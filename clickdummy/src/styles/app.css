@@ -1,1 +1,104 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Palette: Rechnungsblock mit Durchschlag. Kopierstift-Blau als Akzent, Status in den Farben der Durchschläge. */
+:root {
+  --desk: #eef0f3;
+  --sheet: #ffffff;
+  --sheet-2: #f7f8fa;
+  --ink: #16182a;
+  --muted: #62677c;
+  --faint: #8d92a5;
+  --line: #dadde5;
+  --line-strong: #b9bdcb;
+  --carbon: #3e3bc7;
+  --carbon-ink: #ffffff;
+  --carbon-soft: #e6e5fb;
+  --copy-yellow: #fff3c4;
+  --copy-yellow-ink: #6b5200;
+  --copy-pink: #fbdde3;
+  --copy-pink-ink: #8a1f35;
+  --copy-blue: #dfe9fb;
+  --copy-blue-ink: #1d3f8a;
+  --ok: #1f7a55;
+  --ok-soft: #dcf1e6;
+  --danger: #c2362b;
+  --danger-soft: #fbe2df;
+  --shadow: 0 1px 0 rgb(22 24 42 / 0.04), 0 2px 6px -2px rgb(22 24 42 / 0.08);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --desk: #10111a;
+  --sheet: #191b27;
+  --sheet-2: #1f2230;
+  --ink: #e7e8f0;
+  --muted: #9aa0b6;
+  --faint: #6f748a;
+  --line: #2b2e3e;
+  --line-strong: #3d4155;
+  --carbon: #8e8bff;
+  --carbon-ink: #10111a;
+  --carbon-soft: #2a2960;
+  --copy-yellow: #3d3416;
+  --copy-yellow-ink: #f3d77a;
+  --copy-pink: #45222c;
+  --copy-pink-ink: #f5a9ba;
+  --copy-blue: #1f2a48;
+  --copy-blue-ink: #a9c1f5;
+  --ok: #5cc895;
+  --ok-soft: #173528;
+  --danger: #f07a6e;
+  --danger-soft: #42201d;
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.3), 0 2px 8px -2px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-desk: var(--desk);
+  --color-sheet: var(--sheet);
+  --color-sheet-2: var(--sheet-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-carbon: var(--carbon);
+  --color-carbon-ink: var(--carbon-ink);
+  --color-carbon-soft: var(--carbon-soft);
+  --color-copy-yellow: var(--copy-yellow);
+  --color-copy-yellow-ink: var(--copy-yellow-ink);
+  --color-copy-pink: var(--copy-pink);
+  --color-copy-pink-ink: var(--copy-pink-ink);
+  --color-copy-blue: var(--copy-blue);
+  --color-copy-blue-ink: var(--copy-blue-ink);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --shadow-sheet: var(--shadow);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-cond: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  ::selection { background: var(--carbon-soft); }
+  :focus-visible { outline: 2px solid var(--carbon); outline-offset: 2px; }
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

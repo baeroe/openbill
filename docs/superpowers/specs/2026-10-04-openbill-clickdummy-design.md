@@ -109,9 +109,11 @@ Ein durchklickbarer Prototyp, der alle oben genannten Funktionen sichtbar und be
 
 - `clickdummy/` im Repo-Root (Phase 2 bekommt später eigene Ordner).
 - Vite + React + TypeScript, React Router, **pnpm**.
-- **Keine UI-Library** (kein shadcn o. Ä.); eigenes kleines Komponentenset mit CSS-Variablen/Tokens, Light + Dark.
+- Styling mit **Tailwind CSS v4** (Design-Tokens via `@theme`), Light + Dark.
+- **Keine UI-Library** (kein shadcn o. Ä.); eigenes kleines Komponentenset auf Tailwind-Basis.
+- Lokaler State mit **Zustand** (Stores je Domäne, `persist`-Middleware für `localStorage`).
 - Erlaubte Bibliotheken: `liquidjs` (echte Live-Vorschau), CodeMirror 6 (Template-Editor), ggf. ein Icon-Set.
-- **Mock-Daten:** realistische Demo-Daten (fiktive Firma „Studio Nordlicht“ o. ä., fiktive Kunden — keine echten Namen), in-memory Store, persistiert in `localStorage`, mit „Demo-Daten zurücksetzen“.
+- **Mock-Daten:** realistische Demo-Daten (fiktive Firma „Studio Nordlicht“ o. ä., fiktive Kunden — keine echten Namen), in Zustand-Stores, persistiert in `localStorage`, mit „Demo-Daten zurücksetzen“.
 - Rechenlogik (Summen, Steuern, Nummernkreise, Umwandeln) ist im Dummy echt implementiert, damit sich das Konzept realistisch anfühlt.
 
 ### 3.3 Screens
@@ -135,7 +137,7 @@ Ein durchklickbarer Prototyp, der alle oben genannten Funktionen sichtbar und be
 Umsetzung mit dem Frontend-Design-Skill. Leitlinie: **modern, ruhig, eigenständig — nicht verspielt, nicht bieder.**
 
 - Richtung „Papier & Präzision“: Das Produkt dreht sich um Dokumente, die Oberfläche greift das auf (helle, leicht warme Flächen, Dokumente als „Blätter“, klare Typografie), kombiniert mit präzisen, technischen Details (tabellarische Zahlen, Mono-Akzente für Nummern und Feldschlüssel).
-- Eine markante Akzentfarbe, sparsam eingesetzt; konsequente Tokens; Dark Mode gleichwertig.
+- Eine markante Akzentfarbe, sparsam eingesetzt; konsequente Tokens (Tailwind `@theme`); Dark Mode gleichwertig.
 - Eigenständige, nicht generische Schriftwahl (Display + Text + Mono).
 - Desktop-first (Arbeitswerkzeug), Tablet nutzbar; Mobile nur Grundbedienbarkeit.
 

@@ -66,9 +66,9 @@ export function DashboardPage() {
         <Figure testId="kpi-paid" label="Bezahlt in 30 Tagen" {...stats.paid} to="/documents?type=invoice" />
       </div>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[1fr_320px]">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <Sheet title="Zuletzt bearbeitet" bodyClassName="p-0">
-          <DocumentTable documents={recent} />
+          <DocumentTable documents={recent} compact />
         </Sheet>
         <Sheet title="Entwürfe" description={drafts.length ? 'Noch nicht abgeschlossen' : undefined}>
           {drafts.length ? (

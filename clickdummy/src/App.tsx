@@ -5,10 +5,10 @@ import { CustomerDetailPage } from '@/features/customers/CustomerDetailPage'
 import { CustomerListPage } from '@/features/customers/CustomerListPage'
 import { TemplateEditorPage } from '@/features/templates/TemplateEditorPage'
 import { TemplateGalleryPage } from '@/features/templates/TemplateGalleryPage'
+import { SettingsLayout } from '@/features/settings/SettingsLayout'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { DocumentEditorPage } from '@/features/documents/DocumentEditorPage'
 import { DocumentListPage } from '@/features/documents/DocumentListPage'
-import { Placeholder } from '@/features/Placeholder'
 import { AppShell } from '@/layout/AppShell'
 import { useApplyTheme } from '@/layout/useTheme'
 import { ToastHost } from '@/ui/Toast'
@@ -28,7 +28,7 @@ export default function App() {
           <Route path="catalog" element={<CatalogPage />} />
           <Route path="templates" element={<TemplateGalleryPage />} />
           <Route path="templates/:id" element={<TemplateEditorPage />} />
-          <Route path="settings/*" element={<Placeholder title="Einstellungen" />} />
+          <Route path="settings/*" element={<SettingsLayout />} />
         </Route>
       </Routes>
       <ToastHost />

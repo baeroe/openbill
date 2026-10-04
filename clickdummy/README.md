@@ -1,32 +1,17 @@
-# React + TypeScript + Vite
+# openbill Klickdummy
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Durchklickbarer Prototyp zum Abstimmen von Funktionsumfang und Design. Kein Backend: alle Daten liegen im `localStorage` des Browsers.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+pnpm install
+pnpm dev        # http://localhost:5173, jede Eingabe beim Login funktioniert
+pnpm test       # Tests der Fachlogik (Summen, Steuern, Dokumentkette)
+pnpm typecheck
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Aufbau:
+
+- `src/domain/` – Fachlogik als reine Funktionen (Summen, Steuern, Nummernkreise, Status, Umwandeln, Prüfprofile, Liquid-Rendering, E-Rechnungs-XML)
+- `src/store/` – Zustand-Stores mit Persistenz, `src/data/seed.ts` die fiktiven Demo-Daten
+- `src/features/` – Seiten, `src/ui/` – eigenes Komponentenset (Tailwind, keine UI-Library)
+- `src/templates/` – mitgelieferte Liquid-Templates „Klar“, „Kante“, „Leise“

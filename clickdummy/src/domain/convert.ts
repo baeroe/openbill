@@ -57,6 +57,7 @@ export function convertDocument(source: Document, target: DocType, opts: Convert
     sourceId: source.id,
     cancelledById: null,
     finalizedAt: null,
+    snapshot: null,
     createdAt: now,
     updatedAt: now,
   }

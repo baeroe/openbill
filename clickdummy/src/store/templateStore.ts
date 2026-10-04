@@ -35,7 +35,7 @@ export const useTemplateStore = create<TemplateState>()(
       // Mitgelieferte Templates kommen immer aus dem Code, eigene aus dem Speicher.
       merge: (persisted, current) => ({
         ...current,
-        templates: [...builtInTemplates, ...(((persisted as { templates?: Template[] })?.templates) ?? []).filter((t) => !t.builtIn)],
+        templates: [...builtInTemplates, ...(Array.isArray((persisted as { templates?: unknown })?.templates) ? (persisted as { templates: Template[] }).templates : []).filter((t) => t && !t.builtIn)],
       }),
     },
   ),

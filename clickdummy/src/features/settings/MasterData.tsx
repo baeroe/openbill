@@ -3,7 +3,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { TAX_CATEGORY_LABELS } from '@/domain/taxCategories'
 import { UNIT_CODES } from '@/domain/unitCodes'
 import type { Category, TaxCategory, TaxRate, TextBlock, TextBlockKind, Unit, User } from '@/domain/types'
-import { createLiquid, renderText } from '@/domain/liquid'
+import { renderText } from '@/domain/liquid'
 import { buildTemplateContext } from '@/domain/templateContext'
 import { newId } from '@/store/ids'
 import { useDocumentView } from '@/store/selectors'
@@ -127,13 +127,12 @@ export function CategorySettings() {
 /* ---------- Textbausteine ---------- */
 
 const KIND_LABELS: Record<TextBlockKind, string> = { intro: 'Einleitung', closing: 'Schlusstext', payment: 'Zahlungsbedingungen', note: 'Hinweis' }
-const engine = createLiquid()
 
 function BlockPreview({ body }: { body: string }) {
   const view = useDocumentView('doc-invoice-1')
   const ctx = useMemo(() => (view ? buildTemplateContext(view.contextInput) : null), [view])
   const [out, setOut] = useState('')
-  useEffect(() => { if (ctx) renderText(engine, body, ctx).then(setOut) }, [body, ctx])
+  useEffect(() => { if (ctx) renderText(body, ctx).then(setOut) }, [body, ctx])
   return <p className="rounded-[3px] bg-sheet-2 px-3 py-2 text-sm whitespace-pre-line text-muted">{out || '–'}</p>
 }
 

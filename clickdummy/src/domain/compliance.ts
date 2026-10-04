@@ -62,11 +62,13 @@ export function checkCompliance(ctx: ComplianceContext): ComplianceIssue[] {
   const items = doc.positions.filter((p) => p.kind === 'item')
   const name = (title: string) => `„${title || 'Position'}“`
 
+  if (!doc.date) add('document.date', 'Datum fehlt.')
   if (!customer) add('document.customer', 'Kunde fehlt.')
   if (items.length === 0) add('positions', 'Mindestens eine Leistungsposition ist nötig.')
   for (const p of items) {
     if (!p.title.trim()) add(`positions.${p.id}.title`, 'Position ohne Bezeichnung.')
     if (org.taxationMode === 'regular' && !taxRates.some((r) => r.id === p.taxRateId)) add(`positions.${p.id}.tax_rate`, `${name(p.title)}: Steuersatz fehlt oder wurde gelöscht.`)
+    if (!units.some((u) => u.id === p.unitId)) add(`positions.${p.id}.unit`, `${name(p.title)}: Einheit fehlt oder wurde gelöscht.`)
   }
   issues.push(...requiredCustom(ctx.orgFields, org.custom, 'org.', 'Organisation: '))
   if (customer) issues.push(...requiredCustom(ctx.customerFields, customer.custom, 'customer.', 'Kunde: '))
@@ -84,7 +86,7 @@ export function checkCompliance(ctx: ComplianceContext): ComplianceIssue[] {
   if (doc.type === 'invoice' && !doc.dueDate) add('document.due_date', 'Fälligkeit fehlt.')
   for (const p of items) {
     const unit = units.find((u) => u.id === p.unitId)
-    if (!unit || !unit.code.trim()) add(`positions.${p.id}.unit`, `${name(p.title)}: Einheit mit E-Rechnungs-Code fehlt.`)
+    if (unit && !unit.code.trim()) add(`positions.${p.id}.unit`, `${name(p.title)}: Einheit hat keinen E-Rechnungs-Code.`)
     if (p.quantity === 0) add(`positions.${p.id}.quantity`, `${name(p.title)}: Menge darf nicht 0 sein.`)
   }
   return issues

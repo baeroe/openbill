@@ -39,7 +39,7 @@ export function DocumentHeaderFields({ doc, config, customer, locked }: { doc: D
           <option value="">Keiner</option>
           {customer?.contacts.map((c) => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}{c.position ? `, ${c.position}` : ''}</option>)}
         </Select>
-        <Input label="Datum" type="date" disabled={locked} value={doc.date} onChange={(e) => set({ date: e.target.value })} />
+        <Input label="Datum" type="date" disabled={locked} value={doc.date} onChange={(e) => e.target.value && set({ date: e.target.value })} />
         {doc.type === 'offer' && (
           <Input label="Gültig bis" type="date" disabled={locked} value={doc.validUntil ?? ''} onChange={(e) => set({ validUntil: e.target.value || null })} />
         )}

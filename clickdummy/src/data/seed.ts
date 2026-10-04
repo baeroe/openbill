@@ -110,7 +110,7 @@ export function seed(): SeedData {
   })
   const heading = (id: string, title: string) => p(id, { kind: 'heading', title, quantity: 0, unitId: null, unitPrice: 0, taxRateId: null })
   const stamp = (days: number) => `${addDays(today, days)}T09:00:00.000Z`
-  const base = { serviceDateEnd: null, sourceId: null, cancelledById: null, templateId: 'tpl-klar' }
+  const base = { serviceDateEnd: null, sourceId: null, cancelledById: null, templateId: 'tpl-klar', snapshot: null }
   const tb = (id: string) => settings.textBlocks.find((b) => b.id === id)!.body
 
   const documents: Document[] = [
@@ -156,6 +156,12 @@ export function seed(): SeedData {
       positions: [p('d5-a', { title: 'UI-Design', description: 'Newsletter-Vorlage', quantity: 8, categoryId: 'cat-design', custom: { phase: 'Design' } })],
     },
   ]
+
+  for (const d of documents) {
+    if (d.status !== 'draft') {
+      d.snapshot = { org: settings.org, taxRates: settings.taxRates, units: settings.units, categories: settings.categories, customer: customers.find((c) => c.id === d.customerId) ?? null }
+    }
+  }
 
   return { settings, customers, catalog, documents, templates: builtInTemplates }
 }

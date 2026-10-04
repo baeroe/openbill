@@ -34,3 +34,15 @@ describe('renderDocument', () => {
     expect(r.html).toContain('Template-Fehler')
   })
 })
+
+describe('escaping of pre-rendered texts', () => {
+  const engine = createLiquid()
+  it('escapes customer data in the intro exactly once', async () => {
+    const c: TemplateContext = { ...ctx, customer: { name: 'Müller & Söhne' }, document: { ...ctx.document, intro: 'Für {{ customer.name }}', closing: '' } }
+    const viaNl2br = await renderDocument(engine, { manifest, css: '', liquid: '{{ document.intro | nl2br }}' }, c)
+    const plain = await renderDocument(engine, { manifest, css: '', liquid: '{{ document.intro }}' }, c)
+    expect(viaNl2br.html).toContain('Für Müller &amp; Söhne')
+    expect(plain.html).toContain('Für Müller &amp; Söhne')
+    expect(viaNl2br.html).not.toContain('&amp;amp;')
+  })
+})

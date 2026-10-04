@@ -6,8 +6,8 @@ import type { Template } from './types'
 const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-export function createLiquid(): Liquid {
-  const engine = new Liquid({ outputEscape: 'escape', strictVariables: false, strictFilters: true, ownPropertyOnly: true })
+export function createLiquid({ escape = true }: { escape?: boolean } = {}): Liquid {
+  const engine = new Liquid({ outputEscape: escape ? 'escape' : undefined, strictVariables: false, strictFilters: true, ownPropertyOnly: true })
   engine.registerFilter('money', (v: unknown) => formatMoney(Number(v ?? 0)))
   engine.registerFilter('date', (v: unknown) => formatDate(v ? String(v) : null))
   engine.registerFilter('number', (v: unknown, decimals = 2) => formatDecimal(Number(v ?? 0), Number(decimals)))
@@ -27,6 +27,10 @@ ${css}
 </style></head><body>${body}</body></html>`
 }
 
+/** Kopf-/Fußtexte werden ohne Escaping vorgerendert; escaped wird genau einmal bei der Ausgabe im Template. */
+let textEngine: Liquid | null = null
+const getTextEngine = () => (textEngine ??= createLiquid({ escape: false }))
+
 export interface RenderResult { html: string; error: string | null }
 
 /** Rendert ein Dokument. Wirft nie: Fehler landen als lesbare Fehlerseite in `html`. */
@@ -36,8 +40,8 @@ export async function renderDocument(
   ctx: TemplateContext,
 ): Promise<RenderResult> {
   try {
-    const intro = await engine.parseAndRender(String(ctx.document.intro ?? ''), ctx)
-    const closing = await engine.parseAndRender(String(ctx.document.closing ?? ''), ctx)
+    const intro = await getTextEngine().parseAndRender(String(ctx.document.intro ?? ''), ctx)
+    const closing = await getTextEngine().parseAndRender(String(ctx.document.closing ?? ''), ctx)
     const body = await engine.parseAndRender(template.liquid, { ...ctx, document: { ...ctx.document, intro, closing } })
     return { html: shell(body, template.css, template.manifest), error: null }
   } catch (e) {
@@ -48,9 +52,9 @@ export async function renderDocument(
 }
 
 /** Rendert einen einzelnen Text (z. B. Textbaustein) mit Liquid; Fehler werden als Text zurückgegeben. */
-export async function renderText(engine: Liquid, text: string, ctx: TemplateContext): Promise<string> {
+export async function renderText(text: string, ctx: TemplateContext): Promise<string> {
   try {
-    return await engine.parseAndRender(text, ctx)
+    return await getTextEngine().parseAndRender(text, ctx)
   } catch (e) {
     return `⚠ ${e instanceof Error ? e.message : String(e)}`
   }

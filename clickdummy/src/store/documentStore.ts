@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { mergeOrSeed } from './persistence'
 import { seed } from '@/data/seed'
 import { checkCompliance, type ComplianceContext, type ComplianceIssue } from '@/domain/compliance'
 import { canConvert, convertDocument } from '@/domain/convert'
 import { addDays, todayIso } from '@/domain/dates'
 import { defaultCustomValues } from '@/domain/fields'
 import { canTransition, isLocked } from '@/domain/lifecycle'
-import type { CatalogItem, DocStatus, DocType, Document, Position, PositionKind } from '@/domain/types'
+import type { CatalogItem, DocStatus, DocType, Document, DocumentSnapshot, Position, PositionKind } from '@/domain/types'
 import { useCustomerStore } from './customerStore'
 import { newId } from './ids'
 import { useSettingsStore } from './settingsStore'
@@ -29,6 +30,15 @@ interface DocumentState {
 
 const nowIso = () => new Date().toISOString()
 const isPriced = (kind: PositionKind) => kind === 'item' || kind === 'optional'
+
+/** Hält die Stammdaten fest, die ein abgeschlossenes Dokument braucht. */
+export function takeSnapshot(customerId: string | null): DocumentSnapshot {
+  const s = useSettingsStore.getState()
+  return {
+    org: s.org, taxRates: s.taxRates, units: s.units, categories: s.categories,
+    customer: useCustomerStore.getState().customers.find((c) => c.id === customerId) ?? null,
+  }
+}
 
 export function buildComplianceContextFor(doc: Document): ComplianceContext {
   const s = useSettingsStore.getState()
@@ -84,7 +94,7 @@ export const useDocumentStore = create<DocumentState>()(
             validUntil: type === 'offer' && config.validityDays !== null ? addDays(date, config.validityDays) : null,
             intro: block(config.defaultIntroBlockId), closing: block(config.defaultClosingBlockId),
             templateId: config.templateId, positions: [], custom: defaultCustomValues(config.documentFields),
-            sourceId: null, cancelledById: null, finalizedAt: null, createdAt: nowIso(), updatedAt: nowIso(),
+            sourceId: null, cancelledById: null, finalizedAt: null, snapshot: null, createdAt: nowIso(), updatedAt: nowIso(),
           }
           set((s) => ({ documents: [doc, ...s.documents] }))
           return doc.id
@@ -139,10 +149,11 @@ export const useDocumentStore = create<DocumentState>()(
           if (issues.length) return { ok: false, issues }
           const number = useSettingsStore.getState().allocateNumber(doc.type, doc.date)
           const finalizedAt = nowIso()
+          const snapshot = takeSnapshot(doc.customerId)
           const status: DocStatus = doc.type === 'cancellation' ? 'closed' : 'open'
           set((s) => ({
             documents: s.documents.map((d) => {
-              if (d.id === id) return { ...d, number, status, finalizedAt, updatedAt: finalizedAt }
+              if (d.id === id) return { ...d, number, status, finalizedAt, snapshot, updatedAt: finalizedAt }
               if (doc.type === 'cancellation' && d.id === doc.sourceId) return { ...d, status: 'cancelled', cancelledById: id, updatedAt: finalizedAt }
               return d
             }),
@@ -175,8 +186,9 @@ export const useDocumentStore = create<DocumentState>()(
 
         duplicateDocument: (id) => {
           const src = find(id)
+          if (src.type === 'cancellation') throw new Error('Stornos entstehen nur aus einer Rechnung und lassen sich nicht duplizieren.')
           const copy: Document = {
-            ...src, id: newId(), status: 'draft', number: null, date: todayIso(), sourceId: null, cancelledById: null, finalizedAt: null,
+            ...src, id: newId(), status: 'draft', number: null, date: todayIso(), sourceId: null, cancelledById: null, finalizedAt: null, snapshot: null,
             positions: src.positions.map((p) => ({ ...p, id: newId() })), createdAt: nowIso(), updatedAt: nowIso(),
           }
           set((s) => ({ documents: [copy, ...s.documents] }))
@@ -189,6 +201,6 @@ export const useDocumentStore = create<DocumentState>()(
         },
       }
     },
-    { name: 'openbill:documents', version: 1, migrate: () => ({ documents: seed().documents }) as never, partialize: (s) => ({ documents: s.documents }) },
+    { name: 'openbill:documents', version: 1, migrate: () => ({ documents: seed().documents }) as never, partialize: (s) => ({ documents: s.documents }), merge: mergeOrSeed((s) => Array.isArray(s.documents)) },
   ),
 )

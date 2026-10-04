@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { seed } from '@/data/seed'
 import type { CatalogItem } from '@/domain/types'
 import { upsert, without } from './listUtils'
+import { mergeOrSeed } from './persistence'
 
 interface CatalogState { items: CatalogItem[]; upsertItem(i: CatalogItem): void; removeItem(id: string): void }
 
@@ -13,6 +14,6 @@ export const useCatalogStore = create<CatalogState>()(
       upsertItem: (i) => set((s) => ({ items: upsert(s.items, i) })),
       removeItem: (id) => set((s) => ({ items: without(s.items, id) })),
     }),
-    { name: 'openbill:catalog', version: 1, migrate: () => ({ items: seed().catalog }) as never, partialize: (s) => ({ items: s.items }) },
+    { name: 'openbill:catalog', version: 1, migrate: () => ({ items: seed().catalog }) as never, partialize: (s) => ({ items: s.items }), merge: mergeOrSeed((s) => Array.isArray(s.items)) },
   ),
 )

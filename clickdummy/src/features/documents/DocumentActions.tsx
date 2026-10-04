@@ -37,7 +37,7 @@ export function DocumentActions({ doc, issues }: { doc: Document; issues: Compli
     return (
       <>
         <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => setConfirm('delete')}>Löschen</Button>
-        <Button size="sm" icon={<Copy size={14} />} onClick={duplicate}>Duplizieren</Button>
+        {doc.type !== 'cancellation' && <Button size="sm" icon={<Copy size={14} />} onClick={duplicate}>Duplizieren</Button>}
         <Button variant="primary" icon={<Lock size={14} />} disabled={issues.length > 0} title={issues.length ? 'Erst alle Pflichtangaben ausfüllen' : undefined} onClick={() => setConfirm('finalize')}>
           Abschließen
         </Button>
@@ -67,7 +67,7 @@ export function DocumentActions({ doc, issues }: { doc: Document; issues: Compli
   const existingStorno = doc.type === 'invoice' && !doc.cancelledById && useDocumentStore.getState().documents.some((d) => d.sourceId === doc.id && d.type === 'cancellation')
   return (
     <>
-      <Button size="sm" icon={<Copy size={14} />} onClick={duplicate}>Duplizieren</Button>
+      {doc.type !== 'cancellation' && <Button size="sm" icon={<Copy size={14} />} onClick={duplicate}>Duplizieren</Button>}
       {statuses.map((s) => (
         <Button key={s} size="sm" onClick={() => { setStatus(doc.id, s); toast(`Status: ${STATUS_ACTION_LABELS[s]?.replace('Als ', '').replace(' markieren', '')}.`) }}>
           {STATUS_ACTION_LABELS[s]}

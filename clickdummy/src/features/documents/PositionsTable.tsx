@@ -147,7 +147,7 @@ function PositionRow({ doc, position: p, index, config, customer, totals, locked
             disabled={locked}
             value={p.unitId ?? ''}
             onChange={(e) => set({ unitId: e.target.value || null })}
-            className={cx(controlClass({ error: strict && !units.some((u) => u.id === p.unitId) }), 'h-8 appearance-none px-2 text-[13px]')}
+            className={cx(controlClass({ error: !units.some((u) => u.id === p.unitId) }), 'h-8 appearance-none px-2 text-[13px]')}
           >
             {!units.some((u) => u.id === p.unitId) && <option value="">–</option>}
             {units.map((u) => <option key={u.id} value={u.id} title={u.name}>{u.symbol}</option>)}

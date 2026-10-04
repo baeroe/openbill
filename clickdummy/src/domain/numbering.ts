@@ -11,6 +11,14 @@ export function formatDocumentNumber(pattern: string, date: Date, seq: number): 
 
 export function allocateNumber(state: NumberState, date: Date): { number: string; next: NumberState } {
   const year = date.getFullYear()
-  const seq = state.resetYearly && state.lastYear !== null && state.lastYear !== year ? 1 : state.nextSeq
-  return { number: formatDocumentNumber(state.pattern, date, seq), next: { ...state, nextSeq: seq + 1, lastYear: year } }
+  const lastYear = state.lastYear === null ? year : Math.max(state.lastYear, year)
+  if (!state.resetYearly) {
+    return { number: formatDocumentNumber(state.pattern, date, state.nextSeq), next: { ...state, nextSeq: state.nextSeq + 1, lastYear } }
+  }
+  // Ein Zähler pro Jahr: rückdatierte Dokumente bekommen die nächste Nummer ihres Jahres, lastYear läuft nie rückwärts.
+  const seqs: Record<string, number> = { ...(state.yearSeqs ?? {}) }
+  if (state.lastYear !== null) seqs[state.lastYear] = state.nextSeq
+  const seq = seqs[year] ?? 1
+  seqs[year] = seq + 1
+  return { number: formatDocumentNumber(state.pattern, date, seq), next: { ...state, yearSeqs: seqs, lastYear, nextSeq: seqs[lastYear] } }
 }

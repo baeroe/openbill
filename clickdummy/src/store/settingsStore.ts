@@ -6,6 +6,7 @@ import { validateFieldDef } from '@/domain/fields'
 import { allocateNumber as allocate } from '@/domain/numbering'
 import type { Category, DocType, DocTypeConfig, FieldDef, Organization, TaxRate, TextBlock, Unit, User } from '@/domain/types'
 import { upsert, without } from './listUtils'
+import { isObj, mergeOrSeed } from './persistence'
 
 export interface SettingsData {
   org: Organization
@@ -88,6 +89,11 @@ export const useSettingsStore = create<SettingsData & SettingsActions>()(
         removeUser: (id) => set((s) => ({ users: without(s.users, id) })),
       }
     },
-    { name: 'openbill:settings', version: 1, migrate: () => seed().settings as never },
+    {
+      name: 'openbill:settings',
+      version: 1,
+      migrate: () => seed().settings as never,
+      merge: mergeOrSeed((s) => isObj(s.org) && isObj(s.docTypes) && isObj(s.fieldDefs) && ['taxRates', 'units', 'categories', 'textBlocks', 'users'].every((k) => Array.isArray(s[k]))),
+    },
   ),
 )

@@ -53,3 +53,28 @@ describe('document flow', () => {
     expect(get('doc-invoice-1').status).toBe('paid')
   })
 })
+
+describe('review fixes', () => {
+  it('freezes totals of finalized documents against master data changes', async () => {
+    const { useSettingsStore } = await import('./settingsStore')
+    const { useCustomerStore } = await import('./customerStore')
+    const { documentTotals } = await import('./selectors')
+    const before = documentTotals(get('doc-invoice-2'), useSettingsStore.getState(), useCustomerStore.getState().customers).gross
+    useSettingsStore.getState().removeTaxRate('tax-19')
+    useSettingsStore.getState().updateOrg({ taxationMode: 'small_business' })
+    const after = documentTotals(get('doc-invoice-2'), useSettingsStore.getState(), useCustomerStore.getState().customers).gross
+    expect(after).toBe(before)
+  })
+
+  it('stores a snapshot when finalizing', () => {
+    const id = docs().createDocument('offer', 'cus-alpen')
+    docs().insertCatalogItem(id, useCatalogStore.getState().items[0])
+    docs().finalizeDocument(id)
+    expect(get(id).snapshot?.customer?.name).toBe('Hotel Alpenglück')
+  })
+
+  it('does not duplicate cancellations', () => {
+    const { id: stornoId } = docs().convertTo('doc-invoice-1', 'cancellation')
+    expect(() => docs().duplicateDocument(stornoId)).toThrow()
+  })
+})

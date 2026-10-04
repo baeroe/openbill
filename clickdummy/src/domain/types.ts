@@ -97,7 +97,8 @@ export interface Position {
   custom: CustomValues
 }
 
-export interface NumberState { pattern: string; nextSeq: number; resetYearly: boolean; lastYear: number | null }
+/** nextSeq gilt für lastYear; bei jährlichem Reset merkt sich yearSeqs die Zähler früherer Jahre (für rückdatierte Dokumente). */
+export interface NumberState { pattern: string; nextSeq: number; resetYearly: boolean; lastYear: number | null; yearSeqs?: Record<string, number> }
 
 export interface DocTypeConfig {
   type: DocType
@@ -133,8 +134,18 @@ export interface Document {
   sourceId: string | null
   cancelledById: string | null
   finalizedAt: string | null
+  /** Stammdaten zum Zeitpunkt des Abschließens (GoBD): spätere Änderungen wirken nicht mehr auf das Dokument. */
+  snapshot: DocumentSnapshot | null
   createdAt: string
   updatedAt: string
+}
+
+export interface DocumentSnapshot {
+  org: Organization
+  customer: Customer | null
+  taxRates: TaxRate[]
+  units: Unit[]
+  categories: Category[]
 }
 
 export type ExpectedFieldScope = 'org' | 'customer' | 'contact' | 'document' | 'position'

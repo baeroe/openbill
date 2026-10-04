@@ -7,9 +7,15 @@ import { useCustomerStore } from './customerStore'
 import { buildComplianceContextFor, useDocumentStore } from './documentStore'
 import { useSettingsStore, type SettingsData } from './settingsStore'
 
-export function documentTotals(doc: Document, settings: Pick<SettingsData, 'taxRates' | 'org'>, customers: Customer[]) {
-  const customer = customers.find((c) => c.id === doc.customerId)
-  return calcTotals(doc.positions, { taxRates: settings.taxRates, taxationMode: settings.org.taxationMode, taxTreatment: customer?.taxTreatment ?? 'domestic' })
+/** Abgeschlossene Dokumente rechnen mit ihrem Snapshot, Entwürfe mit den aktuellen Stammdaten. */
+export function documentSources(doc: Document, settings: Pick<SettingsData, 'taxRates' | 'org' | 'units' | 'categories'>, customers: Customer[]) {
+  if (doc.snapshot) return doc.snapshot
+  return { org: settings.org, taxRates: settings.taxRates, units: settings.units, categories: settings.categories, customer: customers.find((c) => c.id === doc.customerId) ?? null }
+}
+
+export function documentTotals(doc: Document, settings: Pick<SettingsData, 'taxRates' | 'org' | 'units' | 'categories'>, customers: Customer[]) {
+  const src = documentSources(doc, settings, customers)
+  return calcTotals(doc.positions, { taxRates: src.taxRates, taxationMode: src.org.taxationMode, taxTreatment: src.customer?.taxTreatment ?? 'domestic' })
 }
 
 export function useDocumentView(docId: string) {
@@ -21,12 +27,13 @@ export function useDocumentView(docId: string) {
     const doc = documents.find((d) => d.id === docId)
     if (!doc) return null
     const config = settings.docTypes[doc.type]
-    const customer = customers.find((c) => c.id === doc.customerId) ?? null
+    const src = documentSources(doc, settings, customers)
+    const customer = src.customer
     const contact = customer?.contacts.find((c) => c.id === doc.contactId) ?? null
     const totals = documentTotals(doc, settings, customers)
-    const issues = checkCompliance(buildComplianceContextFor(doc))
+    const issues = doc.snapshot ? [] : checkCompliance(buildComplianceContextFor(doc))
     const contextInput: TemplateContextInput = {
-      doc, org: settings.org, customer, contact, units: settings.units, taxRates: settings.taxRates, categories: settings.categories,
+      doc, org: src.org, customer, contact, units: src.units, taxRates: src.taxRates, categories: src.categories,
       sourceNumber: documents.find((d) => d.id === doc.sourceId)?.number ?? null,
     }
     return { doc, config, customer, contact, totals, issues, contextInput }

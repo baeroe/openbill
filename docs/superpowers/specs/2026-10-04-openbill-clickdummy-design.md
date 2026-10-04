@@ -49,7 +49,7 @@ Einheitliches Prinzip auf allen Ebenen: ein **fester Kern** (nicht löschbar, f�
 | Organisation | Name, Adresse, Logo, USt-ID, Steuernummer, Bankverbindung (IBAN/BIC/Bank), E-Mail, Telefon, Website, Besteuerungsart | `org.*` |
 | Kunde | Name, Adresse, E-Mail, USt-ID, Steuerbehandlung, Kundennummer | `customer.*` |
 | Ansprechpartner (n pro Kunde, einer Standard) | Anrede, Vorname, Nachname, Position, E-Mail, Telefon | `contact.*` |
-| Dokument (pro Typ) | Nummer, Datum, Kunde, Ansprechpartner (optional), Kopftext, Fußtext, Template; typspezifisch z. B. Gültig bis (AN), Fälligkeit/Zahlungsziel (RE) | `document.*` |
+| Dokument (pro Typ) | Nummer, Datum, Kunde, Ansprechpartner (optional), Einleitung, Schlusstext, Template; typspezifisch z. B. Gültig bis (AN), Fälligkeit/Zahlungsziel (RE) | `document.*` |
 | Position (pro Typ) | Art, Titel, Beschreibung, Menge, Einheit, Einzelpreis, Steuersatz, Kategorie | `p.*` in `positions` |
 | Katalogeintrag | Bezeichnung, Beschreibung, Kategorie, Einheit, Preis, Steuersatz | — (wird in Positionen kopiert) |
 
@@ -83,7 +83,8 @@ Pro Dokumenttyp wird ein Profil gewählt. Ein Profil fügt Pflichtfelder auf all
 ### 2.7 Texte
 
 - **Textbausteine:** Bibliothek wiederverwendbarer Texte (Einleitung, Schlusstext, Zahlungsbedingungen, Hinweis). Dürfen Liquid-Platzhalter enthalten.
-- Jedes Dokument hat **Kopftext** und **Fußtext**; frei schreibbar oder aus Bausteinen einfügbar. Pro Dokumenttyp ist ein Standard-Baustein für beide hinterlegbar.
+- Jedes Dokument hat eine **Einleitung** und einen **Schlusstext** (vor bzw. nach den Positionen); frei schreibbar oder aus Bausteinen einfügbar. Pro Dokumenttyp ist ein Standard-Baustein für beide hinterlegbar.
+- Nicht zu verwechseln mit **Kopf- und Fußzeile**: Die gehören zum Template und stehen auf jeder Seite (siehe 2.9).
 
 ### 2.8 Nummernkreise
 
@@ -93,9 +94,15 @@ Pro Dokumenttyp ein Muster, z. B. `RE-{YYYY}-{0000}`; Platzhalter `{YYYY}`, `{YY
 
 - **Sprache:** HTML + CSS mit **Liquid** (sandboxed by design, identisch im Browser via `liquidjs` und auf dem Server via `keepsuit/liquid`). Gotenberg rendert das finale PDF.
 - **Kontext:** `org`, `customer`, `contact`, `document`, `positions`, `groups`, `document.tax_breakdown`, `document.legal_notes`. Filter u. a. `money`, `date`, `number`, `nl2br`.
+- **Seitenaufbau wie bei Gotenberg/Chromium:** Ein Template hat drei Teile: **Kopfzeile**, **Inhalt**, **Fußzeile**.
+  - Kopf- und Fußzeile werden als `header.html`/`footer.html` an Gotenberg übergeben und auf **jeder Seite** im oberen bzw. unteren Seitenrand wiederholt.
+  - Ihre Höhe ist der Seitenrand (`marginTop`/`marginBottom`); was höher ist, wird abgeschnitten.
+  - Sie laufen in einem **eigenen Kontext**: kein CSS des Inhalts, kein JavaScript, keine externen Ressourcen. Styles stehen in einem `<style>` im jeweiligen Teil, Bilder (Logo) als Data-URL.
+  - Seitenzahlen: Template-Autoren schreiben `{{ page.number }}` / `{{ page.total }}`; daraus wird `<span class="pageNumber">` / `<span class="totalPages">`, das Chromium beim Drucken befüllt.
+- **Vorschau:** zeigt echte Seiten (Umbruch an Zeilen- und Absatzgrenzen), Kopf- und Fußzeile auf jeder Seite, Seitenzahl gefüllt, Anzahl der Seiten. Ein Schalter „Bereiche“ blendet Hilfslinien für Kopfzeile, Inhalt und Fußzeile ein; im Template-Editor ist der gerade bearbeitete Bereich hervorgehoben.
 - **Template-Paket** (portabel, Marketplace-tauglich): ZIP mit
-  - `manifest.json` — Name, Version, Autor, Lizenz, Beschreibung, unterstützte Dokumenttypen, erwartete eigene Felder (Schlüssel, Typ, Fallback), Papierformat/Ränder
-  - `template.liquid`, `styles.css`, optional `assets/` (Fonts, Grafiken)
+  - `manifest.json` — Name, Version, Autor, Lizenz, Beschreibung, unterstützte Dokumenttypen, erwartete eigene Felder (Schlüssel, Typ, Fallback), Papier: Format, Kopfzeilenhöhe, Fußzeilenhöhe, Rand links/rechts
+  - `header.liquid` (Kopfzeile), `template.liquid` (Inhalt), `footer.liquid` (Fußzeile), `styles.css` (nur Inhalt), optional `assets/` (Fonts, Grafiken)
 - Beim Zuweisen eines Templates zu einem Dokumenttyp zeigt das UI, welche erwarteten Felder fehlen (Hinweis, kein Blocker — Templates müssen mit leeren Werten umgehen).
 - Mitgeliefert: 2–3 Standard-Templates unterschiedlicher Anmutung.
 
@@ -121,10 +128,10 @@ Ein durchklickbarer Prototyp, der alle oben genannten Funktionen sichtbar und be
 1. **Login** — eigenständig gestaltet, Fake-Login (jede Eingabe führt rein).
 2. **Übersicht** — offene Rechnungssumme, überfällige Rechnungen, offene Angebote, zuletzt bearbeitete Dokumente, Schnellaktion „Neues Dokument“.
 3. **Dokumente** — Liste mit Filter nach Typ, Status, Kunde und Suche; Status-Badges, Überfällig-Markierung.
-4. **Dokument-Editor** — Kernfelder + eigene Felder, Kunde/Ansprechpartner, Positionstabelle (Positionsarten, Katalog-Autocomplete, Drag & Drop-Sortierung), Kopf-/Fußtext mit Baustein-Einfügen, Summen inkl. Steueraufschlüsselung, Prüfanzeige des Profils, **Live-Vorschau (A4) daneben**, Aktionen: Abschließen, Status setzen, Umwandeln, Stornieren, „PDF herunterladen“ (Dummy), E-Rechnung-Tab mit XML-Vorschau (Mock), Dokumentkette.
+4. **Dokument-Editor** — Kernfelder + eigene Felder, Kunde/Ansprechpartner, Positionstabelle (Positionsarten, Katalog-Autocomplete, Drag & Drop-Sortierung), Einleitung/Schlusstext mit Baustein-Einfügen, Summen inkl. Steueraufschlüsselung, Prüfanzeige des Profils, **Live-Vorschau daneben (echte A4-Seiten mit Kopf- und Fußzeile, Hilfslinien einblendbar)**, Aktionen: Abschließen, Status setzen, Umwandeln, Stornieren, „PDF herunterladen“ (Dummy), E-Rechnung-Tab mit XML-Vorschau (Mock), Dokumentkette.
 5. **Kunden** — Liste, Detail mit Kern + eigenen Feldern, Steuerbehandlung, Ansprechpartnern, zugehörigen Dokumenten.
 6. **Katalog** — Einträge nach Kategorie, Anlegen/Bearbeiten.
-7. **Templates** — Galerie mit Vorschaubildern, Import eines ZIP (simuliert), Editor: CodeMirror links, Live-Vorschau rechts mit Beispieldokument, Seitenleiste mit verfügbaren Feldern (klickbar zum Einfügen), Manifest-Bearbeitung.
+7. **Templates** — Galerie mit Vorschaubildern, Import eines ZIP (simuliert), Editor mit Tabs Kopfzeile · Inhalt · Fußzeile · CSS · Manifest (CodeMirror), Seitenskizze zeigt den bearbeiteten Bereich, Live-Vorschau rechts mit Beispieldokument und hervorgehobenem Bereich, Seitenleiste mit verfügbaren Feldern (klickbar zum Einfügen), Manifest-Bearbeitung.
 8. **Einstellungen**
    - Organisation (Kern + eigene Felder, Logo-Upload, Besteuerungsart)
    - Dokumenttypen (je Typ: Feld-Builder für Dokument- und Positionsfelder, Profil, Nummernkreis, Standard-Template, Standard-Texte, Zahlungsziel)

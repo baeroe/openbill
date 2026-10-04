@@ -1,0 +1,11 @@
+<style>
+  .h { display: flex; justify-content: space-between; align-items: flex-end; height: 100%; box-sizing: border-box; padding: 0 20mm 5mm; font-family: "Helvetica Neue", Arial, sans-serif; color: #1b1a17; }
+  .h-logo { max-height: 12mm; max-width: 55mm; }
+  .h-name { font-size: 14pt; font-weight: 600; letter-spacing: -0.02em; }
+  .h-doc { font-size: 8pt; color: #6d685f; text-align: right; }
+  .h-doc b { color: #1b1a17; font-weight: 600; }
+</style>
+<div class="h">
+  {% if org.logo %}<img class="h-logo" src="{{ org.logo }}" alt="">{% else %}<span class="h-name">{{ org.name }}</span>{% endif %}
+  <span class="h-doc">{{ document.type_label }} <b>{{ document.number }}</b></span>
+</div>

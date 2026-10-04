@@ -1,7 +1,6 @@
 <header class="band">
   <div class="band-top">
     {% if org.logo %}<img class="logo" src="{{ org.logo }}" alt="">{% else %}<span class="org">{{ org.name }}</span>{% endif %}
-    <span class="number">{{ document.number }}</span>
   </div>
   <div class="band-main">
     <h1>{{ document.type_label }}</h1>
@@ -69,9 +68,3 @@
   {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
   {% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
 </main>
-
-<footer class="foot">
-  <span>{{ org.name }}, {{ org.street }}, {{ org.zip }} {{ org.city }}</span>
-  <span>{% if org.vat_id %}USt-ID {{ org.vat_id }}{% else %}St.-Nr. {{ org.tax_number }}{% endif %}</span>
-  <span>IBAN {{ org.iban }}</span>
-</footer>

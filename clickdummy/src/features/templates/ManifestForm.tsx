@@ -7,6 +7,7 @@ const TYPES: DocType[] = ['offer', 'confirmation', 'invoice', 'cancellation']
 
 export function ManifestForm({ manifest, onChange, readOnly, missing }: { manifest: TemplateManifest; onChange(m: TemplateManifest): void; readOnly: boolean; missing: string[] }) {
   const set = (patch: Partial<TemplateManifest>) => onChange({ ...manifest, ...patch })
+  const setPaper = (patch: Partial<TemplateManifest['paper']>) => set({ paper: { ...manifest.paper, ...patch } })
   return (
     <div className="grid max-w-2xl gap-4 p-5">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -25,12 +26,18 @@ export function ManifestForm({ manifest, onChange, readOnly, missing }: { manife
           ))}
         </div>
       </fieldset>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Select label="Papierformat" disabled={readOnly} value={manifest.paper.format} onChange={(e) => set({ paper: { ...manifest.paper, format: e.target.value as 'A4' | 'Letter' } })}>
-          <option value="A4">A4</option><option value="Letter">US Letter</option>
-        </Select>
-        <Input label="Seitenränder (CSS)" mono hint="z. B. 20mm oder 18mm 20mm 22mm" disabled={readOnly} value={manifest.paper.margin} onChange={(e) => set({ paper: { ...manifest.paper, margin: e.target.value } })} />
-      </div>
+      <fieldset className="grid gap-3">
+        <legend className="mb-1 text-[13px] font-medium text-muted">Seite</legend>
+        <p className="text-xs text-faint">Kopf- und Fußzeile sitzen im oberen und unteren Seitenrand. Ihre Höhe ist dieser Rand: Was höher ist, wird im PDF abgeschnitten.</p>
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Select label="Papierformat" disabled={readOnly} value={manifest.paper.format} onChange={(e) => setPaper({ format: e.target.value as 'A4' | 'Letter' })}>
+            <option value="A4">A4</option><option value="Letter">US Letter</option>
+          </Select>
+          <Input label="Kopfzeilenhöhe" mono disabled={readOnly} value={manifest.paper.headerHeight} onChange={(e) => setPaper({ headerHeight: e.target.value })} />
+          <Input label="Fußzeilenhöhe" mono disabled={readOnly} value={manifest.paper.footerHeight} onChange={(e) => setPaper({ footerHeight: e.target.value })} />
+          <Input label="Rand links/rechts" mono disabled={readOnly} value={manifest.paper.marginX} onChange={(e) => setPaper({ marginX: e.target.value })} />
+        </div>
+      </fieldset>
       <div>
         <p className="mb-1 text-[13px] font-medium text-muted">Erwartete eigene Felder</p>
         <p className="mb-2 text-xs text-faint">Damit sieht man beim Import, welche Felder das Template nutzt. Fehlen sie, bleibt die Stelle leer.</p>

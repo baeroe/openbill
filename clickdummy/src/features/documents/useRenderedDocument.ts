@@ -4,11 +4,12 @@ import { buildTemplateContext, type TemplateContextInput } from '@/domain/templa
 import type { Template } from '@/domain/types'
 
 const engine = createLiquid()
+const EMPTY: RenderResult = { body: '', header: '', footer: '', error: null }
 
-/** Rendert ein Dokument mit Liquid, leicht verzögert, damit Tippen flüssig bleibt. */
-export function useRenderedDocument(input: TemplateContextInput | null, template: Pick<Template, 'liquid' | 'css' | 'manifest'> | null, delay = 120) {
+/** Rendert Inhalt, Kopf- und Fußzeile mit Liquid, leicht verzögert, damit Tippen flüssig bleibt. */
+export function useRenderedDocument(input: TemplateContextInput | null, template: Template | null, delay = 120) {
   const ctx = useMemo(() => (input ? buildTemplateContext(input) : null), [input])
-  const [result, setResult] = useState<RenderResult>({ html: '', error: null })
+  const [result, setResult] = useState<RenderResult>(EMPTY)
   useEffect(() => {
     if (!ctx || !template) return
     let cancelled = false
@@ -17,5 +18,5 @@ export function useRenderedDocument(input: TemplateContextInput | null, template
     }, delay)
     return () => { cancelled = true; clearTimeout(t) }
   }, [ctx, template, delay])
-  return { ...result, ctx }
+  return { result, ctx }
 }

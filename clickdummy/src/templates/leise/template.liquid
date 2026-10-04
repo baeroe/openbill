@@ -1,8 +1,3 @@
-<header class="head">
-  <p class="org">{% if org.logo %}<img src="{{ org.logo }}" alt="">{% else %}{{ org.name }}{% endif %}</p>
-  <p class="addr">{{ org.street }}<br>{{ org.zip }} {{ org.city }}<br>{{ org.email }}</p>
-</header>
-
 <section class="to">
   {% if customer %}{{ customer.name }}<br>{% if contact %}{{ contact.full_name }}<br>{% endif %}{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% endif %}
 </section>
@@ -38,7 +33,3 @@
 
 {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
 {% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
-
-<footer class="foot">
-  {{ org.name }} · {{ org.bank_name }} · IBAN {{ org.iban }} · {% if org.vat_id %}USt-ID {{ org.vat_id }}{% else %}St.-Nr. {{ org.tax_number }}{% endif %}
-</footer>

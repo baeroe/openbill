@@ -28,7 +28,7 @@ export function DocumentTypeSettings() {
     ...(type === 'offer' ? [{ key: 'valid_until', label: 'Gültig bis' }] : []),
     ...(type !== 'offer' ? [{ key: 'service_date', label: 'Leistungsdatum', profile: strict && docReq.has('service_date') }] : []),
     ...(type === 'invoice' ? [{ key: 'due_date', label: 'Fälligkeit', profile: strict && docReq.has('due_date') }] : []),
-    { key: 'intro', label: 'Kopftext' }, { key: 'closing', label: 'Fußtext' },
+    { key: 'intro', label: 'Einleitung' }, { key: 'closing', label: 'Schlusstext' },
   ]
   const posCore: CoreField[] = [
     { key: 'title', label: 'Bezeichnung' }, { key: 'description', label: 'Beschreibung' },
@@ -98,11 +98,11 @@ export function DocumentTypeSettings() {
               <NumberInput id="validity" decimals={0} value={config.validityDays ?? 0} onValue={(n) => updateDocType(type, { validityDays: Math.round(n) })} className="h-9" />
             </div>
           )}
-          <Select label="Kopftext" value={config.defaultIntroBlockId ?? ''} onChange={(e) => updateDocType(type, { defaultIntroBlockId: e.target.value || null })}>
+          <Select label="Einleitung" value={config.defaultIntroBlockId ?? ''} onChange={(e) => updateDocType(type, { defaultIntroBlockId: e.target.value || null })}>
             <option value="">Leer</option>
             {blocks(['intro', 'note']).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </Select>
-          <Select label="Fußtext" value={config.defaultClosingBlockId ?? ''} onChange={(e) => updateDocType(type, { defaultClosingBlockId: e.target.value || null })}>
+          <Select label="Schlusstext" value={config.defaultClosingBlockId ?? ''} onChange={(e) => updateDocType(type, { defaultClosingBlockId: e.target.value || null })}>
             <option value="">Leer</option>
             {blocks(['closing', 'payment', 'note']).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </Select>

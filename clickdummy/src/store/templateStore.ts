@@ -6,6 +6,26 @@ import { builtInTemplates } from '@/templates'
 import { newId } from './ids'
 import { upsert } from './listUtils'
 
+/** Eigene Templates aus älteren Ständen (ohne Kopf-/Fußzeile, mit altem margin) auf das aktuelle Format bringen. */
+function normalizeTemplate(t: Template): Template {
+  const paper = (t.manifest?.paper ?? {}) as Partial<Template['manifest']['paper']> & { margin?: string }
+  const side = paper.margin?.trim().split(/\s+/)
+  return {
+    ...t,
+    header: t.header ?? '',
+    footer: t.footer ?? '',
+    manifest: {
+      ...t.manifest,
+      paper: {
+        format: paper.format ?? 'A4',
+        marginX: paper.marginX ?? side?.[side.length > 1 ? 1 : 0] ?? '20mm',
+        headerHeight: paper.headerHeight ?? '20mm',
+        footerHeight: paper.footerHeight ?? '20mm',
+      },
+    },
+  }
+}
+
 interface TemplateState {
   templates: Template[]
   upsertTemplate(t: Template): void
@@ -35,7 +55,7 @@ export const useTemplateStore = create<TemplateState>()(
       // Mitgelieferte Templates kommen immer aus dem Code, eigene aus dem Speicher.
       merge: (persisted, current) => ({
         ...current,
-        templates: [...builtInTemplates, ...(Array.isArray((persisted as { templates?: unknown })?.templates) ? (persisted as { templates: Template[] }).templates : []).filter((t) => t && !t.builtIn)],
+        templates: [...builtInTemplates, ...(Array.isArray((persisted as { templates?: unknown })?.templates) ? (persisted as { templates: Template[] }).templates : []).filter((t) => t && !t.builtIn).map(normalizeTemplate)],
       }),
     },
   ),

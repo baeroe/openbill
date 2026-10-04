@@ -52,10 +52,10 @@ function TextField({ label, value, locked, onChange }: { label: string; value: s
 export function TextsSection({ doc, locked }: { doc: Document; locked: boolean }) {
   const update = useDocumentStore((s) => s.updateDocument)
   return (
-    <Sheet title="Texte" description="Platzhalter wie {{ contact.first_name }} werden in der Vorschau ersetzt.">
+    <Sheet title="Einleitung und Schlusstext" description="Stehen vor und nach den Positionen. Platzhalter wie {{ contact.first_name }} werden ersetzt. Kopf- und Fußzeile jeder Seite kommen aus dem Template.">
       <div className="grid gap-4">
-        <TextField label="Kopftext" value={doc.intro} locked={locked} onChange={(intro) => update(doc.id, { intro })} />
-        <TextField label="Fußtext" value={doc.closing} locked={locked} onChange={(closing) => update(doc.id, { closing })} />
+        <TextField label="Einleitung" value={doc.intro} locked={locked} onChange={(intro) => update(doc.id, { intro })} />
+        <TextField label="Schlusstext" value={doc.closing} locked={locked} onChange={(closing) => update(doc.id, { closing })} />
       </div>
     </Sheet>
   )

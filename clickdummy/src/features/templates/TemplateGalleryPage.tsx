@@ -11,7 +11,7 @@ import { Badge } from '@/ui/Badge'
 import { Button } from '@/ui/Button'
 import { Dialog } from '@/ui/Dialog'
 import { PageHeader } from '@/ui/PageHeader'
-import { SheetPreview } from '@/ui/SheetPreview'
+import { PagedPreview } from '@/ui/PagedPreview'
 import { toast } from '@/ui/Toast'
 import { useRenderedDocument } from '../documents/useRenderedDocument'
 import { missingExpectedFields } from './expectedFields'
@@ -20,7 +20,7 @@ const SAMPLE_DOC = 'doc-offer-1'
 
 function TemplateCard({ template }: { template: Template }) {
   const view = useDocumentView(useDocumentStore.getState().documents.some((d) => d.id === SAMPLE_DOC) ? SAMPLE_DOC : useDocumentStore.getState().documents[0]?.id ?? '')
-  const { html } = useRenderedDocument(view?.contextInput ?? null, template, 0)
+  const { result } = useRenderedDocument(view?.contextInput ?? null, template, 0)
   const settings = useSettingsStore()
   const { duplicateTemplate, removeTemplate } = useTemplateStore()
   const navigate = useNavigate()
@@ -29,7 +29,7 @@ function TemplateCard({ template }: { template: Template }) {
   return (
     <article aria-label={template.manifest.name} className="flex flex-col overflow-hidden rounded-[3px] border border-line bg-sheet shadow-sheet">
       <button type="button" onClick={() => navigate(`/templates/${template.id}`)} className="block bg-desk p-5 pb-0">
-        <SheetPreview html={html} title={`Vorschau ${template.manifest.name}`} maxHeight={300} className="mx-auto rounded-t-[2px]" />
+        <PagedPreview result={result} paper={template.manifest.paper} maxPages={1} maxHeight={300} title={`Vorschau ${template.manifest.name}`} />
       </button>
       <div className="flex flex-1 flex-col gap-2 border-t border-line p-4">
         <div className="flex items-start justify-between gap-2">

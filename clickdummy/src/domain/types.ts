@@ -157,13 +157,18 @@ export interface TemplateManifest {
   description: string
   documentTypes: DocType[]
   expectedFields: { scope: ExpectedFieldScope; key: string; type: FieldType; fallback: string }[]
-  paper: { format: 'A4' | 'Letter'; margin: string }
+  /** Kopf- und Fußzeilenhöhe sind die oberen/unteren Seitenränder (Gotenberg marginTop/marginBottom). */
+  paper: { format: 'A4' | 'Letter'; marginX: string; headerHeight: string; footerHeight: string }
 }
 
 export interface Template {
   id: string
   builtIn: boolean
   manifest: TemplateManifest
+  /** Kopfzeile, auf jeder Seite wiederholt, eigener Kontext ohne das CSS des Inhalts */
+  header: string
   liquid: string
   css: string
+  /** Fußzeile, auf jeder Seite wiederholt */
+  footer: string
 }

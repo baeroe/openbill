@@ -140,7 +140,7 @@ export function TextBlockSettings() {
   const { textBlocks, upsertTextBlock, removeTextBlock } = useSettingsStore()
   const [edit, setEdit] = useState<TextBlock | null>(null)
   return (
-    <Sheet title="Textbausteine" description="Wiederverwendbare Texte für Kopf- und Fußtext. Liquid-Platzhalter sind erlaubt." actions={<Button size="sm" icon={<Plus size={14} />} onClick={() => setEdit({ id: newId(), name: '', kind: 'note', body: '' })}>Baustein</Button>} bodyClassName="p-0">
+    <Sheet title="Textbausteine" description="Wiederverwendbare Texte für Einleitung und Schlusstext. Liquid-Platzhalter sind erlaubt." actions={<Button size="sm" icon={<Plus size={14} />} onClick={() => setEdit({ id: newId(), name: '', kind: 'note', body: '' })}>Baustein</Button>} bodyClassName="p-0">
       <ul className="divide-y divide-line">
         {textBlocks.map((b) => (
           <Row key={b.id} label={b.name} onEdit={() => setEdit(b)} onDelete={() => removeTextBlock(b.id)}>

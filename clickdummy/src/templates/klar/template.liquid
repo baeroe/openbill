@@ -1,20 +1,15 @@
-<header class="head">
-  <div class="sender">
-    {% if org.logo %}<img class="logo" src="{{ org.logo }}" alt="">{% else %}<div class="wordmark">{{ org.name }}</div>{% endif %}
-  </div>
-  <div class="meta">
-    <div class="type">{{ document.type_label }}</div>
-    <dl>
-      <dt>Nummer</dt><dd>{{ document.number }}</dd>
-      <dt>Datum</dt><dd>{{ document.date | date }}</dd>
-      {% if document.service_date %}<dt>Leistung</dt><dd>{{ document.service_date | date }}{% if document.service_date_end %} – {{ document.service_date_end | date }}{% endif %}</dd>{% endif %}
-      {% if document.due_date %}<dt>Fällig</dt><dd>{{ document.due_date | date }}</dd>{% endif %}
-      {% if document.valid_until %}<dt>Gültig bis</dt><dd>{{ document.valid_until | date }}</dd>{% endif %}
-      {% if customer.number %}<dt>Kunde</dt><dd>{{ customer.number }}</dd>{% endif %}
-      {% if document.source_number %}<dt>Bezug</dt><dd>{{ document.source_number }}</dd>{% endif %}
-    </dl>
-  </div>
-</header>
+<div class="meta">
+  <div class="type">{{ document.type_label }}</div>
+  <dl>
+    <dt>Nummer</dt><dd>{{ document.number }}</dd>
+    <dt>Datum</dt><dd>{{ document.date | date }}</dd>
+    {% if document.service_date %}<dt>Leistung</dt><dd>{{ document.service_date | date }}{% if document.service_date_end %} – {{ document.service_date_end | date }}{% endif %}</dd>{% endif %}
+    {% if document.due_date %}<dt>Fällig</dt><dd>{{ document.due_date | date }}</dd>{% endif %}
+    {% if document.valid_until %}<dt>Gültig bis</dt><dd>{{ document.valid_until | date }}</dd>{% endif %}
+    {% if customer.number %}<dt>Kunde</dt><dd>{{ customer.number }}</dd>{% endif %}
+    {% if document.source_number %}<dt>Bezug</dt><dd>{{ document.source_number }}</dd>{% endif %}
+  </dl>
+</div>
 
 <section class="address">
   <div class="return">{{ org.name }} · {{ org.street }} · {{ org.zip }} {{ org.city }}</div>
@@ -62,10 +57,3 @@
 
 {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
 {% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
-
-<footer class="foot">
-  <div>{{ org.name }}<br>{{ org.street }}<br>{{ org.zip }} {{ org.city }}</div>
-  <div>{{ org.email }}<br>{{ org.phone }}<br>{{ org.website }}</div>
-  <div>{% if org.vat_id %}USt-ID {{ org.vat_id }}{% else %}St.-Nr. {{ org.tax_number }}{% endif %}{% if org.register %}<br>{{ org.register }}{% endif %}</div>
-  <div>{{ org.bank_name }}<br>IBAN {{ org.iban }}<br>BIC {{ org.bic }}</div>
-</footer>

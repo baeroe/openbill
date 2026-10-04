@@ -10,7 +10,7 @@ export const useToastStore = create<ToastState>((set) => ({
   items: [],
   push: (message, tone = 'ok') => {
     const id = ++seq
-    set((s) => ({ items: [...s.items, { id, message, tone }] }))
+    set((s) => ({ items: [...s.items, { id, message, tone }].slice(-3) }))
     setTimeout(() => set((s) => ({ items: s.items.filter((t) => t.id !== id) })), 4200)
   },
   dismiss: (id) => set((s) => ({ items: s.items.filter((t) => t.id !== id) })),

@@ -1,5 +1,8 @@
 import { Route, Routes } from 'react-router'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { DashboardPage } from '@/features/dashboard/DashboardPage'
+import { DocumentEditorPage } from '@/features/documents/DocumentEditorPage'
+import { DocumentListPage } from '@/features/documents/DocumentListPage'
 import { Placeholder } from '@/features/Placeholder'
 import { AppShell } from '@/layout/AppShell'
 import { useApplyTheme } from '@/layout/useTheme'
@@ -12,9 +15,9 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<AppShell />}>
-          <Route index element={<Placeholder title="Übersicht" />} />
-          <Route path="documents" element={<Placeholder title="Dokumente" />} />
-          <Route path="documents/:id" element={<Placeholder title="Dokument" />} />
+          <Route index element={<DashboardPage />} />
+          <Route path="documents" element={<DocumentListPage />} />
+          <Route path="documents/:id" element={<DocumentEditorPage />} />
           <Route path="customers" element={<Placeholder title="Kunden" />} />
           <Route path="customers/:id" element={<Placeholder title="Kunde" />} />
           <Route path="catalog" element={<Placeholder title="Katalog" />} />

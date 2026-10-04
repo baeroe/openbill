@@ -1,0 +1,10 @@
+{
+  "name": "Leise",
+  "version": "1.0.0",
+  "author": "openbill",
+  "license": "MIT",
+  "description": "Minimal: viel Weißraum, Serifenschrift, Haarlinien.",
+  "documentTypes": ["offer", "confirmation", "invoice", "cancellation"],
+  "expectedFields": [],
+  "paper": { "format": "A4", "margin": "26mm 24mm 24mm 24mm" }
+}

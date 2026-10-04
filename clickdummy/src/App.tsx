@@ -1,5 +1,10 @@
 import { Route, Routes } from 'react-router'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { CatalogPage } from '@/features/catalog/CatalogPage'
+import { CustomerDetailPage } from '@/features/customers/CustomerDetailPage'
+import { CustomerListPage } from '@/features/customers/CustomerListPage'
+import { TemplateEditorPage } from '@/features/templates/TemplateEditorPage'
+import { TemplateGalleryPage } from '@/features/templates/TemplateGalleryPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { DocumentEditorPage } from '@/features/documents/DocumentEditorPage'
 import { DocumentListPage } from '@/features/documents/DocumentListPage'
@@ -18,11 +23,11 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="documents" element={<DocumentListPage />} />
           <Route path="documents/:id" element={<DocumentEditorPage />} />
-          <Route path="customers" element={<Placeholder title="Kunden" />} />
-          <Route path="customers/:id" element={<Placeholder title="Kunde" />} />
-          <Route path="catalog" element={<Placeholder title="Katalog" />} />
-          <Route path="templates" element={<Placeholder title="Templates" />} />
-          <Route path="templates/:id" element={<Placeholder title="Template" />} />
+          <Route path="customers" element={<CustomerListPage />} />
+          <Route path="customers/:id" element={<CustomerDetailPage />} />
+          <Route path="catalog" element={<CatalogPage />} />
+          <Route path="templates" element={<TemplateGalleryPage />} />
+          <Route path="templates/:id" element={<TemplateEditorPage />} />
           <Route path="settings/*" element={<Placeholder title="Einstellungen" />} />
         </Route>
       </Routes>

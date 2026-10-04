@@ -1,0 +1,13 @@
+{
+  "name": "Kante",
+  "version": "1.0.0",
+  "author": "openbill",
+  "license": "MIT",
+  "description": "Markant: kräftiger Farbblock, große Summe, starke Linien.",
+  "documentTypes": ["offer", "confirmation", "invoice", "cancellation"],
+  "expectedFields": [
+    { "scope": "document", "key": "project_name", "type": "text", "fallback": "" },
+    { "scope": "position", "key": "phase", "type": "select", "fallback": "" }
+  ],
+  "paper": { "format": "A4", "margin": "0" }
+}

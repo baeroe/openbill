@@ -1,7 +1,12 @@
 <?php
 
 use App\Actions\AllocateDocumentNumber;
+use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
+use App\Enums\EventAction;
+use App\Models\Document;
+use App\Models\DocumentEvent;
+use App\Models\DocumentSnapshot;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +23,25 @@ it('never hands out the same number to parallel processes', function () {
 
     expect(array_unique(array_column($results, 'database')))->toBe(['testing'])
         ->and($numbers)->toBe(array_map(fn (int $n): string => sprintf('INV-2026-%04d', $n), range(1, 30)));
+});
+
+it('finalizes drafts in parallel processes exactly once with unique numbers', function () {
+    $ids = array_map(fn (): string => draft()->id, range(1, 12));
+
+    // four processes race for every draft, each in a different order
+    $tasks = array_map(fn (int $shift): Closure => ParallelAllocation::finalizeTask([
+        ...array_slice($ids, $shift * 3), ...array_slice($ids, 0, $shift * 3),
+    ]), range(0, 3));
+    $results = Concurrency::driver('process')->run($tasks);
+
+    $numbers = array_values(array_filter(array_merge(...array_map('array_values', $results)), fn (string $r): bool => $r !== 'locked'));
+    sort($numbers);
+    $year = now()->format('Y');
+
+    expect($numbers)->toBe(array_map(fn (int $n): string => sprintf("INV-{$year}-%04d", $n), range(1, 12)))
+        ->and(Document::query()->whereIn('id', $ids)->where('status', DocumentStatus::Open)->whereNotNull('finalized_at')->count())->toBe(12)
+        ->and(DocumentSnapshot::query()->whereIn('document_id', $ids)->count())->toBe(12)
+        ->and(DocumentEvent::query()->whereIn('document_id', $ids)->where('action', EventAction::Finalized)->count())->toBe(12);
 });
 
 it('makes a second connection wait while the first one holds the number range', function () {

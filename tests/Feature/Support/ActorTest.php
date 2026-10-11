@@ -33,3 +33,13 @@ it('records who did what on a document', function () {
 it('binds a no-op archiver until phase 3', function () {
     expect(app(DocumentArchiver::class))->toBeInstanceOf(NullDocumentArchiver::class);
 });
+
+it('keeps the user behind a token in the event', function () {
+    $user = User::factory()->create();
+    $document = Document::factory()->create();
+
+    $event = EventLog::record($document, Actor::token('42', $user->id), EventAction::Updated);
+
+    expect($event->fresh()->actor_id)->toBe('42')
+        ->and($event->fresh()->user_id)->toBe($user->id);
+});

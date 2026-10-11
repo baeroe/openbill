@@ -16,6 +16,8 @@ final class EventLog
         return $document->events()->create([
             'actor_type' => $actor->type,
             'actor_id' => $actor->id,
+            // kept for token actors too: the user stays traceable after the token is deleted
+            'user_id' => $actor->userId,
             'action' => $action,
             'payload' => $payload,
         ]);

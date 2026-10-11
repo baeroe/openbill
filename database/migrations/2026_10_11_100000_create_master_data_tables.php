@@ -125,7 +125,9 @@ return new class extends Migration
             $table->unsignedInteger('next_value')->default(1);
             $table->boolean('reset_yearly')->default(true);
             $table->timestamps();
-            $table->unique(['doc_type', 'year']);
+            // UNIQUE allows several NULLs: year_key makes the configuration row (year NULL) unique per type
+            $table->unsignedSmallInteger('year_key')->storedAs('COALESCE(`year`, 0)');
+            $table->unique(['doc_type', 'year_key']);
         });
     }
 

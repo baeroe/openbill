@@ -63,6 +63,8 @@ final class SnapshotBuilder
                 'manifest' => $template->manifest ?? [],
             ],
             'field_definitions' => self::fieldDefinitionRows(),
+            // frozen in the document's language: later text changes must not alter a finalized document
+            'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($document->locale)),
         ];
     }
 

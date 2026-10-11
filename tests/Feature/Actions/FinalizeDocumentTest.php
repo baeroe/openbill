@@ -139,3 +139,16 @@ it('refuses a cancellation whose invoice is no longer cancellable', function () 
     expect(fn () => app(FinalizeDocument::class)->handle(systemActor(), $cancellation->fresh()))
         ->toThrow(ActionNotAllowedException::class);
 });
+
+it('freezes the legal notes in the snapshot', function () {
+    Organization::current()->forceFill(['taxation_mode' => 'small_business'])->save();
+    $document = app(FinalizeDocument::class)->handle(systemActor(), draft(DocumentType::Invoice, [], ['locale' => 'en']));
+    $frozen = $document->snapshot->data['legal_notes']['small_business'];
+
+    // simulate a later text change in lang/en.json
+    app('translator')->setLoaded(['*' => ['*' => ['en' => ['legal.small_business' => 'A changed text.']]]]);
+
+    expect($frozen)->not->toBe('A changed text.')
+        ->and(app(DocumentInspector::class)->totals($document->fresh())->legalNotes)->toBe([$frozen])
+        ->and(app(DocumentInspector::class)->totals(draft(DocumentType::Invoice, [], ['locale' => 'en']))->legalNotes)->toBe(['A changed text.']);
+});

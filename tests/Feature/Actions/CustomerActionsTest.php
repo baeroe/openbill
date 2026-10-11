@@ -93,7 +93,9 @@ it('soft-deletes removed contacts and clears them from drafts only', function ()
     expect(Contact::query()->whereKey($removed->id)->exists())->toBeFalse()
         ->and(Contact::withTrashed()->whereKey($removed->id)->exists())->toBeTrue()
         ->and($draft->fresh()->contact_id)->toBeNull()
-        ->and($final->fresh()->contact_id)->toBe($removed->id);
+        ->and($draft->events()->pluck('payload')->all())->toBe([['fields' => ['contact_id']]])
+        ->and($final->fresh()->contact_id)->toBe($removed->id)
+        ->and($final->events()->count())->toBe(0);
 });
 
 it('refuses a duplicate customer number', function () {

@@ -9,6 +9,9 @@ use App\Models\NumberSequence;
 use App\Models\Organization;
 use App\Models\TaxRate;
 use App\Models\Unit;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 it('ships the base master data with a fresh database', function () {
     expect(Organization::query()->count())->toBe(1)
@@ -41,4 +44,20 @@ it('soft-deletes customers and contacts', function () {
     expect(Customer::withTrashed()->find($customer->id))->not->toBeNull()
         ->and(Customer::query()->find($customer->id))->toBeNull()
         ->and(Contact::withTrashed()->find($contact->id))->not->toBeNull();
+});
+
+it('allows only one number range configuration per type', function () {
+    expect(fn () => NumberSequence::query()->create(['doc_type' => 'invoice', 'year' => null, 'pattern' => 'X-{0000}', 'reset_yearly' => false]))
+        ->toThrow(QueryException::class);
+});
+
+it('covers every locked documents column in the lock trigger', function () {
+    $body = (string) DB::table('information_schema.TRIGGERS')
+        ->where('TRIGGER_SCHEMA', DB::connection()->getDatabaseName())
+        ->where('TRIGGER_NAME', 'documents_lock_update')
+        ->value('ACTION_STATEMENT');
+    $locked = array_diff(Schema::getColumnListing('documents'), Document::MUTABLE_WHEN_FINALIZED);
+
+    expect($body)->not->toBe('')
+        ->and(array_values(array_filter($locked, fn (string $column): bool => ! str_contains($body, "NEW.`{$column}`"))))->toBe([]);
 });

@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Domain\Fields\CustomValueValidator;
 use App\Domain\Fields\FieldRegistry;
+use App\Enums\EventAction;
 use App\Enums\FieldScope;
 use App\Enums\TaxTreatment;
 use App\Models\Contact;
@@ -11,6 +12,7 @@ use App\Models\Customer;
 use App\Models\Document;
 use App\Support\Actor;
 use App\Support\DomainMapper;
+use App\Support\EventLog;
 use App\Support\FieldErrors;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -78,7 +80,7 @@ final class SaveCustomer
         }
         FieldErrors::throwIfAny($errors);
 
-        return DB::transaction(function () use ($data, $customer): Customer {
+        return DB::transaction(function () use ($actor, $data, $customer): Customer {
             $customer ??= new Customer;
             foreach (['name', 'tax_treatment', 'locale', 'custom'] as $key) {
                 if (array_key_exists($key, $data)) {
@@ -99,7 +101,7 @@ final class SaveCustomer
             $customer->save();
 
             if (array_key_exists('contacts', $data)) {
-                $this->syncContacts($customer, $data['contacts']);
+                $this->syncContacts($actor, $customer, $data['contacts']);
             }
 
             return $customer->load('contacts');
@@ -124,7 +126,7 @@ final class SaveCustomer
     /**
      * @param  list<array<string, mixed>>  $rows
      */
-    private function syncContacts(Customer $customer, array $rows): void
+    private function syncContacts(Actor $actor, Customer $customer, array $rows): void
     {
         $existing = $customer->contacts()->pluck('id')->all();
         $defaultIndex = 0;
@@ -149,8 +151,12 @@ final class SaveCustomer
 
         $removed = array_values(array_diff($existing, $kept));
         if ($removed !== []) {
-            // drafts only; finalized documents keep their contact (and their snapshot)
-            Document::query()->whereIn('contact_id', $removed)->whereNull('finalized_at')->update(['contact_id' => null]);
+            // drafts only; finalized documents keep their contact (and their snapshot). One event per draft.
+            $drafts = Document::query()->whereIn('contact_id', $removed)->whereNull('finalized_at')->lockForUpdate()->get();
+            foreach ($drafts as $draft) {
+                $draft->forceFill(['contact_id' => null])->save();
+                EventLog::record($draft, $actor, EventAction::Updated, ['fields' => ['contact_id']]);
+            }
             Contact::query()->whereIn('id', $removed)->delete();
         }
     }

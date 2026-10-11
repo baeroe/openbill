@@ -89,6 +89,8 @@ return new class extends Migration
             $table->foreignUlid('document_id')->nullable()->constrained()->nullOnDelete();
             $table->string('actor_type', 16);
             $table->string('actor_id', 64)->nullable();
+            // no foreign key: the protocol keeps the id after the user or token is deleted
+            $table->ulid('user_id')->nullable()->index();
             $table->string('action', 32);
             $table->json('payload')->nullable();
             $table->timestamps();

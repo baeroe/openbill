@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { PanelRightOpen } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, type MouseEvent } from 'react';
 import type { DocumentDetail, DocumentPageContext } from '@/api/types';
 import { Button, cx, Tag } from '@/components/ui';
 import { t } from '@/lib/i18n';
@@ -21,6 +21,10 @@ import { PreviewPane } from './preview-pane';
 import { ReadOnlyNotice } from './read-only-notice';
 import { TextsSection } from './texts-section';
 import { TotalsPanel } from './totals-panel';
+
+function keepFocus(event: MouseEvent<HTMLDivElement>): void {
+    if ((event.target as HTMLElement).closest('button')) event.preventDefault();
+}
 
 /** The document editor. Keyed by document id in the page: one instance (and one autosave) per document. */
 export function Editor({ document, context }: { document: DocumentDetail; context: DocumentPageContext }) {
@@ -48,7 +52,9 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
     return (
         <div className={cx('ed', previewOpen && 'ed--with-preview')}>
             <Head title={title} />
-            <div className="ed-main">
+            {/* a mouse press on a button keeps the focus where it is: blurring a row would collapse its empty description
+                (editor.css), move everything below and let the click land elsewhere; keyboard focus works as usual */}
+            <div className="ed-main" onMouseDown={keepFocus}>
                 <EditorHeader document={document} title={title} saveState={saveState} onRetry={autosave.retry}>
                     {!previewOpen && (
                         <Button variant="ghost" iconOnly icon={<PanelRightOpen />} onClick={() => setPreviewOpen(true)}>

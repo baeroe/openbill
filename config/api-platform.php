@@ -118,10 +118,11 @@ return [
         'hydra_prefix' => false,
     ],
 
-    // metadata in APCu (store "api-platform", config/cache.php): Laravel refuses to unserialize objects from
-    // file/database/redis stores (cache.serializable_classes = false → __PHP_Incomplete_Class). Without APCu
-    // (CLI, CI, composer install) per process only. The Docker image (phase 10) needs the apcu extension.
-    'cache' => function_exists('apcu_enabled') && apcu_enabled() ? 'api-platform' : 'array',
+    // metadata in the store "api-platform" (config/cache.php): APCu under PHP-FPM, a per-process array without
+    // APCu (CLI, CI, composer install), chosen at runtime by App\Support\Cache\MetadataStore. Laravel refuses
+    // to unserialize objects from file/database/redis (cache.serializable_classes = false → __PHP_Incomplete_Class).
+    // The Docker image (phase 10) needs the apcu extension.
+    'cache' => 'api-platform',
 
     'metadata_dump' => null,
 

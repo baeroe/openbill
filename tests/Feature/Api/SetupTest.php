@@ -5,6 +5,9 @@ use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
 use App\ApiResource\UnitResource;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Support\Cache\MetadataStore;
+use Illuminate\Cache\ApcStore;
+use Illuminate\Cache\ArrayStore;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -32,11 +35,28 @@ it('leaves /mcp to laravel/mcp (phase 8)', function () {
     expect(Route::has('api_mcp'))->toBeFalse();
 });
 
-it('caches API Platform metadata in APCu, never in a store that refuses to unserialize objects', function () {
-    expect(config('cache.stores.api-platform.driver'))->toBe('apc')
-        ->and(config('api-platform.cache'))->toBe(function_exists('apcu_enabled') && apcu_enabled() ? 'api-platform' : 'array')
-        ->and(config('api-platform.cache'))->not->toBeIn(['file', 'database', 'redis'])
+it('caches API Platform metadata in a store that never unserializes objects through Laravel', function () {
+    expect(config('cache.stores.api-platform.driver'))->toBe(MetadataStore::DRIVER)
+        ->and(config('api-platform.cache'))->toBe('api-platform')
         ->and(config('cache.serializable_classes'))->toBeFalse();
+});
+
+it('keeps the APCu decision out of the config, so config:cache in the CLI cannot freeze it', function () {
+    // what config:cache does: load the files in the CLI (APCu off here) and export them
+    $apiPlatform = require config_path('api-platform.php');
+    $cache = require config_path('cache.php');
+    $exported = var_export(['api-platform' => $apiPlatform, 'cache' => $cache], true);
+
+    // whatever the loading process has (CLI: APCu off), the exported config names the runtime store
+    expect($apiPlatform['cache'])->toBe('api-platform')
+        ->and($cache['stores']['api-platform']['driver'])->toBe(MetadataStore::DRIVER)
+        ->and($exported)->not->toContain('Closure');
+});
+
+it('chooses APCu or a per-process array when the store is used', function () {
+    expect(MetadataStore::make(true))->toBeInstanceOf(ApcStore::class)
+        ->and(MetadataStore::make(false))->toBeInstanceOf(ArrayStore::class)
+        ->and(Cache::store('api-platform')->getStore())->toBeInstanceOf(function_exists('apcu_enabled') && apcu_enabled() ? ApcStore::class : ArrayStore::class);
 });
 
 it('gets API Platform metadata back from the APCu store as objects', function () {

@@ -60,8 +60,9 @@ final class OpenbillFilters extends FiltersProvider
             return $value;
         }
         if (is_string($format) && $format !== '') {
-            // every strftime directive expands to at most ~30 bytes
-            $this->guardLength(strlen($format) * 16);
+            // keepsuit passes letters outside of %-directives on to PHP's date(): "r" (RFC 2822) is 31 bytes and
+            // "e" at most 32 (America/Argentina/ComodRivadavia), the most any format character expands to
+            $this->guardLength(strlen($format) * 32);
 
             return (string) (new StandardFilters)->date($value, $format);
         }

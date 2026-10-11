@@ -119,3 +119,11 @@ it('refuses math on numbers with more digits than any amount has (re-review 2, #
         ->and(fn () => liquid('{{ n | money }}', ['n' => str_repeat('9', 1001)]))->toThrow(ResourceLimitException::class)
         ->and(liquid('{{ n | times: 2 }}', ['n' => str_repeat('9', 20)]))->toBe('1'.str_repeat('9', 19).'8');
 });
+
+it('estimates a date format by its worst case, "r" with 31 bytes (re-review 3)', function () {
+    config(['openbill.rendering.max_output_bytes' => 10_000]);
+
+    // 400 × "r" are 12 400 bytes: above the limit, although 16 bytes per format character would let it pass
+    expect(fn () => liquid('{{ d | date: f | size }}', ['d' => '2026-10-11', 'f' => str_repeat('r', 400)]))->toThrow(ResourceLimitException::class)
+        ->and(liquid('{{ d | date: f | size }}', ['d' => '2026-10-11', 'f' => str_repeat('r', 300)]))->toBe((string) (300 * 31));
+});

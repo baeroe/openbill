@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { FileText, Plus, SearchX } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDocumentList } from '@/api/documents';
 import type { DocumentFilters, DocumentStatus, DocumentSummary, DocumentType } from '@/api/types';
 import { useNewDocument } from '@/components/new-document/new-document-context';
@@ -48,9 +48,20 @@ export default function Documents({ filters, counts, summary, customers }: Props
         const params = Object.fromEntries(Object.entries(next).filter(([, value]) => value));
         router.get(path('/documents'), params, { preserveState: true, preserveScroll: true, replace, only: ['filters', 'counts', 'summary'] });
     };
-    const set = (patch: Partial<Filters>, replace = false) => visit({ ...filters, ...patch }, replace);
+    // The filters asked for last. The `filters` prop stays old until the answer arrives, and Inertia cancels a
+    // running visit when the next one starts: merging into the prop would drop a change made in between.
+    const requested = useRef<Filters>(filters);
+    useEffect(() => {
+        requested.current = filters;
+    }, [filters]);
+    // the search always goes along as typed, so a pill clicked during typing keeps it
+    const set = (patch: Partial<Filters>, replace = false) => {
+        requested.current = { ...requested.current, q: query.trim() || null, ...patch };
+        visit(requested.current, replace);
+    };
     const reset = () => {
         setQuery('');
+        requested.current = EMPTY;
         visit(EMPTY);
     };
     const newDocument = () =>
@@ -59,7 +70,7 @@ export default function Documents({ filters, counts, summary, customers }: Props
     // the search goes into the URL once typing pauses
     useEffect(() => {
         const q = search.trim() || null;
-        if (q !== filters.q) set({ q }, true);
+        if (q !== requested.current.q) set({ q }, true);
     }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // back/forward in the browser changes the URL: the field follows. Compared with the debounced text, so an

@@ -10,7 +10,7 @@ use Keepsuit\Liquid\Render\ResourceLimits;
  * The sandbox templates run in: strict parsing (keepsuit always), unknown filters are errors, unknown
  * variables render empty, errors are rethrown (with line numbers) instead of printed, resource limits from
  * config('openbill.rendering') (LiquidRenderer adds a deadline per rendering: RenderLimits), no file system
- * (render/include fail), no tablerow.
+ * (render/include fail), no tablerow, RenderEnv::checkBudget() before every filter call (FilterGuard).
  */
 final class LiquidEnvironment
 {
@@ -32,6 +32,9 @@ final class LiquidEnvironment
 
         // tablerow expands ranges without a limit and has no use in documents
         $environment->tagRegistry->delete('tablerow');
+
+        // deadline and memory budget before every filter call (re-review 3, I1); must stay the last step
+        FilterGuard::wrap($environment->filterRegistry);
 
         return $environment;
     }

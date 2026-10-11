@@ -11,7 +11,8 @@ namespace App\Rendering\Liquid;
  * by building an array – is overridden in OpenbillFilters and checks the size of its result before
  * building it (guardLength: max_output_bytes, guardCount: 10 × max_range items, guardDigits: numbers).
  * The others shrink, keep the size, pick from their input or grow by a bounded constant per call; their
- * output is covered by the streamed output limit.
+ * output is covered by the streamed output limit. This is about bytes only: time (and memory) is checked
+ * before every filter call by FilterGuard, whatever the class.
  */
 final class FilterPolicy
 {

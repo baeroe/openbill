@@ -40,7 +40,7 @@ final readonly class RenderEnv
     }
 
     /**
-     * Deadline and memory budget; checked on every render point, every streamed chunk and in the string filters.
+     * Deadline and memory budget; checked on every render point, every streamed chunk and before every filter call (FilterGuard).
      *
      * @throws RenderTimeoutException|RenderMemoryException
      */

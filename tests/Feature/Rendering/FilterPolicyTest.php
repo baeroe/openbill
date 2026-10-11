@@ -3,6 +3,8 @@
 use App\Rendering\Liquid\FilterPolicy;
 use App\Rendering\Liquid\LiquidEnvironment;
 use App\Rendering\Liquid\OpenbillFilters;
+use App\Rendering\Liquid\RenderEnv;
+use App\Rendering\Liquid\RenderTimeoutException;
 use Illuminate\Support\Str;
 
 /*
@@ -25,3 +27,28 @@ it('classifies every registered filter as additive-safe or guarded', function ()
 it('implements every guarded filter in OpenbillFilters', function (string $filter) {
     expect(method_exists(OpenbillFilters::class, Str::camel($filter)))->toBeTrue("{$filter} is not overridden");
 })->with(FilterPolicy::GUARDED);
+
+/*
+ * Re-review 3, I1: the deadline and the memory budget are checked before every filter call, not only in the
+ * guarded filters. With an expired deadline every registered filter must stop before it runs – a filter that
+ * is not wrapped would run (or fail on its missing arguments) instead.
+ */
+it('checks the render budget before every registered filter', function () {
+    $environment = LiquidEnvironment::make();
+    $context = $environment->newRenderContext(registers: [RenderEnv::REGISTER => new RenderEnv('de', deadline: hrtime(true) - 1)]);
+
+    $unchecked = [];
+    foreach ($environment->filterRegistry->all() as $filter) {
+        try {
+            $context->applyFilter($filter, 'x');
+            $unchecked[] = $filter;
+        } catch (RenderTimeoutException) {
+            // stopped before the filter ran
+        } catch (Throwable $e) {
+            $unchecked[] = $filter.' ('.$e::class.')';
+        }
+    }
+
+    expect($environment->filterRegistry->all())->toHaveCount(count(FilterPolicy::ADDITIVE) + count(FilterPolicy::GUARDED))
+        ->and($unchecked)->toBe([]);
+});

@@ -215,7 +215,7 @@ Ein Template kann openbill weder kaputt machen noch blockieren:
 - `styles.css` darf kein `</style>` enthalten,
 - das Papier muss Platz für den Inhalt lassen: doppelter `marginX` kleiner als die Seitenbreite, `headerHeight + footerHeight` mindestens 20mm kleiner als die Seitenhöhe,
 - beim Import muss jeder Teil unter 200 KB bleiben, Feldschlüssel in `expectedFields` müssen wie `project_name` aussehen, und Assets müssen wirklich das sein, was ihre Endung sagt,
-- ein Rendering bricht nach 5 Sekunden ab,
+- ein Rendering bricht nach 5 Sekunden ab; die Zeit wird in jedem Schleifendurchlauf und vor jedem Filteraufruf geprüft, auch eine lange Filterkette endet also rechtzeitig,
 - keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen), und jedes `<meta http-equiv>` (refresh, eigene Regeln) ist ein Template-Fehler,
 - ein Rendering darf höchstens 128 MB Speicher nutzen; `capture` und jeder Filter, dessen Ergebnis größer als seine Eingabe werden kann (`replace`, `append`, `join`, `split`, `base64_encode`, `url_encode`, `upcase`, …), prüft die Größe vor dem Aufbau gegen die Ausgabegrenze, Arrays aus Filtern haben höchstens 100 000 Einträge, Zahlen in Rechenfiltern höchstens 1 000 Stellen.
 

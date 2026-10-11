@@ -211,6 +211,22 @@ it('stops an expensive filter in a loop at the deadline (review #2)', function (
         ->and(microtime(true) - $start)->toBeLessThan(3);
 });
 
+it('stops a chain of cheap filters at the deadline (re-review 3, I1)', function () {
+    config(['openbill.rendering.max_seconds' => 1]);
+    $start = microtime(true);
+
+    // one output tag, no loop: only the filter calls themselves can notice the deadline (before: about a minute)
+    $result = renderParts(
+        ['body' => "x\n{{ s | split: ''".str_repeat(' | sort | reverse', 1000).' | size }}'],
+        [...rendererContext(), 's' => str_repeat('a', 99_000)],
+    );
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->part)->toBe(RenderPart::Body)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.time', ['seconds' => 1]))
+        ->and(microtime(true) - $start)->toBeLessThan(3);
+});
+
 it('locks body, header and footer down with a Content-Security-Policy as first head element (review #1, re-review M2)', function () {
     $result = renderParts(['body' => '<script>x()</script>', 'header' => 'h', 'footer' => 'f']);
     $csp = '<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\'">';

@@ -4,14 +4,18 @@ namespace App\ApiResource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Domain\Lifecycle\StatusMachine;
 use App\Http\Api\ApiMiddleware;
 use App\Models\Document;
 use App\Models\Position;
 use App\Models\PositionGroup;
+use App\State\Processor\DocumentProcessor;
 use App\State\Provider\DocumentProvider;
 use App\Support\DocumentInspector;
 use App\Support\IssueList;
@@ -42,6 +46,23 @@ use Symfony\Component\Serializer\Attribute\Groups;
             ],
         ),
         new Get(uriTemplate: '/documents/{id}', middleware: ApiMiddleware::READ, provider: DocumentProvider::class),
+        new Post(
+            uriTemplate: '/documents',
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentProcessor::class,
+            description: 'Creates a draft: type (offer, confirmation, invoice), customer_id, date and any field PATCH takes.',
+        ),
+        new Patch(
+            uriTemplate: '/documents/{id}',
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentProcessor::class,
+            description: 'Saves a draft (autosave). Missing keys stay, "groups" replaces all groups and positions. Finalized: 409.',
+        ),
+        new Delete(uriTemplate: '/documents/{id}', middleware: ApiMiddleware::WRITE, read: false, processor: DocumentProcessor::class),
     ],
 )]
 final class DocumentResource

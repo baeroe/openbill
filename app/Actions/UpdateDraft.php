@@ -39,6 +39,7 @@ final class UpdateDraft
 
         $data = DraftInput::validate($document, $input);
 
+        // retried on deadlocks: SaveCustomer locks customer → drafts, UpdateDraft draft → customer (FK)
         return DB::transaction(function () use ($actor, $document, $data): Document {
             // re-read with a row lock: a finalize that won the race must not be overwritten
             $draft = Document::query()->lockForUpdate()->findOrFail($document->id);
@@ -68,6 +69,6 @@ final class UpdateDraft
             EventLog::record($draft, $actor, EventAction::Updated, ['fields' => array_keys($data)]);
 
             return $draft;
-        });
+        }, 3);
     }
 }

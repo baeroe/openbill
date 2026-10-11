@@ -10,6 +10,9 @@ use App\Exceptions\PdfRenderFailedException;
 use App\Exceptions\TemplateRenderFailedException;
 use App\Models\Document;
 use App\Models\DocumentFile;
+use App\Models\DocumentSnapshot;
+use App\Contracts\DocumentArchiver;
+use App\Rendering\PdfDocumentArchiver;
 use App\Models\DocumentTypeSetting;
 use App\Models\NumberSequence;
 use App\Models\Template;
@@ -111,4 +114,22 @@ it('freezes the effective template in the snapshot when the document has none', 
     $done = app(FinalizeDocument::class)->handle(systemActor(), $document);
 
     expect($done->snapshot->data['template']['slug'])->toBe('klar');
+});
+
+it('deletes files already moved into the archive when a later step fails (review #10)', function () {
+    $document = eInvoiceDraft();
+    // the PDF and the XML are in place when the archiver (or anything after it) throws
+    app()->bind(DocumentArchiver::class, fn () => new class(app(PdfDocumentArchiver::class)) implements DocumentArchiver
+    {
+        public function __construct(private readonly PdfDocumentArchiver $inner) {}
+
+        public function archive(Document $document, DocumentSnapshot $snapshot): void
+        {
+            $this->inner->archive($document, $snapshot);
+            throw new RuntimeException('after store');
+        }
+    });
+
+    expect(fn () => app(FinalizeDocument::class)->handle(systemActor(), $document))->toThrow(RuntimeException::class, 'after store');
+    assertNothingArchived($document);
 });

@@ -31,8 +31,8 @@ final class SaveFieldDefinition
         $data = Validator::make($input, [
             'scope' => [$definition === null ? 'required' : 'sometimes', Rule::enum(FieldScope::class)],
             'key' => ['sometimes', 'nullable', 'string', 'max:64'],
-            'label' => ['required', 'string', 'max:255'],
-            'type' => ['required', Rule::enum(FieldType::class)],
+            'label' => [$definition === null ? 'required' : 'sometimes', 'string', 'max:255'],
+            'type' => [$definition === null ? 'required' : 'sometimes', Rule::enum(FieldType::class)],
             'required' => ['sometimes', 'boolean'],
             'default_value' => ['sometimes', 'nullable'],
             'help' => ['sometimes', 'nullable', 'string', 'max:1000'],
@@ -42,6 +42,21 @@ final class SaveFieldDefinition
             'doc_types.*' => [Rule::enum(DocumentType::class)],
             'sort' => ['sometimes', 'integer', 'min:0'],
         ])->validate();
+
+        // PATCH: keys that are not sent keep their stored value
+        if ($definition !== null) {
+            $data = [
+                'label' => $definition->label,
+                'type' => $definition->type->value,
+                'required' => $definition->required,
+                'default_value' => $definition->default_value,
+                'help' => $definition->help,
+                'options' => $definition->options ?? [],
+                'doc_types' => $definition->doc_types ?? [],
+                'sort' => $definition->sort,
+                ...$data,
+            ];
+        }
 
         $scope = $definition === null ? FieldScope::from($data['scope']) : $definition->scope;
         $key = $definition !== null ? $definition->key : (is_string($data['key'] ?? null) && $data['key'] !== '' ? $data['key'] : KeySlugger::slug($data['label']));

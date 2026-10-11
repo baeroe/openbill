@@ -23,14 +23,19 @@ type Props = {
  */
 export function DecimalCell({ value, onCommit, label, disabled = false, error, path, scale = 4, minFraction = 0, suffix, className }: Props) {
     const [raw, setRaw] = useState(() => formatDecimalInput(value, undefined, minFraction));
-    const [invalid, setInvalid] = useState(false);
+    const [invalid, setInvalidState] = useState(false);
+    // invalid input is the user's unsent edit: a value arriving from outside (save answer, reload) must not wipe it
+    const invalidRef = useRef(false);
+    const setInvalid = (next: boolean) => {
+        invalidRef.current = next;
+        setInvalidState(next);
+    };
     const focused = useRef(false);
     const selectOnMouseUp = useRef(false);
 
     useEffect(() => {
-        if (focused.current) return;
+        if (focused.current || invalidRef.current) return;
         setRaw(formatDecimalInput(value, undefined, minFraction));
-        setInvalid(false);
     }, [value, minFraction]);
 
     const message = invalid ? t('editor.invalid_number') : error;

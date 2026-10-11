@@ -34,8 +34,14 @@ class AppServiceProvider extends ServiceProvider
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
 
         // editor autosave (600 ms) and preview (250 ms) stay well below this per open editor
-        RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(600)->by(
-            $request->bearerToken() !== null ? 'token:'.hash('sha256', $request->bearerToken()) : 'ip:'.$request->ip(),
-        ));
+        // only a valid token gets its own bucket; anything else (no token, made-up tokens) shares the IP's
+        RateLimiter::for('api', function (Request $request): Limit {
+            $bearer = $request->bearerToken();
+            $token = $bearer !== null ? PersonalAccessToken::findToken($bearer) : null;
+            $valid = $token !== null && ($token->expires_at === null || $token->expires_at->isFuture());
+
+            return Limit::perMinute((int) config('openbill.api.requests_per_minute'))
+                ->by($valid ? 'token:'.$token->getKey() : 'ip:'.$request->ip());
+        });
     }
 }

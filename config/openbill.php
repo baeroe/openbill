@@ -42,5 +42,7 @@ return [
     'api' => [
         'max_body_bytes' => 2 * 1024 * 1024,
         'max_template_body_bytes' => 30 * 1024 * 1024,
+        // per valid token, otherwise per IP (editor autosave 600 ms + preview 250 ms ≈ 240/min)
+        'requests_per_minute' => 600,
     ],
 ];

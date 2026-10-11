@@ -10,12 +10,22 @@ use App\Http\Middleware\LimitApiBody;
 use App\Http\Middleware\RequireApiAbility;
 use App\Http\Middleware\SetApiLocale;
 use App\Http\Middleware\SetLocale;
+use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
+use Illuminate\Contracts\Session\Middleware\AuthenticatesSessions;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ThrottleRequestsWithRedis;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,8 +42,23 @@ return Application::configure(basePath: dirname(__DIR__))
         // body size first: nothing parses a body above config('openbill.api.*')
         $middleware->api(prepend: [LimitApiBody::class]);
         $middleware->api(append: [SetApiLocale::class]);
-        // before auth (priority list), so a 401 is already in the requested language
-        $middleware->prependToPriorityList(AuthenticatesRequests::class, SetApiLocale::class);
+        // Laravel's priority list with the rate limit moved before auth: requests with made-up tokens (401)
+        // count as well, otherwise guessing tokens is unlimited
+        $middleware->priority([
+            HandlePrecognitiveRequests::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ThrottleRequests::class,
+            ThrottleRequestsWithRedis::class,
+            AuthenticatesRequests::class,
+            AuthenticatesSessions::class,
+            SubstituteBindings::class,
+            Authorize::class,
+        ]);
+        // language before rate limit and auth, so 429 and 401 are already in the requested language
+        $middleware->prependToPriorityList(ThrottleRequests::class, SetApiLocale::class);
         $middleware->alias(['api.ability' => RequireApiAbility::class]);
         // auth runs before SetLocale (middleware priority), so resolve the language here as well
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['locale' => SetLocale::fromRequest($request)]));

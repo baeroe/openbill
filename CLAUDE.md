@@ -93,7 +93,7 @@ curl -s https://openbill.ddev.site/api/docs.jsonopenapi > openapi.json          
 - **Body-Limit:** `App\Http\Middleware\LimitApiBody` (vorn im `api`-Stack) lehnt Bodies über `openbill.api.max_body_bytes` (2 MB) bzw. für Template-Uploads `max_template_body_bytes` (30 MB) mit 413 `payload_too_large` ab – nach `Content-Length` **und** nach dem tatsächlich gelesenen Body (chunked). `UpdateTemplateFiles` prüft Asset-Größen anhand der Base64-Länge, bevor etwas dekodiert wird. Phase 10: nginx `client_max_body_size` und PHP `post_max_size` mindestens auf `max_template_body_bytes`.
 - **Sprache der API:** `Accept-Language` (`en`/`de`) über `SetApiLocale` im `api`-Stack, sonst Englisch.
 - **Signierte Downloads:** `App\Support\SignedDownloads::link()` (15 min, relativ signiert) → Route `api.downloads`; für das MCP-Tool `get-document-pdf-url`.
-- **Middleware-Reihenfolge:** `SetApiLocale` steht per `prependToPriorityList()` vor `AuthenticatesRequests` (`bootstrap/app.php`), sonst kämen 401-Antworten immer auf Englisch.
+- **Middleware-Reihenfolge und Rate-Limit:** `bootstrap/app.php` setzt Laravels Priority-Liste mit `ThrottleRequests` **vor** `AuthenticatesRequests` (sonst zählen 401-Anfragen mit erfundenen Tokens nie), `SetApiLocale` davor (429/401 in der gewünschten Sprache). Limiter `api` (`AppServiceProvider`): `openbill.api.requests_per_minute` (600) je **gültigem** Token (`PersonalAccessToken::findToken`, nicht abgelaufen), sonst je IP.
 
 ## Doku
 

@@ -1,0 +1,73 @@
+/* Graphit & Kobalt: Ebenen durch Tonwerte, nicht durch Linien. Quelle für DESIGN.md. */
+:root {
+  --bg: #F4F4F2;
+  --surface: #FFFFFF;
+  --surface-2: #ECECE9;
+  --surface-3: #E3E3DF;
+  --ink: #23252B;
+  --muted: #73767E;
+  --faint: #A2A4AA;
+  --accent: #2F55D4;
+  --accent-hover: #2647B8;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E3E9FB;
+  --accent-soft-hover: #D5DEF8;
+  --ok: #2E7D4F;
+  --ok-soft: #DFF0E5;
+  --warn: #8F5B00;
+  --warn-soft: #FAEFD7;
+  --bad: #B4322E;
+  --bad-soft: #FBE3E1;
+  --overlay: rgba(28, 30, 36, 0.32);
+  --paper-shadow: 0 1px 2px rgba(20, 22, 30, 0.06), 0 16px 36px -18px rgba(20, 22, 30, 0.28);
+  --shadow-float: 0 1px 2px rgba(20, 22, 30, 0.06), 0 18px 48px -12px rgba(20, 22, 30, 0.22);
+
+  --font: "Schibsted Grotesk Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+
+  --text-xs: 0.75rem;   /* 12 */
+  --text-sm: 0.8125rem; /* 13 */
+  --text-md: 0.875rem;  /* 14, Basis */
+  --text-lg: 1rem;      /* 16 */
+  --text-xl: 1.25rem;   /* 20 */
+  --text-2xl: 1.625rem; /* 26 */
+  --text-3xl: 2.125rem; /* 34 */
+
+  --sp-1: 0.25rem; --sp-2: 0.5rem; --sp-3: 0.75rem; --sp-4: 1rem; --sp-5: 1.25rem;
+  --sp-6: 1.5rem; --sp-8: 2rem; --sp-10: 2.5rem; --sp-12: 3rem; --sp-16: 4rem;
+
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px; --r-pill: 999px;
+
+  --control-h: 2.375rem;     /* 38 */
+  --control-h-sm: 2rem;      /* 32 */
+
+  --dur: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #16171A;
+  --surface: #1F2024;
+  --surface-2: #292A2F;
+  --surface-3: #33343A;
+  --ink: #ECECEE;
+  --muted: #9A9CA3;
+  --faint: #686A71;
+  --accent: #829BF3;
+  --accent-hover: #9AAFF6;
+  --accent-ink: #0D1330;
+  --accent-soft: #252E52;
+  --accent-soft-hover: #2E3963;
+  --ok: #6CC891;
+  --ok-soft: #173326;
+  --warn: #E3B158;
+  --warn-soft: #3A2C10;
+  --bad: #F08A84;
+  --bad-soft: #3D1A18;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.4), 0 20px 50px -12px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}

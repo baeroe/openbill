@@ -1,0 +1,36 @@
+<section class="to">
+  {% if customer %}{{ customer.name }}<br>{% if contact %}{{ contact.full_name }}<br>{% endif %}{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% endif %}
+</section>
+
+<h1>{{ document.type_label }}</h1>
+<p class="meta">
+  Nr. {{ document.number }}, {{ document.date | date }}{% if document.service_date %}, Leistung {{ document.service_date | date }}{% endif %}{% if document.valid_until %}, gültig bis {{ document.valid_until | date }}{% endif %}
+</p>
+
+{% if document.intro %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
+
+<table class="items">
+  {% for g in groups %}
+    {% if g.has_title %}<tr class="heading"><td colspan="2">{{ g.title }}</td><td class="r">{{ g.total | money }}</td></tr>{% endif %}
+    {% for p in g.positions %}
+      {% if p.is_text %}
+        <tr><td colspan="3" class="note">{{ p.title }}</td></tr>
+      {% else %}
+        <tr class="{% if p.is_optional %}optional{% endif %}">
+          <td>{{ p.title }}{% if p.is_optional %} (optional){% endif %}{% if p.description %}<span>{{ p.description }}</span>{% endif %}</td>
+          <td class="r q">{{ p.quantity | number: 2 }} {{ p.unit }} × {{ p.unit_price | money }}</td>
+          <td class="r">{{ p.total | money }}</td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+</table>
+
+<table class="sums">
+  <tr><td>Netto</td><td class="r">{{ document.net_total | money }}</td></tr>
+  {% for t in document.tax_breakdown %}{% if t.percent > 0 %}<tr><td>Umsatzsteuer {{ t.percent }} %</td><td class="r">{{ t.tax | money }}</td></tr>{% endif %}{% endfor %}
+  <tr class="total"><td>Gesamt</td><td class="r">{{ document.gross_total | money }}</td></tr>
+</table>
+
+{% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
+{% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}

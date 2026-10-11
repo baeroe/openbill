@@ -1,0 +1,23 @@
+body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 9.5pt; color: #1b1a17; line-height: 1.45; }
+.meta { float: right; margin-top: 2mm; }
+.meta .type { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.12em; color: #6d685f; text-align: right; margin-bottom: 2mm; }
+.meta dl { display: grid; grid-template-columns: auto auto; gap: 0.5mm 6mm; margin: 0; font-size: 8.5pt; }
+.meta dt { color: #6d685f; } .meta dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.address { min-height: 32mm; margin: 6mm 0 10mm; }
+h1 { clear: both; }
+.return { font-size: 7pt; color: #6d685f; border-bottom: 0.3pt solid #c9c3b8; padding-bottom: 1mm; margin-bottom: 2mm; display: inline-block; }
+h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em; }
+.text { margin: 0 0 6mm; }
+.items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.items th { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.08em; color: #6d685f; font-weight: 500; text-align: left; border-bottom: 0.6pt solid #1b1a17; padding: 0 2mm 1.5mm; }
+.items td { padding: 2mm; border-bottom: 0.3pt solid #e3ddd2; vertical-align: top; }
+.items .n { width: 9mm; color: #6d685f; } .items .r { text-align: right; white-space: nowrap; }
+.items .heading td { font-weight: 600; padding-top: 4mm; border-bottom: none; }
+.items .optional td { color: #6d685f; }
+.desc { color: #6d685f; font-size: 8.5pt; }
+.sums { margin: 4mm 0 6mm auto; border-collapse: collapse; min-width: 75mm; font-variant-numeric: tabular-nums; }
+.sums td { padding: 1mm 2mm; } .sums .r { text-align: right; }
+.sums .total td { font-weight: 700; border-top: 0.6pt solid #1b1a17; padding-top: 2mm; }
+.sums .opt td { color: #6d685f; font-size: 8pt; }
+.legal { font-size: 8.5pt; margin: 0 0 3mm; }
+.items .subtotal td { border-bottom: none; color: #6d685f; font-size: 8.5pt; padding-top: 1mm; }

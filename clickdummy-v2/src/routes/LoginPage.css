@@ -1,0 +1,12 @@
+.login-sheets { position: relative; width: min(100%, 26rem); aspect-ratio: 210 / 260; }
+.login-sheet { position: absolute; inset: 0; background: #fff; color: #23252B; border-radius: 6px; box-shadow: var(--paper-shadow); padding: 9% 9%; display: grid; align-content: start; gap: 10px; font-size: 12px; }
+.login-sheet--back { transform: rotate(-5deg) translate(-8%, 3%); opacity: 0.7; }
+.ls-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; font-size: 13px; }
+.ls-head b { font-size: 16px; letter-spacing: -0.03em; }
+.ls-head span { color: #73767E; }
+.ls-group { display: flex; justify-content: space-between; font-weight: 650; padding-top: 10px; border-top: 1px solid #ECECE9; }
+.ls-group span { color: #73767E; font-weight: 500; font-variant-numeric: proportional-nums lining-nums; }
+.ls-row { display: flex; justify-content: space-between; color: #4A4D55; font-variant-numeric: proportional-nums lining-nums; }
+.ls-total { display: flex; justify-content: space-between; margin-top: 18px; padding: 10px 12px; border-radius: 10px; background: #E3E9FB; color: #2F55D4; font-weight: 700; font-variant-numeric: proportional-nums lining-nums; }
+.ls-line { height: 8px; border-radius: 4px; background: #ECECE9; }
+.login-chip { position: absolute; right: -6%; bottom: 10%; display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; border-radius: 999px; background: var(--surface); box-shadow: var(--shadow-float); font-size: var(--text-sm); color: var(--muted); }

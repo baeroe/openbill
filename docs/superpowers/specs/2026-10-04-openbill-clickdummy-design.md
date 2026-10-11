@@ -1,6 +1,8 @@
 # openbill — Fachkonzept & Klickdummy (Design-Spec)
 
-Stand: 2026-10-04 · Status: Entwurf zur Abstimmung
+Stand: 2026-10-11 · Status: Entwurf zur Abstimmung
+
+> **Änderungen vom 2026-10-11 (Klickdummy v2):** Projektphasen, Kategorien und Katalog entfallen, stattdessen gibt es Positionsgruppen im Dokument (2.6). Alle eigenen Felder werden an einem Ort gepflegt, Dokument- und Positionsfelder einmal definiert und per Häkchen den Dokumenttypen zugeordnet (2.3). Neue Gestaltung „Graphit & Kobalt“ ohne Tailwind (3.4, `clickdummy-v2/DESIGN.md`).
 
 ## 1. Ziel & Kontext
 
@@ -37,7 +39,7 @@ Vier Dokumenttypen zum Start. Status bewusst simpel:
 
 - Angebot → Auftragsbestätigung → Rechnung; Angebot → Rechnung direkt ist ebenfalls erlaubt.
 - Rechnung → Storno: Ein Storno bezieht sich immer auf genau eine abgeschlossene Rechnung, übernimmt deren Positionen mit negativen Beträgen und setzt die Rechnung auf „Storniert“.
-- Beim Umwandeln werden Kernfelder, Kunde, Ansprechpartner, Positionen und Texte übernommen; **eigene Felder werden per gleichem Feldschlüssel** übernommen, nicht passende verworfen (Hinweis im UI).
+- Beim Umwandeln werden Kernfelder, Kunde, Ansprechpartner, Positionsgruppen, Positionen und Texte übernommen. **Eigene Felder** wandern mit, wenn das Feld auch für den Zieltyp gilt; sonst wird der Wert verworfen (Hinweis im UI).
 - Jedes Dokument zeigt seine Kette („aus Angebot AN-2026-014“, „storniert durch ST-2026-002“).
 
 ### 2.3 Datenebenen: fester Kern + eigene Felder
@@ -49,12 +51,13 @@ Einheitliches Prinzip auf allen Ebenen: ein **fester Kern** (nicht löschbar, f�
 | Organisation | Name, Adresse, Logo, USt-ID, Steuernummer, Bankverbindung (IBAN/BIC/Bank), E-Mail, Telefon, Website, Besteuerungsart | `org.*` |
 | Kunde | Name, Adresse, E-Mail, USt-ID, Steuerbehandlung, Kundennummer | `customer.*` |
 | Ansprechpartner (n pro Kunde, einer Standard) | Anrede, Vorname, Nachname, Position, E-Mail, Telefon | `contact.*` |
-| Dokument (pro Typ) | Nummer, Datum, Kunde, Ansprechpartner (optional), Einleitung, Schlusstext, Template; typspezifisch z. B. Gültig bis (AN), Fälligkeit/Zahlungsziel (RE) | `document.*` |
-| Position (pro Typ) | Art, Titel, Beschreibung, Menge, Einheit, Einzelpreis, Steuersatz, Kategorie | `p.*` in `positions` |
-| Katalogeintrag | Bezeichnung, Beschreibung, Kategorie, Einheit, Preis, Steuersatz | — (wird in Positionen kopiert) |
+| Dokument | Nummer, Datum, Kunde, Ansprechpartner (optional), Einleitung, Schlusstext, Template; typspezifisch z. B. Gültig bis (AN), Fälligkeit/Zahlungsziel (RE) | `document.*` |
+| Position | Art, Titel, Beschreibung, Menge, Einheit, Einzelpreis, Steuersatz, Gruppe | `p.*` in `positions` bzw. `g.positions` |
 
 **Feldtypen für eigene Felder:** Text, Mehrzeiliger Text, Zahl, Betrag, Datum, Auswahl (Optionen), Ja/Nein, Bild.
-**Felddefinition:** Label, Schlüssel (`snake_case`, eindeutig pro Ebene, unveränderlich nach Anlage), Typ, Pflicht ja/nein, Standardwert, Hilfetext.
+**Felddefinition:** Label, Schlüssel (`snake_case`, eindeutig pro Ebene, unveränderlich nach Anlage), Typ, Pflicht ja/nein, Standardwert, Hilfetext; bei Dokument- und Positionsfeldern zusätzlich die Dokumenttypen, für die das Feld gilt.
+
+**Ein Ort für alle eigenen Felder:** „Eigene Felder“ zeigt alle Ebenen (Organisation, Kunde, Ansprechpartner, Dokument, Position) mit demselben Feld-Builder. Dokument- und Positionsfelder werden einmal definiert und per Häkchen den Dokumenttypen (AN, AB, RE, ST) zugeordnet. Kernfelder und die von Profilen verlangten Felder stehen gesperrt daneben. Die Dokumenttyp-Einstellungen enthalten keine Felder mehr.
 
 ### 2.4 Konformitätsprofile
 
@@ -73,12 +76,12 @@ Pro Dokumenttyp wird ein Profil gewählt. Ein Profil fügt Pflichtfelder auf all
 - **Summen** pro Steuersatz: Netto, Steuer, Brutto (`document.tax_breakdown`), dazu `document.net_total`, `document.tax_total`, `document.gross_total`.
 - **Gesetzliche Hinweise** (§ 19, Reverse Charge, Ausfuhr) entstehen ausschließlich aus den Steuerregeln: `document.legal_notes`.
 
-### 2.6 Katalog, Einheiten, Positionsarten
+### 2.6 Einheiten, Positionsgruppen, Positionsarten
 
 - **Einheiten** (Einstellungen): Name, Kürzel, Nachkommastellen, UN/ECE-Rec-20-Code. Vorbelegt: Stunde `HUR`, Tag `DAY`, Stück `H87`, Pauschal `LS`, Kilometer `KMT`, Monat `MON`.
-- **Kategorien:** frei anlegbar (z. B. Beratung, Implementierung, Hosting).
-- **Katalog:** Einträge mit Kern + eigenen Feldern. **Einfügen kopiert** die Werte in die Position (keine Verknüpfung); eigene Felder werden per Schlüssel übernommen. Einfügen per Autocomplete direkt in der Positionszeile.
-- **Positionsarten:** Leistung, Überschrift/Gruppe (gruppiert Folgepositionen, Zwischensumme im Template verfügbar), Textzeile (ohne Betrag), Optionale Position (nur Angebot, zählt nicht zur Summe).
+- **Positionsgruppen:** Ein Dokument gliedert seine Positionen in Gruppen mit Titel und Zwischensumme (z. B. „Konzept & UX“, „Umsetzung“). Gruppen lassen sich sortieren und einklappen, Positionen zwischen Gruppen verschieben. Positionen ohne Gruppe stehen in einer Gruppe ohne Titel. Im Template: `groups` mit `title`, `has_title`, `total`, `positions`.
+- **Kein Katalog, keine Kategorien:** Die Positionszeile schlägt per Autocomplete Positionen aus früheren Dokumenten vor (Titel, Beschreibung, Einheit, Preis, Steuersatz). Projektphasen gibt es nicht als eigenes Konzept; sie sind Gruppen im Dokument.
+- **Positionsarten:** Leistung, Textzeile (ohne Betrag), Optionale Position (nur Angebot, zählt nicht zur Summe).
 
 ### 2.7 Texte
 
@@ -114,6 +117,8 @@ Ein durchklickbarer Prototyp, der alle oben genannten Funktionen sichtbar und be
 
 ### 3.2 Technik
 
+> **v2 (`clickdummy-v2/`):** Vite + React + TypeScript, React Router, eigenes CSS mit Tokens (kein Tailwind, keine UI-Library), TanStack Query über einer Fake-API (`src/api/*`, später gegen echte Endpunkte tauschbar), Zustand nur für Client-State, liquidjs, CodeMirror 6, @dnd-kit, lucide-react. Die Punkte unten beschreiben v1.
+
 - `clickdummy/` im Repo-Root (Phase 2 bekommt später eigene Ordner).
 - Vite + React + TypeScript, React Router, **pnpm**.
 - Styling mit **Tailwind CSS v4** (Design-Tokens via `@theme`), Light + Dark.
@@ -128,30 +133,30 @@ Ein durchklickbarer Prototyp, der alle oben genannten Funktionen sichtbar und be
 1. **Login** — eigenständig gestaltet, Fake-Login (jede Eingabe führt rein).
 2. **Übersicht** — offene Rechnungssumme, überfällige Rechnungen, offene Angebote, zuletzt bearbeitete Dokumente, Schnellaktion „Neues Dokument“.
 3. **Dokumente** — Liste mit Filter nach Typ, Status, Kunde und Suche; Status-Badges, Überfällig-Markierung.
-4. **Dokument-Editor** — Kernfelder + eigene Felder, Kunde/Ansprechpartner, Positionstabelle (Positionsarten, Katalog-Autocomplete, Drag & Drop-Sortierung), Einleitung/Schlusstext mit Baustein-Einfügen, Summen inkl. Steueraufschlüsselung, Prüfanzeige des Profils, **Live-Vorschau daneben (echte A4-Seiten mit Kopf- und Fußzeile, Hilfslinien einblendbar)**, Aktionen: Abschließen, Status setzen, Umwandeln, Stornieren, „PDF herunterladen“ (Dummy), E-Rechnung-Tab mit XML-Vorschau (Mock), Dokumentkette.
+4. **Dokument-Editor** — Kernfelder + eigene Felder, Kunde/Ansprechpartner, Positionsgruppen mit Zwischensummen (Drag & Drop für Gruppen und Positionen, Positionsarten, Autocomplete aus früheren Positionen), Einleitung/Schlusstext mit Baustein-Einfügen, Summen inkl. Steueraufschlüsselung, Prüfanzeige des Profils, **Live-Vorschau daneben (echte A4-Seiten mit Kopf- und Fußzeile, Hilfslinien einblendbar)**, Aktionen: Abschließen, Status setzen, Umwandeln, Stornieren, „PDF herunterladen“ (Dummy), E-Rechnung-Tab mit XML-Vorschau (Mock), Dokumentkette.
 5. **Kunden** — Liste, Detail mit Kern + eigenen Feldern, Steuerbehandlung, Ansprechpartnern, zugehörigen Dokumenten.
-6. **Katalog** — Einträge nach Kategorie, Anlegen/Bearbeiten.
+6. **Eigene Felder** — alle Ebenen an einem Ort, Dokumenttypen per Häkchen, Kernfelder und Profil-Pflichtfelder gesperrt daneben.
 7. **Templates** — Galerie mit Vorschaubildern, Import eines ZIP (simuliert), Editor mit Tabs Kopfzeile · Inhalt · Fußzeile · CSS · Manifest (CodeMirror), Seitenskizze zeigt den bearbeiteten Bereich, Live-Vorschau rechts mit Beispieldokument und hervorgehobenem Bereich, Seitenleiste mit verfügbaren Feldern (klickbar zum Einfügen), Manifest-Bearbeitung.
 8. **Einstellungen**
    - Organisation (Kern + eigene Felder, Logo-Upload, Besteuerungsart)
-   - Dokumenttypen (je Typ: Feld-Builder für Dokument- und Positionsfelder, Profil, Nummernkreis, Standard-Template, Standard-Texte, Zahlungsziel)
-   - Eigene Felder für Kunde, Ansprechpartner, Katalog (gleicher Feld-Builder)
-   - Steuersätze, Einheiten, Kategorien, Textbausteine
+   - Dokumenttypen (je Typ: Profil, Nummernkreis, Standard-Template, Standard-Texte, Zahlungsziel)
+   - Steuersätze, Einheiten, Textbausteine
    - Benutzer (Liste, Einladen — Dummy)
 
 ### 3.4 Gestaltung
 
 Umsetzung mit dem Frontend-Design-Skill. Leitlinie: **modern, ruhig, eigenständig — nicht verspielt, nicht bieder.**
 
-- Richtung „Papier & Präzision“: Das Produkt dreht sich um Dokumente, die Oberfläche greift das auf (helle, leicht warme Flächen, Dokumente als „Blätter“, klare Typografie), kombiniert mit präzisen, technischen Details (tabellarische Zahlen, Mono-Akzente für Nummern und Feldschlüssel).
-- Eine markante Akzentfarbe, sparsam eingesetzt; konsequente Tokens (Tailwind `@theme`); Dark Mode gleichwertig.
-- Eigenständige, nicht generische Schriftwahl (Display + Text + Mono).
+- Richtung **„Graphit & Kobalt“** (v2, gewählt am 2026-10-11 aus vier Moodboards; der erste Entwurf „Papier & Präzision“ wirkte zu steif): neutral-modern und weich, Ebenen durch Tonwerte statt Rahmen und Schatten, Pillen für Filter und Buttons, viel Luft.
+- Ein Akzent (Kobalt), sparsam eingesetzt; Tokens als CSS-Variablen in eigenem CSS, **ohne Tailwind und ohne UI-Library**; Dark Mode gleichwertig.
+- Eine Schriftfamilie (Schibsted Grotesk), Mono nur im Template-Editor.
+- Details und Tokens: `clickdummy-v2/DESIGN.md`.
 - Desktop-first (Arbeitswerkzeug), Tablet nutzbar; Mobile nur Grundbedienbarkeit.
 
 ### 3.5 Erfolgskriterien
 
 - Alle Screens aus 3.3 sind erreichbar und bedienbar.
-- Ein kompletter Durchlauf funktioniert: Angebot anlegen → Katalogpositionen einfügen → abschließen → angenommen → in Rechnung umwandeln → Prüfanzeige E-Rechnung grün machen → abschließen → stornieren.
+- Ein kompletter Durchlauf funktioniert: Angebot anlegen → Positionsgruppen und Positionen anlegen → abschließen → angenommen → in Rechnung umwandeln → Prüfanzeige E-Rechnung grün machen → abschließen → stornieren.
 - Eigenes Feld anlegen (z. B. „Projektname“ an Rechnungen), im Dokument befüllen, im Template einbauen → erscheint in der Live-Vorschau.
 - Kleinunternehmer ein/aus ändert Steuerauswahl, Summen und Pflichthinweis sichtbar.
 - Der Maintainer bewertet Look & Feel als „modern, nicht kindlich, nicht spießig“.

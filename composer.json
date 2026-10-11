@@ -3,7 +3,7 @@
     "name": "baeroe/openbill",
     "type": "project",
     "description": "Open, self-hosted quotes and invoices with custom fields, Liquid templates and EN 16931 e-invoices.",
-    "keywords": ["laravel", "framework"],
+    "keywords": ["invoices", "quotes", "e-invoice", "self-hosted"],
     "license": "MIT",
     "require": {
         "php": "^8.4",
@@ -48,11 +48,6 @@
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
-        ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"

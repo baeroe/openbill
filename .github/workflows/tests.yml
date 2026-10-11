@@ -87,11 +87,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Gotenberg reachable
+        run: curl -fsS --retry 15 --retry-delay 2 --retry-all-errors http://127.0.0.1:3000/health
+
       - name: Pest
         run: php artisan test
-
-      - name: Gotenberg reachable
-        run: curl -fsS http://127.0.0.1:3000/health
 
       # domain logic of the clickable prototypes (sums, taxes, numbering, chain, Liquid, page breaks)
       - name: Prototypes

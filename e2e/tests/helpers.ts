@@ -18,3 +18,14 @@ export async function apiGet(page: Page, url: string): Promise<unknown> {
     expect(response.ok()).toBe(true);
     return response.json();
 }
+
+/** A write against the API with the page's session: Sanctum needs the Referer and the XSRF cookie as header. */
+export async function apiPost(page: Page, url: string, body: unknown = {}): Promise<unknown> {
+    const xsrf = (await page.context().cookies()).find((cookie) => cookie.name === 'XSRF-TOKEN')?.value ?? '';
+    const response = await page.request.post(url, {
+        data: body,
+        headers: { Accept: 'application/json', Referer: page.url(), 'X-XSRF-TOKEN': decodeURIComponent(xsrf) },
+    });
+    expect(response.ok(), await response.text()).toBe(true);
+    return response.json();
+}

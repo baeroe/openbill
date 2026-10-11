@@ -34,6 +34,12 @@ return [
 
     'stores' => [
 
+        // API Platform metadata (config/api-platform.php): APCu keeps objects with native serialization and
+        // is not subject to serializable_classes, unlike file/database/redis
+        'api-platform' => [
+            'driver' => 'apc',
+        ],
+
         'array' => [
             'driver' => 'array',
             'serialize' => false,

@@ -46,9 +46,13 @@ export type ApiOptions = {
     signal?: AbortSignal;
     /** "jsonld" for paginated collections (total and next page); default plain JSON. */
     format?: 'json' | 'jsonld';
+    /** Request outlives the page (saving while the tab closes; body ≤ 64 KB). */
+    keepalive?: boolean;
 };
 
-const ACCEPT = { json: 'application/json', jsonld: 'application/ld+json' } as const;
+type Format = NonNullable<ApiOptions['format']> | 'text';
+
+const ACCEPT: Record<Format, string> = { json: 'application/json', jsonld: 'application/ld+json', text: 'application/xml, application/problem+json' };
 
 /** Path with query string; empty values (undefined, null, '', false) are left out. */
 export function apiUrl(path: string, params: Record<string, string | number | boolean | null | undefined> = {}): string {
@@ -76,10 +80,10 @@ export function setUnauthenticatedHandler(handler: () => void): void {
     onUnauthenticated = handler;
 }
 
-async function send(path: string, options: ApiOptions): Promise<Response> {
+async function send(path: string, options: ApiOptions, format: Format): Promise<Response> {
     const method = options.method ?? 'GET';
     const headers: Record<string, string> = {
-        Accept: ACCEPT[options.format ?? 'json'],
+        Accept: ACCEPT[format],
         'Accept-Language': getLocale(),
         'X-Requested-With': 'XMLHttpRequest',
     };
@@ -94,6 +98,7 @@ async function send(path: string, options: ApiOptions): Promise<Response> {
             headers,
             credentials: 'same-origin',
             signal: options.signal,
+            keepalive: options.keepalive,
             body: options.body === undefined ? undefined : JSON.stringify(options.body),
         });
     } catch (error) {
@@ -118,18 +123,29 @@ async function problemOf(response: Response): Promise<Problem> {
     }
 }
 
-/** One request to the own API with the login session. Every answer ≥ 400 throws an ApiError. */
-export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
-    let response = await send(path, options);
+/** Sends, renews the CSRF cookie once on 419, sends 401 to the login and throws every answer ≥ 400 as ApiError. */
+async function request(path: string, options: ApiOptions, format: Format): Promise<Response> {
+    let response = await send(path, options, format);
     // 419: the CSRF token changed (e.g. a new login in another tab): fetch a fresh cookie, then try once more
     if (response.status === 419) {
         await fetch('/sanctum/csrf-cookie', { credentials: 'same-origin' });
-        response = await send(path, options);
+        response = await send(path, options, format);
     }
     if (response.status === 401) onUnauthenticated();
     if (!response.ok) throw new ApiError(await problemOf(response));
+    return response;
+}
+
+/** One request to the own API with the login session. Every answer ≥ 400 throws an ApiError. */
+export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
+    const response = await request(path, options, options.format ?? 'json');
     if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
+}
+
+/** A text answer (e-invoice XML); errors still arrive as Problem Details. */
+export async function apiText(path: string, options: Omit<ApiOptions, 'format'> = {}): Promise<string> {
+    return (await request(path, options, 'text')).text();
 }
 
 export type Page<T> = { items: T[]; total: number; page: number; hasMore: boolean };

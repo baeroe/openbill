@@ -1,0 +1,17 @@
+body { font-family: Georgia, "Times New Roman", serif; font-size: 10pt; color: #2a2a2a; line-height: 1.6; }
+.to { margin: 8mm 0 18mm; }
+h1 { font-weight: normal; font-size: 22pt; margin: 0; letter-spacing: -0.01em; }
+.meta { margin: 1mm 0 10mm; color: #777; font-size: 9pt; }
+.text { margin: 0 0 8mm; max-width: 140mm; }
+.items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.items td { padding: 3mm 0; border-top: 0.25pt solid #ccc; vertical-align: top; }
+.items span { display: block; color: #888; font-size: 8.5pt; }
+.items .r { text-align: right; white-space: nowrap; padding-left: 6mm; }
+.items .q { color: #888; font-size: 9pt; }
+.items .heading td { border-top: none; padding-top: 7mm; font-style: italic; color: #777; }
+.items .note { color: #888; font-style: italic; }
+.items .optional td { color: #999; }
+.sums { margin: 4mm 0 10mm auto; border-collapse: collapse; min-width: 70mm; font-variant-numeric: tabular-nums; }
+.sums td { padding: 1mm 0; color: #777; } .sums .r { text-align: right; padding-left: 10mm; }
+.sums .total td { color: #2a2a2a; border-top: 0.25pt solid #2a2a2a; padding-top: 2mm; font-size: 12pt; }
+.legal { font-size: 9pt; color: #555; }

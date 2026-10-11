@@ -1,0 +1,38 @@
+.dl-filters { display: grid; gap: var(--sp-3); }
+.dl-filters__row { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+.dl-search { flex: 1 1 18rem; max-width: 26rem; }
+.dl-select { width: auto; flex: 0 1 13rem; }
+
+.dl-card { padding: var(--sp-2); background: var(--surface); }
+.workspace .dl-card { background: color-mix(in srgb, var(--surface-2) 45%, var(--surface)); }
+
+.dl-grid { grid-template-columns: 8.5rem minmax(0, 1fr) 5.5rem 6.5rem 7.5rem 7rem; }
+.dl-amount { text-align: right; justify-self: end; font-weight: 600; }
+.list__head .dl-amount { font-weight: 500; }
+
+.dl-month { padding: var(--sp-4) var(--sp-5) var(--sp-1); font-size: var(--text-sm); font-weight: 600; color: var(--muted); letter-spacing: -0.01em; }
+.dl-month::first-letter { text-transform: uppercase; }
+
+.dl-number, .dl-who { display: grid; min-width: 0; gap: 1px; }
+.dl-number .num { font-weight: 600; }
+.dl-draft { font-weight: 600; color: var(--muted); font-style: italic; }
+.dl-date { color: var(--muted); font-size: var(--text-sm); }
+.dl-date--late { color: var(--bad); font-weight: 600; }
+
+.dl-foot { display: flex; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5) var(--sp-3); color: var(--muted); font-size: var(--text-sm); }
+
+@media (max-width: 1100px) {
+  .dl-grid { grid-template-columns: 8rem minmax(0, 1fr) 6.5rem 7.5rem 7rem; }
+  .dl-grid > :nth-child(3) { display: none; }
+}
+@media (max-width: 720px) {
+  .dl-select { flex: 1 1 10rem; }
+  .list__head.dl-grid { display: none; }
+  .list__row.dl-grid { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "who amount" "number status"; row-gap: var(--sp-1); padding: var(--sp-3) var(--sp-4); }
+  .list__row.dl-grid > :nth-child(1) { grid-area: number; }
+  .list__row.dl-grid > :nth-child(2) { grid-area: who; }
+  .list__row.dl-grid > :nth-child(3), .list__row.dl-grid > :nth-child(4) { display: none; }
+  .list__row.dl-grid > :nth-child(5) { grid-area: status; justify-self: end; }
+  .list__row.dl-grid > :nth-child(6) { grid-area: amount; }
+  .dl-number { grid-auto-flow: column; justify-content: start; gap: var(--sp-2); align-items: baseline; }
+}

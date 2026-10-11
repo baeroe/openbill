@@ -1,0 +1,14 @@
+.pp { position: relative; width: 100%; overflow: hidden; }
+.pp-measure { position: absolute; left: -9999px; border: 0; opacity: 0; pointer-events: none; }
+.pp-stack { position: absolute; top: 0; transform-origin: top left; }
+.pp-page { position: absolute; left: 0; overflow: hidden; background: #fff; border-radius: 3px; box-shadow: var(--paper-shadow); }
+.pp-clip { position: absolute; overflow: hidden; }
+.pp-frame { position: absolute; left: 0; border: 0; pointer-events: none; }
+.pp-guide { position: absolute; pointer-events: none; outline: 1px dashed color-mix(in srgb, #2F55D4 55%, transparent); outline-offset: -1px; }
+.pp-guide--on { outline: 2px solid #2F55D4; outline-offset: -2px; background: rgba(47, 85, 212, 0.06); }
+.pp-label {
+  position: absolute; left: 0; width: 18px; display: flex; align-items: flex-start; justify-content: center; overflow: hidden;
+  padding: 6px 0; border-radius: 6px; writing-mode: vertical-rl; white-space: nowrap;
+  font-size: 10.5px; line-height: 1; font-weight: 600; background: var(--accent-soft); color: var(--accent);
+}
+.pp-label--on { background: var(--accent-soft-hover); color: var(--accent); }

@@ -1,0 +1,71 @@
+<header class="band">
+  <div class="band-top">
+    {% if org.logo %}<img class="logo" src="{{ org.logo }}" alt="">{% else %}<span class="org">{{ org.name }}</span>{% endif %}
+  </div>
+  <div class="band-main">
+    <h1>{{ document.type_label }}</h1>
+    <div class="amount">
+      <span>{% if document.type == "offer" %}Angebotssumme{% elsif document.type == "cancellation" %}Gutschrift{% else %}Zu zahlen{% endif %}</span>
+      <strong>{{ document.gross_total | money }}</strong>
+    </div>
+  </div>
+</header>
+
+<section class="parties">
+  <div>
+    <p class="label">Für</p>
+    {% if customer %}
+      <p><b>{{ customer.name }}</b>{% if contact %}<br>{{ contact.full_name }}{% endif %}<br>{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}</p>
+    {% endif %}
+  </div>
+  <div>
+    <p class="label">Daten</p>
+    <p>
+      Datum {{ document.date | date }}
+      {% if document.service_date %}<br>Leistung {{ document.service_date | date }}{% endif %}
+      {% if document.due_date %}<br>Fällig {{ document.due_date | date }}{% endif %}
+      {% if document.valid_until %}<br>Gültig bis {{ document.valid_until | date }}{% endif %}
+      {% if document.source_number %}<br>Bezug {{ document.source_number }}{% endif %}
+    </p>
+  </div>
+  {% if document.project_name %}
+  <div>
+    <p class="label">Projekt</p>
+    <p><b>{{ document.project_name }}</b></p>
+  </div>
+  {% endif %}
+</section>
+
+<main class="content">
+  {% if document.intro %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
+
+  <table class="items">
+    <thead><tr><th>Leistung</th><th class="r">Menge</th><th class="r">Preis</th><th class="r">Summe</th></tr></thead>
+    <tbody>
+    {% for g in groups %}
+      {% if g.has_title %}<tr class="heading"><td colspan="3">{{ g.title }}</td><td class="r">{{ g.total | money }}</td></tr>{% endif %}
+      {% for p in g.positions %}
+        {% if p.is_text %}
+          <tr class="note"><td colspan="4">{{ p.title }}</td></tr>
+        {% else %}
+          <tr class="{% if p.is_optional %}optional{% endif %}">
+            <td><b>{{ p.title }}</b>{% if p.is_optional %} · optional{% endif %}{% if p.description %}<br><small>{{ p.description }}</small>{% endif %}</td>
+            <td class="r">{{ p.quantity | number: 2 }} {{ p.unit }}</td>
+            <td class="r">{{ p.unit_price | money }}</td>
+            <td class="r">{{ p.total | money }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="sums">
+    <div><span>Netto</span><span>{{ document.net_total | money }}</span></div>
+    {% for t in document.tax_breakdown %}{% if t.percent > 0 %}<div><span>USt. {{ t.percent }} %</span><span>{{ t.tax | money }}</span></div>{% endif %}{% endfor %}
+    <div class="total"><span>Gesamt</span><span>{{ document.gross_total | money }}</span></div>
+  </div>
+
+  {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
+  {% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
+</main>

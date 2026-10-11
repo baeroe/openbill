@@ -1,0 +1,14 @@
+<style>
+  .f { box-sizing: border-box; height: 100%; padding: 4mm 20mm 0; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 7pt; line-height: 1.45; color: #6d685f; }
+  .f-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; border-top: 0.3pt solid #c9c3b8; padding-top: 3mm; }
+  .f-page { margin-top: 3mm; text-align: right; color: #1b1a17; }
+</style>
+<div class="f">
+  <div class="f-cols">
+    <div>{{ org.name }}<br>{{ org.street }}<br>{{ org.zip }} {{ org.city }}</div>
+    <div>{{ org.email }}<br>{{ org.phone }}<br>{{ org.website }}</div>
+    <div>{% if org.vat_id %}USt-ID {{ org.vat_id }}{% else %}St.-Nr. {{ org.tax_number }}{% endif %}{% if org.register %}<br>{{ org.register }}{% endif %}</div>
+    <div>{{ org.bank_name }}<br>IBAN {{ org.iban }}<br>BIC {{ org.bic }}</div>
+  </div>
+  <div class="f-page">Seite {{ page.number }} von {{ page.total }}</div>
+</div>

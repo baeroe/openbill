@@ -1,0 +1,7 @@
+<style>
+  .lf { box-sizing: border-box; height: 100%; padding: 8mm 24mm 0; font-family: Georgia, serif; font-size: 7pt; color: #999; display: flex; justify-content: space-between; }
+</style>
+<div class="lf">
+  <span>{{ org.name }} · {{ org.bank_name }} · IBAN {{ org.iban }} · {% if org.vat_id %}USt-ID {{ org.vat_id }}{% else %}St.-Nr. {{ org.tax_number }}{% endif %}</span>
+  <span>{{ page.number }} / {{ page.total }}</span>
+</div>

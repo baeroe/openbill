@@ -105,4 +105,17 @@ describe('editor store', () => {
         state().expandAll();
         expect(state().collapsed).toEqual([]);
     });
+
+    it('lets an undo change only the document it belongs to (review: undo after a page change)', () => {
+        state().load(detail({ id: 'a', groups: [{ id: 'g1', title: 'Konzept', positions: [] }] }));
+        const undo = () => state().updateFor('a', (d) => ({ ...d, groups: [...d.groups, { id: 'restored', title: 'Alt', positions: [] }] }));
+
+        state().load(detail({ id: 'b', groups: [] }));
+        undo();
+        expect(state().draft?.groups).toEqual([]);
+
+        state().load(detail({ id: 'a', groups: [] }));
+        undo();
+        expect(state().draft?.groups.map((g) => g.id)).toEqual(['restored']);
+    });
 });

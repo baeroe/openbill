@@ -18,6 +18,8 @@ export type EditorState = {
     aliases: Record<string, string>;
     load(document: DocumentDetail): void;
     update(fn: (draft: Draft) => Draft): void;
+    /** update() only while this document is still in the editor: undo toasts outlive a page change. */
+    updateFor(documentId: string, fn: (draft: Draft) => Draft): void;
     applySaved(sent: DraftPayload, saved: DocumentDetail): void;
     setSave(state: SaveState, error?: unknown): void;
     setErrors(errors: Record<string, string>): void;
@@ -56,6 +58,10 @@ export const useEditor = create<EditorState>()((set, get) => ({
         if (!draft || draft.status !== 'draft' || saveState === 'locked' || saveState === 'gone') return;
         const next = fn(draft);
         if (next !== draft) set((state) => ({ draft: next, revision: state.revision + 1 }));
+    },
+
+    updateFor: (documentId, fn) => {
+        if (get().draft?.id === documentId) get().update(fn);
     },
 
     applySaved: (sent, saved) =>

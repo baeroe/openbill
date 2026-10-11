@@ -8,6 +8,7 @@ import type { DocumentDetail } from '@/api/types';
 import { ApiError, errorMessage } from '@/lib/api';
 import { toast } from '@/lib/toast';
 import { Autosave } from './autosave';
+import { draftSource } from './draft-source';
 import { fromDocument, samePayload, toPayload } from './ops';
 import { fieldErrors } from './paths';
 import { useEditor } from './store';
@@ -28,14 +29,13 @@ export function useAutosave(id: string, document: DocumentDetail | undefined): {
         triggerRef.current = trigger;
     }, [trigger]);
 
+    const source = useMemo(() => draftSource(useEditor, id), [id]);
     const autosave = useMemo(() => {
         const mine = () => useEditor.getState().draft?.id === id;
         return new Autosave({
-            revision: () => useEditor.getState().revision,
-            payload: () => {
-                const draft = useEditor.getState().draft;
-                return draft && draft.id === id && draft.status === 'draft' ? toPayload(draft) : null;
-            },
+            // the last state of this document, also after the store moved on to another one (save while leaving)
+            revision: source.revision,
+            payload: source.payload,
             save: async (payload) => {
                 const saved = await triggerRef.current(payload);
                 // SWR types the answer as optional; PATCH always answers with the document
@@ -57,7 +57,7 @@ export function useAutosave(id: string, document: DocumentDetail | undefined): {
                 if (state === 'locked' || state === 'gone') void mutate(keys.document(id));
             },
         });
-    }, [id]);
+    }, [id, source]);
 
     // server state → store: a new document, a changed lock, or an external change while nothing is pending
     useEffect(() => {
@@ -91,9 +91,12 @@ export function useAutosave(id: string, document: DocumentDetail | undefined): {
         return () => {
             window.removeEventListener('pagehide', onPageHide);
             off();
-            void autosave.flush();
+            // keep reading this document's last state until it is on the server (retries included)
+            void autosave.flush().then(() => {
+                if (!autosave.pending) source.unsubscribe();
+            });
         };
-    }, [autosave, id]);
+    }, [autosave, id, source]);
 
     return useMemo(
         () => ({

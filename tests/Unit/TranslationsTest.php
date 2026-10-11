@@ -1,5 +1,8 @@
 <?php
 
+use App\Domain\Compliance\ComplianceRule;
+use App\Domain\Fields\FieldErrorCode;
+
 it('has the same keys in English and German', function () {
     $keys = fn (string $locale): array => array_keys(json_decode(
         (string) file_get_contents(dirname(__DIR__, 2)."/lang/{$locale}.json"),
@@ -29,4 +32,16 @@ it('defines every key used in code', function () {
 
     expect($used)->not->toBeEmpty('texts should go through t()/tn()/__()')
         ->and(array_values(array_diff($used, array_keys($en))))->toBe([]);
+});
+
+it('has a message for every domain code', function () {
+    $root = dirname(__DIR__, 2);
+    $keys = fn (string $locale): array => array_keys(json_decode((string) file_get_contents("{$root}/lang/{$locale}.json"), true, flags: JSON_THROW_ON_ERROR));
+    $needed = [
+        ...array_map(fn ($c) => "compliance.{$c->value}", ComplianceRule::cases()),
+        ...array_map(fn ($c) => "fields.error.{$c->value}", FieldErrorCode::cases()),
+    ];
+
+    expect(array_values(array_diff($needed, $keys('en'))))->toBe([])
+        ->and(array_values(array_diff($needed, $keys('de'))))->toBe([]);
 });

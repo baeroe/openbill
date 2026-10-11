@@ -4,10 +4,12 @@ namespace Tests\Integration;
 
 use App\Actions\AllocateDocumentNumber;
 use App\Actions\FinalizeDocument;
+use App\Contracts\DocumentArchiver;
 use App\Enums\DocumentType;
 use App\Exceptions\DocumentLockedException;
 use App\Models\Document;
 use App\Support\Actor;
+use App\Support\NullDocumentArchiver;
 use Closure;
 use Illuminate\Support\Facades\DB;
 
@@ -43,6 +45,8 @@ final class ParallelAllocation
     public static function finalizeTask(array $ids): Closure
     {
         return static function () use ($ids): array {
+            // number allocation is under test here, not rendering: no Gotenberg, no archive files in child processes
+            app()->bind(DocumentArchiver::class, NullDocumentArchiver::class);
             $results = [];
             foreach ($ids as $id) {
                 try {

@@ -119,6 +119,8 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l�
 
 **Abnahme:** Demo-Rechnung lässt sich in DDEV abschließen; PDF/A-3 mit eingebetteter XML liegt im Archiv; Pest grün.
 
+**Entscheidung aus dem Review (Steuerkategorie Drittland):** Kunden mit `third_country` werden bis Phase 7 auf die Kategorie `G` (Ausfuhr, steuerfrei) abgebildet. Für **Dienstleistungen** an Drittland-Kunden – den häufigeren Fall – ist fachlich `O` (nicht steuerbar) richtig, mit eigenen Regeln (BR-O-02 ff.: keine USt-IDs von Verkäufer und Käufer, nur diese eine Kategorie im Dokument). Phase 7 bekommt dafür eine Kundenoption „Leistungsart: Ware / Dienstleistung“ (Standard Dienstleistung), `EffectiveTax` bildet Drittland + Dienstleistung auf `O` ab, Compliance und `CiiBuilder` setzen die BR-O-Regeln um, und `scripts/validate-einvoice.sh` bekommt den Fall dazu. Exempt-Kategorien ohne Steuerhinweis bekommen seit Phase 3 einen Standard-Befreiungsgrund (`einvoice.exemption.*`).
+
 ## Phase 4: REST-API
 
 **Branch:** `phase-04-api` · **Phasenplan:** `…phase-04-api.md`
@@ -190,7 +192,8 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l�
 - Templates-Galerie (Mini-Vorschau über `/api/render`), Import (ZIP), Duplizieren, Löschen
 - Template-Editor mit CodeMirror (Kopfzeile/Inhalt/Fußzeile/CSS/Manifest + Papier-Formular), Feldleiste, Live-Vorschau mit Bereichshervorhebung, Beispieldaten-Auswahl, Export
 - Eigene Felder (alle Ebenen, Dokumenttyp-Häkchen in der Zeile, Drawer mit Live-Vorschau, gesperrte Kern- und Profilfelder, Undo)
-- Einstellungen: Organisation (Logo-Upload, Besteuerung), Dokumenttypen (Profil, Nummernkreis mit Vorschau, Vorgaben), Steuern & Einheiten (Archivieren), Textbausteine, Benutzer (Einladen per kopierbarem Link, Rollen)
+- Kundenoption „Leistungsart: Ware / Dienstleistung“ und Steuerkategorie `O` für Dienstleistungen an Drittland-Kunden (siehe Entscheidung in Phase 3)
+- Einstellungen: Organisation (Logo-Upload, Besteuerung, Registernummer `registration_id`), Dokumenttypen (Profil, Nummernkreis mit Vorschau, Vorgaben), Steuern & Einheiten (Archivieren), Textbausteine, Benutzer (Einladen per kopierbarem Link, Rollen)
 
 **Tests:** Pest-Inertia-Tests, Playwright: Feld anlegen → im Dokument füllen → im Template ergänzen → in Vorschau sichtbar.
 
@@ -273,7 +276,7 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l�
 ## Fortschritt
 
 - [x] Phase 1: Fundament
-- [ ] Phase 2: Domain & Datenmodell
+- [x] Phase 2: Domain & Datenmodell
 - [ ] Phase 3: Rendering, PDF, E-Rechnung
 - [ ] Phase 4: REST-API
 - [ ] Phase 5: UI-Basis

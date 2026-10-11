@@ -71,8 +71,21 @@ final class ComplianceChecker
         if (trim($in->org->name) === '' || ! $in->org->addressComplete()) {
             $issues[] = new ComplianceIssue('org.address', ComplianceRule::OrgAddressMissing);
         }
-        if (trim($in->org->vatId) === '' && trim($in->org->taxNumber) === '') {
-            $issues[] = new ComplianceIssue('org.vat_id', ComplianceRule::OrgTaxIdMissing);
+        if (trim($in->org->vatId) === '') {
+            // BR-AE-02 / BR-G-02 (and § 14a UStG): reverse charge and exports need the seller's VAT ID. A small
+            // business always invoices with category E (EffectiveTax), where the tax number is enough (BR-E-02).
+            if ($in->taxationMode === TaxationMode::Regular
+                && in_array($in->customer?->taxTreatment, [TaxTreatment::EuReverseCharge, TaxTreatment::ThirdCountry], true)) {
+                $issues[] = new ComplianceIssue('org.vat_id', ComplianceRule::OrgVatIdRequired);
+            } else {
+                if (trim($in->org->taxNumber) === '') {
+                    $issues[] = new ComplianceIssue('org.vat_id', ComplianceRule::OrgTaxIdMissing);
+                }
+                // BR-CO-26: the seller needs a VAT ID (BT-31) or a legal registration ID (BT-30); a tax number is not enough
+                if (trim($in->org->registrationId) === '') {
+                    $issues[] = new ComplianceIssue('org.registration_id', ComplianceRule::OrgSellerIdMissing);
+                }
+            }
         }
         if (trim($in->org->iban) === '') {
             $issues[] = new ComplianceIssue('org.iban', ComplianceRule::OrgIbanMissing);

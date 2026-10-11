@@ -1,0 +1,10 @@
+{
+  "name": "Leise",
+  "version": "1.0.0",
+  "author": "openbill",
+  "license": "MIT",
+  "description": "Minimal: lots of white space, a serif typeface, hairlines.",
+  "documentTypes": ["offer", "confirmation", "invoice", "cancellation"],
+  "expectedFields": [],
+  "paper": { "format": "A4", "marginX": "24mm", "headerHeight": "26mm", "footerHeight": "22mm" }
+}

@@ -8,7 +8,6 @@ use App\Models\Document;
 use App\Models\FieldDefinition;
 use App\Models\Organization;
 use App\Models\TaxRate;
-use App\Models\Template;
 use App\Models\Unit;
 
 /**
@@ -25,14 +24,10 @@ final class SnapshotBuilder
         $org = Organization::current();
         $customer = $document->customer_id === null ? null : Customer::withTrashed()->find($document->customer_id);
         $contact = $document->contact_id === null ? null : Contact::withTrashed()->find($document->contact_id);
-        $template = $document->template_id === null ? null : Template::query()->find($document->template_id);
+        $template = TemplateResolver::for($document);
 
         return [
-            'org' => [
-                ...$org->only(['name', 'street', 'zip', 'city', 'country', 'logo_path', 'vat_id', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website', 'locale']),
-                'taxation_mode' => $org->taxation_mode->value,
-                'custom' => $org->custom ?? [],
-            ],
+            'org' => self::orgRow($org),
             'customer' => $customer === null ? null : [
                 ...$customer->only(['id', 'number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'locale']),
                 'tax_treatment' => $customer->tax_treatment->value,
@@ -65,6 +60,18 @@ final class SnapshotBuilder
             'field_definitions' => self::fieldDefinitionRows(),
             // frozen in the document's language: later text changes must not alter a finalized document
             'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($document->locale)),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function orgRow(Organization $org): array
+    {
+        return [
+            ...$org->only(['name', 'street', 'zip', 'city', 'country', 'logo_path', 'vat_id', 'tax_number', 'registration_id', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website', 'locale']),
+            'taxation_mode' => $org->taxation_mode->value,
+            'custom' => $org->custom ?? [],
         ];
     }
 

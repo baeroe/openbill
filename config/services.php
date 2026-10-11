@@ -37,6 +37,9 @@ return [
 
     'gotenberg' => [
         'url' => env('GOTENBERG_URL', 'http://gotenberg:3000'),
+        // seconds; FinalizeDocument holds the number_sequences row lock while Gotenberg renders, so this must stay
+        // well below innodb_lock_wait_timeout (50 s) or waiting finalizes fail with a lock wait timeout
+        'timeout' => (int) env('GOTENBERG_TIMEOUT', 20),
     ],
 
 ];

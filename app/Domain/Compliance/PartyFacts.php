@@ -21,6 +21,7 @@ final readonly class PartyFacts
         public string $iban = '',
         public array $custom = [],
         public ?TaxTreatment $taxTreatment = null,
+        public string $registrationId = '',
     ) {}
 
     public function addressComplete(): bool

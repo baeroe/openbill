@@ -1,8 +1,18 @@
 # Gotenberg 8 for PDF rendering, reachable from the web container as http://gotenberg:3000
+# Hardened: templates come from untrusted packages, so Chromium runs no JavaScript and loads no URL
+# except Gotenberg's own working files (file:///tmp/...) and data: URLs (assets are inlined).
+# Keep the flags in sync with the gotenberg step in .github/workflows/tests.yml.
 services:
   gotenberg:
     container_name: ddev-${DDEV_SITENAME}-gotenberg
     image: gotenberg/gotenberg:8
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-deny-list=^file:(?!//\/tmp/).*
+      - --chromium-deny-list=^(?!(file|data):).*
+      - --chromium-deny-private-ips=true
+      - --chromium-deny-public-ips=true
     restart: "no"
     labels:
       com.ddev.site-name: ${DDEV_SITENAME}

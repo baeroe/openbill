@@ -35,6 +35,14 @@ Open <https://openbill.ddev.site/en/login> and log in with `ADMIN_EMAIL` / `ADMI
 | Database | `ddev mysql`, user/password/database `db` |
 | These docs | `ddev exec pnpm --dir docs dev` → `https://openbill.ddev.site:5174/en/` |
 
+Gotenberg runs hardened, because templates may come from untrusted packages: Chromium runs no JavaScript and may load only Gotenberg's own working files and `data:` URLs (`.ddev/docker-compose.gotenberg.yaml`; CI starts it with the same flags). Run it the same way in production:
+
+```bash
+gotenberg --chromium-disable-javascript=true \
+  '--chromium-deny-list=^file:(?!//\/tmp/).*' '--chromium-deny-list=^(?!(file|data):).*' \
+  --chromium-deny-private-ips=true --chromium-deny-public-ips=true
+```
+
 ## Everyday commands
 
 ```bash

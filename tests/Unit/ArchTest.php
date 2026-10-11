@@ -54,8 +54,28 @@ arch('support code does not call actions')
     ->not->toUse('App\Actions');
 
 arch('domain exceptions carry an HTTP status')
-    ->expect(['App\Exceptions\DocumentLockedException', 'App\Exceptions\ActionNotAllowedException', 'App\Exceptions\ComplianceFailedException'])
+    ->expect([
+        'App\Exceptions\DocumentLockedException', 'App\Exceptions\ActionNotAllowedException', 'App\Exceptions\ComplianceFailedException',
+        'App\Exceptions\TemplateRenderFailedException', 'App\Exceptions\PdfRenderFailedException', 'App\Exceptions\EInvoiceInvalidException',
+    ])
     ->toExtend('App\Exceptions\DomainActionException');
+
+arch('rendering and e-invoice code does not call actions or the http layer')
+    ->expect(['App\Rendering', 'App\EInvoice'])
+    ->not->toUse(['App\Actions', 'App\Http']);
+
+arch('rendering and e-invoice classes are final')
+    ->expect(['App\Rendering', 'App\EInvoice'])
+    ->classes()
+    ->toBeFinal();
+
+arch('only the rendering layer talks to Gotenberg')
+    ->expect('Gotenberg')
+    ->toOnlyBeUsedIn('App\Rendering\GotenbergClient');
+
+arch('only the e-invoice layer uses horstoeko/zugferd')
+    ->expect('horstoeko\zugferd')
+    ->toOnlyBeUsedIn('App\EInvoice');
 
 /**
  * Raw table writers on the locked tables: DB::table('documents'), $connection->table('positions'), ...

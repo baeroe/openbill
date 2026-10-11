@@ -1,0 +1,73 @@
+# E-invoices
+
+openbill creates e-invoices according to **EN 16931** in the UN/CEFACT CII syntax (Factur-X / ZUGFeRD profile EN 16931). The XML is embedded in a **PDF/A-3b**, so one file serves people and accounting software.
+
+## Turning it on
+
+The compliance profile is set per document type: `basic` or `en16931`. The e-invoice profile can only be chosen for invoices and cancellations. With `en16931`, finalizing checks everything an e-invoice needs (see [compliance profiles](/en/documents#compliance-profiles)) and stops with a list of what is missing.
+
+## What finalizing does
+
+For an invoice or cancellation with the profile `en16931` openbill, in the same step that assigns the number,
+
+1. builds the CII XML from the frozen master data and the totals,
+2. checks it against the EN 16931 XML schema (an invalid XML stops finalizing),
+3. renders the PDF with the document's template and has Gotenberg convert it to PDF/A-3b with the XML embedded as `factur-x.xml`,
+4. archives the PDF and the XML.
+
+If any step fails – a template error, an invalid XML, Gotenberg not reachable – nothing is saved: the document stays a draft and the number stays free.
+
+Documents with the profile `basic` (and offers and order confirmations) get a regular PDF without XML.
+
+## Cancellations are credit notes
+
+A finalized cancellation becomes a credit note (type code 381) with positive amounts that refers to the cancelled invoice (number and date). It carries the payment terms "The amount will be refunded." in the document language.
+
+## Discounts
+
+A discount is an item with a negative price. In the XML the price stays positive and the quantity carries the sign (EN 16931 forbids negative net prices); the line amount is the same.
+
+## Taxes
+
+| Situation | Tax category | Exemption reason |
+|---|---|---|
+| regular rate | `S` | – |
+| zero rate | `Z` | – |
+| small business (§ 19 UStG) | `E` | the small business note |
+| EU reverse charge | `AE` (buyer VAT ID required) | the reverse charge note |
+| outside the EU | `G` | the third country note |
+
+Without a tax note or legal note an exempt category gets a standard reason (for example "Exempt from VAT").
+
+The legal notes are also part of the XML as document notes.
+
+## What goes into the XML
+
+| openbill | EN 16931 |
+|---|---|
+| number, date | invoice number (BT-1), issue date (BT-2) |
+| organization | seller name, address, VAT ID (`VA`) and/or tax number (`FC`), register number (BT-30), e-mail |
+| customer | buyer name, customer number, address, VAT ID |
+| service date (period) | delivery date (BT-72), invoicing period (BT-73/74) |
+| IBAN, BIC | SEPA credit transfer (payment means 58) |
+| due date | payment due date (BT-9) |
+| items | name, description, net price (4 decimals), quantity with UN/ECE unit code, tax category and rate, line amount |
+| totals | sum of lines, tax basis, tax total, grand total, amount due |
+
+Text lines are not part of the XML; optional items only exist in offers.
+
+## Downloads
+
+The archived PDF and the archived XML can be downloaded separately; both are always the files from the archive, never rendered again. Only finalized invoices and cancellations with the e-invoice profile have an XML.
+
+## Archive
+
+Archived files live in `storage/app/archive/<year>/<document id>.pdf` and `.xml`. openbill stores the SHA-256 checksum of every file and checks it on every download: a changed or missing file is reported as an error instead of being replaced. Back up this folder together with the database.
+
+## Requirements and limits
+
+- Gotenberg **8.34 or newer** (the Docker image `gotenberg/gotenberg:8` is). `GOTENBERG_TIMEOUT` (seconds, default 20) limits each PDF request; keep it well below the database lock wait timeout (50 s).
+- openbill checks every XML against the schema before archiving it. The business rules of EN 16931 (Schematron) are covered by the compliance profile; the official CEN Schematron runs in development and CI on the e-invoice cases of the test suite (`scripts/validate-einvoice.sh`).
+- The seller needs a VAT ID or a register number; with regular taxation, reverse charge and customers outside the EU need the VAT ID (small businesses invoice with category `E`, where the tax number is enough).
+- Customers outside the EU are taxed with category `G` (export); a category for services to such customers (`O`) is planned.
+- Not supported yet: XRechnung with Leitweg-ID, currencies other than EUR, document-level allowances and charges.

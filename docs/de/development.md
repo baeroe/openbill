@@ -35,6 +35,14 @@ ddev exec pnpm dev              # Vite mit Hot Reload, laufen lassen
 | Datenbank | `ddev mysql`, Nutzer/Passwort/Datenbank `db` |
 | Diese Doku | `ddev exec pnpm --dir docs dev` → `https://openbill.ddev.site:5174/de/` |
 
+Gotenberg läuft gehärtet, weil Templates aus fremden Paketen kommen können: Chromium führt kein JavaScript aus und darf nur Gotenbergs eigene Arbeitsdateien und `data:`-URLs laden (`.ddev/docker-compose.gotenberg.yaml`; CI startet es mit denselben Schaltern). Im Betrieb genauso starten:
+
+```bash
+gotenberg --chromium-disable-javascript=true \
+  '--chromium-deny-list=^file:(?!//\/tmp/).*' '--chromium-deny-list=^(?!(file|data):).*' \
+  --chromium-deny-private-ips=true --chromium-deny-public-ips=true
+```
+
 ## Alltägliche Befehle
 
 ```bash

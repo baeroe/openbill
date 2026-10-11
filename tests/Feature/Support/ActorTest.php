@@ -5,9 +5,9 @@ use App\Enums\ActorType;
 use App\Enums\EventAction;
 use App\Models\Document;
 use App\Models\User;
+use App\Rendering\PdfDocumentArchiver;
 use App\Support\Actor;
 use App\Support\EventLog;
-use App\Support\NullDocumentArchiver;
 
 it('describes users, tokens and the system', function () {
     $user = User::factory()->create();
@@ -30,8 +30,8 @@ it('records who did what on a document', function () {
         ->and($event->payload)->toBe(['from' => 'open', 'to' => 'paid']);
 });
 
-it('binds a no-op archiver until phase 3', function () {
-    expect(app(DocumentArchiver::class))->toBeInstanceOf(NullDocumentArchiver::class);
+it('binds the PDF archiver since phase 3', function () {
+    expect(app(DocumentArchiver::class))->toBeInstanceOf(PdfDocumentArchiver::class);
 });
 
 it('keeps the user behind a token in the event', function () {

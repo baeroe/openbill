@@ -16,8 +16,10 @@ interface DocumentArchiver
      * - The transaction holds the row lock on number_sequences, so every finalize of the same type waits
      *   while this runs. The render timeout (Gotenberg) must stay well below innodb_lock_wait_timeout
      *   (50 s), otherwise waiting finalizes fail with a lock wait timeout.
-     * - A rollback can't remove files: write them to a temporary path, move them into place in
-     *   DB::afterCommit() and delete the temporary files when the transaction rolls back.
+     * - A rollback can't remove files: write them to a temporary path first, rename them into place
+     *   (atomic) and delete them in DB::afterRollBack(). Renaming before the commit means a committed
+     *   (immutable) document never points to a missing file; a file left by a crash is overwritten by
+     *   the next attempt. See App\Rendering\PdfArchive.
      */
     public function archive(Document $document, DocumentSnapshot $snapshot): void;
 }

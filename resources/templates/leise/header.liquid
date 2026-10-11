@@ -1,0 +1,10 @@
+<style>
+  .lh { display: flex; justify-content: space-between; align-items: flex-end; height: 100%; box-sizing: border-box; padding: 0 24mm 6mm; font-family: Georgia, serif; color: #2a2a2a; }
+  .lh-org { font-size: 12pt; letter-spacing: 0.01em; }
+  .lh-org img { max-height: 11mm; }
+  .lh-addr { font-size: 7.5pt; color: #888; text-align: right; line-height: 1.5; }
+</style>
+<div class="lh">
+  <span class="lh-org">{% if org.logo != blank %}<img src="{{ org.logo }}" alt="">{% else %}{{ org.name }}{% endif %}</span>
+  <span class="lh-addr">{{ org.street }}, {{ org.zip }} {{ org.city }}<br>{{ org.email }}</span>
+</div>

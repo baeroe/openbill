@@ -9,6 +9,8 @@ use App\Enums\EventAction;
 use App\Enums\FieldScope;
 use App\Enums\FieldType;
 use App\Enums\PositionKind;
+use App\Enums\RenderPart;
+use App\Enums\RenderScenario;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
@@ -30,4 +32,6 @@ it('uses the exact values from the spec', function (string $enum, array $values)
     'actor types' => [ActorType::class, ['user', 'token', 'system']],
     'event actions' => [EventAction::class, ['created', 'updated', 'finalized', 'status_changed', 'converted', 'converted_from', 'cancelled', 'duplicated', 'deleted']],
     'file kinds' => [DocumentFileKind::class, ['pdf', 'xml']],
+    'render parts' => [RenderPart::class, ['header', 'body', 'footer', 'css', 'manifest', 'intro', 'closing']],
+    'render scenarios' => [RenderScenario::class, ['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options']],
 ]);

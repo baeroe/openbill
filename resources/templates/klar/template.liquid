@@ -1,0 +1,62 @@
+<div class="meta">
+  <div class="type">{{ document.type_label }}</div>
+  <dl>
+    <dt>{{ 'number' | t }}</dt><dd>{{ document.number }}</dd>
+    <dt>{{ 'date' | t }}</dt><dd>{{ document.date | date }}</dd>
+    {% if document.service_date %}<dt>{{ 'service_date' | t }}</dt><dd>{{ document.service_date | date }}{% if document.service_date_end %} – {{ document.service_date_end | date }}{% endif %}</dd>{% endif %}
+    {% if document.due_date %}<dt>{{ 'due_date' | t }}</dt><dd>{{ document.due_date | date }}</dd>{% endif %}
+    {% if document.valid_until %}<dt>{{ 'valid_until' | t }}</dt><dd>{{ document.valid_until | date }}</dd>{% endif %}
+    {% if customer.number != blank %}<dt>{{ 'customer_number' | t }}</dt><dd>{{ customer.number }}</dd>{% endif %}
+    {% if customer.vat_id != blank %}<dt>{{ 'vat_id' | t }}</dt><dd>{{ customer.vat_id }}</dd>{% endif %}
+    {% if document.source_number %}<dt>{{ 'reference' | t }}</dt><dd>{{ document.source_number }}</dd>{% endif %}
+  </dl>
+</div>
+
+<section class="address">
+  <div class="return">{{ org.name }} · {{ org.street }} · {{ org.zip }} {{ org.city }}</div>
+  {% if customer %}
+    <div>{{ customer.name }}</div>
+    {% if contact %}<div>{{ contact.salutation }} {{ contact.full_name }}</div>{% endif %}
+    <div>{{ customer.street }}</div>
+    <div>{{ customer.zip }} {{ customer.city }}</div>
+  {% endif %}
+</section>
+
+<h1>{{ document.type_label }} {{ document.number }}{% if document.project_name != blank %} · {{ document.project_name }}{% endif %}</h1>
+
+{% if document.intro != blank %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
+
+<table class="items">
+  <thead><tr><th class="n">{{ 'pos' | t }}</th><th>{{ 'service' | t }}</th><th class="r">{{ 'quantity' | t }}</th><th class="r">{{ 'unit_price' | t }}</th><th class="r">{{ 'total' | t }}</th></tr></thead>
+  <tbody>
+  {% for g in groups %}
+    {% if g.has_title %}<tr class="heading"><td colspan="5">{{ g.title }}</td></tr>{% endif %}
+    {% for p in g.positions %}
+      {% if p.is_text %}
+        <tr class="note"><td></td><td colspan="4">{{ p.title }}{% if p.description != blank %}<br><span class="desc">{{ p.description | nl2br }}</span>{% endif %}</td></tr>
+      {% else %}
+        <tr class="{% if p.is_optional %}optional{% endif %}">
+          <td class="n">{{ p.index }}</td>
+          <td>{{ p.title }}{% if p.is_optional %} <em>({{ 'optional' | t }})</em>{% endif %}{% if p.description != blank %}<br><span class="desc">{{ p.description | nl2br }}</span>{% endif %}</td>
+          <td class="r">{{ p.quantity | number: 2 }} {{ p.unit }}</td>
+          <td class="r">{{ p.unit_price | money }}</td>
+          <td class="r">{{ p.total | money }}</td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+    {% if g.has_title %}<tr class="subtotal"><td></td><td colspan="3">{{ 'subtotal' | t }} {{ g.title }}</td><td class="r">{{ g.total | money }}</td></tr>{% endif %}
+  {% endfor %}
+  </tbody>
+</table>
+
+<table class="sums">
+  <tr><td>{{ 'net' | t }}</td><td class="r">{{ document.net_total | money }}</td></tr>
+  {% for row in document.tax_breakdown %}{% if row.percent > 0 %}
+  <tr><td>{{ 'vat' | t }} {{ row.percent }} % {{ 'vat_on' | t }} {{ row.net | money }}</td><td class="r">{{ row.tax | money }}</td></tr>
+  {% endif %}{% endfor %}
+  <tr class="total"><td>{{ 'total' | t }}</td><td class="r">{{ document.gross_total | money }}</td></tr>
+  {% if document.optional_total > 0 %}<tr class="opt"><td>{{ 'optional_total' | t }}</td><td class="r">{{ document.optional_total | money }}</td></tr>{% endif %}
+</table>
+
+{% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
+{% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}

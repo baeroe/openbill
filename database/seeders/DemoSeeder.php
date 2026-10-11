@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Actions\SyncBuiltInTemplates;
+use App\Contracts\DocumentArchiver;
 use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
@@ -20,6 +22,7 @@ use App\Models\TaxRate;
 use App\Models\Template;
 use App\Models\TextBlock;
 use App\Models\Unit;
+use App\Support\Actor;
 use App\Support\DocumentInspector;
 use App\Support\GroupWriter;
 use App\Support\SnapshotBuilder;
@@ -27,6 +30,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 /**
@@ -55,6 +59,8 @@ class DemoSeeder extends Seeder
     public function __construct(
         private readonly DocumentInspector $inspector,
         private readonly SnapshotBuilder $snapshots,
+        private readonly SyncBuiltInTemplates $builtInTemplates,
+        private readonly DocumentArchiver $archiver,
     ) {}
 
     public function run(): void
@@ -66,7 +72,11 @@ class DemoSeeder extends Seeder
 
         $this->today = CarbonImmutable::today();
 
-        DB::transaction(function (): void {
+        // the old files belong to documents wipe() deletes; removed only after the commit, so a failed run loses nothing
+        $oldFiles = Storage::disk('archive')->allFiles();
+
+        DB::transaction(function () use ($oldFiles): void {
+            DB::afterCommit(fn () => Storage::disk('archive')->delete($oldFiles));
             $this->wipe();
             $this->organization();
             $templates = $this->templates();
@@ -114,32 +124,15 @@ class DemoSeeder extends Seeder
             'website' => 'nordlicht.example',
             'taxation_mode' => TaxationMode::Regular,
             'locale' => 'de',
-            'custom' => ['register' => 'Amtsgericht Hamburg HRB 000000'],
+            'registration_id' => 'HRB 000000, Amtsgericht Hamburg',
+            'custom' => ['managing_director' => 'Ida Sommer'],
         ])->save();
     }
 
     /** @return array<string, string> slug => id */
     private function templates(): array
     {
-        $ids = [];
-        foreach (['klar' => 'Klar', 'kante' => 'Kante', 'leise' => 'Leise'] as $slug => $name) {
-            $ids[$slug] = Template::query()->create([
-                'name' => $name,
-                'slug' => $slug,
-                'version' => '0.0.0',
-                'author' => 'openbill',
-                'license' => 'MIT',
-                'description' => 'Placeholder until phase 3 ships the real template.',
-                'built_in' => true,
-                'manifest' => ['paper' => ['format' => 'A4', 'marginX' => '20mm', 'headerHeight' => '30mm', 'footerHeight' => '20mm']],
-                'header' => '',
-                'body' => '<h1>{{ document.type_label }} {{ document.number }}</h1>',
-                'footer' => '',
-                'css' => '',
-            ])->id;
-        }
-
-        return $ids;
+        return array_map(fn (Template $template): string => $template->id, $this->builtInTemplates->handle(Actor::system()));
     }
 
     /** @return array<string, TextBlock> */
@@ -184,7 +177,7 @@ class DemoSeeder extends Seeder
     {
         $all = ['offer', 'confirmation', 'invoice', 'cancellation'];
         $fields = [
-            [FieldScope::Org, 'register', 'Handelsregister', FieldType::Text, [], [], ''],
+            [FieldScope::Org, 'managing_director', 'Geschäftsführung', FieldType::Text, [], [], ''],
             [FieldScope::Customer, 'industry', 'Branche', FieldType::Select, [], ['Handel', 'Software', 'Hotellerie', 'Logistik', 'Kultur'], ''],
             [FieldScope::Customer, 'supplier_number', 'Unsere Lieferantennummer', FieldType::Text, [], [], 'Die Nummer, unter der uns der Kunde führt.'],
             [FieldScope::Contact, 'department', 'Abteilung', FieldType::Text, [], [], ''],
@@ -289,7 +282,7 @@ class DemoSeeder extends Seeder
 
         $this->document([
             'type' => DocumentType::Invoice, 'status' => DocumentStatus::Draft, 'number' => null, 'date' => $this->day(0),
-            'customer' => $c['hafenkontor'], 'due_date' => $this->day(14), 'intro' => $invoiceIntro, 'closing' => $payment,
+            'customer' => $c['hafenkontor'], 'service_date' => $this->day(-1), 'due_date' => $this->day(14), 'intro' => $invoiceIntro, 'closing' => $payment,
             'template_id' => $templates['klar'], 'source_id' => $offer1->id, 'custom' => ['project_name' => 'Relaunch Online-Shop', 'po_number' => 'PO-77812'],
             'finalized_at' => null, 'created_at' => $this->stamp(-1), 'updated_at' => $this->stamp(0),
         ], array_map(fn (array $group): array => [
@@ -393,7 +386,8 @@ class DemoSeeder extends Seeder
         $data = $a['finalized_at'] !== null ? $this->snapshots->build($document) : null;
         $document->forceFill(['created_at' => $a['created_at'], 'updated_at' => $a['updated_at'], 'finalized_at' => $a['finalized_at']])->save();
         if ($data !== null) {
-            $document->snapshot()->create(['data' => $data]);
+            $snapshot = $document->snapshot()->create(['data' => $data]);
+            $this->archiver->archive($document, $snapshot);
         }
 
         return $document;

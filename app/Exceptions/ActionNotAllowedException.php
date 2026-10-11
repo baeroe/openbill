@@ -39,6 +39,12 @@ final class ActionNotAllowedException extends DomainActionException
         return new self('cancellation_source', Text::t('errors.cancellation_source'));
     }
 
+    /** No archived e-invoice XML: not finalized, or not an EN 16931 invoice/cancellation. */
+    public static function noEInvoice(): self
+    {
+        return new self('no_e_invoice', Text::t('errors.no_e_invoice'));
+    }
+
     /** A cancellation always belongs to the customer of its invoice. */
     public static function cancellationCustomer(): self
     {

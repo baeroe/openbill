@@ -25,10 +25,6 @@ jobs:
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
-      gotenberg:
-        image: gotenberg/gotenberg:8
-        ports:
-          - 3000:3000
 
     env:
       DB_CONNECTION: mariadb
@@ -41,6 +37,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # not a service container: services can't take a command, and Gotenberg must run hardened
+      # (no JavaScript, no URLs but its own files and data:) – same flags as .ddev/docker-compose.gotenberg.yaml
+      - name: Gotenberg
+        run: >-
+          docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:8 gotenberg
+          --chromium-disable-javascript=true
+          '--chromium-deny-list=^file:(?!//\/tmp/).*'
+          '--chromium-deny-list=^(?!(file|data):).*'
+          --chromium-deny-private-ips=true
+          --chromium-deny-public-ips=true
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -87,11 +94,20 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Gotenberg reachable
+        run: curl -fsS --retry 15 --retry-delay 2 --retry-all-errors http://127.0.0.1:3000/health
+
       - name: Pest
         run: php artisan test
+        env:
+          # EInvoiceSamplesTest writes the archived e-invoice XMLs there for the einvoice job
+          EINVOICE_SAMPLES_DIR: ${{ github.workspace }}/einvoice-samples
 
-      - name: Gotenberg reachable
-        run: curl -fsS http://127.0.0.1:3000/health
+      - uses: actions/upload-artifact@v4
+        with:
+          name: einvoice-samples
+          path: einvoice-samples/*.xml
+          if-no-files-found: error
 
       # domain logic of the clickable prototypes (sums, taxes, numbering, chain, Liquid, page breaks)
       - name: Prototypes
@@ -102,3 +118,19 @@ jobs:
 
       - name: Docs
         run: pnpm --dir docs build
+
+  # EN 16931 business rules (official CII Schematron, Saxon-HE) on the e-invoices the tests archive.
+  # Not a required check; see scripts/validate-einvoice.sh.
+  einvoice:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: einvoice-samples
+          path: einvoice-samples
+
+      - name: EN 16931 Schematron
+        run: scripts/validate-einvoice.sh einvoice-samples

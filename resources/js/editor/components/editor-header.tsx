@@ -4,7 +4,7 @@ import type { DocumentDetail } from '@/api/types';
 import { Button, cx, StatusBadge } from '@/components/ui';
 import { formatDate } from '@/lib/format';
 import { t } from '@/lib/i18n';
-import { saveAnnouncement } from '../save-announcement';
+import { createSaveAnnouncer } from '../save-announcement';
 import type { SaveState } from '../types';
 
 const LABEL: Partial<Record<SaveState, string>> = {
@@ -36,11 +36,11 @@ function SaveStatus({ state, onRetry }: { state: SaveState; onRetry(): void }) {
 
 /** Screen reader region of the save status: always mounted, speaks only on the changes that matter. */
 function SaveAnnouncer({ state }: { state: SaveState }) {
-    const previous = useRef(state);
+    const announcer = useRef<ReturnType<typeof createSaveAnnouncer> | null>(null);
     const [message, setMessage] = useState('');
     useEffect(() => {
-        const key = saveAnnouncement(previous.current, state);
-        previous.current = state;
+        announcer.current ??= createSaveAnnouncer();
+        const key = announcer.current(state);
         if (key) setMessage(t(key));
     }, [state]);
     return (

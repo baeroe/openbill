@@ -40,9 +40,9 @@ export function PreviewPane({ documentId, profile, finalized, data, error, templ
                 )}
                 <span className="flex-1" />
                 {active === 'preview' && (
-                    <PillButton pressed={guides} onClick={() => setGuides(!guides)} title={t('editor.guides_title')}>
+                    <PillButton pressed={guides} onClick={() => setGuides(!guides)} title={t('editor.guides_title')} aria-label={t('editor.guides')}>
                         <Frame aria-hidden className="size-3.5" />
-                        {t('editor.guides')}
+                        <span className="ed-pane__label">{t('editor.guides')}</span>
                     </PillButton>
                 )}
                 <Button size="sm" variant="ghost" iconOnly icon={<Download />} onClick={onPdf}>

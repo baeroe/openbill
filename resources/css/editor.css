@@ -33,6 +33,13 @@
     }
     .ed-pane {
         height: 100%;
+        container: preview / inline-size;
+    }
+    /* narrow preview column: the toolbar stays on one line */
+    @container preview (max-width: 27rem) {
+        .ed-pane__label {
+            display: none;
+        }
     }
     @media (min-width: 1200px) {
         .ed--with-preview {
@@ -194,11 +201,13 @@
 .ed-pos__desc:disabled:placeholder-shown {
     display: none;
 }
-/* inputs in position rows read like text until touched (controlClass tints them; no second background class) */
-.ed-pos input:not(:hover):not(:focus):not([aria-invalid='true']),
-.ed-pos select:not(:hover):not(:focus):not([aria-invalid='true']),
-.ed-pos textarea:not(:hover):not(:focus) {
+/* title and description in position rows read like text until touched (controlClass tints them; no second
+   background class); quantity, unit, price and tax stay visible as light boxes, as in the clickdummy */
+.ed-pos__main :is(input, textarea):not(:hover):not(:focus):not([aria-invalid='true']) {
     background-color: transparent;
+}
+.ed-pos > :not(.ed-pos__main) :is(input, select):not([aria-invalid='true']) {
+    background-color: var(--surface);
 }
 .ed-pos :is(input, select):disabled {
     opacity: 1;
@@ -206,8 +215,7 @@
     color: var(--ink);
 }
 
-.ed-pos :is(input, select):is(:hover, :focus):not(:disabled):not([aria-invalid='true']),
-.ed-pos textarea:is(:hover, :focus):not(:disabled) {
+.ed-pos__main :is(input, textarea):is(:hover, :focus):not(:disabled):not([aria-invalid='true']) {
     background-color: var(--surface);
 }
 .ed-pos__desc::placeholder {

@@ -14,6 +14,7 @@ import { useRenderPreview } from '../use-preview';
 import { ChainBar } from './chain-bar';
 import { CompliancePanel } from './compliance-panel';
 import { EditorHeader } from './editor-header';
+import { GroupsEditor } from './groups-editor';
 import { HeaderFields } from './header-fields';
 import { PreviewPane } from './preview-pane';
 import { ReadOnlyNotice } from './read-only-notice';
@@ -67,6 +68,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                         </h2>
                         {context.small_business && <Tag neutral>{t('editor.small_business')}</Tag>}
                     </div>
+                    <GroupsEditor draft={draft} totals={totals} smallBusiness={context.small_business} readOnly={readOnly} messages={messages} update={update} />
                     <TotalsPanel totals={totals} />
                 </section>
                 <TextsSection which="closing" value={draft.closing} readOnly={readOnly} error={messages['document.closing']} onChange={(closing) => update((d) => ({ ...d, closing }))} />

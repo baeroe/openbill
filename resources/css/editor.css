@@ -78,6 +78,8 @@
     /* position rows: header and rows share the columns; they follow the width of the list, not of the window */
     .ed-groups {
         container: positions / inline-size;
+        /* groups never grow past the list (an implicit auto column would take their min-content width) */
+        grid-template-columns: minmax(0, 1fr);
     }
     .ed-pos-head,
     .ed-pos {
@@ -97,27 +99,6 @@
     .ed-pos--text .ed-pos__main {
         grid-column: 2 / -2;
     }
-    /* an empty description takes no room until the row is being edited */
-    .ed-pos:not(:focus-within) .ed-pos__desc:placeholder-shown:not(:disabled) {
-        min-height: 0;
-        height: 0;
-        padding-block: 0;
-    }
-    .ed-pos__desc:disabled:placeholder-shown {
-        display: none;
-    }
-    /* inputs in position rows read like text until touched (controlClass tints them; no second background class) */
-    .ed-pos input:not(:hover):not(:focus):not([aria-invalid='true']),
-    .ed-pos select:not(:hover):not(:focus):not([aria-invalid='true']),
-    .ed-pos textarea:not(:hover):not(:focus) {
-        background-color: transparent;
-    }
-    .ed-pos :is(input, select):disabled {
-        opacity: 1;
-        cursor: default;
-        color: var(--ink);
-    }
-
     @container positions (max-width: 51rem) {
         .ed-pos-head {
             display: none;
@@ -198,4 +179,45 @@
         --pp-accent-soft: var(--accent-soft);
         --pp-accent-soft-hover: var(--accent-soft-hover);
     }
+}
+
+/*
+ * Overrides of utility classes (controlClass tints every input with bg-surface-2): they must stay outside
+ * @layer, because any layered rule loses against the utilities layer.
+ */
+/* an empty description takes no room until the row is being edited */
+.ed-pos:not(:focus-within) .ed-pos__desc:placeholder-shown:not(:disabled) {
+    min-height: 0;
+    height: 0;
+    padding-block: 0;
+}
+.ed-pos__desc:disabled:placeholder-shown {
+    display: none;
+}
+/* inputs in position rows read like text until touched (controlClass tints them; no second background class) */
+.ed-pos input:not(:hover):not(:focus):not([aria-invalid='true']),
+.ed-pos select:not(:hover):not(:focus):not([aria-invalid='true']),
+.ed-pos textarea:not(:hover):not(:focus) {
+    background-color: transparent;
+}
+.ed-pos :is(input, select):disabled {
+    opacity: 1;
+    cursor: default;
+    color: var(--ink);
+}
+
+.ed-pos :is(input, select):is(:hover, :focus):not(:disabled):not([aria-invalid='true']),
+.ed-pos textarea:is(:hover, :focus):not(:disabled) {
+    background-color: var(--surface);
+}
+.ed-pos__desc::placeholder {
+    color: transparent;
+}
+.ed-pos:hover .ed-pos__desc::placeholder,
+.ed-pos__desc:focus::placeholder {
+    color: var(--faint);
+}
+/* custom fields of the document sit on a tinted panel: white inputs like the clickdummy */
+.ed-custom :is(input, select, textarea) {
+    background-color: var(--surface);
 }

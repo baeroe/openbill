@@ -45,6 +45,7 @@ export function TextsSection({ which, value, readOnly, error, onChange }: { whic
             path={`document.${which}`}
             error={error}
             placeholder={which === 'intro' ? t('editor.intro_placeholder') : t('editor.closing_placeholder')}
+            hint={readOnly ? undefined : t('editor.placeholder_hint')}
             onChange={(e) => onChange(e.target.value)}
         />
     );

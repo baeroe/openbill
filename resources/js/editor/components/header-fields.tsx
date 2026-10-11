@@ -125,7 +125,7 @@ export function HeaderFields({ draft, context, readOnly, messages, customerName,
             </div>
 
             {definitions.length > 0 && (
-                <div className="grid gap-3 rounded-lg bg-bg p-4">
+                <div className="ed-custom grid gap-3 rounded-lg bg-bg p-4">
                     <span className="text-sm font-strong">{t('editor.custom_fields')}</span>
                     <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(12.5rem,1fr))]">
                         {definitions.map((definition) => (

@@ -276,6 +276,7 @@
     "editor.pages.one": ":count Seite",
     "editor.pages.other": ":count Seiten",
     "editor.pdf": "PDF herunterladen",
+    "editor.placeholder_hint": "Platzhalter wie {{ contact.first_name }} werden in der Vorschau ersetzt.",
     "editor.position": "Position",
     "editor.position_menu": "Position bearbeiten",
     "editor.position_move": "„:title“ verschieben",

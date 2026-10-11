@@ -52,11 +52,15 @@ ddev exec vendor/bin/pint                              # format PHP
 ddev exec vendor/bin/phpstan analyse --memory-limit=1G # Larastan, level 6
 ddev exec pnpm typecheck                               # TypeScript
 ddev exec pnpm test                                    # Vitest (resources/js)
+ddev exec 'pnpm --filter "./packages/*" test'          # workspace packages (paged-preview)
+pnpm --dir e2e test                                    # Playwright on the Mac against DDEV (incl. the editor flow)
 ddev exec pnpm build                                   # production assets
 ddev exec 'pnpm --filter "./prototypes/*" test'        # clickable prototypes
 ```
 
 JavaScript dependencies are installed inside the DDEV container, so always run `pnpm` through `ddev exec`. `ddev exec` passes its arguments through a shell inside the container: wrap commands with glob patterns in single quotes, as above. Tests use their own database `testing`, which DDEV creates on start.
+
+`packages/paged-preview` splits the server-rendered parts of a document into pages. The app, the template editor and the template toolkit use it; it has no dependency on the app (no Tailwind, texts come in as props).
 
 ## Browser tests
 

@@ -52,11 +52,15 @@ ddev exec vendor/bin/pint                              # PHP formatieren
 ddev exec vendor/bin/phpstan analyse --memory-limit=1G # Larastan, Level 6
 ddev exec pnpm typecheck                               # TypeScript
 ddev exec pnpm test                                    # Vitest (resources/js)
+ddev exec 'pnpm --filter "./packages/*" test'          # Workspace-Pakete (paged-preview)
+pnpm --dir e2e test                                    # Playwright auf dem Mac gegen DDEV (inkl. Editor-Ablauf)
 ddev exec pnpm build                                   # Produktions-Assets
 ddev exec 'pnpm --filter "./prototypes/*" test'        # Klick-Prototypen
 ```
 
 JavaScript-Abhängigkeiten werden im DDEV-Container installiert, `pnpm` also immer über `ddev exec` aufrufen. `ddev exec` reicht die Argumente an eine Shell im Container weiter: Befehle mit Glob-Mustern wie oben in einfache Anführungszeichen setzen. Tests nutzen eine eigene Datenbank `testing`, die DDEV beim Start anlegt.
+
+`packages/paged-preview` teilt die serverseitig gerenderten Teile eines Dokuments in Seiten auf. App, Template-Editor und Template-Toolkit nutzen das Paket; es hängt nicht von der App ab (kein Tailwind, Texte kommen als Props).
 
 ## Browsertests
 

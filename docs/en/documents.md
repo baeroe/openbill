@@ -107,7 +107,19 @@ After logging in you land on the overview. Four figures sum up the money side: o
 
 ### New document
 
-**New document** in the sidebar – or the key **N** anywhere, as long as you are not typing in a field – opens a dialog: choose the type and the customer (or choose the customer later), and openbill creates a draft with the defaults of the document type. Cancellations are not created here; they always come from an invoice. Editing documents in the app comes with the document editor; until then a document's page shows its key data and its PDF.
+**New document** in the sidebar – or the key **N** anywhere, as long as you are not typing in a field – opens a dialog: choose the type and the customer (or choose the customer later), and openbill creates a draft with the defaults of the document type. Cancellations are not created here; they always come from an invoice. The new draft opens in the document editor.
+
+### Document editor
+
+Every document opens in the editor: the form on the left, a live preview on the right (below the form on narrow screens). The preview shows the pages exactly as the PDF will look – openbill renders header, content and footer on the server with the document's template and only splits them into pages in the browser. **Areas** outlines header, content and footer on every page. The preview can be hidden and shown again; the choice is remembered in this browser.
+
+- **Header fields:** customer, contact (the customer's default contact is preselected), date, valid until (quotes), service period (invoices and cancellations), due date (invoices), document language and template, plus the document's custom fields. A cancellation always keeps the customer of its invoice.
+- **Positions:** organize positions in groups, each with its subtotal. Drag groups and positions by their handle – also with the keyboard: focus the handle, press Space, move with the arrow keys, press Space again. A position is a service, a text line or, in quotes, an optional service that is shown but not added to the total. While you type a title, openbill suggests positions from earlier documents with their price, unit and tax rate. Numbers can be typed with a comma or a dot (`12,5` or `12.5`); invalid input is marked and not saved. Removing a group or a position can be undone from the message that appears.
+- **Texts:** introduction and closing text, typed or inserted from text blocks.
+- **Totals and check:** net, VAT per rate, total, optional positions and legal notes come from the server, as do the line and group totals. The check panel lists what the document's compliance profile still requires; click an entry to jump to the field. Entries about the customer link to the customer; entries about your organization name the organization settings.
+- **Saving:** changes are saved automatically shortly after you stop typing; the header shows *Unsaved*, *Saving …* and *Saved*. Leaving the page or closing the tab saves first. If saving fails because of the connection, openbill tries again on its own (or right away with **Try again**); invalid input is marked at its field. If the document was finalized or deleted elsewhere in the meantime (another tab, the API or MCP), the editor stops saving and says so. Two people editing the same draft at the same time overwrite each other's changes – the last save wins.
+- **Actions:** **Finalize** asks for confirmation and names the number the document will get; with missing required details it jumps to the first one instead. Finalized documents are read-only. Depending on the status you can change it (for example *Mark as accepted*, *Mark as paid*), convert a document along the chain, cancel an invoice, duplicate a document, download the PDF (drafts with a watermark) and delete a draft – with **Undo** while the message is visible.
+- **Chain and e-invoice:** above the form, the chain links the quote, order confirmation, invoice and cancellation that belong together. With the e-invoice profile, the tab **E-invoice** shows the XML of a finalized invoice or cancellation (copy or download); for drafts it explains that the XML is created when finalizing.
 
 ### Customers
 

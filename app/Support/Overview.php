@@ -38,7 +38,7 @@ final class Overview
         return [
             'figures' => [
                 'open' => self::figure(self::openInvoices()),
-                'overdue' => self::figure(self::openInvoices()->where('due_date', '<', $day)),
+                'overdue' => self::figure(self::overdueInvoices($day)),
                 'offers' => self::figure(self::openOffers()),
                 'paid_month' => self::figure(self::paidInvoices()->whereBetween('paid_at', [$today->startOfMonth(), $today->endOfMonth()])),
                 'paid_year' => self::figure(self::paidInvoices()->whereBetween('paid_at', [$today->startOfYear(), $today->endOfYear()])),
@@ -61,14 +61,20 @@ final class Overview
     public static function openByCustomer(CarbonImmutable $today): array
     {
         $rows = self::openInvoices()->whereNotNull('customer_id')->toBase()
-            ->selectRaw('customer_id, COUNT(*) as aggregate, SUM(gross_total) as gross, SUM(CASE WHEN due_date < ? THEN 1 ELSE 0 END) as overdue', [$today->toDateString()])
+            ->selectRaw('customer_id, COUNT(*) as aggregate, SUM(gross_total) as gross')
             ->groupBy('customer_id')
             ->get();
+        // overdue through the one rule of DocumentQuery, not a second copy of it in SQL
+        $overdue = self::overdueInvoices($today->toDateString())->whereNotNull('customer_id')->toBase()
+            ->selectRaw('customer_id, COUNT(*) as aggregate')
+            ->groupBy('customer_id')
+            ->pluck('aggregate', 'customer_id');
 
         $result = [];
         foreach ($rows as $row) {
             $row = (array) $row;
-            $result[(string) $row['customer_id']] = ['gross' => Amount::of($row['gross']), 'count' => (int) $row['aggregate'], 'overdue' => (int) $row['overdue']];
+            $id = (string) $row['customer_id'];
+            $result[$id] = ['gross' => Amount::of($row['gross']), 'count' => (int) $row['aggregate'], 'overdue' => (int) ($overdue[$id] ?? 0)];
         }
 
         return $result;
@@ -83,7 +89,7 @@ final class Overview
     private static function attention(CarbonImmutable $today): array
     {
         $day = $today->toDateString();
-        $overdue = self::openInvoices()->where('due_date', '<', $day);
+        $overdue = self::overdueInvoices($day);
         $offers = self::openOffers()->whereNotNull('valid_until')->where('valid_until', '<=', $today->addDays(self::EXPIRY_DAYS)->toDateString());
         $drafts = Document::query()->where('status', DocumentStatus::Draft->value);
 
@@ -141,6 +147,16 @@ final class Overview
     private static function openInvoices(): Builder
     {
         return Document::query()->where('type', DocumentType::Invoice->value)->where('status', DocumentStatus::Open->value);
+    }
+
+    /**
+     * Open invoices past their due date: the filter "overdue" of the document list (same rule as StatusMachine::isOverdue).
+     *
+     * @return Builder<Document>
+     */
+    private static function overdueInvoices(string $today): Builder
+    {
+        return DocumentQuery::filtered(['status' => DocumentQuery::OVERDUE], $today);
     }
 
     /** @return Builder<Document> */

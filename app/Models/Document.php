@@ -35,6 +35,10 @@ class Document extends Model
                 return;
             }
             $locked = array_values(array_diff(array_keys($document->getDirty()), self::MUTABLE_WHEN_FINALIZED));
+            // finalized_at (not mutable) and status keep the two lock criteria in sync: never back to draft
+            if ($document->isDirty('status') && $document->status === DocumentStatus::Draft) {
+                $locked[] = 'status';
+            }
             if ($locked !== []) {
                 throw DocumentLockedException::for($document, $locked);
             }

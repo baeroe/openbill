@@ -17,6 +17,8 @@ class DocumentSnapshot extends Model
     protected static function booted(): void
     {
         static::updating(fn () => throw new LogicException('Document snapshots are immutable.'));
+        // deleting a draft removes them by cascade (no model event); finalized documents can't be deleted
+        static::deleting(fn () => throw new LogicException('Document snapshots are immutable.'));
     }
 
     /**

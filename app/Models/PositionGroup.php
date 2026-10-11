@@ -18,9 +18,13 @@ class PositionGroup extends Model
     {
         static::saving(function (PositionGroup $group): void {
             Document::assertDraft($group->document_id);
+            // moving out of a document needs that document unlocked too
+            if ($group->exists && $group->isDirty('document_id')) {
+                Document::assertDraft((string) $group->getOriginal('document_id'));
+            }
         });
         static::deleting(function (PositionGroup $group): void {
-            Document::assertDraft($group->document_id);
+            Document::assertDraft((string) $group->getOriginal('document_id'));
         });
     }
 

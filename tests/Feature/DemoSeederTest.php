@@ -63,3 +63,10 @@ it('keeps users and can run twice; the number ranges continue', function () {
         ->and(app(FinalizeDocument::class)->handle(systemActor(), $draftOffer)->number)->toBe("AN-{$year}-0004")
         ->and($draftInvoice->source_id)->not->toBeNull();
 });
+
+it('refuses to run in production', function () {
+    app()->detectEnvironment(fn (): string => 'production');
+
+    expect(fn () => app(DemoSeeder::class)->run())->toThrow(RuntimeException::class)
+        ->and(Organization::current()->name)->not->toBe('Studio Nordlicht');
+});

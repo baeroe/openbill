@@ -6,6 +6,7 @@ use App\Enums\PositionKind;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 
 class Position extends Model
 {
@@ -17,9 +18,17 @@ class Position extends Model
     {
         static::saving(function (Position $position): void {
             Document::assertDraft($position->document_id);
+            // moving out of a document needs that document unlocked too
+            if ($position->exists && $position->isDirty('document_id')) {
+                Document::assertDraft((string) $position->getOriginal('document_id'));
+            }
+            // the group decides where a position is rendered: it must belong to the same document
+            if (! PositionGroup::query()->whereKey($position->group_id)->where('document_id', $position->document_id)->exists()) {
+                throw new LogicException("Position group {$position->group_id} does not belong to document {$position->document_id}.");
+            }
         });
         static::deleting(function (Position $position): void {
-            Document::assertDraft($position->document_id);
+            Document::assertDraft((string) $position->getOriginal('document_id'));
         });
     }
 

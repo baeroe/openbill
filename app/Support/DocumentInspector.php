@@ -8,6 +8,7 @@ use App\Domain\Totals\Totals;
 use App\Domain\Totals\TotalsCalculator;
 use App\Models\Document;
 use App\Models\DocumentTypeSetting;
+use LogicException;
 
 /** Totals and compliance of a document: drafts with live master data, finalized ones with their snapshot. */
 final class DocumentInspector
@@ -19,7 +20,12 @@ final class DocumentInspector
      */
     public function sources(Document $document): array
     {
-        if ($document->isFinalized() && $document->snapshot !== null) {
+        if ($document->isFinalized()) {
+            // never fall back to live master data: that would silently change a finalized document
+            if ($document->snapshot === null) {
+                throw new LogicException("Finalized document {$document->id} has no snapshot.");
+            }
+
             return $document->snapshot->data;
         }
 
@@ -36,7 +42,7 @@ final class DocumentInspector
 
         return TotalsCalculator::calculate(
             DomainMapper::groups($document),
-            DomainMapper::taxContext($sources, LegalNoteTexts::for($document->locale)),
+            DomainMapper::taxContext($sources, LegalNoteTexts::fromSources($sources, $document->locale)),
         );
     }
 

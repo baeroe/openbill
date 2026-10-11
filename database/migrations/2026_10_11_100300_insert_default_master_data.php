@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -41,10 +42,13 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::table('number_sequences')->delete();
-        DB::table('document_types')->delete();
-        DB::table('units')->delete();
-        DB::table('tax_rates')->delete();
-        DB::table('organization')->delete();
+        // documents may still reference units and tax rates; rolling back further drops those tables anyway
+        Schema::withoutForeignKeyConstraints(function (): void {
+            DB::table('number_sequences')->delete();
+            DB::table('document_types')->delete();
+            DB::table('units')->delete();
+            DB::table('tax_rates')->delete();
+            DB::table('organization')->delete();
+        });
     }
 };

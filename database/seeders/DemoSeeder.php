@@ -27,6 +27,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 /**
  * Fictional demo data (Studio Nordlicht and its customers), ported from
@@ -58,6 +59,11 @@ class DemoSeeder extends Seeder
 
     public function run(): void
     {
+        // the wipe deletes finalized invoices: never on a production installation, not even with --force
+        if (app()->isProduction()) {
+            throw new RuntimeException('DemoSeeder replaces all business data and does not run in production.');
+        }
+
         $this->today = CarbonImmutable::today();
 
         DB::transaction(function (): void {
@@ -73,14 +79,20 @@ class DemoSeeder extends Seeder
         });
     }
 
+    /** Deletes finalized documents too, so it switches the lock triggers off for this session (@openbill_unlock). */
     private function wipe(): void
     {
-        Schema::withoutForeignKeyConstraints(function (): void {
-            DB::table('document_types')->update(['template_id' => null, 'default_intro_block_id' => null, 'default_closing_block_id' => null]);
-            foreach (self::TABLES as $table) {
-                DB::table($table)->delete();
-            }
-        });
+        DB::statement('SET @openbill_unlock = 1');
+        try {
+            Schema::withoutForeignKeyConstraints(function (): void {
+                DB::table('document_types')->update(['template_id' => null, 'default_intro_block_id' => null, 'default_closing_block_id' => null]);
+                foreach (self::TABLES as $table) {
+                    DB::table($table)->delete();
+                }
+            });
+        } finally {
+            DB::statement('SET @openbill_unlock = NULL');
+        }
     }
 
     private function organization(): void
@@ -377,13 +389,12 @@ class DemoSeeder extends Seeder
         $this->inspector->applyTotals($document, $this->inspector->totals($document));
         $document->save();
 
-        if ($a['finalized_at'] !== null) {
-            $data = $this->snapshots->build($document);
-            $document->forceFill(['finalized_at' => $a['finalized_at']])->save();
+        // timestamps in the same write as finalized_at: afterwards the lock allows no other column
+        $data = $a['finalized_at'] !== null ? $this->snapshots->build($document) : null;
+        $document->forceFill(['created_at' => $a['created_at'], 'updated_at' => $a['updated_at'], 'finalized_at' => $a['finalized_at']])->save();
+        if ($data !== null) {
             $document->snapshot()->create(['data' => $data]);
         }
-
-        DB::table('documents')->where('id', $document->id)->update(['created_at' => $a['created_at'], 'updated_at' => $a['updated_at']]);
 
         return $document;
     }

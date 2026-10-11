@@ -37,6 +37,7 @@ final class SaveCustomer
      */
     public function handle(Actor $actor, array $input, ?Customer $customer = null): Customer
     {
+        $input = self::trimmed($input);
         $data = Validator::make($input, [
             'number' => ['sometimes', 'nullable', 'string', 'max:32', Rule::unique('customers', 'number')->ignore($customer?->id)],
             'name' => [$customer === null ? 'required' : 'sometimes', 'string', 'max:255'],
@@ -94,7 +95,8 @@ final class SaveCustomer
                     $customer->{$key} = $key === 'country' ? strtoupper($value) : $value;
                 }
             }
-            if (($data['number'] ?? null) !== null) {
+            // an empty number means "next number" for a new customer and "keep it" for an existing one
+            if (($data['number'] ?? '') !== '') {
                 $customer->number = $data['number'];
             } elseif (! $customer->exists) {
                 $customer->number = $this->nextNumber();
@@ -123,6 +125,36 @@ final class SaveCustomer
         }
 
         return $prefix.($max + 1);
+    }
+
+    /**
+     * Master data is stored without surrounding blanks. Laravel's TrimStrings middleware never sees the
+     * JSON bodies of the API (API Platform reads the raw body), so the action trims itself.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private static function trimmed(array $input): array
+    {
+        foreach (['number', 'name', ...self::STRINGS] as $key) {
+            if (isset($input[$key]) && is_string($input[$key])) {
+                $input[$key] = trim($input[$key]);
+            }
+        }
+        if (isset($input['contacts']) && is_array($input['contacts'])) {
+            foreach ($input['contacts'] as $i => $contact) {
+                if (! is_array($contact)) {
+                    continue;
+                }
+                foreach (self::CONTACT_STRINGS as $key) {
+                    if (isset($contact[$key]) && is_string($contact[$key])) {
+                        $input['contacts'][$i][$key] = trim($contact[$key]);
+                    }
+                }
+            }
+        }
+
+        return $input;
     }
 
     /**

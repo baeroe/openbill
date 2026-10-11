@@ -51,11 +51,25 @@ ddev artisan test --filter=AuthTest                    # one file or test
 ddev exec vendor/bin/pint                              # format PHP
 ddev exec vendor/bin/phpstan analyse --memory-limit=1G # Larastan, level 6
 ddev exec pnpm typecheck                               # TypeScript
+ddev exec pnpm test                                    # Vitest (resources/js)
 ddev exec pnpm build                                   # production assets
 ddev exec 'pnpm --filter "./prototypes/*" test'        # clickable prototypes
 ```
 
 JavaScript dependencies are installed inside the DDEV container, so always run `pnpm` through `ddev exec`. `ddev exec` passes its arguments through a shell inside the container: wrap commands with glob patterns in single quotes, as above. Tests use their own database `testing`, which DDEV creates on start.
+
+## Browser tests
+
+Playwright tests live in `e2e/` and run on your machine against the DDEV site (the browsers are native binaries, the `node_modules` of the app belong to the container). `e2e/` is a separate pnpm project with its own lockfile.
+
+```bash
+pnpm --dir e2e install                       # once, on the host
+pnpm --dir e2e exec playwright install chromium
+ddev exec pnpm build                         # or keep `ddev exec pnpm dev` running
+pnpm --dir e2e test                          # seeds demo data, then runs the tests
+```
+
+The tests log in as `e2e@example.com` (created by `Database\Seeders\E2eUserSeeder`) and replace all business data with the demo data before they start (`E2E_SKIP_SEED=1` skips that). `OPENBILL_URL` points them at another instance.
 
 ## Languages
 

@@ -57,7 +57,7 @@ it('shows the start page with the signed-in user but without secrets', function 
     $this->actingAs($user)->get('/de')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->component('home')
+            ->component('overview')
             ->where('locale', 'de')
             ->where('auth.user.id', $user->id)
             ->where('auth.user.email', 'anna@example.com')

@@ -29,3 +29,8 @@ export function tn(key: string, count: number): string {
 export function path(p: string): string {
     return `/${locale}${p}`;
 }
+
+/** The same page in another language. A full page load, because translations are loaded once per page. */
+export function localeHref(target: string, location: { pathname: string; search: string } = window.location): string {
+    return location.pathname.replace(/^\/(en|de)(?=\/|$)/, `/${target}`) + location.search;
+}

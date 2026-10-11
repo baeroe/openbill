@@ -95,6 +95,35 @@ Vorgaben: `Q-{YYYY}-{0000}` (Angebote), `OC-{YYYY}-{0000}` (Auftragsbestätigung
 
 Jede Änderung an einem Dokument wird mit Urheber (Benutzer, API-Token oder System; bei einem Token auch der zugehörige Benutzer, der auch nach dem Löschen des Tokens im Protokoll bleibt) protokolliert: angelegt, geändert, abgeschlossen, Status geändert, umgewandelt, storniert, dupliziert, gelöscht. Einträge gelöschter Entwürfe bleiben im Protokoll.
 
+## In der App
+
+### Übersicht
+
+Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld zusammen: offene Rechnungen, wie viel davon überfällig ist, offene Angebote und was in diesem Monat bezahlt wurde (mit der Summe seit Jahresbeginn). Die Kennzahlen zu offenen Rechnungen und Angeboten öffnen die passend gefilterte Liste. **Braucht deine Aufmerksamkeit** zeigt zuerst überfällige Rechnungen, dann offene Angebote, deren Gültigkeit in den nächsten sieben Tagen endet oder schon abgelaufen ist, dann Entwürfe. **Zuletzt bearbeitet** zeigt die sechs zuletzt geänderten Dokumente.
+
+### Dokumentliste
+
+**Dokumente** zeigt alle Dokumente, die neuesten zuerst und nach Monaten gruppiert. Filtern lässt sich nach Art (jede Pille zeigt, wie viele Dokumente dieser Art unter den übrigen Filtern dazukommen), nach Status und Kunde, dazu eine Suche über Nummer und Kundennamen. Der Statusfilter kennt zusätzlich **Überfällig**: offene Rechnungen, deren Fälligkeit überschritten ist. Jeder Filter steht in der Adresse, zum Beispiel `/de/documents?type=invoice&status=overdue`; eine gefilterte Liste lässt sich also als Lesezeichen speichern, weitergeben und mit dem Zurück-Knopf des Browsers wieder aufrufen. Die Liste lädt 50 Dokumente auf einmal (**Mehr laden**); die Zeile darunter zählt alle passenden Dokumente und summiert ihre Bruttobeträge.
+
+### Neues Dokument
+
+**Neues Dokument** in der Seitenleiste – oder die Taste **N** überall, solange du nicht in einem Feld tippst – öffnet einen Dialog: Art und Kunde wählen (den Kunden auch später), und openbill legt einen Entwurf mit den Vorgaben des Dokumenttyps an. Stornos entstehen hier nicht, sondern immer aus einer Rechnung. Dokumente in der App bearbeiten kommt mit dem Dokument-Editor; bis dahin zeigt die Seite eines Dokuments seine Eckdaten und das PDF.
+
+### Kunden
+
+**Kunden** listet alle Kunden mit ihrem Standard-Ansprechpartner und dem, was offen ist: die Summe ihrer offenen Rechnungen, überfällige markiert. Die Suche geht über Name, Nummer und E-Mail.
+
+Die Seite eines Kunden enthält die Stammdaten, die **Steuerbehandlung** (Inland; EU mit USt-ID, also Reverse Charge; Drittland), die eigenen Felder des Kunden, die **Ansprechpartner** und seine Dokumente. Ansprechpartner bearbeitest du in einem Seitenpanel; einer davon ist der Standard, den neue Dokumente übernehmen. Alle Änderungen, auch die an Ansprechpartnern, speichert **Speichern** zusammen:
+
+- Fehler stehen am betroffenen Feld (oder am Ansprechpartner), und gespeichert wird erst, wenn alles gültig ist.
+- Leerzeichen am Anfang und Ende werden entfernt; eine leere Kundennummer bekommt die nächste freie Nummer.
+- Wer die Seite mit ungespeicherten Änderungen verlässt, wird vorher gefragt.
+- Kunden mit abgeschlossenen Dokumenten lassen sich nicht löschen.
+
+### Darstellung und Sprache
+
+Das Kontomenü unten in der Seitenleiste schaltet zwischen hell, dunkel und der Systemeinstellung um (gemerkt pro Browser) und zwischen Englisch und Deutsch. Die Seitenleiste lässt sich auf Symbole einklappen; auf kleinen Bildschirmen öffnet sie der Menü-Knopf.
+
 ## Demo-Daten
 
 Zum Entwickeln und Ausprobieren:

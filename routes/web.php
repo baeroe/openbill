@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\OverviewController;
 use Illuminate\Support\Facades\Route;
 
 // admin: the language is part of the URL (/en/…, /de/…)
@@ -13,7 +15,12 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
     });
 
     Route::middleware('auth')->group(function (): void {
-        Route::get('/', HomeController::class)->name('home');
+        Route::get('/', OverviewController::class)->name('home');
+        Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/documents/{id}', [DocumentController::class, 'show'])->whereUlid('id')->name('documents.show');
+        Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/new', [CustomerController::class, 'create'])->name('customers.create');
+        Route::get('/customers/{id}', [CustomerController::class, 'show'])->whereUlid('id')->name('customers.show');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     });
 });

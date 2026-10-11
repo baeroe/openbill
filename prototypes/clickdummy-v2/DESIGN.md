@@ -16,7 +16,7 @@ Die Quelle ist `src/styles/tokens.css`. Kurzfassung:
   --surface-2: #ECECE9;   /* Eingabefelder, Pillen, Hover */
   --surface-3: #E3E3DF;   /* Pressed, Trenner auf surface-2 */
   --ink: #23252B;         /* Graphit: Text */
-  --muted: #73767E;       /* Stein: Nebentext */
+  --muted: #5F626A;       /* Stein: Nebentext (WCAG AA ≥ 4,5:1 auf bg, surface, surface-2) */
   --faint: #A2A4AA;       /* Platzhalter, deaktiviert */
   --accent: #2F55D4;      /* Kobalt: Aktion, Auswahl, Fokus */
   --accent-ink: #FFFFFF;
@@ -65,3 +65,4 @@ Zeilenlänge für Fließtext max. 68ch.
 - 2026-10-11: Alle eigenen Felder an einem Ort (Einstellungen → Eigene Felder) für die Ebenen Organisation, Kunde, Ansprechpartner, Dokument und Position. Dokument- und Positionsfelder werden einmal definiert und per Häkchen den Dokumenttypen zugeordnet. Grund: Vorher waren Dokumentfelder in den Dokumenttyp-Einstellungen versteckt, der Rest lag unter „Eigene Felder“.
 - 2026-10-11: Ohne Katalog schlägt die Positionszeile per Autocomplete Positionen aus früheren Dokumenten vor.
 - 2026-10-11: Proportionalziffern statt `tabular-nums`. Grund: Die Tabellenziffern von Schibsted Grotesk sehen aus wie Schreibmaschinenschrift.
+- 2026-10-11: `--muted` im hellen Modus von #73767E auf #5F626A abgedunkelt. Grund: WCAG AA. Nebentext und Feldlabels (12–13 px) brauchen 4,5:1; vorher 3,8:1 auf `bg` und 3,5:1 auf `surface-2`, jetzt 5,5:1 / 6,1:1 / 5,2:1 auf `bg` / `surface` / `surface-2`. Dark Mode bleibt (#9A9CA3: 6,5:1 auf `bg`, 5,2:1 auf `surface-2`).

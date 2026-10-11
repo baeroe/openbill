@@ -25,6 +25,7 @@ export function DecimalCell({ value, onCommit, label, disabled = false, error, p
     const [raw, setRaw] = useState(() => formatDecimalInput(value, undefined, minFraction));
     const [invalid, setInvalid] = useState(false);
     const focused = useRef(false);
+    const selectOnMouseUp = useRef(false);
 
     useEffect(() => {
         if (focused.current) return;
@@ -43,7 +44,17 @@ export function DecimalCell({ value, onCommit, label, disabled = false, error, p
                 title={message}
                 disabled={disabled}
                 value={raw}
-                onFocus={() => (focused.current = true)}
+                onFocus={(e) => {
+                    focused.current = true;
+                    // typing replaces the value (a new row shows "0.00"); the mouse-up of the click would drop the selection
+                    e.currentTarget.select();
+                    selectOnMouseUp.current = true;
+                }}
+                onMouseUp={(e) => {
+                    if (!selectOnMouseUp.current) return;
+                    selectOnMouseUp.current = false;
+                    e.preventDefault();
+                }}
                 onChange={(e) => {
                     setRaw(e.target.value);
                     const parsed = parseDecimalInput(e.target.value, scale);
@@ -53,6 +64,7 @@ export function DecimalCell({ value, onCommit, label, disabled = false, error, p
                 }}
                 onBlur={() => {
                     focused.current = false;
+                    selectOnMouseUp.current = false;
                     const parsed = parseDecimalInput(raw, scale);
                     if (parsed === 'invalid') {
                         setInvalid(true);

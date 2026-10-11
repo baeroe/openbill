@@ -152,8 +152,7 @@ final class SampleDataFactory
      */
     private function groups(RenderScenario $scenario, array $text, array $custom): array
     {
-        $line = fn (string $title, string $description, string $quantity, string $unit, string $price, PositionKind $kind = PositionKind::Item): array
-            => ['title' => $title, 'description' => $description, 'quantity' => $quantity, 'unit' => $unit, 'price' => $price, 'kind' => $kind];
+        $line = fn (string $title, string $description, string $quantity, string $unit, string $price, PositionKind $kind = PositionKind::Item): array => ['title' => $title, 'description' => $description, 'quantity' => $quantity, 'unit' => $unit, 'price' => $price, 'kind' => $kind];
         $items = array_map(fn (array $i): array => $line(...$i), $text['items']);
         $note = $line($text['note'], '', '0', 'hour', '0', PositionKind::Text);
 

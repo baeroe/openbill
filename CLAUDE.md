@@ -10,13 +10,14 @@ Spec und Pläne: `docs/superpowers/specs/2026-10-11-openbill-app-design.md` (bin
 
 ## Was openbill ist
 
-Offenes, selbst gehostetes Programm für Angebote, Auftragsbestätigungen, Rechnungen und Stornos mit eigenen Feldern, eigenen Liquid-Templates (Rendering nur serverseitig, PDF über Gotenberg) und E-Rechnung (EN 16931). Steuerbar über UI, REST-API und MCP. Wird in Phasen gebaut; Stand: Phase 3 (Rendering: Liquid-Templates, PDF über Gotenberg, E-Rechnung EN 16931, Archiv; noch keine API und keine UI für Dokumente).
+Offenes, selbst gehostetes Programm für Angebote, Auftragsbestätigungen, Rechnungen und Stornos mit eigenen Feldern, eigenen Liquid-Templates (Rendering nur serverseitig, PDF über Gotenberg) und E-Rechnung (EN 16931). Steuerbar über UI, REST-API und MCP. Wird in Phasen gebaut; Stand: Phase 4 (REST-API unter `/api` mit API Platform, Sanctum-Tokens und Session für die eigene UI; noch keine UI für Dokumente, kein MCP).
 
 ## Tech Stack
 
 - PHP 8.4, Laravel 13, MariaDB 11.4, Inertia v3 + React 19 + TypeScript, Tailwind 4, Vite 8 (`laravel-vite-plugin`)
 - Tests: Pest 5 (Suiten `Unit` ohne App, `Feature` gegen MariaDB-DB `testing` mit `RefreshDatabase`, `Integration` mit `DatabaseMigrations` für echte Parallelität), Larastan Level 6, Pint
 - Rechnen: brick/math (`BigDecimal`), nie float
+- API: `api-platform/laravel` ^5.0 (DTO-Ressourcen in `app/ApiResource`, Provider/Processor in `app/State`), `laravel/sanctum` ^4.3 (Tokens mit Fähigkeiten, Session der UI)
 - Rendering: keepsuit/liquid (Templates), gotenberg/gotenberg-php (PDF über Gotenberg ≥ 8.34, PDF/A-3b mit Factur-X), horstoeko/zugferd (CII-XML EN 16931 + XSD), smalot/pdfparser (nur Tests)
 - Doku: VitePress in `docs/` (eigenes Paket im pnpm-Workspace)
 - Prototypen (Referenz, nicht Teil der App): `prototypes/clickdummy`, `prototypes/clickdummy-v2` (Gestaltung: `prototypes/clickdummy-v2/DESIGN.md`)
@@ -49,6 +50,8 @@ ddev exec pnpm build
 ddev exec 'pnpm --filter "./prototypes/*" test'   # äußere Quotes nötig, siehe Fallstricke
 ddev exec pnpm --dir docs dev                # https://openbill.ddev.site:5174/en/
 ddev exec pnpm --dir docs build
+ddev artisan app:create-token admin@example.com --ability=api:read --ability=api:write   # Token einmal ausgeben (--template=<id> für templates:write)
+curl -s https://openbill.ddev.site/api/docs.jsonopenapi > openapi.json                   # OpenAPI (Swagger UI: /api/docs)
 ```
 
 ## Regeln
@@ -62,7 +65,7 @@ ddev exec pnpm --dir docs build
 - CI: Pflicht-Job `tests` in `.github/workflows/tests.yml` – Name nie ändern. Neue Prüfungen dort anhängen.
 - Git: Branch je Phase `phase-NN-<name>`, PR gegen `main`, Conventional Commits.
 
-## Architektur (Stand Phase 3)
+## Architektur (Stand Phase 4)
 
 - Routen (`routes/web.php`): Admin unter Sprachpräfix `/{locale}` (`en|de`): `GET|POST /{locale}/login` (guest), `POST /{locale}/logout`, `GET /{locale}` = Startseite `home` (auth). `/` und `/login` leiten in die zuletzt genutzte Sprache um (Cookie `locale`, sonst `en`). Unbekanntes Präfix → 404.
 - `app/Http/Middleware/SetLocale.php`: Sprache aus Präfix, sonst Cookie, sonst `en` (nie `Accept-Language`). Setzt `URL::defaults(['locale' => …])` und das Request-Attribut `locale`, merkt die Sprache im Cookie und **entfernt den Routenparameter `locale`**, damit Controller ihn nie als Argument bekommen (sonst verrutschen Model-Bindings). `SetLocale::fromRequest()` funktioniert auch vor der Middleware (Auth läuft wegen der Middleware-Priorität früher) und wird in `bootstrap/app.php` für `redirectGuestsTo`/`redirectUsersTo` genutzt.
@@ -83,6 +86,12 @@ ddev exec pnpm --dir docs build
 - **Exceptions** zusätzlich: `TemplateRenderFailedException` 422 (`toArray()` = Fehlerliste), `EInvoiceInvalidException` 422, `PdfRenderFailedException` 503, `ArchiveCorruptedException` (kein Domain-Fehler, 500).
 - `document_snapshots.data` enthält zusätzlich `legal_notes` (`small_business`, `reverse_charge`, `third_country` in der Dokumentsprache); `DocumentInspector` nimmt sie bei abgeschlossenen Dokumenten aus dem Snapshot und wirft `LogicException`, wenn einem abgeschlossenen Dokument der Snapshot fehlt. `document_events.user_id` hält den Nutzer hinter einem Token.
 - **Grunddaten** kommen aus der Migration `2026_10_11_100300_insert_default_master_data.php` (Organisation, Dokumenttypen, Nummernkreise `Q`/`OC`/`INV`/`CN`, Steuersätze, Einheiten), nicht aus Seedern.
+- **REST-API** (`/api`, Doku `docs/*/api.md`): DTO-Ressourcen in `app/ApiResource` (nie Eloquent-Models als Ressource), lesen über `app/State/Provider` (Eloquent → DTO, `fromModel()`), schreiben über `app/State/Processor` mit `read: false, deserialize: false`: der rohe JSON-Body (`App\Http\Api\RequestBody`) geht unverändert an genau eine Action. Dateien und fertige Action-Ergebnisse (PDF/XML, Paket-ZIP, `POST /api/render`, `render/sources|schema`, `position-suggestions`, signierte Downloads) sind Controller in `routes/api.php` (`app/Http/Controllers/Api`), im OpenAPI-Dokument über `App\OpenApi\OpenApiFactory`. JSON-Schlüssel snake_case (`name_converter => null`), leere Objekte als `ArrayObject` + `preserve_empty_objects`.
+- **Auth:** `auth:sanctum` + `api.ability:<regel>` (`App\Http\Middleware\RequireApiAbility`, Regeln in `App\Support\ApiAccess`, Stacks in `App\Http\Api\ApiMiddleware`). Fähigkeiten `App\Enums\TokenAbility`; `templates:write` nur mit `personal_access_tokens.template_id` (gilt dann nur für dieses Template, Route-Parameter `{id}`). Session der UI über Sanctum-„stateful“-Domains (`config/sanctum.php`, enthält `openbill.ddev.site` und den Host aus `APP_URL`), CSRF per `X-XSRF-TOKEN`. Tokens: `IssueApiToken`/`RevokeApiToken`, `app:create-token`. Actor: `App\Http\Api\CurrentActor::from($request)`.
+- **Fehler:** Jede Exception unter `api/*` wird in `bootstrap/app.php` zu `application/problem+json` (`App\Http\Api\ProblemResponse` → `App\Support\Problem`, API Platforms Handler ist aus). `DomainActionException::reason()`/`extensions()` liefern Code und Zusatzfelder; Compliance-Issues haben `code`. 5xx ohne Details, wenn `APP_DEBUG=false`.
+- **Sprache der API:** `Accept-Language` (`en`/`de`) über `SetApiLocale` im `api`-Stack, sonst Englisch.
+- **Signierte Downloads:** `App\Support\SignedDownloads::link()` (15 min, relativ signiert) → Route `api.downloads`; für das MCP-Tool `get-document-pdf-url`.
+- **Middleware-Reihenfolge:** `SetApiLocale` steht per `prependToPriorityList()` vor `AuthenticatesRequests` (`bootstrap/app.php`), sonst kämen 401-Antworten immer auf Englisch.
 
 ## Doku
 
@@ -96,7 +105,7 @@ VitePress in `docs/`, Englisch unter `docs/en/` (Locale `root` mit `link: '/en/'
 - Sessions sind JSON-serialisiert (`config/session.php`, `serialization => json`): Nach einem Test-Request liefert `session('errors')` ein Array, erst `->assertSessionHasErrors()` macht daraus wieder einen `ViewErrorBag`. Fehlertexte also nach `assertSessionHasErrors()` lesen.
 - `phpunit.xml` erzwingt `DB_DATABASE=testing` (DDEV-Hook legt sie bei `ddev start` an; in CI der MariaDB-Service).
 - Tailwind scannt nur `resources/` (`@import 'tailwindcss' source(none)` + `@source`), sonst landen Klassen aus Prototypen und Doku im CSS.
-- `users.id` ist eine ULID: Sanctum (Phase 4) braucht `ulidMorphs('tokenable')` in `personal_access_tokens`; `sessions.user_id` ist bereits `foreignUlid`.
+- `personal_access_tokens` ist eine eigene Migration (`2026_10_11_100600`, ULID-Schlüssel, `ulidMorphs('tokenable')`, `template_id`); Sanctum 4 bringt keine eigene mehr mit. Token-Model ist `App\Models\PersonalAccessToken`.
 - `ddev composer create-project` nicht benutzen (der DDEV-Wrapper will ein leeres Root).
 - Laravel Boost wird nicht genutzt; es gibt kein `AGENTS.md`.
 - Mass-Updates/-Deletes (`Model::query()->update()`, `->delete()` auf Relationen) umgehen die Sperr-Hooks; abgeschlossene Dokumente schützen dann nur noch die Trigger. In Actions nur für Entwürfe benutzen (wie `GroupWriter`). `DB::table()` auf `documents`, `positions`, `position_groups`, `document_snapshots`, `document_files` ist in `app/` verboten (`ArchTest`).
@@ -126,3 +135,14 @@ VitePress in `docs/`, Englisch unter `docs/en/` (Locale `root` mit `link: '/en/'
 - Liquid-Rechenfilter `plus`/`minus`/`times`/`divided_by`/`round` und `escape` sind in `OpenbillFilters` überschrieben (BigDecimal bzw. wie `escape_once`); `NoFloatTest` ignoriert nur den *deklarierten* Methodennamen `round`.
 - Organisation hat das Kernfeld `registration_id` (BT-30). Prüfprofil `en16931`: USt-ID oder Registernummer (BR-CO-26), bei Regelbesteuerung und Reverse Charge/Drittland die USt-ID (BR-AE-02/BR-G-02; Kleinunternehmer = Kategorie E, Steuernummer reicht). E-Rechnungsfälle für das Schematron stehen in `tests/Feature/EInvoice/EInvoiceSamplesTest.php` (mit `EINVOICE_SAMPLES_DIR` schreibt der Test die XMLs; CI-Job `einvoice`, kein Pflicht-Check). Neue E-Rechnungs-Fälle dort ergänzen.
 - **Filter-Größen:** `App\Rendering\Liquid\FilterPolicy` stuft jeden registrierten Filter ein (`GUARDED` = in `OpenbillFilters` überschrieben, prüft Ergebnisgröße/Arraylänge/Stellen vorab; `ADDITIVE` = wächst höchstens konstant). `FilterPolicyTest` schlägt bei jedem neuen, nicht eingestuften Filter fehl (auch nach keepsuit-Updates) und prüft, dass jeder registrierte Filter bei abgelaufener Deadline abbricht. `FilterGuard::wrap()` muss der letzte Schritt in `LiquidEnvironment::make()` bleiben; es greift über die geschützte Filtertabelle von keepsuits `FilterRegistry` (bei keepsuit-Updates prüfen).
+- API Platform liest beim Start **alle** Klassen unter `app/` per Reflection (Provider/Processor werden automatisch getaggt). Eine Klasse, die beim Laden etwas tut, bremst jeden Request.
+- Neue API-Ressource: DTO in `app/ApiResource` mit expliziten `uriTemplate`s (Bindestrich-Pfade), `middleware: ApiMiddleware::…` an **jeder** Operation (sonst ist sie offen – `RightsMatrixTest` um den Endpunkt ergänzen), Schreib-Operationen mit `read: false, deserialize: false`.
+- Controller in `routes/api.php` lesen Route-Parameter mit `$request->route('id')`, nicht als Methodenparameter (Laravel würde Skalare nach Position füllen).
+- Sanctum merkt sich den Nutzer pro Test über mehrere Requests: vor einem Request mit anderem oder widerrufenem Token `forgetApiAuth()` aufrufen (`tests/Pest.php`).
+- `php artisan api:openapi:export` kennt die Controller-Routen aus `routes/api.php` nicht (nutzt API Platforms konkrete Factory); das vollständige Dokument liefert `/api/docs.jsonopenapi`.
+- Swagger-UI-Dateien (`public/vendor/api-platform`) entstehen bei jedem `composer install` (`post-autoload-dump`) und sind nicht im Repo.
+- JSON-LD ist das Standardformat. Wer einfaches JSON will, schickt `Accept: application/json`; Seitenangaben (`totalItems`, `view`) gibt es nur in JSON-LD.
+- API Platform antwortet mit einfachen Symfony-Responses: In Tests `$response->getStatusCode()` statt `status()` benutzen (`status()` gibt es nur bei Laravel-Responses).
+- Provider deklarieren ihren echten Rückgabetyp (`: object|array` bzw. `: object` bei paginierten Listen, mit `@return XResource|list<XResource>`), nie `|null`, sonst meldet Larastan `return.unusedType`.
+- Actions, die ein neues Model zurückgeben, das API-Antworten formen, laden es nach dem Speichern neu (`refresh()`): Spalten mit Datenbank-Default (z. B. `customers.tax_treatment`) fehlen sonst am frischen Model.
+- `/api/docs.jsonopenapi` liefert OpenAPI **3.2** (API Platform 5).

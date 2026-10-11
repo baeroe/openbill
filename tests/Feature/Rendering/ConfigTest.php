@@ -9,7 +9,9 @@ it('keeps the Gotenberg timeout well below the InnoDB lock wait timeout', functi
     $lockWait = (int) DB::selectOne('SELECT @@innodb_lock_wait_timeout AS t')->t;
 
     expect(config('services.gotenberg.timeout'))->toBeInt()->toBeGreaterThan(0)
-        ->and(config('services.gotenberg.timeout'))->toBeLessThanOrEqual($lockWait - 20);
+        ->and(config('services.gotenberg.timeout'))->toBeLessThanOrEqual($lockWait - 20)
+        // rendering the template happens under the same lock
+        ->and(config('openbill.rendering.max_seconds') + config('services.gotenberg.timeout'))->toBeLessThanOrEqual($lockWait - 20);
 });
 
 it('has an archive disk below storage/app/archive that throws on errors', function () {

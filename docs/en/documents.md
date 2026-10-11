@@ -56,7 +56,7 @@ The lock is enforced by the database too: writes that change a finalized documen
 | Profile | Checks |
 |---|---|
 | Basic | date, customer, at least one item, title, tax rate (unless small business) and unit of every item, required custom fields |
-| E-invoice (EN 16931) | everything from Basic, plus organization name, full address, VAT ID or tax number and IBAN, full customer address, the customer's VAT ID for reverse charge, service date, due date (invoices), a unit code for every unit and no quantity 0 |
+| E-invoice (EN 16931) | everything from Basic, plus organization name, full address, VAT ID or tax number, VAT ID or register number (the VAT ID is required for reverse charge and customers outside the EU) and IBAN, full customer address, the customer's VAT ID for reverse charge, service date, due date (invoices), a unit code for every unit and no quantity 0 |
 
 The e-invoice profile can only be chosen for invoices and cancellations.
 

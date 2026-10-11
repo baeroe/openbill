@@ -101,6 +101,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `name`, `street`, `zip`, `city`, `country` | Anschrift (`country` als ISO-Code, `DE`) |
 | `logo` | Logo als Data-URL, leer ohne Logo: `{% if org.logo != blank %}<img src="{{ org.logo }}">{% endif %}` |
 | `vat_id`, `tax_number` | USt-ID, Steuernummer |
+| `registration_id` | Registernummer, z. B. Handelsregister (`HRB 12345, Amtsgericht Hamburg`) |
 | `iban`, `bic`, `bank_name` | Bankverbindung |
 | `email`, `phone`, `website` | Kontakt |
 | `taxation_mode`, `small_business` | `regular` oder `small_business`; `small_business` ist bei Kleinunternehmern (§ 19 UStG) `true` |
@@ -146,7 +147,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 
 ### Eigene Felder
 
-Eigene Felder stehen direkt an ihrem Objekt, unter ihrem Schlüssel: `{{ document.project_name }}`, `{{ customer.industry }}`, `{{ contact.department }}`, `{{ org.register }}`, `{{ p.ticket }}` für eine Position `p`. Eingebaute Schlüssel sind reserviert, ein eigenes Feld verdeckt also nie eins. Ein Feld ohne Wert gibt nichts aus; mit `default` setzt du einen Ersatz: `{{ document.po_number | default: "–" }}`.
+Eigene Felder stehen direkt an ihrem Objekt, unter ihrem Schlüssel: `{{ document.project_name }}`, `{{ customer.industry }}`, `{{ contact.department }}`, `{{ org.managing_director }}`, `{{ p.ticket }}` für eine Position `p`. Eingebaute Schlüssel sind reserviert, ein eigenes Feld verdeckt also nie eins. Ein Feld ohne Wert gibt nichts aus; mit `default` setzt du einen Ersatz: `{{ document.po_number | default: "–" }}`.
 
 ### Filter
 
@@ -161,6 +162,16 @@ Eigene Felder stehen direkt an ihrem Objekt, unter ihrem Schlüssel: `{{ documen
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formate folgen der Dokumentsprache. Beträge werden kaufmännisch gerundet. `money` und `number` geben bei Werten, die keine Zahl sind, nichts aus. Ein unbekannter Filter ist ein Fehler.
+
+Die Rechenfilter `plus`, `minus`, `times`, `divided_by` und `round` rechnen mit exakten Dezimalzahlen und liefern einen Dezimaltext (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rundet kaufmännisch); mit zwei ganzen Zahlen bleibt es bei Liquids Ganzzahl-Verhalten (`{{ 10 | divided_by: 4 }}` → `2`). Nutze lieber die Summen aus dem Kontext, als Beträge im Template zu rechnen.
+
+### Escaping
+
+Alle Texte im Kontext sind vor dem Rendern genau einmal HTML-escaped. Deshalb:
+
+- `escape` brauchst du nicht; es arbeitet wie `escape_once` und escapt nie doppelt, ändert also nichts,
+- `truncate` und `slice` zählen den escapten Text und können eine Entity zerschneiden (`&am…`); kürze nur Texte ohne `&`, `<`, `>` oder Anführungszeichen,
+- in Einleitung und Schlusstext werden Filter, die HTML erzeugen (`nl2br`), mit dem Text escapt: `nl2br` im Template auf `document.intro` anwenden, nicht in der Einleitung selbst.
 
 ### Wörter in der Dokumentsprache (`t`)
 
@@ -202,6 +213,8 @@ Ein Template kann openbill weder kaputt machen noch blockieren:
 - Schleifen und Ausgabe sind begrenzt (eine Schleife über einen Bereich wie `(1..n)` darf höchstens 10 000 Einträge haben; endlose oder riesige Schleifen enden mit „Render-Grenze“),
 - `{% render %}` und `{% include %}` gibt es nicht, `{% tablerow %}` auch nicht,
 - `styles.css` darf kein `</style>` enthalten,
+- das Papier muss Platz für den Inhalt lassen: doppelter `marginX` kleiner als die Seitenbreite, `headerHeight + footerHeight` mindestens 20mm kleiner als die Seitenhöhe,
+- beim Import muss jeder Teil unter 200 KB bleiben, Feldschlüssel in `expectedFields` müssen wie `project_name` aussehen, und Assets müssen wirklich das sein, was ihre Endung sagt,
 - ein Rendering bricht nach 5 Sekunden ab,
 - keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen).
 

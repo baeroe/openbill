@@ -21,7 +21,11 @@ Dokumente mit Profil `basic` (sowie Angebote und Auftragsbestätigungen) bekomme
 
 ## Stornos sind Gutschriften
 
-Ein abgeschlossenes Storno wird eine Gutschrift (Typcode 381) mit positiven Beträgen, die auf die stornierte Rechnung verweist (Nummer und Datum).
+Ein abgeschlossenes Storno wird eine Gutschrift (Typcode 381) mit positiven Beträgen, die auf die stornierte Rechnung verweist (Nummer und Datum). Sie trägt die Zahlungsbedingung „Der Betrag wird erstattet.“ in der Dokumentsprache.
+
+## Rabatte
+
+Ein Rabatt ist eine Position mit negativem Preis. In der XML bleibt der Preis positiv und die Menge trägt das Vorzeichen (EN 16931 verbietet negative Nettopreise); der Zeilenbetrag bleibt gleich.
 
 ## Steuern
 
@@ -33,6 +37,8 @@ Ein abgeschlossenes Storno wird eine Gutschrift (Typcode 381) mit positiven Betr
 | Reverse Charge in der EU | `AE` (USt-ID des Kunden nötig) | der Reverse-Charge-Hinweis |
 | außerhalb der EU | `G` | der Drittland-Hinweis |
 
+Ohne Steuer- oder Rechtshinweis bekommt eine steuerbefreite Kategorie einen Standardgrund (z. B. „Steuerbefreit“).
+
 Die gesetzlichen Hinweise stehen außerdem als Dokumentnotizen in der XML.
 
 ## Was in die XML kommt
@@ -40,7 +46,7 @@ Die gesetzlichen Hinweise stehen außerdem als Dokumentnotizen in der XML.
 | openbill | EN 16931 |
 |---|---|
 | Nummer, Datum | Rechnungsnummer (BT-1), Rechnungsdatum (BT-2) |
-| Organisation | Verkäufer: Name, Anschrift, USt-ID (`VA`) oder Steuernummer (`FC`), E-Mail |
+| Organisation | Verkäufer: Name, Anschrift, USt-ID (`VA`) und/oder Steuernummer (`FC`), Registernummer (BT-30), E-Mail |
 | Kunde | Käufer: Name, Kundennummer, Anschrift, USt-ID |
 | Leistungsdatum (-zeitraum) | Lieferdatum (BT-72), Leistungszeitraum (BT-73/74) |
 | IBAN, BIC | SEPA-Überweisung (Zahlungsart 58) |
@@ -61,5 +67,7 @@ Archivierte Dateien liegen unter `storage/app/archive/<Jahr>/<Dokument-ID>.pdf` 
 ## Voraussetzungen und Grenzen
 
 - Gotenberg **8.34 oder neuer** (das Docker-Image `gotenberg/gotenberg:8` ist es). `GOTENBERG_TIMEOUT` (Sekunden, Standard 20) begrenzt jede PDF-Anfrage; der Wert muss deutlich unter der Lock-Wartezeit der Datenbank (50 s) bleiben.
-- openbill prüft die XML gegen das Schema. Geschäftsregeln jenseits des Schemas (EN-16931-Schematron) deckt das Prüfprofil ab; für eine vollständige Prüfung nutze einen externen Validator.
-- Noch nicht unterstützt: XRechnung mit Leitweg-ID, andere Währungen als EUR, Zu- und Abschläge, negative Einzelpreise.
+- openbill prüft jede XML vor dem Archivieren gegen das Schema. Die Geschäftsregeln von EN 16931 (Schematron) deckt das Prüfprofil ab; das offizielle CEN-Schematron läuft in der Entwicklung und in CI über die E-Rechnungsfälle der Tests (`scripts/validate-einvoice.sh`).
+- Der Verkäufer braucht eine USt-ID oder eine Registernummer; Reverse Charge und Kunden außerhalb der EU brauchen die USt-ID.
+- Kunden außerhalb der EU werden mit Kategorie `G` (Ausfuhr) besteuert; eine Kategorie für Dienstleistungen an solche Kunden (`O`) ist geplant.
+- Noch nicht unterstützt: XRechnung mit Leitweg-ID, andere Währungen als EUR, Zu- und Abschläge auf Dokumentebene.

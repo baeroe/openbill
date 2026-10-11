@@ -56,7 +56,7 @@ Die Sperre sichert auch die Datenbank ab: Schreibzugriffe, die ein abgeschlossen
 | Profil | Prüft |
 |---|---|
 | Basis | Datum, Kunde, mindestens eine Leistung, Bezeichnung, Steuersatz (außer bei Kleinunternehmern) und Einheit jeder Leistung, eigene Pflichtfelder |
-| E-Rechnung (EN 16931) | alles aus Basis, dazu Name, vollständige Adresse, USt-ID oder Steuernummer und IBAN der Organisation, vollständige Kundenadresse, USt-ID des Kunden bei Reverse Charge, Leistungsdatum, Fälligkeit (Rechnungen), einen Einheiten-Code je Einheit und keine Menge 0 |
+| E-Rechnung (EN 16931) | alles aus Basis, dazu Name, vollständige Adresse, USt-ID oder Steuernummer, USt-ID oder Registernummer (bei Reverse Charge und Kunden außerhalb der EU ist die USt-ID Pflicht) und IBAN der Organisation, vollständige Kundenadresse, USt-ID des Kunden bei Reverse Charge, Leistungsdatum, Fälligkeit (Rechnungen), einen Einheiten-Code je Einheit und keine Menge 0 |
 
 Das E-Rechnungs-Profil ist nur für Rechnungen und Stornos wählbar.
 

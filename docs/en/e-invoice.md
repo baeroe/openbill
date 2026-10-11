@@ -21,7 +21,11 @@ Documents with the profile `basic` (and offers and order confirmations) get a re
 
 ## Cancellations are credit notes
 
-A finalized cancellation becomes a credit note (type code 381) with positive amounts that refers to the cancelled invoice (number and date).
+A finalized cancellation becomes a credit note (type code 381) with positive amounts that refers to the cancelled invoice (number and date). It carries the payment terms "The amount will be refunded." in the document language.
+
+## Discounts
+
+A discount is an item with a negative price. In the XML the price stays positive and the quantity carries the sign (EN 16931 forbids negative net prices); the line amount is the same.
 
 ## Taxes
 
@@ -33,6 +37,8 @@ A finalized cancellation becomes a credit note (type code 381) with positive amo
 | EU reverse charge | `AE` (buyer VAT ID required) | the reverse charge note |
 | outside the EU | `G` | the third country note |
 
+Without a tax note or legal note an exempt category gets a standard reason (for example "Exempt from VAT").
+
 The legal notes are also part of the XML as document notes.
 
 ## What goes into the XML
@@ -40,7 +46,7 @@ The legal notes are also part of the XML as document notes.
 | openbill | EN 16931 |
 |---|---|
 | number, date | invoice number (BT-1), issue date (BT-2) |
-| organization | seller name, address, VAT ID (`VA`) or tax number (`FC`), e-mail |
+| organization | seller name, address, VAT ID (`VA`) and/or tax number (`FC`), register number (BT-30), e-mail |
 | customer | buyer name, customer number, address, VAT ID |
 | service date (period) | delivery date (BT-72), invoicing period (BT-73/74) |
 | IBAN, BIC | SEPA credit transfer (payment means 58) |
@@ -61,5 +67,7 @@ Archived files live in `storage/app/archive/<year>/<document id>.pdf` and `.xml`
 ## Requirements and limits
 
 - Gotenberg **8.34 or newer** (the Docker image `gotenberg/gotenberg:8` is). `GOTENBERG_TIMEOUT` (seconds, default 20) limits each PDF request; keep it well below the database lock wait timeout (50 s).
-- openbill checks the XML against the schema. Business rules beyond the schema (EN 16931 Schematron) are covered by the compliance profile; for a full check use an external validator.
-- Not supported yet: XRechnung with Leitweg-ID, currencies other than EUR, allowances and charges, negative unit prices.
+- openbill checks every XML against the schema before archiving it. The business rules of EN 16931 (Schematron) are covered by the compliance profile; the official CEN Schematron runs in development and CI on the e-invoice cases of the test suite (`scripts/validate-einvoice.sh`).
+- The seller needs a VAT ID or a register number; reverse charge and customers outside the EU need the VAT ID.
+- Customers outside the EU are taxed with category `G` (export); a category for services to such customers (`O`) is planned.
+- Not supported yet: XRechnung with Leitweg-ID, currencies other than EUR, document-level allowances and charges.

@@ -101,6 +101,7 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 | `name`, `street`, `zip`, `city`, `country` | address (`country` as ISO code, `DE`) |
 | `logo` | logo as data URL, empty when there is none: `{% if org.logo != blank %}<img src="{{ org.logo }}">{% endif %}` |
 | `vat_id`, `tax_number` | VAT ID, tax number |
+| `registration_id` | register number, e.g. the commercial register (`HRB 12345, Amtsgericht Hamburg`) |
 | `iban`, `bic`, `bank_name` | bank account |
 | `email`, `phone`, `website` | contact |
 | `taxation_mode`, `small_business` | `regular` or `small_business`; `small_business` is `true` for small businesses (§ 19 UStG) |
@@ -146,7 +147,7 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 
 ### Custom fields
 
-Custom fields sit directly on their object, with their key: `{{ document.project_name }}`, `{{ customer.industry }}`, `{{ contact.department }}`, `{{ org.register }}`, `{{ p.ticket }}` for a position `p`. Built-in keys are reserved, so a custom field never hides one. A field without value prints nothing; use `default` for a fallback: `{{ document.po_number | default: "–" }}`.
+Custom fields sit directly on their object, with their key: `{{ document.project_name }}`, `{{ customer.industry }}`, `{{ contact.department }}`, `{{ org.managing_director }}`, `{{ p.ticket }}` for a position `p`. Built-in keys are reserved, so a custom field never hides one. A field without value prints nothing; use `default` for a fallback: `{{ document.po_number | default: "–" }}`.
 
 ### Filters
 
@@ -161,6 +162,16 @@ Custom fields sit directly on their object, with their key: `{{ document.project
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formats follow the document language. Amounts are rounded commercially. `money` and `number` print nothing for values that are not numbers. An unknown filter is an error.
+
+The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Prefer the totals of the context over computing amounts in the template.
+
+### Escaping
+
+All texts of the context are HTML-escaped exactly once before rendering, so:
+
+- don't add `escape`; it works like `escape_once` and never escapes twice, so it changes nothing,
+- `truncate` and `slice` count the escaped text and may cut an entity (`&am…`); shorten texts only when they contain no `&`, `<`, `>` or quotes,
+- inside intro and closing texts, filters that produce HTML (`nl2br`) are escaped with the text: use `nl2br` on `document.intro` in the template, not inside the intro.
 
 ### Words in the document language (`t`)
 
@@ -202,6 +213,8 @@ A template can never break openbill or block it:
 - loops and output are limited (a loop over a range like `(1..n)` may have at most 10 000 items; endless or huge loops stop with "render limit"),
 - `{% render %}` and `{% include %}` are not available, `{% tablerow %}` neither,
 - `styles.css` must not contain `</style>`,
+- the paper must leave room for the body: twice `marginX` less than the page width, `headerHeight + footerHeight` at least 20mm less than the page height,
+- on import, every part must stay within the 200 KB, field keys in `expectedFields` must look like `project_name`, and assets must really be what their extension says,
 - a rendering stops after 5 seconds,
 - no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets).
 

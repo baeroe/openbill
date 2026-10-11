@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { FileCheck2, FilePlus2, FileText, FileX2, type LucideIcon } from 'lucide-react';
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { useCustomer, useCustomerOptions } from '@/api/customers';
 import { createDocument } from '@/api/documents';
 import type { Customer, DocumentType } from '@/api/types';
@@ -22,21 +22,15 @@ const TYPES: { type: DocumentType; icon: LucideIcon }[] = [
 /** Cancellations come from an invoice (CreateDocument refuses them), so the card is only an explanation. */
 const creatable = (type: DocumentType) => type !== 'cancellation';
 
+/** Mounted fresh for every opening (key in NewDocumentProvider), so the start values come from `options` before the first focus. */
 export function NewDocumentDialog({ open, options, onClose }: { open: boolean; options: NewDocumentOptions; onClose(): void }) {
-    const [type, setType] = useState<DocumentType>('offer');
-    const [customerId, setCustomerId] = useState('');
+    const [type, setType] = useState<DocumentType>(options.type && creatable(options.type) ? options.type : 'offer');
+    const [customerId, setCustomerId] = useState(options.customerId ?? '');
     const [query, setQuery] = useState('');
     const [pending, setPending] = useState(false);
     const search = useDebounced(query, 250);
     const customers = useCustomerOptions(search, open);
     const selected = useCustomer(open && customerId ? customerId : null);
-
-    useEffect(() => {
-        if (!open) return;
-        setType(options.type && creatable(options.type) ? options.type : 'offer');
-        setCustomerId(options.customerId ?? '');
-        setQuery('');
-    }, [open, options.type, options.customerId]);
 
     // a preselected customer stays visible even when it is not among the first matches
     const results = customers.data?.items ?? [];
@@ -51,6 +45,23 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
         const next = enabled[(index + step) % enabled.length];
         setType(next.type);
         event.currentTarget.querySelector<HTMLElement>(`[data-type="${next.type}"]`)?.focus();
+    };
+
+    // customers as a radio group: one tab stop, arrow keys move and select (the search field hands over with ArrowDown)
+    const choices = ['', ...list.map((customer) => customer.id)];
+    const focusChoice = (container: HTMLElement | null, id: string) => container?.querySelector<HTMLElement>(`[data-customer="${id}"]`)?.focus();
+    const moveCustomer = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const index = Math.max(0, choices.indexOf(customerId));
+        const next =
+            event.key === 'Home'
+                ? 0
+                : event.key === 'End'
+                  ? choices.length - 1
+                  : (index + (event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : choices.length - 1)) % choices.length;
+        setCustomerId(choices[next]);
+        focusChoice(event.currentTarget, choices[next]);
     };
 
     const submit = async () => {
@@ -113,8 +124,25 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
                 <span id="new-document-customer" className="text-sm font-medium text-muted">
                     {t('new_document.customer')}
                 </span>
-                <SearchInput value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('new_document.search')} aria-label={t('new_document.search')} />
-                <div role="listbox" aria-labelledby="new-document-customer" className="grid max-h-60 grid-cols-[minmax(0,1fr)] gap-0.5 overflow-auto p-0.5">
+                <SearchInput
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key !== 'ArrowDown') return;
+                        e.preventDefault();
+                        focusChoice(document.getElementById('new-document-customers'), customerId);
+                    }}
+                    placeholder={t('new_document.search')}
+                    aria-label={t('new_document.search')}
+                    aria-controls="new-document-customers"
+                />
+                <div
+                    id="new-document-customers"
+                    role="radiogroup"
+                    aria-labelledby="new-document-customer"
+                    onKeyDown={moveCustomer}
+                    className="grid max-h-60 grid-cols-[minmax(0,1fr)] gap-0.5 overflow-auto p-0.5"
+                >
                     {customers.error ? (
                         <p className="p-3 text-sm text-muted">
                             {t('new_document.load_failed')}{' '}
@@ -126,10 +154,11 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
                         Array.from({ length: 3 }, (_, i) => <Skeleton key={i} h={40} r={12} />)
                     ) : (
                         <>
-                            <CustomerOption selected={customerId === ''} onSelect={() => setCustomerId('')} name={t('new_document.later')} />
+                            <CustomerOption id="" selected={customerId === ''} onSelect={() => setCustomerId('')} name={t('new_document.later')} />
                             {list.map((customer) => (
                                 <CustomerOption
                                     key={customer.id}
+                                    id={customer.id}
                                     selected={customerId === customer.id}
                                     onSelect={() => setCustomerId(customer.id)}
                                     name={customer.name}
@@ -145,14 +174,16 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
     );
 }
 
-function CustomerOption({ selected, onSelect, name, meta }: { selected: boolean; onSelect(): void; name: string; meta?: string }) {
+function CustomerOption({ id, selected, onSelect, name, meta }: { id: string; selected: boolean; onSelect(): void; name: string; meta?: string }) {
     return (
         <button
             type="button"
-            role="option"
-            aria-selected={selected}
+            role="radio"
+            data-customer={id}
+            aria-checked={selected}
+            tabIndex={selected ? 0 : -1}
             onClick={onSelect}
-            className={cx('flex w-full min-w-0 items-baseline gap-3 rounded-md px-3 py-[9px] text-left text-ink transition-colors hover:bg-surface-2 aria-selected:bg-accent-soft aria-selected:text-accent')}
+            className={cx('flex w-full min-w-0 items-baseline gap-3 rounded-md px-3 py-[9px] text-left text-ink transition-colors hover:bg-surface-2 aria-checked:bg-accent-soft aria-checked:text-accent')}
         >
             <span className="min-w-0 truncate font-strong">{name}</span>
             {meta && <span className="ml-auto min-w-0 shrink-[2] truncate text-xs text-muted">{meta}</span>}

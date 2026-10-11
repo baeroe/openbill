@@ -6,12 +6,17 @@ const NewDocumentContext = createContext<(options?: NewDocumentOptions) => void>
 /** One "new document" dialog for the whole app (shell button, key N, overview, customer page). */
 export function NewDocumentProvider({ children }: { children: ReactNode }) {
     const [options, setOptions] = useState<NewDocumentOptions | null>(null);
-    const open = useCallback((next: NewDocumentOptions = {}) => setOptions(next), []);
+    // every opening mounts a fresh dialog: its start values come from the options of that opening
+    const [session, setSession] = useState(0);
+    const open = useCallback((next: NewDocumentOptions = {}) => {
+        setOptions(next);
+        setSession((current) => current + 1);
+    }, []);
 
     return (
         <NewDocumentContext value={open}>
             {children}
-            <NewDocumentDialog open={options !== null} options={options ?? {}} onClose={() => setOptions(null)} />
+            {options !== null && <NewDocumentDialog key={session} open options={options} onClose={() => setOptions(null)} />}
         </NewDocumentContext>
     );
 }

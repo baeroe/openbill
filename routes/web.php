@@ -8,10 +8,13 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void {
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', [LoginController::class, 'show'])->name('login');
+        // per-account lockout lives in LoginRequest; this caps password spraying per address
+        Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:20,1');
     });
 
     Route::middleware('auth')->group(function (): void {
         Route::get('/', HomeController::class)->name('home');
+        Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     });
 });
 

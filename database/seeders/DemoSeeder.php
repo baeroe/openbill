@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Actions\SyncBuiltInTemplates;
+use App\Contracts\DocumentArchiver;
 use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
@@ -17,11 +19,10 @@ use App\Models\FieldDefinition;
 use App\Models\NumberSequence;
 use App\Models\Organization;
 use App\Models\TaxRate;
-use App\Actions\SyncBuiltInTemplates;
 use App\Models\Template;
-use App\Support\Actor;
 use App\Models\TextBlock;
 use App\Models\Unit;
+use App\Support\Actor;
 use App\Support\DocumentInspector;
 use App\Support\GroupWriter;
 use App\Support\SnapshotBuilder;
@@ -29,6 +30,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 /**
@@ -58,6 +60,7 @@ class DemoSeeder extends Seeder
         private readonly DocumentInspector $inspector,
         private readonly SnapshotBuilder $snapshots,
         private readonly SyncBuiltInTemplates $builtInTemplates,
+        private readonly DocumentArchiver $archiver,
     ) {}
 
     public function run(): void
@@ -69,7 +72,11 @@ class DemoSeeder extends Seeder
 
         $this->today = CarbonImmutable::today();
 
-        DB::transaction(function (): void {
+        // the old files belong to documents wipe() deletes; removed only after the commit, so a failed run loses nothing
+        $oldFiles = Storage::disk('archive')->allFiles();
+
+        DB::transaction(function () use ($oldFiles): void {
+            DB::afterCommit(fn () => Storage::disk('archive')->delete($oldFiles));
             $this->wipe();
             $this->organization();
             $templates = $this->templates();
@@ -274,7 +281,7 @@ class DemoSeeder extends Seeder
 
         $this->document([
             'type' => DocumentType::Invoice, 'status' => DocumentStatus::Draft, 'number' => null, 'date' => $this->day(0),
-            'customer' => $c['hafenkontor'], 'due_date' => $this->day(14), 'intro' => $invoiceIntro, 'closing' => $payment,
+            'customer' => $c['hafenkontor'], 'service_date' => $this->day(-1), 'due_date' => $this->day(14), 'intro' => $invoiceIntro, 'closing' => $payment,
             'template_id' => $templates['klar'], 'source_id' => $offer1->id, 'custom' => ['project_name' => 'Relaunch Online-Shop', 'po_number' => 'PO-77812'],
             'finalized_at' => null, 'created_at' => $this->stamp(-1), 'updated_at' => $this->stamp(0),
         ], array_map(fn (array $group): array => [
@@ -378,7 +385,8 @@ class DemoSeeder extends Seeder
         $data = $a['finalized_at'] !== null ? $this->snapshots->build($document) : null;
         $document->forceFill(['created_at' => $a['created_at'], 'updated_at' => $a['updated_at'], 'finalized_at' => $a['finalized_at']])->save();
         if ($data !== null) {
-            $document->snapshot()->create(['data' => $data]);
+            $snapshot = $document->snapshot()->create(['data' => $data]);
+            $this->archiver->archive($document, $snapshot);
         }
 
         return $document;

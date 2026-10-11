@@ -69,7 +69,7 @@ final class CiiBuilder
         if ($document->service_date !== null) {
             $cii->setDocumentSupplyChainEvent($document->service_date);
             if ($document->service_date_end !== null) {
-                $cii->setDocumentBillingPeriod($document->service_date, $document->service_date_end);
+                $cii->setDocumentBillingPeriod($document->service_date, $document->service_date_end, null);
             }
         }
         if ($credit && $document->source_id !== null) {
@@ -141,7 +141,7 @@ final class CiiBuilder
     /** @return list<string> */
     private static function libxmlErrors(): array
     {
-        return array_values(array_map(fn (LibXMLError $e): string => trim($e->message)." (line {$e->line})", libxml_get_errors()));
+        return array_map(fn (LibXMLError $e): string => trim($e->message)." (line {$e->line})", libxml_get_errors());
     }
 
     /** BT-120 for exempt categories: the position's tax note (e.g. § 19 UStG), else the first legal note. */

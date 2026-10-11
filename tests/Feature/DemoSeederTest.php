@@ -6,12 +6,14 @@ use App\Enums\DocumentType;
 use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Document;
+use App\Models\DocumentFile;
 use App\Models\DocumentSnapshot;
 use App\Models\FieldDefinition;
 use App\Models\Organization;
 use App\Models\Template;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
+use Illuminate\Support\Facades\Storage;
 
 it('seeds the demo data from the clickdummy', function () {
     $this->seed(DemoSeeder::class);
@@ -69,4 +71,34 @@ it('refuses to run in production', function () {
 
     expect(fn () => app(DemoSeeder::class)->run())->toThrow(RuntimeException::class)
         ->and(Organization::current()->name)->not->toBe('Studio Nordlicht');
+});
+
+it('archives a PDF for every finalized demo document and the XML for e-invoices', function () {
+    $this->seed(DemoSeeder::class);
+
+    $finalized = Document::query()->whereNotNull('finalized_at');
+    expect(DocumentFile::query()->where('kind', 'pdf')->count())->toBe((clone $finalized)->count())
+        ->and(DocumentFile::query()->where('kind', 'xml')->count())->toBe((clone $finalized)->whereIn('type', ['invoice', 'cancellation'])->count());
+    foreach (DocumentFile::all() as $file) {
+        Storage::disk('archive')->assertExists($file->path);
+    }
+});
+
+it('removes the archive files of the previous demo data', function () {
+    $this->seed(DemoSeeder::class);
+    $old = Storage::disk('archive')->allFiles();
+    $this->seed(DemoSeeder::class);
+
+    expect(array_intersect($old, Storage::disk('archive')->allFiles()))->toBe([])
+        ->and(count(Storage::disk('archive')->allFiles()))->toBe(DocumentFile::query()->count());
+});
+
+it('lets the demo invoice draft be finalized as e-invoice', function () {
+    $this->seed(DemoSeeder::class);
+    $draft = Document::query()->where('type', DocumentType::Invoice)->where('status', DocumentStatus::Draft)->firstOrFail();
+
+    $done = app(FinalizeDocument::class)->handle(systemActor(), $draft);
+
+    expect($done->status)->toBe(DocumentStatus::Open)
+        ->and($done->files->map(fn (DocumentFile $file): string => $file->kind->value)->sort()->values()->all())->toBe(['pdf', 'xml']);
 });

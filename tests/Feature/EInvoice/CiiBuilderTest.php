@@ -59,6 +59,15 @@ it('builds an EN 16931 invoice that is valid against the XSD', function () {
         ->toContain('20261018');
 });
 
+it('carries a service period as billing period (BT-73/74)', function () {
+    $xml = ciiOf(draft(DocumentType::Invoice, [itemRow()], ['service_date' => '2026-09-01', 'service_date_end' => '2026-09-30', 'due_date' => '2026-10-18']));
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and($xml)->toContain('BillingSpecifiedPeriod')
+        ->toContain('20260901')
+        ->toContain('20260930');
+});
+
 it('marks small business invoices as exempt (E) with the legal note as reason', function () {
     Organization::current()->forceFill(['taxation_mode' => 'small_business'])->save();
 

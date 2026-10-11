@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\DocumentArchiver;
-use App\Support\NullDocumentArchiver;
+use App\Rendering\PdfDocumentArchiver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,8 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // phase 3 binds the PDF/XML archiver here
-        $this->app->bind(DocumentArchiver::class, NullDocumentArchiver::class);
+        $this->app->bind(DocumentArchiver::class, PdfDocumentArchiver::class);
     }
 
     /**

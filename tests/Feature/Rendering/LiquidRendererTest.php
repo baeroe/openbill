@@ -283,7 +283,24 @@ it('refuses a meta refresh with its part and line instead of letting Gotenberg f
     ]);
 
     expect(array_map(fn ($e) => [$e->part, $e->line], $result->errors))->toBe([[RenderPart::Body, 2], [RenderPart::Footer, 1]])
-        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.meta_refresh'))
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.meta_http_equiv'))
         ->and($result->body)->not->toContain('HTTP-EQUIV')
         ->and($result->footer)->not->toContain('http-equiv=refresh');
 });
+
+it('refuses every meta http-equiv of a template, also written with character references (re-review 2, M1)', function (string $meta) {
+    $result = renderParts(['body' => "<p>ok</p>\n{$meta}"]);
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->part)->toBe(RenderPart::Body)
+        ->and($result->errors[0]->line)->toBe(2)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.meta_http_equiv'))
+        // the CSP openbill puts into the head is not template content
+        ->and($result->body)->toContain('<meta http-equiv="Content-Security-Policy"');
+})->with([
+    'character reference' => ['<meta http-equiv="&#114;efresh" content="0;url=http://example.com/">'],
+    'hex reference' => ['<meta http-equiv="&#x52;EFRESH" content="0">'],
+    'unquoted' => ['<META http-equiv=refresh content=0>'],
+    'own CSP' => ['<meta http-equiv="Content-Security-Policy" content="default-src *">'],
+    'set-cookie' => ["<meta http-equiv='set-cookie' content='a=b'>"],
+]);

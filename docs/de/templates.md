@@ -216,7 +216,7 @@ Ein Template kann openbill weder kaputt machen noch blockieren:
 - das Papier muss Platz für den Inhalt lassen: doppelter `marginX` kleiner als die Seitenbreite, `headerHeight + footerHeight` mindestens 20mm kleiner als die Seitenhöhe,
 - beim Import muss jeder Teil unter 200 KB bleiben, Feldschlüssel in `expectedFields` müssen wie `project_name` aussehen, und Assets müssen wirklich das sein, was ihre Endung sagt,
 - ein Rendering bricht nach 5 Sekunden ab,
-- keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen), und `<meta http-equiv="refresh">` ist ein Template-Fehler,
+- keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen), und jedes `<meta http-equiv>` (refresh, eigene Regeln) ist ein Template-Fehler,
 - ein Rendering darf höchstens 128 MB Speicher nutzen; `capture` und jeder Filter, dessen Ergebnis größer als seine Eingabe werden kann (`replace`, `append`, `join`, `split`, `base64_encode`, `url_encode`, `upcase`, …), prüft die Größe vor dem Aufbau gegen die Ausgabegrenze, Arrays aus Filtern haben höchstens 100 000 Einträge, Zahlen in Rechenfiltern höchstens 1 000 Stellen.
 
 Jeder Fehler wird mit **Bereich** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), **Datei** und **Zeile** gemeldet, zum Beispiel `body · template.liquid · Zeile 3 · Unexpected character }`. Die Vorschau zeigt den Fehler anstelle des kaputten Teils. Abschließen und Entwurfs-PDF verweigern, solange das Template Fehler hat; ein kaputtes Template landet so nie in einem archivierten PDF.

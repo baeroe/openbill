@@ -82,7 +82,7 @@
     "rendering.error.internal": "Internal error while rendering: :message",
     "rendering.error.limit": "The template exceeds the render limit (endless loop or too much output).",
     "rendering.error.memory": "The template needs more memory than allowed (too much data in variables, loops or filters).",
-    "rendering.error.meta_refresh": "<meta http-equiv=\"refresh\"> is not allowed: a document can't navigate away.",
+    "rendering.error.meta_http_equiv": "<meta http-equiv> is not allowed in templates (a document can't refresh, redirect or set its own policy).",
     "rendering.error.no_template": "There is no template. Run php artisan app:sync-templates.",
     "rendering.error.range": "A range may contain at most :max items.",
     "rendering.error.style_tag": "styles.css must not contain </style>.",

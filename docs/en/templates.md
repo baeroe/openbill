@@ -216,7 +216,7 @@ A template can never break openbill or block it:
 - the paper must leave room for the body: twice `marginX` less than the page width, `headerHeight + footerHeight` at least 20mm less than the page height,
 - on import, every part must stay within the 200 KB, field keys in `expectedFields` must look like `project_name`, and assets must really be what their extension says,
 - a rendering stops after 5 seconds,
-- no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets), and `<meta http-equiv="refresh">` is a template error,
+- no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets), and every `<meta http-equiv>` (refresh, own policies) is a template error,
 - a rendering may use at most 128 MB of memory; `capture` and every filter that can make its result larger than its input (`replace`, `append`, `join`, `split`, `base64_encode`, `url_encode`, `upcase`, …) check the size of the result against the output limit before building it, arrays from filters have at most 100 000 items, and numbers in math filters at most 1 000 digits.
 
 Every problem is reported with the **part** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), the **file** and the **line**, for example `body · template.liquid · line 3 · Unexpected character }`. The preview shows the error in place of the broken part. Finalizing and the draft PDF refuse to run while the template has errors, so a broken template never ends up in an archived PDF.

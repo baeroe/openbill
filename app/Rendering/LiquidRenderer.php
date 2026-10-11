@@ -10,6 +10,7 @@ use App\Rendering\Liquid\RenderMemoryException;
 use App\Rendering\Liquid\RenderTimeoutException;
 use App\Support\Text;
 use Brick\Math\BigDecimal;
+use Dom\HTMLDocument;
 use Keepsuit\Liquid\Environment;
 use Keepsuit\Liquid\Exceptions\LiquidException;
 use Keepsuit\Liquid\Exceptions\ResourceLimitException;
@@ -110,9 +111,8 @@ final class LiquidRenderer
                 $env->checkBudget();
             }
 
-            if (preg_match(self::META_REFRESH, $output) === 1) {
-                $line = preg_match(self::META_REFRESH, $source, $m, PREG_OFFSET_CAPTURE) === 1 ? substr_count($source, "\n", 0, $m[0][1]) + 1 : null;
-                $errors[] = new RenderError($part, $line, Text::t('rendering.error.meta_refresh'));
+            if (self::hasMetaHttpEquiv($output)) {
+                $errors[] = new RenderError($part, self::metaHttpEquivLine($source), Text::t('rendering.error.meta_http_equiv'));
 
                 return null;
             }
@@ -155,6 +155,35 @@ final class LiquidRenderer
         }
 
         return $css;
+    }
+
+    /**
+     * No <meta http-equiv> in template content: "refresh" navigates away (no CSP covers navigation; Chromium
+     * then prints an empty page or fails), and refresh/CSP/cookies are openbill's business. The rendered
+     * output is parsed like a browser would (character references like &#114;efresh are decoded), so no
+     * spelling gets past. openbill's own CSP sits in the shell around the part and is not checked here.
+     */
+    private static function hasMetaHttpEquiv(string $html): bool
+    {
+        if (stripos($html, '<meta') === false) {
+            return false;
+        }
+        $document = HTMLDocument::createFromString('<!doctype html><html><body>'.$html.'</body></html>', LIBXML_NOERROR);
+
+        return $document->querySelector('meta[http-equiv]') !== null;
+    }
+
+    /** Line of the first <meta … http-equiv …> in the source, null when the tag only exists in the output. */
+    private static function metaHttpEquivLine(string $source): ?int
+    {
+        preg_match_all('/<meta\b[^>]*>/i', $source, $matches, PREG_OFFSET_CAPTURE);
+        foreach ($matches[0] as [$tag, $offset]) {
+            if (preg_match('/\shttp-equiv\s*=/i', html_entity_decode($tag, ENT_QUOTES | ENT_HTML5)) === 1) {
+                return substr_count($source, "\n", 0, $offset) + 1;
+            }
+        }
+
+        return null;
     }
 
     /** {{ page.number }} / {{ page.total }} become the elements Chromium fills while printing (same line count). */
@@ -209,9 +238,6 @@ final class LiquidRenderer
      * no http(s), see docs/en/development.md).
      */
     public const CSP = "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
-
-    /** <meta http-equiv="refresh"> navigates away (no CSP covers it) and makes Chromium fail the whole PDF. */
-    private const META_REFRESH = '/<meta\b[^>]*http-equiv\s*=\s*["\']?\s*refresh/i';
 
     private static function head(string $locale, string $title): string
     {

@@ -114,7 +114,7 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
                     {t('new_document.customer')}
                 </span>
                 <SearchInput value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('new_document.search')} aria-label={t('new_document.search')} />
-                <div role="listbox" aria-labelledby="new-document-customer" className="grid max-h-60 gap-0.5 overflow-auto p-0.5">
+                <div role="listbox" aria-labelledby="new-document-customer" className="grid max-h-60 grid-cols-[minmax(0,1fr)] gap-0.5 overflow-auto p-0.5">
                     {customers.error ? (
                         <p className="p-3 text-sm text-muted">
                             {t('new_document.load_failed')}{' '}
@@ -152,10 +152,10 @@ function CustomerOption({ selected, onSelect, name, meta }: { selected: boolean;
             role="option"
             aria-selected={selected}
             onClick={onSelect}
-            className={cx('flex w-full items-baseline gap-3 rounded-md px-3 py-[9px] text-left text-ink transition-colors hover:bg-surface-2 aria-selected:bg-accent-soft aria-selected:text-accent')}
+            className={cx('flex w-full min-w-0 items-baseline gap-3 rounded-md px-3 py-[9px] text-left text-ink transition-colors hover:bg-surface-2 aria-selected:bg-accent-soft aria-selected:text-accent')}
         >
             <span className="min-w-0 truncate font-strong">{name}</span>
-            {meta && <span className="ml-auto text-xs whitespace-nowrap text-muted">{meta}</span>}
+            {meta && <span className="ml-auto min-w-0 shrink-[2] truncate text-xs text-muted">{meta}</span>}
         </button>
     );
 }

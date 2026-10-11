@@ -3,6 +3,8 @@ includes:
 
 parameters:
     level: 6
+    # read the casts() method body; its @return array<string, string> hides the casts otherwise
+    parseModelCastsMethod: true
     paths:
         - app
         - bootstrap/app.php

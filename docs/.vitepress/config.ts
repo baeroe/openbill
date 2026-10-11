@@ -2,7 +2,7 @@ import { defineConfig, type DefaultTheme } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 
 // every page exists in docs/en and docs/de under the same file name (tests/Unit/DocsTest.php)
-const pages = ['development'];
+const pages = ['documents', 'development'];
 
 const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.SidebarItem[] => [
     { text: t.guide, items: pages.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
@@ -10,11 +10,13 @@ const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.Sideba
 
 const en: Record<string, string> = {
     guide: 'Guide',
+    documents: 'Documents',
     development: 'Development',
 };
 
 const de: Record<string, string> = {
     guide: 'Anleitung',
+    documents: 'Dokumente',
     development: 'Entwicklung',
 };
 

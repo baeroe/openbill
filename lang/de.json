@@ -7,6 +7,7 @@
     "api.problem.forbidden": "Nicht erlaubt",
     "api.problem.http_error": "Anfrage fehlgeschlagen",
     "api.problem.invalid_json": "Der Request-Body ist kein gültiges JSON.",
+    "api.problem.link_outdated": "Dieser Link gehört zu einem älteren Stand des Entwurfs. Bitte einen neuen Link anfordern.",
     "api.problem.method_not_allowed": "Methode nicht erlaubt",
     "api.problem.missing_ability": "Dieser Token darf das nicht (benötigt: :rule).",
     "api.problem.not_acceptable": "Format nicht verfügbar",

@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\FinalizeDocument;
+use App\Actions\UpdateDraft;
 use App\Enums\DocumentFileKind;
 use App\Enums\DocumentType;
 use App\Models\DocumentTypeSetting;
@@ -73,4 +74,20 @@ it('needs a token with read access for the direct download', function () {
 
     $this->get("/api/documents/{$draft->id}/pdf", ['Accept' => 'application/json'])->assertUnauthorized();
     $this->withToken(apiToken(['templates:render']))->get("/api/documents/{$draft->id}/pdf", ['Accept' => 'application/json'])->assertForbidden();
+});
+
+it('ties a signed draft link to the state of the draft', function () {
+    $draft = draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95')]);
+    $link = app(SignedDownloads::class)->link($draft, DocumentFileKind::Pdf);
+
+    $this->get($link['url'])->assertOk()->assertHeader('Content-Type', 'application/pdf');
+
+    $this->travel(2)->seconds();
+    app(UpdateDraft::class)->handle(systemActor(), $draft->fresh(), ['intro' => 'Changed after the link was made']);
+
+    $this->get($link['url'], ['Accept' => 'application/json'])
+        ->assertForbidden()
+        ->assertJsonPath('reason', 'forbidden')
+        ->assertJsonPath('detail', 'This link belongs to an older state of the draft. Ask for a new link.');
+    $this->get(app(SignedDownloads::class)->link($draft->fresh(), DocumentFileKind::Pdf)['url'])->assertOk();
 });

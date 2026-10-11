@@ -11,6 +11,7 @@ use Illuminate\Cache\ArrayStore;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Symfony\Component\Process\Process;
 
 it('serves the OpenAPI document under /api/docs', function () {
     $this->get('/api/docs.jsonopenapi')
@@ -65,3 +66,12 @@ it('gets API Platform metadata back from the APCu store as objects', function ()
 
     expect(Cache::store('api-platform')->get('test-metadata'))->toBeInstanceOf(ResourceMetadataCollection::class);
 })->skip(fn () => ! (function_exists('apcu_enabled') && apcu_enabled()), 'APCu is off in this PHP (CLI: apc.enable_cli)');
+
+it('boots without debug, where API Platform uses the metadata store while providers boot', function () {
+    // composer install (post-autoload-dump) runs artisan exactly like this in CI and in the Docker build
+    $process = new Process(['php', 'artisan', 'route:list', '--path=api/units'], base_path(), ['APP_DEBUG' => 'false']);
+    $process->run();
+
+    expect($process->getExitCode())->toBe(0, $process->getErrorOutput().$process->getOutput())
+        ->and($process->getOutput())->toContain('api/units');
+});

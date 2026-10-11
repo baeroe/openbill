@@ -8,11 +8,11 @@ use App\Models\PersonalAccessToken;
 use App\OpenApi\OpenApiFactory;
 use App\Rendering\PdfDocumentArchiver;
 use App\Support\Cache\MetadataStore;
+use Illuminate\Cache\CacheManager;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -26,6 +26,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(DocumentArchiver::class, PdfDocumentArchiver::class);
 
+        // store "api-platform": APCu or array, decided per process (not frozen by config:cache). Registered
+        // when the cache manager is made: API Platform's provider may use the store before boot() of this one
+        $this->app->afterResolving('cache', fn (CacheManager $cache) => $cache->extend(
+            MetadataStore::DRIVER,
+            fn (Application $app): Repository => $cache->repository(MetadataStore::make()),
+        ));
+
         // routes/api.php in the OpenAPI document (/api/docs); api:openapi:export uses API Platform's concrete factory
         $this->app->extend(OpenApiFactoryInterface::class, fn (OpenApiFactoryInterface $factory): OpenApiFactoryInterface => new OpenApiFactory($factory));
     }
@@ -36,9 +43,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
-
-        // store "api-platform": APCu or array, decided per process (not frozen by config:cache)
-        Cache::extend(MetadataStore::DRIVER, fn (Application $app): Repository => Cache::repository(MetadataStore::make()));
 
         // editor autosave (600 ms) and preview (250 ms) stay well below this per open editor
         // only a valid token gets its own bucket; anything else (no token, made-up tokens) shares the IP's

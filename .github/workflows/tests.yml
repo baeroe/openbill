@@ -15,21 +15,21 @@ jobs:
           version: 12
       - uses: actions/setup-node@v4
         with:
-          node-version-file: clickdummy-v2/.node-version
+          node-version-file: prototypes/clickdummy-v2/.node-version
           cache: pnpm
           cache-dependency-path: |
-            clickdummy/pnpm-lock.yaml
-            clickdummy-v2/pnpm-lock.yaml
+            prototypes/clickdummy/pnpm-lock.yaml
+            prototypes/clickdummy-v2/pnpm-lock.yaml
       # Fachlogik: Summen, Steuern, Nummernkreise, Dokumentkette, Liquid-Rendering, Seitenumbruch
       - name: clickdummy
-        working-directory: clickdummy
+        working-directory: prototypes/clickdummy
         run: |
           pnpm install --frozen-lockfile
           pnpm typecheck
           pnpm test
           pnpm build
       - name: clickdummy-v2
-        working-directory: clickdummy-v2
+        working-directory: prototypes/clickdummy-v2
         run: |
           pnpm install --frozen-lockfile
           pnpm typecheck

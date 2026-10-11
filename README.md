@@ -2,7 +2,7 @@
 
 Open, self-hosted quotes and invoices. Define your own fields for documents and line items, write your own PDF templates in Liquid, and get German/EU e-invoices (EN 16931, ZUGFeRD/XRechnung) out of the box.
 
-> **Status:** concept phase. This repository currently contains a clickable prototype (`clickdummy/`) used to settle scope and design before the real Laravel implementation.
+> **Status:** concept phase. The clickable prototypes live in `prototypes/`; the real Laravel app is being built in phases.
 
 ## What it does (planned)
 
@@ -17,7 +17,7 @@ Open, self-hosted quotes and invoices. Define your own fields for documents and 
 ## Clickdummy
 
 ```bash
-cd clickdummy
+cd prototypes/clickdummy-v2
 pnpm install
 pnpm dev     # http://localhost:5173
 pnpm test    # domain logic tests

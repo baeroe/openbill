@@ -2,7 +2,7 @@
 
 Stand: 2026-10-11 · Status: Entwurf zur Abstimmung
 
-> **Änderungen vom 2026-10-11 (Klickdummy v2):** Projektphasen, Kategorien und Katalog entfallen, stattdessen gibt es Positionsgruppen im Dokument (2.6). Alle eigenen Felder werden an einem Ort gepflegt, Dokument- und Positionsfelder einmal definiert und per Häkchen den Dokumenttypen zugeordnet (2.3). Neue Gestaltung „Graphit & Kobalt“ ohne Tailwind (3.4, `clickdummy-v2/DESIGN.md`).
+> **Änderungen vom 2026-10-11 (Klickdummy v2):** Projektphasen, Kategorien und Katalog entfallen, stattdessen gibt es Positionsgruppen im Dokument (2.6). Alle eigenen Felder werden an einem Ort gepflegt, Dokument- und Positionsfelder einmal definiert und per Häkchen den Dokumenttypen zugeordnet (2.3). Neue Gestaltung „Graphit & Kobalt“ ohne Tailwind (3.4, `prototypes/clickdummy-v2/DESIGN.md`).
 
 ## 1. Ziel & Kontext
 
@@ -117,9 +117,9 @@ Ein durchklickbarer Prototyp, der alle oben genannten Funktionen sichtbar und be
 
 ### 3.2 Technik
 
-> **v2 (`clickdummy-v2/`):** Vite + React + TypeScript, React Router, eigenes CSS mit Tokens (kein Tailwind, keine UI-Library), TanStack Query über einer Fake-API (`src/api/*`, später gegen echte Endpunkte tauschbar), Zustand nur für Client-State, liquidjs, CodeMirror 6, @dnd-kit, lucide-react. Die Punkte unten beschreiben v1.
+> **v2 (`prototypes/clickdummy-v2/`):** Vite + React + TypeScript, React Router, eigenes CSS mit Tokens (kein Tailwind, keine UI-Library), TanStack Query über einer Fake-API (`src/api/*`, später gegen echte Endpunkte tauschbar), Zustand nur für Client-State, liquidjs, CodeMirror 6, @dnd-kit, lucide-react. Die Punkte unten beschreiben v1.
 
-- `clickdummy/` im Repo-Root (Phase 2 bekommt später eigene Ordner).
+- `prototypes/clickdummy/` (ursprünglich `clickdummy/` im Repo-Root; mit Phase 1 der App nach `prototypes/` verschoben).
 - Vite + React + TypeScript, React Router, **pnpm**.
 - Styling mit **Tailwind CSS v4** (Design-Tokens via `@theme`), Light + Dark.
 - **Keine UI-Library** (kein shadcn o. Ä.); eigenes kleines Komponentenset auf Tailwind-Basis.
@@ -150,7 +150,7 @@ Umsetzung mit dem Frontend-Design-Skill. Leitlinie: **modern, ruhig, eigenständ
 - Richtung **„Graphit & Kobalt“** (v2, gewählt am 2026-10-11 aus vier Moodboards; der erste Entwurf „Papier & Präzision“ wirkte zu steif): neutral-modern und weich, Ebenen durch Tonwerte statt Rahmen und Schatten, Pillen für Filter und Buttons, viel Luft.
 - Ein Akzent (Kobalt), sparsam eingesetzt; Tokens als CSS-Variablen in eigenem CSS, **ohne Tailwind und ohne UI-Library**; Dark Mode gleichwertig.
 - Eine Schriftfamilie (Schibsted Grotesk), Mono nur im Template-Editor.
-- Details und Tokens: `clickdummy-v2/DESIGN.md`.
+- Details und Tokens: `prototypes/clickdummy-v2/DESIGN.md`.
 - Desktop-first (Arbeitswerkzeug), Tablet nutzbar; Mobile nur Grundbedienbarkeit.
 
 ### 3.5 Erfolgskriterien

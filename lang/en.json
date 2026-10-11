@@ -35,6 +35,7 @@
     "errors.decimal": "Enter a number as a string with a dot and at most :scale decimals, e.g. \"12.50\".",
     "errors.document_locked": ":number is finalized and can no longer be changed.",
     "errors.duplicate_cancellation": "Cancellations cannot be duplicated.",
+    "errors.no_e_invoice": "This document has no e-invoice XML (only finalized invoices and cancellations with the EN 16931 profile have one).",
     "errors.number_pattern_year": "With a yearly reset the pattern needs {YYYY} or {YY}.",
     "errors.optional_only_offers": "Optional positions are only allowed in offers.",
     "errors.percent_range": "The rate must be between 0 and 100.",

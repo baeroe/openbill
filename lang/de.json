@@ -35,6 +35,7 @@
     "errors.decimal": "Bitte eine Zahl als Text mit Punkt und höchstens :scale Nachkommastellen angeben, z. B. \"12.50\".",
     "errors.document_locked": ":number ist abgeschlossen und lässt sich nicht mehr ändern.",
     "errors.duplicate_cancellation": "Stornos lassen sich nicht duplizieren.",
+    "errors.no_e_invoice": "Zu diesem Dokument gibt es keine E-Rechnung (nur abgeschlossene Rechnungen und Stornos mit dem Profil EN 16931 haben eine).",
     "errors.number_pattern_year": "Bei jährlichem Zurücksetzen braucht das Muster {YYYY} oder {YY}.",
     "errors.optional_only_offers": "Optionale Positionen gibt es nur in Angeboten.",
     "errors.percent_range": "Der Satz muss zwischen 0 und 100 liegen.",

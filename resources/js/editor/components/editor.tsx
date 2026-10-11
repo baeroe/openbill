@@ -1,7 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { PanelRightOpen } from 'lucide-react';
 import { useMemo } from 'react';
-import { keys } from '@/api/keys';
 import type { DocumentDetail, DocumentPageContext } from '@/api/types';
 import { Button, cx, Tag } from '@/components/ui';
 import { t } from '@/lib/i18n';
@@ -9,10 +8,12 @@ import { useStoredFlag } from '@/lib/prefs';
 import { jumpToIssue } from '../jump';
 import { fromDocument } from '../ops';
 import { useEditor } from '../store';
+import { useDocumentActions } from '../use-actions';
 import { useAutosave } from '../use-autosave';
 import { useRenderPreview } from '../use-preview';
 import { ChainBar } from './chain-bar';
 import { CompliancePanel } from './compliance-panel';
+import { EditorActions } from './editor-actions';
 import { EditorHeader } from './editor-header';
 import { GroupsEditor } from './groups-editor';
 import { HeaderFields } from './header-fields';
@@ -40,7 +41,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
     const expandAll = useEditor((state) => state.expandAll);
     const jump = (target: string) => jumpToIssue(target, expandAll);
     const templateName = context.templates.find((template) => template.id === draft.template_id)?.name ?? '–';
-    const openPdf = () => window.open(keys.documentPdf(document.id), '_blank', 'noopener');
+    const actions = useDocumentActions({ document, issues, flush: autosave.flush, expand: expandAll });
     const messages = useMemo(() => ({ ...Object.fromEntries(issues.map((issue) => [issue.path, issue.message])), ...errors }), [issues, errors]);
     const title = `${t(`document_type.${document.type}`)} ${document.number ?? t('overview.draft_label')}`;
 
@@ -54,6 +55,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                             {t('editor.preview_show')}
                         </Button>
                     )}
+                    <EditorActions document={document} context={context} actions={actions} />
                 </EditorHeader>
                 <ChainBar chain={context.chain} currentId={document.id} />
                 <ReadOnlyNotice document={document} saveState={saveState} />
@@ -84,7 +86,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                         error={preview.error}
                         templateName={templateName}
                         onClose={() => setPreviewOpen(false)}
-                        onPdf={openPdf}
+                        onPdf={() => void actions.openPdf()}
                     />
                 </div>
             )}

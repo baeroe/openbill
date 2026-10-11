@@ -18,6 +18,7 @@ use App\State\Provider\TaxRateProvider;
 /** Tax rate. DELETE archives it (positions and snapshots keep pointing at it). */
 #[ApiResource(
     shortName: 'TaxRate',
+    normalizationContext: Normalization::CONTEXT,
     operations: [
         new GetCollection(
             uriTemplate: '/tax-rates',

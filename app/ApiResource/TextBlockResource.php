@@ -18,6 +18,7 @@ use App\State\Provider\TextBlockProvider;
 /** Reusable intro/closing/payment/note text; may contain Liquid placeholders. */
 #[ApiResource(
     shortName: 'TextBlock',
+    normalizationContext: Normalization::CONTEXT,
     operations: [
         new GetCollection(
             uriTemplate: '/text-blocks',

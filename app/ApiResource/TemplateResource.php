@@ -23,14 +23,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
 /** Liquid template (header, body, footer, styles, manifest, assets). Built-in templates are read-only. */
 #[ApiResource(
     shortName: 'Template',
-    normalizationContext: ['groups' => [self::ITEM], 'preserve_empty_objects' => true, 'skip_null_values' => false],
+    normalizationContext: [...Normalization::CONTEXT, 'groups' => [self::ITEM]],
     operations: [
         new GetCollection(
             uriTemplate: '/templates',
             paginationEnabled: false,
             middleware: ApiMiddleware::READ,
             provider: TemplateProvider::class,
-            normalizationContext: ['groups' => [self::LIST], 'preserve_empty_objects' => true, 'skip_null_values' => false],
+            normalizationContext: [...Normalization::CONTEXT, 'groups' => [self::LIST]],
         ),
         new Get(uriTemplate: '/templates/{id}', middleware: ApiMiddleware::TEMPLATE_READ, provider: TemplateProvider::class),
         new Post(

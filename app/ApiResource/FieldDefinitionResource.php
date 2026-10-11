@@ -18,6 +18,7 @@ use App\State\Provider\FieldDefinitionProvider;
 /** Custom field of one level. scope and key are fixed after creation (templates use the key). */
 #[ApiResource(
     shortName: 'FieldDefinition',
+    normalizationContext: Normalization::CONTEXT,
     operations: [
         new GetCollection(
             uriTemplate: '/field-definitions',

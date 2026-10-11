@@ -14,6 +14,7 @@ use App\State\Provider\DocumentTypeProvider;
 /** Settings per document type: compliance profile, template, default texts, terms and number range. */
 #[ApiResource(
     shortName: 'DocumentType',
+    normalizationContext: Normalization::CONTEXT,
     operations: [
         new GetCollection(uriTemplate: '/document-types', paginationEnabled: false, middleware: ApiMiddleware::READ, provider: DocumentTypeProvider::class),
         new Get(uriTemplate: '/document-types/{type}', middleware: ApiMiddleware::READ, provider: DocumentTypeProvider::class),

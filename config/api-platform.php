@@ -2,6 +2,7 @@
 
 use ApiPlatform\Metadata\Operation\DashPathSegmentNameGenerator;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
+use App\ApiResource\Normalization;
 
 return [
     'title' => 'openbill API',
@@ -54,7 +55,7 @@ return [
         'route_prefix' => '/api',
         'middleware' => [],
         // null stays in the answer ("number": null): clients get every field of the documented shape
-        'normalization_context' => ['skip_null_values' => false],
+        'normalization_context' => Normalization::CONTEXT,
     ],
 
     'pagination' => [

@@ -15,7 +15,7 @@ use ArrayObject;
 /** The one organization of this instance (sender of every document). The logo upload comes in phase 7. */
 #[ApiResource(
     shortName: 'Organization',
-    normalizationContext: ['preserve_empty_objects' => true, 'skip_null_values' => false],
+    normalizationContext: Normalization::CONTEXT,
     operations: [
         new Get(uriTemplate: '/organization', uriVariables: [], middleware: ApiMiddleware::READ, provider: OrganizationProvider::class),
         new Patch(uriTemplate: '/organization', uriVariables: [], middleware: ApiMiddleware::WRITE, read: false, deserialize: false, processor: OrganizationProcessor::class),

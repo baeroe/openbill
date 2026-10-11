@@ -18,6 +18,7 @@ use App\State\Provider\UnitProvider;
 /** Unit with UN/ECE Recommendation 20 code (HUR, DAY, H87, …). DELETE archives it. */
 #[ApiResource(
     shortName: 'Unit',
+    normalizationContext: Normalization::CONTEXT,
     operations: [
         new GetCollection(
             uriTemplate: '/units',

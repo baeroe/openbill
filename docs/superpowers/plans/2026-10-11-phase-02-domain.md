@@ -117,7 +117,7 @@ Alle Actions sind `final`, werden über den Container geholt (`app(X::class)->ha
 
 - `DocumentLockedException` – 409; Properties `documentId`, `number`, `fields` (list der verbotenen Spalten). Fabrik `DocumentLockedException::for(Document $document, array $fields = [])`.
 - `ComplianceFailedException` – 422; Property `issues` (`list<App\Domain\Compliance\ComplianceIssue>`), `toArray(): list<array{path: string, message: string}>` (übersetzt in die aktuelle App-Sprache). Message: `compliance.failed` mit `:count`.
-- `ActionNotAllowedException` – 409; Property `reason` (`status_transition`, `conversion`, `duplicate_cancellation`, `cancellation_needs_invoice`, `cancellation_source`, `customer_has_finalized_documents`).
+- `ActionNotAllowedException` – 409; Property `reason` (`status_transition`, `conversion`, `duplicate_cancellation`, `cancellation_needs_invoice`, `cancellation_source`, `cancellation_customer` (Review-Fix-Runde 1), `customer_has_finalized_documents`).
 
 **Support** (`App\Support`):
 
@@ -132,6 +132,7 @@ Alle Actions sind `final`, werden über den Container geholt (`app(X::class)->ha
   units:     list of id, name, symbol, decimals, code, archived
   template:  null | id, name, slug, version, manifest, header, body, footer, css
   field_definitions: list of id, scope, key, label, type, required, default_value, help, options, doc_types
+  legal_notes: small_business, reverse_charge, third_country (texts in the document language; added in review fix round 1)
   ```
 - `ConversionResult` (readonly): `document: Document`, `droppedFields: list<string>` (`document.<key>` / `position.<key>`).
 - `EventLog::record(Document, Actor, EventAction, array $payload = []): DocumentEvent`.

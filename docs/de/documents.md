@@ -39,12 +39,14 @@ Abschließen macht aus einem Entwurf ein offenes Dokument (ein Storno wird abges
 
 1. prüft openbill das Prüfprofil des Dokumenttyps (siehe unten) und bricht mit einer Liste der fehlenden Angaben ab,
 2. vergibt die nächste Nummer aus dem Nummernkreis,
-3. friert die Stammdaten ein, die das Dokument nutzt (Organisation, Kunde, Ansprechpartner, Steuersätze, Einheiten, Template und Felddefinitionen),
+3. friert die Stammdaten ein, die das Dokument nutzt (Organisation, Kunde, Ansprechpartner, Steuersätze, Einheiten, Template, Felddefinitionen und die Texte der gesetzlichen Hinweise),
 4. speichert die Summen.
 
 Scheitert ein Schritt, ändert sich nichts: Das Dokument bleibt Entwurf und die Nummer bleibt frei.
 
 Danach ist das Dokument **gesperrt**. Nur Status, Zahlungsdatum und der Verweis auf das Storno können sich noch ändern. Spätere Änderungen an Kunden, Steuersätzen, Einheiten, Templates oder eigenen Feldern wirken nicht mehr, weil das Dokument aus seinen eingefrorenen Stammdaten angezeigt und berechnet wird. Eine Rechnung korrigierst du mit einem Storno und einer neuen Rechnung.
+
+Die Sperre sichert auch die Datenbank ab: Schreibzugriffe, die ein abgeschlossenes Dokument, seine Gruppen oder Positionen ändern, und jede Änderung an eingefrorenen Stammdaten oder archivierten Dateien werden abgelehnt, egal auf welchem Weg sie kommen. Ein abgeschlossenes Dokument wird nie wieder zum Entwurf.
 
 ### Prüfprofile
 
@@ -65,7 +67,7 @@ Dokumente lassen sich entlang der Kette umwandeln:
 
 Das neue Dokument ist ein Entwurf mit Kunde, Ansprechpartner, Gruppen, Positionen und Texten der Quelle. Optionale Positionen fallen weg, danach leere Gruppen ebenfalls. Werte eigener Felder wandern mit, wenn das Feld auch für den Zieltyp gilt; andere Werte fallen weg und werden gemeldet. Jedes Dokument kennt seine Quelle, und eine Rechnung kennt das Storno, das sie storniert hat.
 
-Ein Storno übernimmt die Positionen seiner Rechnung mit negativen Mengen. Jede Rechnung hat höchstens ein Storno; ein zweiter Versuch liefert den vorhandenen Entwurf. Wird das Storno abgeschlossen, ist die Rechnung **storniert**.
+Ein Storno übernimmt die Positionen seiner Rechnung mit negativen Mengen. Jede Rechnung hat höchstens ein Storno; ein zweiter Versuch liefert den vorhandenen Entwurf. Ein Storno gehört immer zum Kunden seiner Rechnung; der Kunde lässt sich nicht ändern. Wird das Storno abgeschlossen, ist die Rechnung **storniert**, und eine stornierte Rechnung lässt sich nicht mehr auf bezahlt setzen.
 
 Duplizieren legt einen neuen Entwurf mit heutigem Datum an, ohne Nummer und ohne Kette. Stornos lassen sich nicht duplizieren.
 
@@ -88,7 +90,7 @@ Vorgaben: `Q-{YYYY}-{0000}` (Angebote), `OC-{YYYY}-{0000}` (Auftragsbestätigung
 
 ## Protokoll
 
-Jede Änderung an einem Dokument wird mit Urheber (Benutzer, API-Token oder System) protokolliert: angelegt, geändert, abgeschlossen, Status geändert, umgewandelt, storniert, dupliziert, gelöscht. Einträge gelöschter Entwürfe bleiben im Protokoll.
+Jede Änderung an einem Dokument wird mit Urheber (Benutzer, API-Token oder System; bei einem Token auch der zugehörige Benutzer, der auch nach dem Löschen des Tokens im Protokoll bleibt) protokolliert: angelegt, geändert, abgeschlossen, Status geändert, umgewandelt, storniert, dupliziert, gelöscht. Einträge gelöschter Entwürfe bleiben im Protokoll.
 
 ## Demo-Daten
 

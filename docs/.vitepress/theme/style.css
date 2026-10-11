@@ -1,0 +1,23 @@
+/* openbill tokens (prototypes/clickdummy-v2/DESIGN.md, "Graphit & Kobalt"), mapped onto VitePress variables */
+:root {
+    --vp-font-family-base: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --vp-c-bg: #f4f4f2;
+    --vp-c-bg-alt: #ffffff;
+    --vp-c-bg-elv: #ffffff;
+    --vp-c-bg-soft: #ecece9;
+    --vp-c-text-1: #23252b;
+    --vp-c-text-2: #73767e;
+    --vp-c-text-3: #a2a4aa;
+    --vp-c-divider: #e3e3df;
+    --vp-c-gutter: #e3e3df;
+
+    --vp-c-brand-1: #2f55d4;
+    --vp-c-brand-2: #2647b8;
+    --vp-c-brand-3: #2f55d4;
+    --vp-c-brand-soft: #e3e9fb;
+
+    --vp-button-brand-bg: #2f55d4;
+    --vp-button-brand-hover-bg: #2647b8;
+    --vp-button-brand-text: #ffffff;
+}

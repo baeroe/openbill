@@ -6,4 +6,8 @@ packages:
 
 # pnpm fails on dependency build scripts nobody reviewed (strictDepBuilds).
 # Allow only packages that fetch or build a native binary; block everything else explicitly.
-allowBuilds: {}
+allowBuilds:
+  esbuild: true
+
+overrides:
+  vitepress>vite: ^6.4.3

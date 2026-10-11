@@ -95,6 +95,12 @@ jobs:
       - name: Vitest
         run: pnpm test
 
+      # workspace packages (paged-preview: page geometry and breaks)
+      - name: Packages
+        run: |
+          pnpm --filter "./packages/*" run typecheck
+          pnpm --filter "./packages/*" run test
+
       - name: Build
         run: pnpm build
 

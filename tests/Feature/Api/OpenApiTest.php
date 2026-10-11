@@ -5,6 +5,7 @@ it('documents every resource, document action and file endpoint in OpenAPI', fun
 
     expect($doc['openapi'])->toStartWith('3.')
         ->and($doc['info']['title'])->toBe('openbill API')
+        ->and($doc['info']['license']['name'])->toBe('MIT')
         ->and(array_keys($doc['paths']))->toContain(
             '/api/customers', '/api/customers/{id}',
             '/api/documents', '/api/documents/{id}',

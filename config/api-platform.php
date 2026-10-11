@@ -98,6 +98,10 @@ return [
 
     'swagger_ui' => [
         'enabled' => true,
+        'license' => [
+            'name' => 'MIT',
+            'url' => 'https://opensource.org/licenses/MIT',
+        ],
         'http_auth' => [
             'Sanctum token' => [
                 'scheme' => 'bearer',

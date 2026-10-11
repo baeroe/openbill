@@ -38,3 +38,7 @@ Route::get('/downloads/documents/{id}/{kind}', SignedDownloadController::class)
 Route::get('/templates/{id}/package', TemplatePackageController::class)
     ->middleware(ApiMiddleware::TEMPLATE_READ)
     ->name('api.templates.package');
+
+// API Platform's own error pages (/api/errors/{status}) are no data: same URI as API Platform's route, so this
+// one replaces it (registered later) and answers 404 like any unknown path
+Route::get('/errors/{status}{_format?}', fn () => abort(404))->name('api.errors');

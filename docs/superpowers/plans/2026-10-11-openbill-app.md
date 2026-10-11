@@ -279,7 +279,7 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l√
 - [x] Phase 2: Domain & Datenmodell
 - [x] Phase 3: Rendering, PDF, E-Rechnung
 - [x] Phase 4: REST-API
-- [ ] Phase 5: UI-Basis
+- [x] Phase 5: UI-Basis
 - [ ] Phase 6: Dokument-Editor
 - [ ] Phase 7: Templates, eigene Felder, Einstellungen
 - [ ] Phase 8: MCP

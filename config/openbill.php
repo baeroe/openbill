@@ -19,6 +19,7 @@ return [
         'max_render_score' => 200_000,        // Liquid nodes and loop iterations per part
         'max_assign_score' => 50_000,         // assign/capture work per part
         'max_range' => 10_000,                // items in a range like (1..n)
+        'max_seconds' => 5,                   // wall clock for all parts of one rendering (finalize holds the number lock)
     ],
 
     /*

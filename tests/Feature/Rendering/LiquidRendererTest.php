@@ -176,3 +176,37 @@ it('uses the template translations from the manifest', function () {
 
     expect($result->body)->toContain('Beleg-Nr.');
 });
+
+it('stops huge output in nested loops while streaming, before memory runs out (review #2)', function () {
+    // 10 000 × 15 × 150 KB would be ~22 GB: render() only checks the length at the end and dies with a fatal error
+    memory_reset_peak_usage();
+    $before = memory_get_usage();
+    $start = microtime(true);
+
+    $result = renderParts(
+        ['body' => '{% for a in (1..10000) %}{% for b in (1..15) %}{{ long }}{% endfor %}{% endfor %}'],
+        [...rendererContext(), 'long' => str_repeat('x', 150_000)],
+    );
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->part)->toBe(RenderPart::Body)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.limit'))
+        ->and(memory_get_peak_usage() - $before)->toBeLessThan(128 * 1024 * 1024)
+        ->and(microtime(true) - $start)->toBeLessThan(5);
+});
+
+it('stops an expensive filter in a loop at the deadline (review #2)', function () {
+    config(['openbill.rendering.max_seconds' => 1]);
+    $start = microtime(true);
+
+    // each iteration splits a 90 KB string: within the render score limit this would run for about a minute
+    $result = renderParts(
+        ['body' => "x\n{% for a in (1..1000) %}{% for b in (1..100) %}{{ big | split: ',' | size }}{% endfor %}{% endfor %}"],
+        [...rendererContext(), 'big' => str_repeat('a,', 45_000)],
+    );
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->part)->toBe(RenderPart::Body)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.time', ['seconds' => 1]))
+        ->and(microtime(true) - $start)->toBeLessThan(3);
+});

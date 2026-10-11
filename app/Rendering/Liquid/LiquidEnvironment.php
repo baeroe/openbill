@@ -9,7 +9,8 @@ use Keepsuit\Liquid\Render\ResourceLimits;
 /**
  * The sandbox templates run in: strict parsing (keepsuit always), unknown filters are errors, unknown
  * variables render empty, errors are rethrown (with line numbers) instead of printed, resource limits from
- * config('openbill.rendering'), no file system (render/include fail), no tablerow.
+ * config('openbill.rendering') (LiquidRenderer adds a deadline per rendering: RenderLimits), no file system
+ * (render/include fail), no tablerow.
  */
 final class LiquidEnvironment
 {

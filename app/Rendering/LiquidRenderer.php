@@ -5,6 +5,8 @@ namespace App\Rendering;
 use App\Enums\RenderPart;
 use App\Rendering\Liquid\LiquidEnvironment;
 use App\Rendering\Liquid\RenderEnv;
+use App\Rendering\Liquid\RenderLimits;
+use App\Rendering\Liquid\RenderTimeoutException;
 use App\Support\Text;
 use Brick\Math\BigDecimal;
 use Keepsuit\Liquid\Environment;
@@ -46,7 +48,7 @@ final class LiquidRenderer
             $errors[] = new RenderError(RenderPart::Manifest, null, $message);
         }
         $paper = Paper::fromManifest($template->manifest);
-        $env = new RenderEnv($options->locale, self::translations($template->manifest));
+        $env = new RenderEnv($options->locale, self::translations($template->manifest), RenderEnv::deadlineIn((int) config('openbill.rendering.max_seconds')));
 
         $document = is_array($context['document'] ?? null) ? $context['document'] : [];
         foreach ([[RenderPart::Intro, 'intro'], [RenderPart::Closing, 'closing']] as [$part, $key]) {
@@ -93,9 +95,18 @@ final class LiquidRenderer
         }
 
         try {
-            return $this->liquid->parseString($source)->render(
-                $this->liquid->newRenderContext(data: $data, registers: [RenderEnv::REGISTER => $env]),
-            );
+            $context = $this->liquid->newRenderContext(data: $data, registers: [RenderEnv::REGISTER => $env], resourceLimits: new RenderLimits($env));
+            // streamed: keepsuit checks the output length per chunk (render() only at the very end, after
+            // the whole string is in memory), and the deadline is checked between chunks as well
+            $output = '';
+            foreach ($this->liquid->parseString($source)->stream($context) as $chunk) {
+                $output .= $chunk;
+                $env->checkDeadline();
+            }
+
+            return $output;
+        } catch (RenderTimeoutException) {
+            $errors[] = new RenderError($part, null, Text::t('rendering.error.time', ['seconds' => (int) config('openbill.rendering.max_seconds')]));
         } catch (ResourceLimitException) {
             $errors[] = new RenderError($part, null, Text::t('rendering.error.limit'));
         } catch (LiquidException $e) {

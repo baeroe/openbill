@@ -77,6 +77,7 @@
     "rendering.error.no_template": "There is no template. Run php artisan app:sync-templates.",
     "rendering.error.range": "A range may contain at most :max items.",
     "rendering.error.style_tag": "styles.css must not contain </style>.",
+    "rendering.error.time": "The template took longer than :seconds seconds to render.",
     "rendering.error.too_large": "This part is larger than :kb KB.",
     "rendering.error_box": "Template error in :part",
     "rendering.failed": "The template has errors (:count).",

@@ -17,7 +17,9 @@ use App\Models\FieldDefinition;
 use App\Models\NumberSequence;
 use App\Models\Organization;
 use App\Models\TaxRate;
+use App\Actions\SyncBuiltInTemplates;
 use App\Models\Template;
+use App\Support\Actor;
 use App\Models\TextBlock;
 use App\Models\Unit;
 use App\Support\DocumentInspector;
@@ -55,6 +57,7 @@ class DemoSeeder extends Seeder
     public function __construct(
         private readonly DocumentInspector $inspector,
         private readonly SnapshotBuilder $snapshots,
+        private readonly SyncBuiltInTemplates $builtInTemplates,
     ) {}
 
     public function run(): void
@@ -121,25 +124,7 @@ class DemoSeeder extends Seeder
     /** @return array<string, string> slug => id */
     private function templates(): array
     {
-        $ids = [];
-        foreach (['klar' => 'Klar', 'kante' => 'Kante', 'leise' => 'Leise'] as $slug => $name) {
-            $ids[$slug] = Template::query()->create([
-                'name' => $name,
-                'slug' => $slug,
-                'version' => '0.0.0',
-                'author' => 'openbill',
-                'license' => 'MIT',
-                'description' => 'Placeholder until phase 3 ships the real template.',
-                'built_in' => true,
-                'manifest' => ['paper' => ['format' => 'A4', 'marginX' => '20mm', 'headerHeight' => '30mm', 'footerHeight' => '20mm']],
-                'header' => '',
-                'body' => '<h1>{{ document.type_label }} {{ document.number }}</h1>',
-                'footer' => '',
-                'css' => '',
-            ])->id;
-        }
-
-        return $ids;
+        return array_map(fn (Template $template): string => $template->id, $this->builtInTemplates->handle(Actor::system()));
     }
 
     /** @return array<string, TextBlock> */

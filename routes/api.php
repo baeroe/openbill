@@ -3,6 +3,10 @@
 use App\Http\Api\ApiMiddleware;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
+use App\Http\Controllers\Api\PositionSuggestionsController;
+use App\Http\Controllers\Api\RenderController;
+use App\Http\Controllers\Api\RenderSchemaController;
+use App\Http\Controllers\Api\RenderSourcesController;
 use App\Http\Controllers\Api\SignedDownloadController;
 use App\Http\Controllers\Api\TemplatePackageController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +20,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(ApiMiddleware::READ)->group(function (): void {
     Route::get('/documents/{id}/pdf', DocumentPdfController::class)->name('api.documents.pdf');
     Route::get('/documents/{id}/xml', DocumentXmlController::class)->name('api.documents.xml');
+    Route::get('/position-suggestions', PositionSuggestionsController::class)->name('api.position-suggestions');
+});
+
+Route::middleware(ApiMiddleware::RENDER)->group(function (): void {
+    Route::post('/render', RenderController::class)->name('api.render');
+    Route::get('/render/sources', RenderSourcesController::class)->name('api.render.sources');
+    Route::get('/render/schema', RenderSchemaController::class)->name('api.render.schema');
 });
 
 // signed links (MCP get-document-pdf-url, 15 minutes): no token, the signature is the permission

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use App\Contracts\DocumentArchiver;
 use App\Models\PersonalAccessToken;
+use App\OpenApi\OpenApiFactory;
 use App\Rendering\PdfDocumentArchiver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -19,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(DocumentArchiver::class, PdfDocumentArchiver::class);
+
+        // routes/api.php in the OpenAPI document (/api/docs); api:openapi:export uses API Platform's concrete factory
+        $this->app->extend(OpenApiFactoryInterface::class, fn (OpenApiFactoryInterface $factory): OpenApiFactoryInterface => new OpenApiFactory($factory));
     }
 
     /**

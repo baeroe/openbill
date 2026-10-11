@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\OverviewController;
 use Illuminate\Support\Facades\Route;
 
 // admin: the language is part of the URL (/en/…, /de/…)
@@ -13,7 +13,7 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
     });
 
     Route::middleware('auth')->group(function (): void {
-        Route::get('/', HomeController::class)->name('home');
+        Route::get('/', OverviewController::class)->name('home');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     });
 });

@@ -146,3 +146,4 @@ VitePress in `docs/`, Englisch unter `docs/en/` (Locale `root` mit `link: '/en/'
 - Provider deklarieren ihren echten Rückgabetyp (`: object|array` bzw. `: object` bei paginierten Listen, mit `@return XResource|list<XResource>`), nie `|null`, sonst meldet Larastan `return.unusedType`.
 - Actions, die ein neues Model zurückgeben, das API-Antworten formen, laden es nach dem Speichern neu (`refresh()`): Spalten mit Datenbank-Default (z. B. `customers.tax_treatment`) fehlen sonst am frischen Model.
 - `/api/docs.jsonopenapi` liefert OpenAPI **3.2** (API Platform 5).
+- API Platform lässt `null`-Felder standardmäßig weg (`skip_null_values`). openbill schaltet das ab: global in `config/api-platform.php` (`defaults.normalization_context`) **und** in jedem eigenen `normalizationContext` einer Ressource (der ersetzt den Default, statt ihn zu ergänzen). Test: `DocumentReadApiTest` „keeps null fields“.

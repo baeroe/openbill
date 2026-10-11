@@ -23,7 +23,7 @@ use ArrayObject;
  */
 #[ApiResource(
     shortName: 'Customer',
-    normalizationContext: ['preserve_empty_objects' => true],
+    normalizationContext: ['preserve_empty_objects' => true, 'skip_null_values' => false],
     operations: [
         new GetCollection(
             uriTemplate: '/customers',

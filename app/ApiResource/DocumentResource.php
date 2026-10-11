@@ -31,13 +31,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
  */
 #[ApiResource(
     shortName: 'Document',
-    normalizationContext: ['groups' => [self::ITEM], 'preserve_empty_objects' => true],
+    normalizationContext: ['groups' => [self::ITEM], 'preserve_empty_objects' => true, 'skip_null_values' => false],
     operations: [
         new GetCollection(
             uriTemplate: '/documents',
             middleware: ApiMiddleware::READ,
             provider: DocumentProvider::class,
-            normalizationContext: ['groups' => [self::LIST], 'preserve_empty_objects' => true],
+            normalizationContext: ['groups' => [self::LIST], 'preserve_empty_objects' => true, 'skip_null_values' => false],
             parameters: [
                 'type' => new QueryParameter(description: 'offer, confirmation, invoice or cancellation'),
                 'status' => new QueryParameter(description: 'draft, open, accepted, rejected, done, paid, cancelled or closed'),

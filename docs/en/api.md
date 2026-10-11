@@ -39,6 +39,7 @@ The openbill UI itself uses the API with its login session (no token needed in t
 - `Accept: application/json` – plain JSON. Lists are arrays of the current page.
 - `Accept: application/ld+json` (default) – JSON-LD. Lists are objects with `member`, `totalItems` and `view` (links to the first, last, next and previous page).
 - Field names are snake_case. Amounts and quantities are strings (`"1130.50"`, `"10.0000"`); numbers with decimals in a request are refused. Dates are `YYYY-MM-DD`, IDs are ULIDs.
+- Every field of a resource is always present; fields without a value are `null` (for example `"number": null` of a draft).
 - Lists of customers and documents are paginated: `?page=2&itemsPerPage=50` (up to 100, default 30).
 - `PATCH` changes only the keys you send. `groups` of a document and `contacts` of a customer always replace the whole list (send the `id` of a group, position or contact to keep it).
 - Send `Accept-Language: de` for German messages.

@@ -53,6 +53,8 @@ return [
         'pagination_maximum_items_per_page' => 100,
         'route_prefix' => '/api',
         'middleware' => [],
+        // null stays in the answer ("number": null): clients get every field of the documented shape
+        'normalization_context' => ['skip_null_values' => false],
     ],
 
     'pagination' => [

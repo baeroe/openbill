@@ -81,3 +81,16 @@ it('pages through documents in JSON-LD', function () {
         ->and($page['member'])->toHaveCount(1)
         ->and($page['member'][0]['@id'])->toStartWith('/api/documents/');
 });
+
+it('keeps null fields in the answer instead of dropping them', function () {
+    $document = draft(DocumentType::Offer, [], ['customer_id' => null]);
+
+    $list = $this->getJson('/api/documents')->assertOk()->json('0');
+    $item = $this->get("/api/documents/{$document->id}", ['Accept' => 'application/ld+json'])->assertOk()->json();
+    $rate = $this->getJson('/api/tax-rates')->assertOk()->json('0');
+
+    expect($list)->toHaveKeys(['number', 'customer_id', 'customer_name', 'finalized_at', 'paid_at'])
+        ->and($list['number'])->toBeNull()
+        ->and($item)->toHaveKeys(['number', 'service_date', 'template_id', 'totals'])
+        ->and($rate)->toHaveKey('archived_at');
+});

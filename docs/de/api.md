@@ -39,6 +39,7 @@ Die openbill-Oberfläche selbst nutzt die API mit ihrer Anmeldung (Session), im 
 - `Accept: application/json` – einfaches JSON. Listen sind Arrays der aktuellen Seite.
 - `Accept: application/ld+json` (Standard) – JSON-LD. Listen sind Objekte mit `member`, `totalItems` und `view` (Links auf erste, letzte, nächste und vorige Seite).
 - Feldnamen in snake_case. Beträge und Mengen sind Strings (`"1130.50"`, `"10.0000"`); Zahlen mit Nachkommastellen in einer Anfrage werden abgelehnt. Datumswerte `YYYY-MM-DD`, IDs sind ULIDs.
+- Jedes Feld einer Ressource ist immer vorhanden; Felder ohne Wert sind `null` (zum Beispiel `"number": null` eines Entwurfs).
 - Kunden- und Dokumentlisten sind seitenweise: `?page=2&itemsPerPage=50` (bis 100, Standard 30).
 - `PATCH` ändert nur die mitgeschickten Schlüssel. `groups` eines Dokuments und `contacts` eines Kunden ersetzen immer die ganze Liste (mit der `id` einer Gruppe, Position oder eines Ansprechpartners bleibt er erhalten).
 - Mit `Accept-Language: de` kommen Meldungen auf Deutsch.

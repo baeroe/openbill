@@ -88,6 +88,27 @@ final class UpdateTemplateFiles
      */
     private function decodeAssets(array $encoded, array &$errors): array
     {
+        // sizes from the base64 length first: nothing is decoded when the total or one asset is too large
+        $maxTotal = (int) config('openbill.templates.max_unpacked_bytes');
+        $maxAsset = (int) config('openbill.templates.max_asset_bytes');
+        $estimated = 0;
+        $tooLarge = false;
+        foreach ($encoded as $path => $value) {
+            $bytes = is_string($value) ? intdiv(strlen($value) * 3, 4) : 0;
+            $estimated += $bytes;
+            if ($bytes > $maxAsset) {
+                $tooLarge = true;
+                $errors["assets.{$path}"][] = Text::t('template_package.asset_too_large', ['path' => (string) $path, 'mb' => intdiv($maxAsset, 1024 * 1024)]);
+            }
+        }
+        if ($estimated > $maxTotal) {
+            $tooLarge = true;
+            $errors['assets'][] = Text::t('template_package.too_large', ['mb' => intdiv($maxTotal, 1024 * 1024)]);
+        }
+        if ($tooLarge) {
+            return [];
+        }
+
         $assets = [];
         $total = 0;
         foreach ($encoded as $path => $value) {

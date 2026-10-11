@@ -1,6 +1,7 @@
 {
     "api.problem.bad_request": "Bad request",
     "api.problem.body_not_object": "The request body must be a JSON object.",
+    "api.problem.body_too_large": "The request body is larger than :mb MB.",
     "api.problem.conflict": "Conflict",
     "api.problem.csrf_token_mismatch": "CSRF token mismatch",
     "api.problem.forbidden": "Forbidden",

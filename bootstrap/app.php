@@ -6,6 +6,7 @@ use App\Exceptions\DocumentLockedException;
 use App\Exceptions\TemplateRenderFailedException;
 use App\Http\Api\ProblemResponse;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\LimitApiBody;
 use App\Http\Middleware\RequireApiAbility;
 use App\Http\Middleware\SetApiLocale;
 use App\Http\Middleware\SetLocale;
@@ -28,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // /api: session of the own UI (Sanctum stateful + CSRF), rate limit "api", response language
         $middleware->statefulApi();
         $middleware->throttleApi();
+        // body size first: nothing parses a body above config('openbill.api.*')
+        $middleware->api(prepend: [LimitApiBody::class]);
         $middleware->api(append: [SetApiLocale::class]);
         // before auth (priority list), so a 401 is already in the requested language
         $middleware->prependToPriorityList(AuthenticatesRequests::class, SetApiLocale::class);

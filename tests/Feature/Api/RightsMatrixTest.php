@@ -1,6 +1,8 @@
 <?php
 
 use App\Actions\RevokeApiToken;
+use App\Enums\DocumentType;
+use App\Models\Customer;
 use App\Models\PersonalAccessToken;
 use App\Models\Template;
 
@@ -99,8 +101,8 @@ it('serves the API documentation without a token', function () {
 });
 
 it('lets templates:render read every document in rendered form and list documents with customer names (spec 7, documented)', function () {
-    $customer = App\Models\Customer::factory()->create(['name' => 'Fjord Analytics AB']);
-    $document = draft(App\Enums\DocumentType::Invoice, [itemRow('Workshop', '10', '95')], ['customer_id' => $customer->id]);
+    $customer = Customer::factory()->create(['name' => 'Fjord Analytics AB']);
+    $document = draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95')], ['customer_id' => $customer->id]);
     $this->withToken(apiToken(['templates:render']));
 
     $this->postJson('/api/render', ['document_id' => $document->id])

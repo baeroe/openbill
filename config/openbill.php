@@ -32,4 +32,15 @@ return [
         'max_entries' => 100,
         'max_asset_bytes' => 2 * 1024 * 1024,
     ],
+
+    /*
+    | Request bodies under /api (App\Http\Middleware\LimitApiBody, 413 above). Template uploads
+    | (POST /api/templates, PUT /api/templates/{id}/files) carry the package or base64 assets:
+    | 20 MB unpacked assets as base64 (× 4/3) plus four sources. Phase 10: nginx client_max_body_size
+    | and PHP post_max_size at least max_template_body_bytes.
+    */
+    'api' => [
+        'max_body_bytes' => 2 * 1024 * 1024,
+        'max_template_body_bytes' => 30 * 1024 * 1024,
+    ],
 ];

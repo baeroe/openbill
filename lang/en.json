@@ -1,5 +1,6 @@
 {
     "common.logout": "Log out",
+    "errors.document_locked": ":number is finalized and can no longer be changed.",
     "home.placeholder": "Documents, customers and templates will show up here.",
     "home.signed_in_as": "Signed in as :name.",
     "home.title": "Overview",

@@ -1,5 +1,6 @@
 {
     "common.logout": "Abmelden",
+    "errors.document_locked": ":number ist abgeschlossen und lässt sich nicht mehr ändern.",
     "home.placeholder": "Hier erscheinen bald Dokumente, Kunden und Templates.",
     "home.signed_in_as": "Angemeldet als :name.",
     "home.title": "Übersicht",

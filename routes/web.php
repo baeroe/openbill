@@ -19,6 +19,8 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::get('/documents/{id}', [DocumentController::class, 'show'])->whereUlid('id')->name('documents.show');
         Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/new', [CustomerController::class, 'create'])->name('customers.create');
+        Route::get('/customers/{id}', [CustomerController::class, 'show'])->whereUlid('id')->name('customers.show');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     });
 });

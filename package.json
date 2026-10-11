@@ -15,6 +15,7 @@
     "dependencies": {
         "@fontsource-variable/schibsted-grotesk": "^5.3.0",
         "@inertiajs/react": "^3.9.1",
+        "@openbill/paged-preview": "workspace:*",
         "@radix-ui/react-dialog": "^1.2.0",
         "@radix-ui/react-dropdown-menu": "^2.1.25",
         "lucide-react": "^1.55.0",

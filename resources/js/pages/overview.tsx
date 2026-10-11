@@ -5,7 +5,7 @@ import type { DocumentStatus, DocumentType } from '@/api/types';
 import { useNewDocument } from '@/components/new-document/new-document-context';
 import { Badge, Button, Card, CardHead, cx, EmptyState, Page, StatusBadge } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
-import { formatDate, formatLongDate, formatMoney, monthName, relativeDays, todayIso } from '@/lib/format';
+import { formatDate, formatLongDate, formatMoney, monthName, relativeDays } from '@/lib/format';
 import { path, t, tn } from '@/lib/i18n';
 import type { SharedProps } from '@/types';
 
@@ -61,11 +61,13 @@ function attentionText(document: OverviewDocument, today: string): string {
     }
 }
 
-export default function Overview({ overview }: { overview: OverviewData }) {
+/** `today` is the server's date (YYYY-MM-DD): the figures, the month name and the relative days all refer to it. */
+export default function Overview({ overview, today }: { overview: OverviewData; today: string }) {
     const { auth } = usePage<SharedProps>().props;
     const openNewDocument = useNewDocument();
-    const now = new Date();
-    const today = todayIso(now);
+    // the greeting follows the clock of the person in front of the screen, dates follow the figures
+    const hour = new Date().getHours();
+    const day = new Date(`${today}T12:00:00`);
     const firstName = (auth.user?.name ?? '').split(' ')[0];
     const { figures, attention, attention_count: attentionCount, recent } = overview;
 
@@ -74,8 +76,8 @@ export default function Overview({ overview }: { overview: OverviewData }) {
             <Head title={t('nav.overview')} />
             <header className="flex flex-wrap items-end gap-4">
                 <div className="grid min-w-0 gap-1">
-                    <h1 className="text-3xl font-bold tracking-brand">{greeting(firstName, now.getHours())}</h1>
-                    <p className="text-muted first-letter:uppercase">{formatLongDate(now)}</p>
+                    <h1 className="text-3xl font-bold tracking-brand">{greeting(firstName, hour)}</h1>
+                    <p className="text-muted first-letter:uppercase">{formatLongDate(day)}</p>
                 </div>
                 <div className="flex flex-wrap gap-3 sm:ml-auto">
                     <Button icon={<FilePlus2 />} onClick={() => openNewDocument({ type: 'offer' })}>
@@ -108,10 +110,10 @@ export default function Overview({ overview }: { overview: OverviewData }) {
                     href={path('/documents?type=offer&status=open')}
                 />
                 <FigureTile
-                    label={t('overview.paid_month', { month: monthName(now) })}
+                    label={t('overview.paid_month', { month: monthName(day) })}
                     value={formatMoney(figures.paid_month.gross)}
+                    // no link: the document list has no date filter yet, it would show the paid invoices of every month
                     note={t('overview.paid_year', { amount: formatMoney(figures.paid_year.gross) })}
-                    href={path('/documents?type=invoice&status=paid')}
                 />
             </section>
 

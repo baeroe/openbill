@@ -13,6 +13,7 @@ it('renders the overview with the figures as strings', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('overview')
+            ->where('today', '2026-10-11')
             ->where('overview.figures.open', ['gross' => '119.00', 'count' => 1])
             ->where('overview.figures.overdue.count', 1)
             ->where('overview.attention.0.reason', 'overdue')

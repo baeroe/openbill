@@ -12,6 +12,9 @@ class OverviewController extends Controller
 {
     public function __invoke(): Response
     {
-        return Inertia::render('overview', ['overview' => Overview::build(CarbonImmutable::today())]);
+        $today = CarbonImmutable::today();
+
+        // today goes along: month name and relative days in the browser refer to the same date as the figures
+        return Inertia::render('overview', ['overview' => Overview::build($today), 'today' => $today->toDateString()]);
     }
 }

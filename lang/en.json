@@ -65,5 +65,8 @@
     "login.remember": "Keep me signed in",
     "login.submit": "Log in",
     "login.throttled": "Too many login attempts. Please try again in :seconds seconds.",
-    "login.title": "Log in"
+    "login.title": "Log in",
+    "template_package.paper_format": "paper.format must be one of :formats.",
+    "template_package.paper_invalid": "paper must be an object.",
+    "template_package.paper_length": "paper.:key must be a length like 20mm (mm, cm, in, pt or px)."
 }

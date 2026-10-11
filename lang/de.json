@@ -65,5 +65,8 @@
     "login.remember": "Angemeldet bleiben",
     "login.submit": "Anmelden",
     "login.throttled": "Zu viele Anmeldeversuche. Bitte in :seconds Sekunden erneut versuchen.",
-    "login.title": "Anmelden"
+    "login.title": "Anmelden",
+    "template_package.paper_format": "paper.format muss eins von :formats sein.",
+    "template_package.paper_invalid": "paper muss ein Objekt sein.",
+    "template_package.paper_length": "paper.:key muss eine Länge wie 20mm sein (mm, cm, in, pt oder px)."
 }

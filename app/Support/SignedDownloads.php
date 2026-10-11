@@ -4,6 +4,10 @@ namespace App\Support;
 
 use App\Enums\DocumentFileKind;
 use App\Models\Document;
+use App\Models\Position;
+use App\Models\PositionGroup;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 
 /**
@@ -11,8 +15,11 @@ use Illuminate\Support\Facades\URL;
  * in phase 8). Signed relative to the host, so they survive a reverse proxy.
  *
  * Finalized documents hand out the archived file. Drafts are rendered live (watermark, one Gotenberg
- * render per call, throttled): their link carries the draft's state ("version" = updated_at) and stops
- * working (403) once the draft changes, so a link never shows content that was not there when it was made.
+ * render per call, throttled). A draft link carries "version", a hash over the draft's own content: every
+ * column of the document (texts, dates, custom fields, customer_id, contact_id, template_id, …) and its
+ * groups and positions in their order. Any change of these makes the link answer 403. Master data that
+ * is read live (customer address, organization, the template itself) is not part of the version. Once the
+ * draft is finalized, the link delivers the archived file.
  */
 final class SignedDownloads
 {
@@ -41,6 +48,26 @@ final class SignedDownloads
 
     private static function version(Document $document): string
     {
-        return (string) $document->updated_at?->getTimestamp();
+        $draft = Document::query()->with('groups.positions')->findOrFail($document->id);
+        $state = [
+            'document' => self::columns($draft),
+            'groups' => $draft->groups->map(fn (PositionGroup $group): array => [
+                ...self::columns($group),
+                'positions' => $group->positions->map(fn (Position $position): array => self::columns($position))->all(),
+            ])->all(),
+        ];
+
+        return hash('sha256', json_encode($state, JSON_THROW_ON_ERROR));
+    }
+
+    /**
+     * Stored columns without the timestamps (they would not change for changes within one second, and
+     * not at all for changes of groups or positions).
+     *
+     * @return array<string, mixed>
+     */
+    private static function columns(Model $model): array
+    {
+        return Arr::except($model->getAttributes(), ['created_at', 'updated_at']);
     }
 }

@@ -181,7 +181,7 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/render" -d '{"scenario": "long_invo
 
 ## Downloads für andere Programme
 
-Der MCP-Server gibt signierte Download-Links für PDF und XML aus. Sie funktionieren 15 Minuten ohne Token; danach oder verändert antworten sie mit `403`. Ein abgeschlossenes Dokument liefert seine Archivdatei. Ein Entwurf wird live mit Wasserzeichen gerendert, und sein Link gilt nur, solange der Entwurf unverändert ist: Nach einer Änderung antwortet er mit `403`, dann einen neuen Link anfordern.
+Der MCP-Server gibt signierte Download-Links für PDF und XML aus. Sie funktionieren 15 Minuten ohne Token; danach oder verändert antworten sie mit `403`. Ein abgeschlossenes Dokument liefert seine Archivdatei. Ein Entwurf wird live mit Wasserzeichen gerendert. Sein Link ist an den Inhalt des Entwurfs gebunden (Felder, Texte, Kunde und Ansprechpartner, Template-Wahl, Gruppen und Positionen in ihrer Reihenfolge): Nach jeder Änderung daran antwortet er mit `403`, dann einen neuen Link anfordern. Stammdaten werden live gelesen, eine geänderte Kundenadresse oder ein geändertes Template erscheint also auch über einen Entwurfs-Link. Nach dem Abschließen liefert der Link die Archivdatei.
 
 ## Grenzen
 

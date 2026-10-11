@@ -91,3 +91,29 @@ it('ties a signed draft link to the state of the draft', function () {
         ->assertJsonPath('detail', 'This link belongs to an older state of the draft. Ask for a new link.');
     $this->get(app(SignedDownloads::class)->link($draft->fresh(), DocumentFileKind::Pdf)['url'])->assertOk();
 });
+
+it('invalidates a signed draft link when only a position title changes', function () {
+    $draft = draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95')]);
+    $link = app(SignedDownloads::class)->link($draft, DocumentFileKind::Pdf);
+    $group = $draft->groups()->with('positions')->sole();
+
+    // same totals, same second: only the title of the position changes
+    app(UpdateDraft::class)->handle(systemActor(), $draft->fresh(), ['groups' => [[
+        'id' => $group->id, 'title' => $group->title,
+        'positions' => [itemRow('Workshop (remote)', '10', '95', ['id' => $group->positions[0]->id])],
+    ]]]);
+
+    $this->get($link['url'], ['Accept' => 'application/json'])->assertForbidden();
+});
+
+it('invalidates a signed draft link after two changes within the same second', function () {
+    $this->freezeTime();
+    $draft = draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95')]);
+    app(UpdateDraft::class)->handle(systemActor(), $draft->fresh(), ['intro' => 'First']);
+    $link = app(SignedDownloads::class)->link($draft->fresh(), DocumentFileKind::Pdf);
+    $this->get($link['url'])->assertOk();
+
+    app(UpdateDraft::class)->handle(systemActor(), $draft->fresh(), ['intro' => 'Second']);
+
+    $this->get($link['url'], ['Accept' => 'application/json'])->assertForbidden();
+});

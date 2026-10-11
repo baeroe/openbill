@@ -181,7 +181,7 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/render" -d '{"scenario": "long_invo
 
 ## Downloads for other programs
 
-The MCP server hands out signed download links for PDF and XML. They work without a token for 15 minutes; after that, or when changed, they answer `403`. A finalized document delivers its archived file. A draft is rendered live with a watermark, and its link only works as long as the draft is unchanged: after an edit it answers `403`, ask for a new link.
+The MCP server hands out signed download links for PDF and XML. They work without a token for 15 minutes; after that, or when changed, they answer `403`. A finalized document delivers its archived file. A draft is rendered live with a watermark. Its link is bound to the draft's content (fields, texts, customer and contact, template choice, groups and positions in their order): after any change of these it answers `403`, ask for a new link. Master data is read live, so a changed customer address or template shows up in a draft link. Once the draft is finalized, the link delivers the archived file.
 
 ## Limits
 

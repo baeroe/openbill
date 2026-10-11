@@ -4,8 +4,10 @@ use App\Exceptions\PdfRenderFailedException;
 use App\Rendering\GotenbergClient;
 use App\Rendering\Paper;
 use App\Rendering\RenderResult;
+use App\Support\Text;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\Support\GotenbergFake;
 
 function sampleResult(): RenderResult
@@ -64,3 +66,19 @@ it('turns errors, timeouts and non-PDF answers into PdfRenderFailedException (50
     'timeout' => [fn () => GotenbergFake::timeOut()],
     'no PDF' => [fn () => GotenbergFake::answerWithHtml()],
 ]);
+
+it('logs the answer of Gotenberg instead of showing it to the user (review #13)', function () {
+    Log::spy();
+    GotenbergFake::failWithError();
+
+    try {
+        app(GotenbergClient::class)->pdf(sampleResult());
+        $this->fail('no exception');
+    } catch (PdfRenderFailedException $e) {
+        expect($e->getMessage())->toBe(Text::t('rendering.pdf_failed', ['status' => 500]))
+            ->and($e->getMessage())->not->toContain('Chromium');
+    }
+
+    Log::shouldHaveReceived('warning')->withArgs(fn (string $message, array $context): bool => $context['status'] === 500
+        && str_contains($context['body'], 'Chromium failed'))->once();
+});

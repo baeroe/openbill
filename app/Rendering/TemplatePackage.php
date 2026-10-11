@@ -4,9 +4,9 @@ namespace App\Rendering;
 
 use App\Models\Template;
 use App\Support\Text;
+use finfo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use finfo;
 use JsonException;
 use RuntimeException;
 use ZipArchive;

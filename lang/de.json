@@ -88,7 +88,7 @@
     "rendering.error.too_large": "Dieser Teil ist größer als :kb KB.",
     "rendering.error_box": "Template-Fehler in :part",
     "rendering.failed": "Das Template enthält Fehler (:count).",
-    "rendering.pdf_failed": "Der PDF-Dienst hat mit einem Fehler geantwortet (:status): :message",
+    "rendering.pdf_failed": "Der PDF-Dienst hat mit einem Fehler geantwortet (:status). Bitte später noch einmal versuchen.",
     "rendering.pdf_unreachable": "Der PDF-Dienst (Gotenberg) ist nicht erreichbar oder zu langsam. Bitte noch einmal versuchen.",
     "template.amount_due": "Zu zahlen",
     "template.credit": "Gutschrift",

@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\FinalizeDocument;
+use App\Contracts\DocumentArchiver;
 use App\EInvoice\CiiBuilder;
 use App\Enums\DocumentFileKind;
 use App\Enums\DocumentStatus;
@@ -11,11 +12,10 @@ use App\Exceptions\TemplateRenderFailedException;
 use App\Models\Document;
 use App\Models\DocumentFile;
 use App\Models\DocumentSnapshot;
-use App\Contracts\DocumentArchiver;
-use App\Rendering\PdfDocumentArchiver;
 use App\Models\DocumentTypeSetting;
 use App\Models\NumberSequence;
 use App\Models\Template;
+use App\Rendering\PdfDocumentArchiver;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;

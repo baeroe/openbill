@@ -72,8 +72,10 @@ final class ComplianceChecker
             $issues[] = new ComplianceIssue('org.address', ComplianceRule::OrgAddressMissing);
         }
         if (trim($in->org->vatId) === '') {
-            if (in_array($in->customer?->taxTreatment, [TaxTreatment::EuReverseCharge, TaxTreatment::ThirdCountry], true)) {
-                // BR-AE-02 / BR-G-02 (and § 14a UStG): reverse charge and exports need the seller's VAT ID
+            // BR-AE-02 / BR-G-02 (and § 14a UStG): reverse charge and exports need the seller's VAT ID. A small
+            // business always invoices with category E (EffectiveTax), where the tax number is enough (BR-E-02).
+            if ($in->taxationMode === TaxationMode::Regular
+                && in_array($in->customer?->taxTreatment, [TaxTreatment::EuReverseCharge, TaxTreatment::ThirdCountry], true)) {
                 $issues[] = new ComplianceIssue('org.vat_id', ComplianceRule::OrgVatIdRequired);
             } else {
                 if (trim($in->org->taxNumber) === '') {

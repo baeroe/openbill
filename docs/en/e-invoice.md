@@ -68,6 +68,6 @@ Archived files live in `storage/app/archive/<year>/<document id>.pdf` and `.xml`
 
 - Gotenberg **8.34 or newer** (the Docker image `gotenberg/gotenberg:8` is). `GOTENBERG_TIMEOUT` (seconds, default 20) limits each PDF request; keep it well below the database lock wait timeout (50 s).
 - openbill checks every XML against the schema before archiving it. The business rules of EN 16931 (Schematron) are covered by the compliance profile; the official CEN Schematron runs in development and CI on the e-invoice cases of the test suite (`scripts/validate-einvoice.sh`).
-- The seller needs a VAT ID or a register number; reverse charge and customers outside the EU need the VAT ID.
+- The seller needs a VAT ID or a register number; with regular taxation, reverse charge and customers outside the EU need the VAT ID (small businesses invoice with category `E`, where the tax number is enough).
 - Customers outside the EU are taxed with category `G` (export); a category for services to such customers (`O`) is planned.
 - Not supported yet: XRechnung with Leitweg-ID, currencies other than EUR, document-level allowances and charges.

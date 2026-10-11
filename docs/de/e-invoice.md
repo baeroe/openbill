@@ -68,6 +68,6 @@ Archivierte Dateien liegen unter `storage/app/archive/<Jahr>/<Dokument-ID>.pdf` 
 
 - Gotenberg **8.34 oder neuer** (das Docker-Image `gotenberg/gotenberg:8` ist es). `GOTENBERG_TIMEOUT` (Sekunden, Standard 20) begrenzt jede PDF-Anfrage; der Wert muss deutlich unter der Lock-Wartezeit der Datenbank (50 s) bleiben.
 - openbill prüft jede XML vor dem Archivieren gegen das Schema. Die Geschäftsregeln von EN 16931 (Schematron) deckt das Prüfprofil ab; das offizielle CEN-Schematron läuft in der Entwicklung und in CI über die E-Rechnungsfälle der Tests (`scripts/validate-einvoice.sh`).
-- Der Verkäufer braucht eine USt-ID oder eine Registernummer; Reverse Charge und Kunden außerhalb der EU brauchen die USt-ID.
+- Der Verkäufer braucht eine USt-ID oder eine Registernummer; bei Regelbesteuerung brauchen Reverse Charge und Kunden außerhalb der EU die USt-ID (Kleinunternehmer rechnen mit Kategorie `E` ab, dort reicht die Steuernummer).
 - Kunden außerhalb der EU werden mit Kategorie `G` (Ausfuhr) besteuert; eine Kategorie für Dienstleistungen an solche Kunden (`O`) ist geplant.
 - Noch nicht unterstützt: XRechnung mit Leitweg-ID, andere Währungen als EUR, Zu- und Abschläge auf Dokumentebene.

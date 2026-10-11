@@ -51,6 +51,11 @@ function eInvoiceCases(): array
 
             return finalizedInvoice([itemRow('Workshop', '10', '95')]);
         },
+        'small_business_third_country' => function () {
+            Organization::current()->forceFill(['taxation_mode' => 'small_business', 'vat_id' => '', 'tax_number' => '12/345/67890', 'registration_id' => 'HRB 000000'])->save();
+
+            return finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry]);
+        },
         'reverse_charge' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Fjord Analytics AB', 'street' => 'Storgatan 1', 'zip' => '11122', 'city' => 'Stockholm', 'country' => 'SE', 'vat_id' => 'SE556677889901', 'tax_treatment' => TaxTreatment::EuReverseCharge]),
         'third_country' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry]),
         'discount' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95'), itemRow('Stammkundenrabatt', '1', '-100')]),

@@ -1,7 +1,10 @@
 <?php
 
+use App\Actions\CreateDocument;
 use App\Enums\DocumentType;
+use App\Models\Customer;
 use App\Models\Document;
+use App\Models\Organization;
 use App\Models\TaxRate;
 use App\Models\Unit;
 use App\Support\Actor;
@@ -64,4 +67,30 @@ function draftDocument(DocumentType $type = DocumentType::Invoice, array $positi
     GroupWriter::replace($document, [['title' => null, 'positions' => $positions]]);
 
     return $document->fresh(['groups.positions']);
+}
+
+/**
+ * Draft created through CreateDocument for a new customer, with one loose group holding $positions
+ * (one 100.00 consulting item when empty).
+ *
+ * @param  list<array<string, mixed>>  $positions
+ * @param  array<string, mixed>  $input  extra CreateDocument/UpdateDraft input
+ */
+function draft(DocumentType $type = DocumentType::Invoice, array $positions = [], array $input = []): Document
+{
+    return app(CreateDocument::class)->handle(systemActor(), [
+        'type' => $type->value,
+        'customer_id' => Customer::factory()->create()->id,
+        'groups' => [['title' => null, 'positions' => $positions === [] ? [itemRow()] : $positions]],
+        ...$input,
+    ]);
+}
+
+/** Organization data the EN 16931 profile requires (fictional). */
+function completeOrganization(): void
+{
+    Organization::current()->forceFill([
+        'name' => 'Studio Nordlicht', 'street' => 'Speicherstraße 12', 'zip' => '20457', 'city' => 'Hamburg', 'country' => 'DE',
+        'vat_id' => 'DE123456789', 'iban' => 'DE02120300000000202051',
+    ])->save();
 }

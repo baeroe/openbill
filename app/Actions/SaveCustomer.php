@@ -104,7 +104,8 @@ final class SaveCustomer
                 $this->syncContacts($actor, $customer, $data['contacts']);
             }
 
-            return $customer->load('contacts');
+            // refresh: columns with database defaults (tax_treatment) are not on a new model otherwise
+            return $customer->refresh()->load('contacts');
         });
     }
 

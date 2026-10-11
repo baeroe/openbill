@@ -16,7 +16,7 @@ export function Menu({ trigger, children, align = 'end', side = 'bottom', classN
         <DropdownMenu.Root modal={false}>
             <DropdownMenu.Trigger asChild>{trigger}</DropdownMenu.Trigger>
             <DropdownMenu.Portal>
-                <DropdownMenu.Content align={align} side={side} sideOffset={6} className={cx('z-40 grid min-w-56 animate-menu-in rounded-md bg-surface p-1.5 shadow-float focus:outline-none', className)}>
+                <DropdownMenu.Content align={align} side={side} sideOffset={6} className={cx('z-[55] grid min-w-56 animate-menu-in rounded-md bg-surface p-1.5 shadow-float focus:outline-none', className)}>
                     {children}
                 </DropdownMenu.Content>
             </DropdownMenu.Portal>

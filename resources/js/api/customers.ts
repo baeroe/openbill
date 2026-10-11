@@ -1,7 +1,7 @@
 import useSWR, { mutate } from 'swr';
 import { api, apiPage, type Page } from '@/lib/api';
 import { keys } from './keys';
-import { usePagedList, type PagedList } from './paged';
+import { invalidate, usePagedList, type PagedList } from './paged';
 import type { Customer, CustomerInput } from './types';
 
 export function useCustomerList(q: string): PagedList<Customer> {
@@ -23,10 +23,15 @@ export async function saveCustomer(input: CustomerInput, id?: string): Promise<C
         ? await api<Customer>(keys.customer(id), { method: 'PATCH', body: input })
         : await api<Customer>('/api/customers', { method: 'POST', body: input });
     await mutate(keys.customer(saved.id), saved, { revalidate: false });
+    // lists, pickers ("New document") and the new customer's first page show the change
+    void invalidate('/api/customers', [keys.customer(saved.id)]);
     return saved;
 }
 
 export async function deleteCustomer(id: string): Promise<void> {
     await api<void>(keys.customer(id), { method: 'DELETE' });
-    await mutate(keys.customer(id), undefined, { revalidate: false });
+    // the detail stays in the cache until the page has left (clearing it would flash the skeleton);
+    // the server answers 404 for the deleted customer anyway. Drafts of the customer are gone as well.
+    void invalidate('/api/customers', [keys.customer(id)]);
+    void invalidate('/api/documents');
 }

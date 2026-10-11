@@ -26,20 +26,22 @@ export function CustomFieldInput({ definition, value, onChange, error, disabled 
     const hint = compact ? undefined : definition.help || undefined;
     const text = value === null || value === undefined ? '' : String(value);
     const aria = compact ? definition.label : undefined;
+    // the visible star is decoration; screen readers get the requirement from aria-required
+    const required = definition.required || undefined;
 
     switch (definition.type) {
         case 'textarea':
-            return <Textarea label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} onChange={(e) => onChange(e.target.value)} />;
+            return <Textarea label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} aria-required={required} onChange={(e) => onChange(e.target.value)} />;
         case 'number':
         case 'money':
-            return <DecimalInput label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria={aria} money={definition.type === 'money'} onChange={onChange} />;
+            return <DecimalInput label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria={aria} required={required} money={definition.type === 'money'} onChange={onChange} />;
         case 'date':
-            return <TextInput type="date" label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} onChange={(e) => onChange(e.target.value || null)} />;
+            return <TextInput type="date" label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} aria-required={required} onChange={(e) => onChange(e.target.value || null)} />;
         case 'select':
             return (
                 <Field label={label} hint={hint} error={error} path={path}>
                     {(id, describedBy) => (
-                        <SelectControl id={id} aria-describedby={describedBy} aria-label={aria} invalid={!!error} value={text} disabled={disabled} onChange={(e) => onChange(e.target.value || null)}>
+                        <SelectControl id={id} aria-describedby={describedBy} aria-label={aria} aria-required={required} invalid={!!error} value={text} disabled={disabled} onChange={(e) => onChange(e.target.value || null)}>
                             <option value="">{t('fields.no_selection')}</option>
                             {definition.options.map((option) => (
                                 <option key={option} value={option}>
@@ -55,8 +57,19 @@ export function CustomFieldInput({ definition, value, onChange, error, disabled 
         case 'boolean':
             return (
                 <Field label={label} hint={hint} error={error} path={path}>
-                    {() => (
-                        <Switch className="h-control" checked={value === true} disabled={disabled} aria-label={definition.label} onChange={(e) => onChange(e.target.checked)} label={value === true ? t('fields.yes') : t('fields.no')} />
+                    {/* the field label points at the switch (id); its own label says yes/no */}
+                    {(id, describedBy) => (
+                        <Switch
+                            id={id}
+                            aria-describedby={describedBy}
+                            aria-label={aria}
+                            aria-required={required}
+                            className="h-control"
+                            checked={value === true}
+                            disabled={disabled}
+                            onChange={(e) => onChange(e.target.checked)}
+                            label={value === true ? t('fields.yes') : t('fields.no')}
+                        />
                     )}
                 </Field>
             );
@@ -64,14 +77,14 @@ export function CustomFieldInput({ definition, value, onChange, error, disabled 
             // no upload path for images yet (phase 7 brings asset uploads); the stored path stays as it is
             return <TextInput label={label} hint={compact ? undefined : t('fields.image_read_only')} error={error} path={path} value={text} disabled readOnly aria-label={aria} />;
         default:
-            return <TextInput label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} onChange={(e) => onChange(e.target.value)} />;
+            return <TextInput label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} aria-required={required} onChange={(e) => onChange(e.target.value)} />;
     }
 }
 
-type DecimalProps = { label?: ReactNode; hint?: ReactNode; error?: string; path?: string; value: string; disabled: boolean; aria?: string; money: boolean; onChange(value: CustomValue): void };
+type DecimalProps = { label?: ReactNode; hint?: ReactNode; error?: string; path?: string; value: string; disabled: boolean; aria?: string; required?: boolean; money: boolean; onChange(value: CustomValue): void };
 
 /** Typing keeps the raw text ("12,5"); leaving the field stores "12.5" (or null when empty). */
-function DecimalInput({ label, hint, error, path, value, disabled, aria, money, onChange }: DecimalProps) {
+function DecimalInput({ label, hint, error, path, value, disabled, aria, required, money, onChange }: DecimalProps) {
     const [raw, setRaw] = useState(value);
     useEffect(() => setRaw(value), [value]);
 
@@ -83,6 +96,7 @@ function DecimalInput({ label, hint, error, path, value, disabled, aria, money, 
                         id={id}
                         inputMode="decimal"
                         aria-label={aria}
+                        aria-required={required}
                         aria-invalid={error ? true : undefined}
                         aria-describedby={describedBy}
                         disabled={disabled}

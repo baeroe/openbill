@@ -9,6 +9,7 @@ use App\Models\TaxRate;
 use App\Models\Unit;
 use App\Support\Actor;
 use App\Support\GroupWriter;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,6 +18,13 @@ use Tests\TestCase;
  * Unit tests are plain PHP (domain, architecture, file consistency) and don't boot the app.
  */
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
+
+/*
+ * Integration tests need committed data (other processes and connections must see it), so they
+ * migrate per test instead of wrapping it in a transaction. DatabaseMigrations resets
+ * RefreshDatabaseState afterwards, so later Feature tests migrate again.
+ */
+pest()->extend(TestCase::class)->use(DatabaseMigrations::class)->in('Integration');
 
 function systemActor(): Actor
 {

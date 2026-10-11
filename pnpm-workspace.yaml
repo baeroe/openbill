@@ -4,8 +4,8 @@ packages:
   - docs
   - prototypes/*
 
-# pnpm fails on dependency build scripts nobody reviewed (strictDepBuilds).
-# Allow only packages that fetch or build a native binary; block everything else explicitly.
+# Only listed packages may run build scripts; any other package with build scripts makes
+# `pnpm install` fail until it is added here as `true` (fetches/builds a native binary) or `false`.
 allowBuilds:
   esbuild: true
 

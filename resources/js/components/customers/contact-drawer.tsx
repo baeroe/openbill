@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FieldDefinition } from '@/api/types';
 import { CustomFieldInput } from '@/components/custom-field-input';
 import { Button, Drawer, Select, Switch, TextInput } from '@/components/ui';
@@ -6,7 +6,7 @@ import type { ContactDraft } from '@/lib/customers';
 import { t } from '@/lib/i18n';
 
 type Props = {
-    contact: ContactDraft | null;
+    contact: ContactDraft;
     isNew: boolean;
     fields: FieldDefinition[];
     /** API errors of this contact, keyed by field ("email", "custom.department"). */
@@ -15,16 +15,13 @@ type Props = {
     onApply(contact: ContactDraft): void;
 };
 
-/** Edits a contact. The change lands in the customer draft and is saved together with the customer. */
+/**
+ * Edits a contact. The change lands in the customer draft and is saved together with the customer.
+ * Mounted per contact (key), so the form starts from `contact` without copying props in an effect.
+ */
 export function ContactDrawer({ contact, isNew, fields, errors, onClose, onApply }: Props) {
-    const [draft, setDraft] = useState<ContactDraft | null>(contact);
+    const [draft, setDraft] = useState<ContactDraft>(contact);
     const [touched, setTouched] = useState(false);
-    useEffect(() => {
-        setDraft(contact);
-        setTouched(false);
-    }, [contact]);
-
-    if (!draft) return null;
 
     const set = (patch: Partial<ContactDraft>) => setDraft({ ...draft, ...patch });
     const nameMissing = !draft.first_name.trim() && !draft.last_name.trim();

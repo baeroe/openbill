@@ -65,3 +65,24 @@ test('asks before leaving unsaved changes (review focus)', async ({ page }) => {
     expect(page.url()).toBe(url);
     await expect(page.getByRole('region', { name: 'Unsaved changes' })).toBeVisible();
 });
+
+test('keeps unsaved changes when a background reload of the customer fails (review focus)', async ({ page }) => {
+    await page.clock.install();
+    await page.goto('/en/customers');
+    await page.getByRole('link', { name: /Kulturwerk Elbinsel/ }).click();
+    await expect(page).toHaveURL(/\/en\/customers\/[0-9a-z]{26}$/);
+    const name = page.getByLabel('Name', { exact: true });
+    await expect(name).toHaveValue('Kulturwerk Elbinsel e. V.');
+    await name.fill('Kulturwerk Elbinsel e. V. (Festival)');
+
+    // the network is gone when the tab gets the focus back: SWR revalidates and fails
+    await page.route(/\/api\/customers\/[0-9a-z]{26}$/, (route) => route.fulfill({ status: 503, contentType: 'application/problem+json', body: '{"status":503,"title":"Service unavailable","detail":"","reason":"service_unavailable"}' }));
+    const failed = page.waitForResponse((response) => /\/api\/customers\/[0-9a-z]{26}$/.test(response.url()) && response.status() === 503);
+    await page.clock.fastForward('01:00');
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    await failed;
+    await page.waitForTimeout(300);
+
+    await expect(name).toHaveValue('Kulturwerk Elbinsel e. V. (Festival)');
+    await expect(page.getByRole('region', { name: 'Unsaved changes' })).toBeVisible();
+});

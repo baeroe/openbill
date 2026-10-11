@@ -41,7 +41,9 @@ CustomerPage.layout = appLayout;
 function ExistingCustomer({ id }: { id: string }) {
     const { data, error, mutate } = useCustomer(id);
 
-    if (error) {
+    // only when nothing is loaded: a failed background reload (focus, reconnect) must not replace the form and
+    // throw away unsaved changes
+    if (error && !data) {
         return (
             <Page>
                 <BackLink href={path('/customers')}>{t('customer.all')}</BackLink>
@@ -339,14 +341,17 @@ function CustomerEditor({ id, initial }: { id: string | null; initial: CustomerD
                 )}
             </form>
 
-            <ContactDrawer
-                contact={editing?.contact ?? null}
-                isNew={editing?.isNew ?? false}
-                fields={contactFields.data ?? []}
-                errors={editingIndex >= 0 ? contactErrors(errors, editingIndex) : {}}
-                onClose={() => setEditing(null)}
-                onApply={applyEdited}
-            />
+            {editing && (
+                <ContactDrawer
+                    key={editing.contact.key}
+                    contact={editing.contact}
+                    isNew={editing.isNew}
+                    fields={contactFields.data ?? []}
+                    errors={editingIndex >= 0 ? contactErrors(errors, editingIndex) : {}}
+                    onClose={() => setEditing(null)}
+                    onApply={applyEdited}
+                />
+            )}
             {!isNew && (
                 <ConfirmDialog
                     open={confirmDelete}

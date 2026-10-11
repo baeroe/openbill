@@ -91,6 +91,10 @@ jobs:
       - name: TypeScript
         run: pnpm typecheck
 
+      # unit tests of resources/js (lib/api.ts, formatting, keys, navigation)
+      - name: Vitest
+        run: pnpm test
+
       - name: Build
         run: pnpm build
 

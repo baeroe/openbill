@@ -130,7 +130,8 @@ export type Totals = {
     gross: string;
     optional_net: string;
     legal_notes: string[];
-    missing_tax_rate: boolean;
+    /** Ids of priced positions without a tax rate (they count without VAT). */
+    missing_tax_rate: string[];
 };
 
 /** Item form of a document (GET /api/documents/{id}, answers of PATCH and the document actions). */

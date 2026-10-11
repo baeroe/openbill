@@ -6,6 +6,7 @@ import { Button, cx, Tag } from '@/components/ui';
 import { t } from '@/lib/i18n';
 import { useStoredFlag } from '@/lib/prefs';
 import { jumpToIssue } from '../jump';
+import { isAbort } from '../latest';
 import { fromDocument } from '../ops';
 import { useEditor } from '../store';
 import { useDocumentActions } from '../use-actions';
@@ -77,7 +78,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                         {context.small_business && <Tag neutral>{t('editor.small_business')}</Tag>}
                     </div>
                     <GroupsEditor draft={draft} totals={totals} smallBusiness={context.small_business} readOnly={readOnly} messages={messages} update={update} />
-                    <TotalsPanel totals={totals} />
+                    <TotalsPanel totals={totals} stale={!!preview.error && !isAbort(preview.error)} />
                 </section>
                 <TextsSection which="closing" value={draft.closing} readOnly={readOnly} error={messages['document.closing']} onChange={(closing) => update((d) => ({ ...d, closing }))} />
                 {!readOnly && <CompliancePanel issues={issues} profile={context.profile} customerId={draft.customer_id} onJump={jump} />}

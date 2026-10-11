@@ -39,3 +39,14 @@ export function formatDecimalInput(value: string, locale?: string, minFraction =
 export function isZeroDecimal(value: string): boolean {
     return DECIMAL.test(value) && /^-?0+(\.0+)?$/.test(value);
 }
+
+/** "1" and "1.0000" are the same number in two spellings (the API answers with scale 4) – a string check, no arithmetic. */
+export function sameDecimal(a: string, b: string): boolean {
+    if (!DECIMAL.test(a) || !DECIMAL.test(b)) return a === b;
+    const canonical = (value: string) => {
+        const [int, fraction = ''] = value.replace(/^-/, '').split('.');
+        const digits = `${int.replace(/^0+(?=\d)/, '')}.${fraction.replace(/0+$/, '')}`.replace(/\.$/, '');
+        return digits === '0' ? '0' : `${value.startsWith('-') ? '-' : ''}${digits}`;
+    };
+    return canonical(a) === canonical(b);
+}

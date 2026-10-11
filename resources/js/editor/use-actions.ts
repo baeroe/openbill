@@ -4,6 +4,7 @@ import { mutate } from 'swr';
 import { cancelInvoice, convertDocument, deleteDocument, duplicateDocument, finalizeDocument, setDocumentStatus } from '@/api/documents';
 import { keys } from '@/api/keys';
 import type { DocumentDetail, DocumentStatus, DocumentType, Issue } from '@/api/types';
+import { useFieldDefinitions } from '@/api/fields';
 import { ApiError, errorMessage } from '@/lib/api';
 import { path, t, tn } from '@/lib/i18n';
 import { scheduleDelete } from '@/lib/pending-delete';
@@ -27,7 +28,7 @@ export type DocumentActions = {
     confirmCancel(): Promise<void>;
     closeCancel(): void;
     duplicate(): Promise<void>;
-    remove(): void;
+    remove(): Promise<void>;
     openPdf(): Promise<void>;
 };
 
@@ -41,6 +42,10 @@ export function useDocumentActions({ document, issues, flush, stop, expand }: Ar
     const [pending, setPending] = useState<Running | null>(null);
     const [finalizeOpen, setFinalizeOpen] = useState(false);
     const [cancelOpen, setCancelOpen] = useState(false);
+    const documentFields = useFieldDefinitions('document').data ?? [];
+    const positionFields = useFieldDefinitions('position').data ?? [];
+    /** Field keys of a conversion answer as the names the user knows. */
+    const fieldNames = (keys: string[]) => keys.map((key) => [...documentFields, ...positionFields].find((field) => field.key === key)?.label ?? key).join(', ');
     const label = (type: DocumentType) => t(`document_type.${type}`);
 
     const report = (error: unknown) => {
@@ -110,7 +115,8 @@ export function useDocumentActions({ document, issues, flush, stop, expand }: Ar
                 const created = await convertDocument(document.id, type);
                 await open(created);
                 toast.success(t('editor.converted', { type: label(type) }));
-                if (created.dropped_fields.length > 0) toast.info(t('editor.dropped_fields', { type: label(type), fields: created.dropped_fields.join(', ') }));
+                // stays until confirmed or for the long duration, so it can be read after the page change
+                if (created.dropped_fields.length > 0) toast.info(t('editor.dropped_fields', { type: label(type), fields: fieldNames(created.dropped_fields) }), { label: t('editor.dropped_ok'), run: () => undefined });
             }),
         openCancel: () => setCancelOpen(true),
         confirmCancel: () =>
@@ -129,8 +135,9 @@ export function useDocumentActions({ document, issues, flush, stop, expand }: Ar
                 await open(await duplicateDocument(document.id));
                 toast.success(t('editor.duplicated'));
             }),
-        remove: () => {
-            // nothing may be saved anymore; an undo loads the draft fresh from the server
+        remove: async () => {
+            // what was typed last goes to the server first, so an undo brings it back; then nothing may be saved anymore
+            await flush();
             stop();
             useEditor.getState().reset();
             const id = document.id;

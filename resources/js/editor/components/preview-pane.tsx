@@ -28,7 +28,8 @@ export function PreviewPane({ documentId, profile, finalized, data, error, templ
     const [pages, setPages] = useState(1);
     const strict = profile === 'en16931';
     const active: Tab = strict ? tab : 'preview';
-    const failed = !!error && !isAbort(error) && !data;
+    const broken = !!error && !isAbort(error);
+    const failed = broken && !data;
 
     return (
         <aside aria-label={t('editor.preview')} className="ed-pane grid grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-xl bg-bg">
@@ -63,7 +64,7 @@ export function PreviewPane({ documentId, profile, finalized, data, error, templ
                                 {t('editor.template_error', { file: item.file ?? item.part, line: item.line ?? '–', message: item.message })}
                             </Notice>
                         ))}
-                        {failed && <Notice tone="bad">{t('editor.preview_failed')}</Notice>}
+                        {broken && <Notice tone="bad">{failed ? t('editor.preview_failed') : t('editor.preview_stale')}</Notice>}
                         {data ? (
                             <PagedPreview
                                 parts={data}

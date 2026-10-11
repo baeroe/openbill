@@ -44,6 +44,15 @@ const GUTTER = 24;
 
 const cx = (...names: (string | false | null | undefined)[]) => names.filter(Boolean).join(' ');
 
+/*
+ * Security: every frame is sandbox="allow-same-origin" WITHOUT allow-scripts. Same origin is needed to measure the body
+ * and fill in page numbers from outside; without script rights nothing in the rendered markup can run. Never add
+ * allow-scripts here – together with allow-same-origin a frame could lift its own sandbox.
+ * Cost: n pages make 3n+1 frames, all reloaded on every render answer. Fine for the editor; when the template editor
+ * (phase 7) or the toolkit (phase 9) show long documents, fill frames outside the viewport only once visible
+ * (IntersectionObserver).
+ */
+
 /** Fills {{ page.number }} / {{ page.total }} (rendered as .pageNumber / .totalPages) of one header or footer frame. */
 function fillPageNumbers(frame: HTMLIFrameElement | null, page: number, total: number): void {
     const doc = frame?.contentDocument;

@@ -229,3 +229,7 @@
 .ed-custom :is(input, select, textarea) {
     background-color: var(--surface);
 }
+/* read-only rows: titles read like text, without the outline controlClass gives read-only fields */
+.ed-pos__main :is(input, textarea):disabled {
+    box-shadow: none;
+}

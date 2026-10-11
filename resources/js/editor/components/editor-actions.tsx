@@ -38,7 +38,7 @@ export function EditorActions({ document, context, actions }: { document: Docume
                 {allowed.delete && (
                     <>
                         <MenuSeparator />
-                        <MenuItem danger icon={<Trash2 />} disabled={busy} onSelect={actions.remove}>
+                        <MenuItem danger icon={<Trash2 />} disabled={busy} onSelect={() => void actions.remove()}>
                             {t('editor.delete')}
                         </MenuItem>
                     </>

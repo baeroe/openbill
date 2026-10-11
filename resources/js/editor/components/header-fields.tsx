@@ -100,7 +100,7 @@ export function HeaderFields({ draft, context, readOnly, messages, customerName,
                 {(draft.type === 'invoice' || draft.type === 'cancellation') && (
                     <>
                         {date('service_date', t('editor.service_date'))}
-                        {date('service_date_end', t('editor.service_date_end'), t('editor.service_date_end_hint'))}
+                        {date('service_date_end', t('editor.service_date_end'), readOnly ? undefined : t('editor.service_date_end_hint'))}
                     </>
                 )}
                 {draft.type === 'invoice' && date('due_date', t('editor.due_date'))}

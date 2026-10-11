@@ -14,10 +14,11 @@ function Row({ label, value, sub = false }: { label: string; value: string; sub?
 }
 
 /** Net, VAT per rate, total, optional positions and legal notes – exactly as the server calculated them. */
-export function TotalsPanel({ totals }: { totals: Totals | null }) {
+/** stale: the last render request failed, so these totals belong to an earlier state of the draft (dimmed, aria-busy). */
+export function TotalsPanel({ totals, stale = false }: { totals: Totals | null; stale?: boolean }) {
     if (!totals) return null;
     return (
-        <div role="group" aria-label={t('editor.totals')} className="mt-2 ml-auto grid w-full max-w-96 gap-1.5 rounded-lg bg-bg px-5 py-4">
+        <div role="group" aria-label={t('editor.totals')} aria-busy={stale || undefined} className={cx('mt-2 ml-auto grid w-full max-w-96 gap-1.5 rounded-lg bg-bg px-5 py-4 transition-opacity', stale && 'opacity-55')}>
             <Row label={t('editor.net')} value={formatMoney(totals.net)} />
             {totals.tax_breakdown.map((row) => (
                 <Row

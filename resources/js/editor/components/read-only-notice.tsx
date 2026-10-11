@@ -8,20 +8,25 @@ import type { SaveState } from '../types';
 
 export function ReadOnlyNotice({ document, saveState }: { document: DocumentDetail; saveState: SaveState }) {
     if (saveState === 'locked') {
+        // an alert: screen readers learn at once that the document was finalized elsewhere
         return (
-            <Notice tone="warn" icon={<Lock />}>
-                {t('editor.locked_elsewhere')}
-            </Notice>
+            <div role="alert">
+                <Notice tone="warn" icon={<Lock />}>
+                    {t('editor.locked_elsewhere')}
+                </Notice>
+            </div>
         );
     }
     if (saveState === 'gone') {
         return (
-            <Notice tone="bad" icon={<FileQuestion />}>
-                {t('editor.gone')}{' '}
-                <Link href={path('/documents')} className="font-medium text-accent">
-                    {t('editor.to_documents')}
-                </Link>
-            </Notice>
+            <div role="alert">
+                <Notice tone="bad" icon={<FileQuestion />}>
+                    {t('editor.gone')}{' '}
+                    <Link href={path('/documents')} className="font-medium text-accent">
+                        {t('editor.to_documents')}
+                    </Link>
+                </Notice>
+            </div>
         );
     }
     if (!document.is_locked) return null;

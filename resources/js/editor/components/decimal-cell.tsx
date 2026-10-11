@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { controlClass, cx } from '@/components/ui';
 import { t } from '@/lib/i18n';
-import { formatDecimalInput, parseDecimalInput } from '../decimal';
+import { formatDecimalInput, parseDecimalInput, sameDecimal } from '../decimal';
+import { syncCell, type CellState } from '../decimal-cell-state';
 
 type Props = {
     value: string;
@@ -22,21 +23,17 @@ type Props = {
  * stays local, is marked when the field is left and is never sent.
  */
 export function DecimalCell({ value, onCommit, label, disabled = false, error, path, scale = 4, minFraction = 0, suffix, className }: Props) {
-    const [raw, setRaw] = useState(() => formatDecimalInput(value, undefined, minFraction));
-    const [invalid, setInvalidState] = useState(false);
-    // invalid input is the user's unsent edit: a value arriving from outside (save answer, reload) must not wipe it
-    const invalidRef = useRef(false);
-    const setInvalid = (next: boolean) => {
-        invalidRef.current = next;
-        setInvalidState(next);
-    };
+    const [cell, setCell] = useState<CellState>(() => ({ raw: formatDecimalInput(value, undefined, minFraction), invalid: false }));
+    const { raw, invalid } = cell;
     const focused = useRef(false);
     const selectOnMouseUp = useRef(false);
+    const previous = useRef(value);
 
+    // a value from outside (save answer, server state, read-only): see syncCell for what wins
     useEffect(() => {
-        if (focused.current || invalidRef.current) return;
-        setRaw(formatDecimalInput(value, undefined, minFraction));
-    }, [value, minFraction]);
+        setCell((state) => syncCell(state, { value, previous: previous.current, disabled, focused: focused.current, minFraction }));
+        previous.current = value;
+    }, [value, disabled, minFraction]);
 
     const message = invalid ? t('editor.invalid_number') : error;
 
@@ -61,21 +58,21 @@ export function DecimalCell({ value, onCommit, label, disabled = false, error, p
                     e.preventDefault();
                 }}
                 onChange={(e) => {
-                    setRaw(e.target.value);
                     const parsed = parseDecimalInput(e.target.value, scale);
-                    if (parsed === 'invalid') return;
-                    setInvalid(false);
-                    if (parsed !== value) onCommit(parsed);
+                    setCell({ raw: e.target.value, invalid: invalid && parsed === 'invalid' });
+                    if (parsed !== 'invalid' && parsed !== value) onCommit(parsed);
                 }}
                 onBlur={() => {
                     focused.current = false;
                     selectOnMouseUp.current = false;
                     const parsed = parseDecimalInput(raw, scale);
                     if (parsed === 'invalid') {
-                        setInvalid(true);
+                        setCell({ raw, invalid: true });
                         return;
                     }
-                    setRaw(formatDecimalInput(parsed, undefined, minFraction));
+                    // the stored value may have changed while typing (server state): what is shown is what gets saved
+                    if (!sameDecimal(parsed, value)) onCommit(parsed);
+                    setCell({ raw: formatDecimalInput(parsed, undefined, minFraction), invalid: false });
                 }}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') e.currentTarget.blur();

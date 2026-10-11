@@ -39,8 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // /api: session of the own UI (Sanctum stateful + CSRF), rate limit "api", response language
         $middleware->statefulApi();
         $middleware->throttleApi();
-        // body size first: nothing parses a body above config('openbill.api.*')
-        $middleware->api(prepend: [LimitApiBody::class]);
+        // body size first, globally before ValidatePostSize/TrimStrings (which decode JSON): nothing parses
+        // an /api body above config('openbill.api.*')
+        $middleware->prepend(LimitApiBody::class);
         $middleware->api(append: [SetApiLocale::class]);
         // Laravel's priority list with the rate limit moved before auth: requests with made-up tokens (401)
         // count as well, otherwise guessing tokens is unlimited

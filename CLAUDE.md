@@ -41,6 +41,7 @@ ddev artisan app:sync-templates              # mitgelieferte Templates Klar/Kant
 ddev artisan app:render-sample klar long_invoice --locale=de   # PDF mit Beispieldaten → storage/app/private/samples/
 ddev artisan test --testsuite=Integration --group=gotenberg     # gegen das echte Gotenberg (DDEV-Dienst)
 ddev exec 'UPDATE_GOLDEN=1 php artisan test --filter=GoldenTest'   # Golden-HTML der Templates neu schreiben (Diff prüfen!)
+scripts/validate-einvoice.sh                 # EN-16931-Schematron (CEN, Saxon-HE in Docker) auf die E-Rechnungen aus EInvoiceSamplesTest
 ddev exec vendor/bin/pint                    # PHP formatieren (CI: --test)
 ddev exec vendor/bin/phpstan analyse --memory-limit=1G
 ddev exec pnpm typecheck                     # tsc

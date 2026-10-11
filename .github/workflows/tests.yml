@@ -99,6 +99,15 @@ jobs:
 
       - name: Pest
         run: php artisan test
+        env:
+          # EInvoiceSamplesTest writes the archived e-invoice XMLs there for the einvoice job
+          EINVOICE_SAMPLES_DIR: ${{ github.workspace }}/einvoice-samples
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: einvoice-samples
+          path: einvoice-samples/*.xml
+          if-no-files-found: error
 
       # domain logic of the clickable prototypes (sums, taxes, numbering, chain, Liquid, page breaks)
       - name: Prototypes
@@ -109,3 +118,19 @@ jobs:
 
       - name: Docs
         run: pnpm --dir docs build
+
+  # EN 16931 business rules (official CII Schematron, Saxon-HE) on the e-invoices the tests archive.
+  # Not a required check; see scripts/validate-einvoice.sh.
+  einvoice:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: einvoice-samples
+          path: einvoice-samples
+
+      - name: EN 16931 Schematron
+        run: scripts/validate-einvoice.sh einvoice-samples

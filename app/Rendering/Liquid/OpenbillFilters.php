@@ -5,7 +5,10 @@ namespace App\Rendering\Liquid;
 use App\Rendering\NumberText;
 use App\Support\Text;
 use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Carbon\CarbonImmutable;
+use Closure;
+use Keepsuit\Liquid\Exceptions\StandardException;
 use Keepsuit\Liquid\Filters\FiltersProvider;
 use Keepsuit\Liquid\Filters\StandardFilters;
 use Throwable;
@@ -81,6 +84,72 @@ final class OpenbillFilters extends FiltersProvider
         return $text === "template.{$key}" ? $key : $text;
     }
 
+    /**
+     * Liquid math without floats: amounts are decimal strings, so plus/minus/times/divided_by/round compute
+     * with BigDecimal and return a decimal string. Two integers keep Liquid's integer semantics.
+     */
+    public function plus(mixed $input, mixed $operand): int|string
+    {
+        return self::math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->plus($b), fn (int $a, int $b): int => $a + $b);
+    }
+
+    public function minus(mixed $input, mixed $operand): int|string
+    {
+        return self::math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->minus($b), fn (int $a, int $b): int => $a - $b);
+    }
+
+    public function times(mixed $input, mixed $operand): int|string
+    {
+        return self::math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->multipliedBy($b), fn (int $a, int $b): int => $a * $b);
+    }
+
+    /**
+     * @throws StandardException on division by zero
+     */
+    public function dividedBy(mixed $input, mixed $operand): int|string
+    {
+        if ((self::decimal($operand) ?? BigDecimal::zero())->isZero()) {
+            throw new StandardException('divided by 0');
+        }
+
+        return self::math(
+            $input,
+            $operand,
+            fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->dividedBy($b, 10, RoundingMode::HalfUp)->strippedOfTrailingZeros(),
+            fn (int $a, int $b): int => intdiv($a, $b) - (($a % $b !== 0 && ($a < 0) !== ($b < 0)) ? 1 : 0),
+        );
+    }
+
+    /** Commercial rounding (half up) to $decimals decimals. */
+    public function round(mixed $input, mixed $decimals = 0): int|string
+    {
+        if (is_int($input)) {
+            return $input;
+        }
+        $value = self::decimal($input) ?? BigDecimal::zero();
+
+        return (string) $value->toScale(max(0, min(10, is_numeric($decimals) ? (int) $decimals : 0)), RoundingMode::HalfUp);
+    }
+
+    /** Context values are escaped already: escape works like escape_once and never escapes twice. */
+    public function escape(mixed $input): string
+    {
+        return is_scalar($input) ? htmlspecialchars((string) $input, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) : '';
+    }
+
+    /**
+     * @param  Closure(BigDecimal, BigDecimal): BigDecimal  $decimal
+     * @param  Closure(int, int): int  $integer
+     */
+    private static function math(mixed $input, mixed $operand, Closure $decimal, Closure $integer): int|string
+    {
+        if (is_int($input) && is_int($operand)) {
+            return $integer($input, $operand);
+        }
+
+        return (string) $decimal(self::decimal($input) ?? BigDecimal::zero(), self::decimal($operand) ?? BigDecimal::zero());
+    }
+
     private function env(): RenderEnv
     {
         $env = $this->context->getRegister(RenderEnv::REGISTER);
@@ -93,9 +162,9 @@ final class OpenbillFilters extends FiltersProvider
         if (is_int($value)) {
             return BigDecimal::of($value);
         }
-        // Liquid math (times, plus, …) yields PHP floats; their decimal text is exact enough for display
+        // float literals in a template ("times: 1.19"): their shortest decimal text is what the author wrote
         if (is_float($value) && is_finite($value)) {
-            return BigDecimal::of(sprintf('%.6F', $value));
+            return BigDecimal::of((string) $value);
         }
         if (is_string($value) && preg_match('/^-?\d+(\.\d+)?$/', trim($value)) === 1) {
             return BigDecimal::of(trim($value));

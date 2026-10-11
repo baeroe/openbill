@@ -96,3 +96,20 @@ it('has the vocabulary of the built-in templates in both languages', function ()
         }
     }
 });
+
+it('does Liquid math on amounts with decimals, not floats (review #6)', function () {
+    expect(liquid('{{ a | plus: b }}', ['a' => '0.1', 'b' => '0.2']))->toBe('0.3')
+        ->and(liquid('{{ v | times: 1.19 }}', ['v' => '1130.50']))->toBe('1345.2950')
+        ->and(liquid('{{ v | times: 1.19 | money }}', ['v' => '1130.50']))->toBe('1.345,30 €')
+        ->and(liquid('{{ v | minus: "0.01" }}', ['v' => '1.00']))->toBe('0.99')
+        ->and(liquid('{{ v | round: 2 }}', ['v' => '1.005']))->toBe('1.01')
+        ->and(liquid('{{ v | divided_by: 3 | round: 2 }}', ['v' => '10.00']))->toBe('3.33')
+        // integers keep Liquid's integer semantics (loop counters, integer division)
+        ->and(liquid('{{ 10 | divided_by: 4 }}|{{ 3 | plus: 4 }}|{{ 2 | times: 3 }}|{{ 7 | round }}'))->toBe('2|7|6|7')
+        ->and(fn () => liquid('{{ 1 | divided_by: 0 }}'))->toThrow(Exception::class);
+});
+
+it('does not escape context values twice with escape (review #7)', function () {
+    expect(liquid('{{ s | escape }}', ['s' => 'a &amp; b &lt;c&gt;']))->toBe('a &amp; b &lt;c&gt;')
+        ->and(liquid('{{ "<b>" | escape }}'))->toBe('&lt;b&gt;');
+});

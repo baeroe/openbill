@@ -6,6 +6,7 @@ use App\Http\Api\CurrentActor;
 use App\Models\PersonalAccessToken;
 use App\Models\Template;
 use App\Models\User;
+use App\Support\StatefulDomains;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -127,4 +128,11 @@ it('answers in the language of Accept-Language', function () {
         ->getJson('/api/_test/read')
         ->assertUnauthorized()
         ->assertJsonPath('title', 'Nicht angemeldet');
+});
+
+it('treats local development hosts as first-party only outside production', function () {
+    expect(StatefulDomains::list('production', 'https://billing.example.com'))->toBe(['billing.example.com'])
+        ->and(StatefulDomains::list('production', 'https://billing.example.com:8443'))->toBe(['billing.example.com:8443'])
+        ->and(StatefulDomains::list('local', 'https://openbill.ddev.site'))->toContain('localhost', 'openbill.ddev.site')
+        ->and(config('sanctum.stateful'))->toBe(StatefulDomains::list('testing', config('app.url')));
 });

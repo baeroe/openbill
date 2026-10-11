@@ -1,20 +1,19 @@
 <?php
 
+use App\Support\StatefulDomains;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Laravel\Sanctum\Http\Middleware\AuthenticateSession;
-use Laravel\Sanctum\Sanctum;
 
 return [
     /*
-    | Hosts whose browser requests get the session (the own UI): local hosts, the DDEV host and the
-    | host of APP_URL (Docker, phase 10). Requests from elsewhere need a token.
+    | Hosts whose browser requests get the session (the own UI): the host of APP_URL, plus the local
+    | development hosts (localhost, DDEV) outside production (App\Support\StatefulDomains).
+    | SANCTUM_STATEFUL_DOMAINS (comma-separated) replaces the list.
     */
-    'stateful' => explode(',', (string) env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,openbill.ddev.site',
-        Sanctum::currentApplicationUrlWithPort(),
-    ))),
+    'stateful' => env('SANCTUM_STATEFUL_DOMAINS') !== null
+        ? explode(',', (string) env('SANCTUM_STATEFUL_DOMAINS'))
+        : StatefulDomains::list((string) env('APP_ENV', 'production'), env('APP_URL')),
 
     'guard' => ['web'],
 

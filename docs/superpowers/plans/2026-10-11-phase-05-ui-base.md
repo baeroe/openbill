@@ -7804,7 +7804,7 @@ Die Liste der geprüften Seiten und der bewusst gelassenen Unterschiede kommt in
 Run: `git config user.email && git status --short && git log --oneline main..HEAD`
 Expected: `rafael@hauss.dev`, sauberer Arbeitsbaum (Screenshots und `dist/` ignoriert), die Commits aus Task 1–17.
 
-Run: `git grep -nE 'openbill_[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH) PRIVATE KEY|rafael@lulububu' -- . ':!docs/superpowers' || echo clean`
+Run: `git grep -nE 'openbill_[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH) PRIVATE KEY|rafael@lulu[b]ubu' -- . ':!docs/superpowers' || echo clean`
 Expected: `clean`.
 
 Run: `git push -u origin phase-05-ui-base`

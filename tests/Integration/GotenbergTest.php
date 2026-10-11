@@ -9,6 +9,8 @@ use App\Enums\DocumentType;
 use App\Models\Document;
 use App\Models\Template;
 use App\Rendering\GotenbergClient;
+use App\Rendering\Paper;
+use App\Rendering\RenderResult;
 use Database\Seeders\DemoSeeder;
 use horstoeko\zugferd\ZugferdDocumentPdfReader;
 use Illuminate\Support\Facades\Http;
@@ -72,4 +74,39 @@ it('finalizes the demo invoice into a PDF/A-3b with the archived XML embedded', 
         ->and($meta['DocumentFileName'] ?? null)->toBe('factur-x.xml')
         ->and($meta['ConformanceLevel'] ?? null)->toBe('EN 16931')
         ->and(implode('', pageTexts($pdf)))->toContain(str_replace(' ', '', (string) $done->number));
+})->group('gotenberg');
+
+/** Probes for JavaScript and network access: a script that writes JSRAN, frames and images on internal hosts. */
+function hostileBody(): string
+{
+    return '<p id="o">static</p><script>document.getElementById("o").textContent = "JSRAN";</script>'
+        .'<iframe src="http://localhost:3000/health" width="600" height="200"></iframe>'
+        .'<iframe src="http://web/" width="600" height="200"></iframe>'
+        .'<object data="http://localhost:3000/health" width="600" height="200"></object>'
+        .'<img src="http://localhost:3000/health?img=1" alt="IMGALT"><img src="https://example.com/pixel.png">';
+}
+
+function assertNothingLoaded(string $pdf): void
+{
+    $text = strtolower(implode('', pageTexts($pdf)));
+
+    expect($text)->toContain('static')
+        ->and($text)->not->toContain('jsran')        // no JavaScript
+        ->and($text)->not->toContain('chromium')     // Gotenberg's own /health (JSON lists its modules)
+        ->and($text)->not->toContain('password');    // the openbill login page on http://web/ (DDEV)
+}
+
+it('runs no JavaScript and loads no URL even for HTML without the CSP (Gotenberg flags, review #1)', function () {
+    $result = new RenderResult('<html><body>H</body></html>', '<!doctype html><html><body>'.hostileBody().'</body></html>', '<html><body>F</body></html>', Paper::fromManifest([]));
+
+    assertNothingLoaded(app(GotenbergClient::class)->pdf($result));
+})->group('gotenberg');
+
+it('blocks scripts and URLs of a template through its CSP (review #1)', function () {
+    $preview = app(RenderPreview::class)->handle(systemActor(), [
+        'scenario' => 'short_invoice',
+        'template' => ['body' => hostileBody(), 'header' => hostileBody(), 'footer' => hostileBody()],
+    ]);
+
+    assertNothingLoaded(app(GotenbergClient::class)->pdf($preview->render));
 })->group('gotenberg');

@@ -41,7 +41,7 @@ Assets verweist du mit relativem Pfad an, in HTML und in CSS:
 @font-face { font-family: Brand; src: url(assets/brand.woff2); }
 ```
 
-openbill bettet sie beim Rendern als Data-URL ein, das PDF lädt also nie etwas aus dem Netz.
+openbill bettet sie beim Rendern als Data-URL ein. Bilder und Schriften kommen nur auf diesem Weg ins Dokument – als Template-Assets (oder das Logo der Organisation, `org.logo`): Ein gerendertes Dokument darf nichts anderes laden. Jedes Dokument trägt eine Content-Security-Policy (`default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'`), Bilder, Schriften, Stylesheets oder Frames von `http(s)://…` und alle Skripte werden also blockiert; zusätzlich läuft Gotenberg ohne JavaScript und ohne Netzzugriff.
 
 ## manifest.json
 
@@ -201,7 +201,9 @@ Ein Template kann openbill weder kaputt machen noch blockieren:
 - jeder Teil (Kopfzeile, Inhalt, Fußzeile, Styles) darf höchstens 200 KB groß sein, das gerenderte HTML eines Teils höchstens 5 MB,
 - Schleifen und Ausgabe sind begrenzt (eine Schleife über einen Bereich wie `(1..n)` darf höchstens 10 000 Einträge haben; endlose oder riesige Schleifen enden mit „Render-Grenze“),
 - `{% render %}` und `{% include %}` gibt es nicht, `{% tablerow %}` auch nicht,
-- `styles.css` darf kein `</style>` enthalten.
+- `styles.css` darf kein `</style>` enthalten,
+- ein Rendering bricht nach 5 Sekunden ab,
+- keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen).
 
 Jeder Fehler wird mit **Bereich** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), **Datei** und **Zeile** gemeldet, zum Beispiel `body · template.liquid · Zeile 3 · Unexpected character }`. Die Vorschau zeigt den Fehler anstelle des kaputten Teils. Abschließen und Entwurfs-PDF verweigern, solange das Template Fehler hat; ein kaputtes Template landet so nie in einem archivierten PDF.
 

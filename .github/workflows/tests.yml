@@ -25,10 +25,6 @@ jobs:
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
-      gotenberg:
-        image: gotenberg/gotenberg:8
-        ports:
-          - 3000:3000
 
     env:
       DB_CONNECTION: mariadb
@@ -41,6 +37,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # not a service container: services can't take a command, and Gotenberg must run hardened
+      # (no JavaScript, no URLs but its own files and data:) – same flags as .ddev/docker-compose.gotenberg.yaml
+      - name: Gotenberg
+        run: >-
+          docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:8 gotenberg
+          --chromium-disable-javascript=true
+          '--chromium-deny-list=^file:(?!//\/tmp/).*'
+          '--chromium-deny-list=^(?!(file|data):).*'
+          --chromium-deny-private-ips=true
+          --chromium-deny-public-ips=true
 
       - uses: shivammathur/setup-php@v2
         with:

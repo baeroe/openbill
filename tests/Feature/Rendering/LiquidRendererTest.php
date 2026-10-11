@@ -210,3 +210,12 @@ it('stops an expensive filter in a loop at the deadline (review #2)', function (
         ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.time', ['seconds' => 1]))
         ->and(microtime(true) - $start)->toBeLessThan(3);
 });
+
+it('locks body, header and footer down with a Content-Security-Policy as first head element (review #1)', function () {
+    $result = renderParts(['body' => '<script>x()</script>', 'header' => 'h', 'footer' => 'f']);
+    $csp = '<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'">';
+
+    foreach ([$result->body, $result->header, $result->footer] as $html) {
+        expect($html)->toContain($csp);
+    }
+});

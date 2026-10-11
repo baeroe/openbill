@@ -187,9 +187,18 @@ final class LiquidRenderer
             .'<strong>'.e($where).'</strong><pre style="white-space:pre-wrap;margin:4px 0 0">'.e($error->message).'</pre></div>';
     }
 
+    /**
+     * First element of every head: templates come from untrusted packages, so the documents may load nothing
+     * (no scripts, no URLs; images and fonts only as data URLs, i.e. template assets and the logo). A CSP in
+     * the template can only tighten this one, never loosen it. Gotenberg is hardened as well (no JavaScript,
+     * no http(s), see docs/en/development.md).
+     */
+    public const CSP = "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'";
+
     private static function head(string $locale, string $title): string
     {
-        return '<!doctype html><html lang="'.e($locale).'"><head><meta charset="utf-8"><title>'.$title.'</title>';
+        return '<!doctype html><html lang="'.e($locale).'"><head><meta http-equiv="Content-Security-Policy" content="'.self::CSP.'">'
+            .'<meta charset="utf-8"><title>'.$title.'</title>';
     }
 
     /** Body: as wide as the content area, no own margins (Gotenberg sets them from the paper). */

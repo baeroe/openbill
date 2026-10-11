@@ -41,7 +41,7 @@ Reference assets with a relative path, in HTML and in CSS:
 @font-face { font-family: Brand; src: url(assets/brand.woff2); }
 ```
 
-openbill embeds them as data URLs while rendering, so the PDF never loads anything from the network.
+openbill embeds them as data URLs while rendering. Images and fonts can only come this way – as template assets (or the organization logo, `org.logo`): a rendered document may not load anything else. Every document carries a Content-Security-Policy (`default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'`), so links to `http(s)://…` images, fonts, stylesheets or frames and all scripts are blocked, and Gotenberg runs without JavaScript and without network access as a second line of defence.
 
 ## manifest.json
 
@@ -201,7 +201,9 @@ A template can never break openbill or block it:
 - each part (header, body, footer, styles) may be at most 200 KB, the rendered HTML of a part at most 5 MB,
 - loops and output are limited (a loop over a range like `(1..n)` may have at most 10 000 items; endless or huge loops stop with "render limit"),
 - `{% render %}` and `{% include %}` are not available, `{% tablerow %}` neither,
-- `styles.css` must not contain `</style>`.
+- `styles.css` must not contain `</style>`,
+- a rendering stops after 5 seconds,
+- no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets).
 
 Every problem is reported with the **part** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), the **file** and the **line**, for example `body · template.liquid · line 3 · Unexpected character }`. The preview shows the error in place of the broken part. Finalizing and the draft PDF refuse to run while the template has errors, so a broken template never ends up in an archived PDF.
 

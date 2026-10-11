@@ -99,7 +99,7 @@ Every change to a document is logged with who made it (user, API token or the sy
 
 ### Overview
 
-After logging in you land on the overview. Four figures sum up the money side: open invoices, how much of that is overdue, open quotes, and what was paid this month (with the total since the start of the year). Each figure opens the matching filtered list. **Needs your attention** lists overdue invoices first, then open quotes whose validity ends within seven days or has ended, then drafts. **Recently edited** shows the six documents changed last.
+After logging in you land on the overview. Four figures sum up the money side: open invoices, how much of that is overdue, open quotes, and what was paid this month (with the total since the start of the year). The figures of open invoices and quotes open the matching filtered list. **Needs your attention** lists overdue invoices first, then open quotes whose validity ends within seven days or has ended, then drafts. **Recently edited** shows the six documents changed last.
 
 ### Document list
 

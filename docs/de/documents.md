@@ -99,7 +99,7 @@ Jede Änderung an einem Dokument wird mit Urheber (Benutzer, API-Token oder Syst
 
 ### Übersicht
 
-Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld zusammen: offene Rechnungen, wie viel davon überfällig ist, offene Angebote und was in diesem Monat bezahlt wurde (mit der Summe seit Jahresbeginn). Jede Kennzahl öffnet die passend gefilterte Liste. **Braucht deine Aufmerksamkeit** zeigt zuerst überfällige Rechnungen, dann offene Angebote, deren Gültigkeit in den nächsten sieben Tagen endet oder schon abgelaufen ist, dann Entwürfe. **Zuletzt bearbeitet** zeigt die sechs zuletzt geänderten Dokumente.
+Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld zusammen: offene Rechnungen, wie viel davon überfällig ist, offene Angebote und was in diesem Monat bezahlt wurde (mit der Summe seit Jahresbeginn). Die Kennzahlen zu offenen Rechnungen und Angeboten öffnen die passend gefilterte Liste. **Braucht deine Aufmerksamkeit** zeigt zuerst überfällige Rechnungen, dann offene Angebote, deren Gültigkeit in den nächsten sieben Tagen endet oder schon abgelaufen ist, dann Entwürfe. **Zuletzt bearbeitet** zeigt die sechs zuletzt geänderten Dokumente.
 
 ### Dokumentliste
 

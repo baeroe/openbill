@@ -97,3 +97,18 @@ it('shuts a revoked token out of every endpoint', function () {
 it('serves the API documentation without a token', function () {
     $this->get('/api/docs.jsonopenapi')->assertOk();
 });
+
+it('lets templates:render read every document in rendered form and list documents with customer names (spec 7, documented)', function () {
+    $customer = App\Models\Customer::factory()->create(['name' => 'Fjord Analytics AB']);
+    $document = draft(App\Enums\DocumentType::Invoice, [itemRow('Workshop', '10', '95')], ['customer_id' => $customer->id]);
+    $this->withToken(apiToken(['templates:render']));
+
+    $this->postJson('/api/render', ['document_id' => $document->id])
+        ->assertOk()
+        ->assertJsonPath('body', fn (string $body): bool => str_contains($body, 'Fjord Analytics AB') && str_contains($body, 'Workshop'));
+    $this->getJson('/api/render/sources')
+        ->assertOk()
+        ->assertJsonPath('documents.0.customer_name', 'Fjord Analytics AB');
+    // reading the document as a resource stays closed
+    $this->getJson("/api/documents/{$document->id}")->assertForbidden();
+});

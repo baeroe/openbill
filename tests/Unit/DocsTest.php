@@ -16,3 +16,10 @@ it('lists every English page in the sidebar', function () {
         expect($config)->toContain("'{$page}'");
     }
 });
+
+it('marks templates:render as read access to all documents in the API docs', function () {
+    $root = dirname(__DIR__, 2);
+
+    expect((string) file_get_contents("{$root}/docs/en/api.md"))->toContain('read access to all documents')
+        ->and((string) file_get_contents("{$root}/docs/de/api.md"))->toContain('lesender Zugriff auf alle Dokumente');
+});

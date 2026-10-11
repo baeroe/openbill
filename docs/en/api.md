@@ -26,7 +26,7 @@ php artisan app:create-token admin@example.com --name=agent --ability=api:read -
 |---|---|
 | `api:read` | reading all resources, PDF/XML downloads, position suggestions, previews |
 | `api:write` | everything `api:read` allows, plus creating, changing and deleting |
-| `templates:render` | previews only: `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
+| `templates:render` | previews: `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema`. **This is read access to all documents:** the token can render every document (customer, address, positions, amounts) and `render/sources` lists recent documents with number and customer name. The toolkit needs this to preview templates with real documents. |
 | `templates:write` | reading and writing **one** template (`--template=<id>`): `GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files` |
 | `mcp` | the MCP server only (no REST endpoint) |
 

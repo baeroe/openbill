@@ -76,6 +76,8 @@
     "rendering.error.style_tag": "styles.css darf kein </style> enthalten.",
     "rendering.error.too_large": "Dieser Teil ist größer als :kb KB.",
     "rendering.error_box": "Template-Fehler in :part",
+    "rendering.pdf_failed": "Der PDF-Dienst hat mit einem Fehler geantwortet (:status): :message",
+    "rendering.pdf_unreachable": "Der PDF-Dienst (Gotenberg) ist nicht erreichbar oder zu langsam. Bitte noch einmal versuchen.",
     "template.amount_due": "Zu zahlen",
     "template.credit": "Gutschrift",
     "template.customer_number": "Kunde",

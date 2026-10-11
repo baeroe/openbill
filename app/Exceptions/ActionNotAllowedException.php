@@ -56,6 +56,11 @@ final class ActionNotAllowedException extends DomainActionException
         return new self('customer_has_finalized_documents', Text::t('errors.customer_has_finalized_documents'));
     }
 
+    public function reason(): string
+    {
+        return $this->reason;
+    }
+
     public function status(): int
     {
         return 409;

@@ -22,6 +22,11 @@ final class PdfRenderFailedException extends DomainActionException
         return new self(Text::t('rendering.pdf_failed', ['status' => $status]));
     }
 
+    public function reason(): string
+    {
+        return 'pdf_render_failed';
+    }
+
     public function status(): int
     {
         return 503;

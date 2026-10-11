@@ -219,3 +219,52 @@ it('locks body, header and footer down with a Content-Security-Policy as first h
         expect($html)->toContain($csp);
     }
 });
+
+it('stops a huge capture while it is being built (re-review #2)', function () {
+    // capture rendered its block into one string and counted the length only afterwards: fatal error
+    memory_reset_peak_usage();
+    $before = memory_get_usage();
+
+    $result = renderParts(
+        ['body' => "x\n{% capture c %}{% for a in (1..1000) %}{% for b in (1..15) %}{{ long }}{% endfor %}{% endfor %}{% endcapture %}{{ c | size }}"],
+        [...rendererContext(), 'long' => str_repeat('x', 150_000)],
+    );
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->part)->toBe(RenderPart::Body)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.limit'))
+        ->and(memory_get_peak_usage() - $before)->toBeLessThan(128 * 1024 * 1024);
+});
+
+it('stops a string filter whose result would explode before it allocates it (re-review #2)', function (string $body) {
+    memory_reset_peak_usage();
+    $before = memory_get_usage();
+
+    $result = renderParts(
+        ['body' => "x\n{$body}"],
+        [...rendererContext(), 'xs' => str_repeat('x', 30_000), 'ys' => str_repeat('y', 30_000)],
+    );
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->part)->toBe(RenderPart::Body)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.limit'))
+        ->and(memory_get_peak_usage() - $before)->toBeLessThan(128 * 1024 * 1024);
+})->with([
+    // 30 000 × 30 000 bytes = 900 MB in a single str_replace
+    'replace' => ["{{ xs | replace: 'x', ys | size }}"],
+    // 15 000 × 30 KB = 450 MB within one output tag
+    'append' => ['{{ ys'.str_repeat(' | append: ys', 15_000).' | size }}'],
+]);
+
+it('ends rendering cleanly when the memory budget is used up (re-review #2)', function () {
+    config(['openbill.rendering.max_memory_bytes' => 2 * 1024 * 1024]);
+
+    // 3 MB of output stay below the 5 MB output limit, but not below a 2 MB memory budget
+    $result = renderParts(
+        ['body' => "x\n{% for i in (1..3) %}{{ long | append: long }}{% endfor %}"],
+        [...rendererContext(), 'long' => str_repeat('x', 500_000)],
+    );
+
+    expect($result->errors)->toHaveCount(1)
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.memory'));
+});

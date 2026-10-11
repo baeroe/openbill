@@ -13,12 +13,20 @@ final readonly class RenderEnv
     /**
      * @param  array<string, array<string, string>>  $translations  manifest "translations" by locale
      * @param  int|null  $deadline  hrtime(true) in nanoseconds after which rendering stops, null for none
+     * @param  int|null  $memoryCeiling  memory_get_usage() in bytes above which rendering stops, null for none
      */
     public function __construct(
         public string $locale,
         public array $translations = [],
         public ?int $deadline = null,
+        public ?int $memoryCeiling = null,
     ) {}
+
+    /** Memory budget $bytes on top of what is in use now. */
+    public static function memoryCeilingIn(int $bytes): int
+    {
+        return memory_get_usage() + $bytes;
+    }
 
     /** Deadline $seconds from now. */
     public static function deadlineIn(int $seconds): int
@@ -32,12 +40,17 @@ final readonly class RenderEnv
     }
 
     /**
-     * @throws RenderTimeoutException
+     * Deadline and memory budget; checked on every render point, every streamed chunk and in the string filters.
+     *
+     * @throws RenderTimeoutException|RenderMemoryException
      */
-    public function checkDeadline(): void
+    public function checkBudget(): void
     {
         if ($this->expired()) {
             throw new RenderTimeoutException;
+        }
+        if ($this->memoryCeiling !== null && memory_get_usage() > $this->memoryCeiling) {
+            throw new RenderMemoryException;
         }
     }
 }

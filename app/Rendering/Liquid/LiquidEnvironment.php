@@ -27,6 +27,7 @@ final class LiquidEnvironment
             ))
             ->registerFilters(OpenbillFilters::class)
             ->registerTag(BoundedForTag::class)
+            ->registerTag(BoundedCaptureTag::class)
             ->build();
 
         // tablerow expands ranges without a limit and has no use in documents

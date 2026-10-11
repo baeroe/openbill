@@ -81,6 +81,7 @@
     "login.title": "Anmelden",
     "rendering.error.internal": "Interner Fehler beim Rendern: :message",
     "rendering.error.limit": "Das Template überschreitet die Render-Grenze (Endlosschleife oder zu viel Ausgabe).",
+    "rendering.error.memory": "Das Template braucht mehr Speicher als erlaubt (zu viele Daten in Variablen, Schleifen oder Filtern).",
     "rendering.error.no_template": "Es gibt kein Template. php artisan app:sync-templates ausführen.",
     "rendering.error.range": "Ein Bereich darf höchstens :max Einträge haben.",
     "rendering.error.style_tag": "styles.css darf kein </style> enthalten.",

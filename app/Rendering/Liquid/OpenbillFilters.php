@@ -8,6 +8,8 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Carbon\CarbonImmutable;
 use Closure;
+use Illuminate\Support\Str;
+use Keepsuit\Liquid\Exceptions\ResourceLimitException;
 use Keepsuit\Liquid\Exceptions\StandardException;
 use Keepsuit\Liquid\Filters\FiltersProvider;
 use Keepsuit\Liquid\Filters\StandardFilters;
@@ -131,6 +133,67 @@ final class OpenbillFilters extends FiltersProvider
         return (string) $value->toScale(max(0, min(10, is_numeric($decimals) ? (int) $decimals : 0)), RoundingMode::HalfUp);
     }
 
+    /*
+     * String filters that can multiply their input check the size of their result before building it: a single
+     * call ("30 000 × x" replaced by 30 000 characters) would otherwise allocate gigabytes at once.
+     */
+
+    public function replace(mixed $input, mixed $search, mixed $replace = ''): string
+    {
+        [$input, $search, $replace] = [self::str($input), self::str($search), self::str($replace)];
+        $grow = $search === '' ? 0 : substr_count($input, $search) * (strlen($replace) - strlen($search));
+        $this->guardLength(strlen($input) + max(0, $grow));
+
+        return str_replace($search, $replace, $input);
+    }
+
+    public function replaceFirst(mixed $input, mixed $search, mixed $replace = ''): string
+    {
+        [$input, $search, $replace] = [self::str($input), self::str($search), self::str($replace)];
+        $this->guardLength(strlen($input) + strlen($replace));
+
+        return Str::replaceFirst($search, $replace, $input);
+    }
+
+    public function replaceLast(mixed $input, mixed $search, mixed $replace = ''): string
+    {
+        [$input, $search, $replace] = [self::str($input), self::str($search), self::str($replace)];
+        $this->guardLength(strlen($input) + strlen($replace));
+
+        return Str::replaceLast($search, $replace, $input);
+    }
+
+    public function append(mixed $input, mixed $string): string
+    {
+        [$input, $string] = [self::str($input), self::str($string)];
+        $this->guardLength(strlen($input) + strlen($string));
+
+        return $input.$string;
+    }
+
+    public function prepend(mixed $input, mixed $string): string
+    {
+        [$input, $string] = [self::str($input), self::str($string)];
+        $this->guardLength(strlen($input) + strlen($string));
+
+        return $string.$input;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function split(mixed $input, mixed $separator = ' '): array
+    {
+        [$input, $separator] = [self::str($input), self::str($separator)];
+        // every item of an array costs far more than its bytes: cap the count like a range
+        $this->guardCount($separator === '' ? strlen($input) : substr_count($input, $separator) + 1);
+        if ($input === '') {
+            return [];
+        }
+
+        return $separator === '' ? str_split($input) : explode($separator, $input);
+    }
+
     /** Context values are escaped already: escape works like escape_once and never escapes twice. */
     public function escape(mixed $input): string
     {
@@ -148,6 +211,33 @@ final class OpenbillFilters extends FiltersProvider
         }
 
         return (string) $decimal(self::decimal($input) ?? BigDecimal::zero(), self::decimal($operand) ?? BigDecimal::zero());
+    }
+
+    /**
+     * @throws ResourceLimitException
+     */
+    private function guardLength(int $bytes): void
+    {
+        $this->env()->checkBudget();
+        if ($bytes > (int) config('openbill.rendering.max_output_bytes')) {
+            throw new ResourceLimitException;
+        }
+    }
+
+    /**
+     * @throws ResourceLimitException
+     */
+    private function guardCount(int $items): void
+    {
+        $this->env()->checkBudget();
+        if ($items > 10 * (int) config('openbill.rendering.max_range')) {
+            throw new ResourceLimitException;
+        }
+    }
+
+    private static function str(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 
     private function env(): RenderEnv

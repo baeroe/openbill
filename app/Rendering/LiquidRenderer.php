@@ -6,6 +6,7 @@ use App\Enums\RenderPart;
 use App\Rendering\Liquid\LiquidEnvironment;
 use App\Rendering\Liquid\RenderEnv;
 use App\Rendering\Liquid\RenderLimits;
+use App\Rendering\Liquid\RenderMemoryException;
 use App\Rendering\Liquid\RenderTimeoutException;
 use App\Support\Text;
 use Brick\Math\BigDecimal;
@@ -48,7 +49,12 @@ final class LiquidRenderer
             $errors[] = new RenderError(RenderPart::Manifest, null, $message);
         }
         $paper = Paper::fromManifest($template->manifest);
-        $env = new RenderEnv($options->locale, self::translations($template->manifest), RenderEnv::deadlineIn((int) config('openbill.rendering.max_seconds')));
+        $env = new RenderEnv(
+            $options->locale,
+            self::translations($template->manifest),
+            RenderEnv::deadlineIn((int) config('openbill.rendering.max_seconds')),
+            RenderEnv::memoryCeilingIn((int) config('openbill.rendering.max_memory_bytes')),
+        );
 
         $document = is_array($context['document'] ?? null) ? $context['document'] : [];
         foreach ([[RenderPart::Intro, 'intro'], [RenderPart::Closing, 'closing']] as [$part, $key]) {
@@ -101,10 +107,12 @@ final class LiquidRenderer
             $output = '';
             foreach ($this->liquid->parseString($source)->stream($context) as $chunk) {
                 $output .= $chunk;
-                $env->checkDeadline();
+                $env->checkBudget();
             }
 
             return $output;
+        } catch (RenderMemoryException) {
+            $errors[] = new RenderError($part, null, Text::t('rendering.error.memory'));
         } catch (RenderTimeoutException) {
             $errors[] = new RenderError($part, null, Text::t('rendering.error.time', ['seconds' => (int) config('openbill.rendering.max_seconds')]));
         } catch (ResourceLimitException) {

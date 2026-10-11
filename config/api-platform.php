@@ -113,7 +113,9 @@ return [
         'hydra_prefix' => false,
     ],
 
-    'cache' => 'file',
+    // metadata per process only: Laravel refuses to unserialize objects from its cache stores
+    // (cache.serializable_classes = false), a persistent store would hand back __PHP_Incomplete_Class
+    'cache' => 'array',
 
     'metadata_dump' => null,
 

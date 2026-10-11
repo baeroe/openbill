@@ -27,3 +27,9 @@ it('stores Sanctum tokens with ULID keys for ULID users and a template binding c
 it('leaves /mcp to laravel/mcp (phase 8)', function () {
     expect(Route::has('api_mcp'))->toBeFalse();
 });
+
+it('keeps API Platform metadata out of the persistent cache, which never unserializes objects', function () {
+    // with a file/redis store and APP_DEBUG=false, metadata would come back as __PHP_Incomplete_Class
+    expect(config('api-platform.cache'))->toBe('array')
+        ->and(config('cache.serializable_classes'))->toBeFalse();
+});

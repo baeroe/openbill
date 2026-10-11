@@ -70,5 +70,6 @@ test('creates a document from the dialog and opens it', async ({ page }) => {
 
     await expect(page).toHaveURL(/\/en\/documents\/[0-9a-z]{26}$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Invoice (draft)');
-    await expect(page.getByText('Hotel Alpenglück')).toBeVisible();
+    // the customer select carries the name too: look at the editor header
+    await expect(page.locator('.ed-head').getByText('Hotel Alpenglück')).toBeVisible();
 });

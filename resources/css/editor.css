@@ -1,0 +1,201 @@
+/*
+ * Document editor: what Tailwind utilities cannot express cleanly – the page grid with the sticky preview,
+ * the position rows (container queries with grid areas), the jump flash and the preview variables. Tokens only.
+ */
+@layer components {
+    .ed {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+    }
+    .ed-main {
+        display: grid;
+        min-width: 0;
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto;
+        align-content: start;
+        gap: 2rem;
+        padding: 1.5rem 2rem 4rem;
+    }
+    .ed-preview {
+        min-width: 0;
+        padding: 0 2rem 3rem;
+    }
+    .ed-head {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        margin: -1.5rem -1.5rem 0;
+        padding: 1.5rem 1.5rem 1rem;
+        background: color-mix(in srgb, var(--surface) 92%, transparent);
+        backdrop-filter: blur(10px);
+    }
+    .ed-pane {
+        height: 100%;
+    }
+    @media (min-width: 1200px) {
+        .ed--with-preview {
+            grid-template-columns: minmax(0, 1fr) minmax(360px, 40%);
+        }
+        .ed--with-preview .ed-main {
+            max-width: none;
+            margin: 0;
+            padding-right: 1.5rem;
+        }
+        .ed--with-preview .ed-preview {
+            position: sticky;
+            top: 0.75rem;
+            height: calc(100dvh - 1.5rem);
+            padding: 0.75rem 0.75rem 0.75rem 0;
+        }
+    }
+    @media (max-width: 1199px) {
+        .ed-pane {
+            height: auto;
+        }
+        .ed-pane__body {
+            overflow: visible;
+        }
+    }
+    @media (max-width: 720px) {
+        .ed-main {
+            gap: 1.5rem;
+            padding: 1.25rem 1rem 3rem;
+        }
+        .ed-preview {
+            padding: 0 1rem 2.5rem;
+        }
+        .ed-head {
+            position: static;
+            margin: 0;
+            padding: 0;
+            background: none;
+            backdrop-filter: none;
+        }
+    }
+
+    /* position rows: header and rows share the columns; they follow the width of the list, not of the window */
+    .ed-groups {
+        container: positions / inline-size;
+    }
+    .ed-pos-head,
+    .ed-pos {
+        --cols: 1.5rem minmax(0, 1fr) 5.25rem 5.5rem 7.25rem 5.5rem 7rem 2rem;
+        display: grid;
+        grid-template-columns: var(--cols);
+        column-gap: 0.5rem;
+    }
+    .ed-pos-head.ed-no-tax,
+    .ed-pos.ed-no-tax {
+        --cols: 1.5rem minmax(0, 1fr) 5.25rem 5.5rem 7.25rem 7rem 2rem;
+    }
+    .ed-pos {
+        align-items: start;
+        row-gap: 2px;
+    }
+    .ed-pos--text .ed-pos__main {
+        grid-column: 2 / -2;
+    }
+    /* an empty description takes no room until the row is being edited */
+    .ed-pos:not(:focus-within) .ed-pos__desc:placeholder-shown:not(:disabled) {
+        min-height: 0;
+        height: 0;
+        padding-block: 0;
+    }
+    .ed-pos__desc:disabled:placeholder-shown {
+        display: none;
+    }
+    /* inputs in position rows read like text until touched (controlClass tints them; no second background class) */
+    .ed-pos input:not(:hover):not(:focus):not([aria-invalid='true']),
+    .ed-pos select:not(:hover):not(:focus):not([aria-invalid='true']),
+    .ed-pos textarea:not(:hover):not(:focus) {
+        background-color: transparent;
+    }
+    .ed-pos :is(input, select):disabled {
+        opacity: 1;
+        cursor: default;
+        color: var(--ink);
+    }
+
+    @container positions (max-width: 51rem) {
+        .ed-pos-head {
+            display: none;
+        }
+        .ed-pos,
+        .ed-pos.ed-no-tax {
+            grid-template-columns: 1.5rem 5.5rem 6.5rem 7.25rem 5.5rem minmax(0, 1fr) 2rem;
+            grid-template-areas: 'handle main main main main total menu' '. qty unit price tax . .';
+            row-gap: 0.25rem;
+        }
+        .ed-pos.ed-no-tax {
+            grid-template-areas: 'handle main main main main total menu' '. qty unit price . . .';
+        }
+        .ed-pos--text,
+        .ed-pos--text.ed-no-tax {
+            grid-template-areas: 'handle main main main main main menu';
+        }
+        .ed-pos__handle {
+            grid-area: handle;
+        }
+        .ed-pos__main,
+        .ed-pos--text .ed-pos__main {
+            grid-area: main;
+        }
+        .ed-pos__qty {
+            grid-area: qty;
+        }
+        .ed-pos__unit {
+            grid-area: unit;
+        }
+        .ed-pos__price {
+            grid-area: price;
+        }
+        .ed-pos__tax {
+            grid-area: tax;
+        }
+        .ed-pos__total {
+            grid-area: total;
+        }
+        .ed-pos__menu {
+            grid-area: menu;
+        }
+    }
+    @container positions (max-width: 30rem) {
+        .ed-pos,
+        .ed-pos.ed-no-tax {
+            grid-template-columns: 1.5rem minmax(0, 1fr) minmax(0, 1fr) 2rem;
+            grid-template-areas: 'handle main main menu' '. qty unit .' '. price tax .' '. total total .';
+        }
+        .ed-pos.ed-no-tax {
+            grid-template-areas: 'handle main main menu' '. qty unit .' '. price price .' '. total total .';
+        }
+        .ed-pos--text,
+        .ed-pos--text.ed-no-tax {
+            grid-template-areas: 'handle main main menu';
+        }
+    }
+
+    /* short highlight after a jump from the check panel */
+    .flash {
+        border-radius: 12px;
+        animation: ed-flash 1.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+    @keyframes ed-flash {
+        0%,
+        30% {
+            box-shadow: 0 0 0 4px var(--warn-soft), 0 0 0 6px var(--warn);
+        }
+        100% {
+            box-shadow: 0 0 0 0 transparent;
+        }
+    }
+
+    /* packages/paged-preview reads its colors from these variables */
+    .ed-pane .pp {
+        --pp-paper-shadow: var(--elev-paper);
+        --pp-accent: var(--accent);
+        --pp-accent-soft: var(--accent-soft);
+        --pp-accent-soft-hover: var(--accent-soft-hover);
+    }
+}

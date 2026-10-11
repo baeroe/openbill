@@ -242,7 +242,9 @@ it('stops a string filter whose result would explode before it allocates it (re-
 
     $result = renderParts(
         ['body' => "x\n{$body}"],
-        [...rendererContext(), 'xs' => str_repeat('x', 30_000), 'ys' => str_repeat('y', 30_000)],
+        [...rendererContext(), 'xs' => str_repeat('x', 30_000), 'ys' => str_repeat('y', 30_000),
+            'x50k' => str_repeat('x', 50_000), 'x20k' => str_repeat('x', 20_000), 'y100k' => str_repeat('y', 100_000),
+            'x150k' => str_repeat('x', 150_000), 'pct' => str_repeat('%', 100_000)],
     );
 
     expect($result->errors)->toHaveCount(1)
@@ -254,6 +256,11 @@ it('stops a string filter whose result would explode before it allocates it (re-
     'replace' => ["{{ xs | replace: 'x', ys | size }}"],
     // 15 000 × 30 KB = 450 MB within one output tag
     'append' => ['{{ ys'.str_repeat(' | append: ys', 15_000).' | size }}'],
+    // re-review 2: a big glue in join (5 GB / 2 GB) and a geometric base64 chain
+    'join direct' => ["{{ x50k | split: '' | join: y100k | size }}"],
+    'join on an assigned array' => ["{% assign a = x20k | split: '' %}{{ a | join: y100k | size }}"],
+    'base64 chain' => ['{{ x150k'.str_repeat(' | base64_encode', 30).' | size }}'],
+    'url_encode' => ['{{ pct'.str_repeat(' | url_encode | base64_encode', 20).' | size }}'],
 ]);
 
 it('ends rendering cleanly when the memory budget is used up (re-review #2)', function () {

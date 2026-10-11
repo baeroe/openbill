@@ -113,3 +113,9 @@ it('does not escape context values twice with escape (review #7)', function () {
     expect(liquid('{{ s | escape }}', ['s' => 'a &amp; b &lt;c&gt;']))->toBe('a &amp; b &lt;c&gt;')
         ->and(liquid('{{ "<b>" | escape }}'))->toBe('&lt;b&gt;');
 });
+
+it('refuses math on numbers with more digits than any amount has (re-review 2, #2)', function () {
+    expect(fn () => liquid('{{ n | times: 2 }}', ['n' => str_repeat('9', 1001)]))->toThrow(ResourceLimitException::class)
+        ->and(fn () => liquid('{{ n | money }}', ['n' => str_repeat('9', 1001)]))->toThrow(ResourceLimitException::class)
+        ->and(liquid('{{ n | times: 2 }}', ['n' => str_repeat('9', 20)]))->toBe('1'.str_repeat('9', 19).'8');
+});

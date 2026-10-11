@@ -24,6 +24,7 @@ final class OpenbillFilters extends FiltersProvider
     /** Euro amount in the document language: "1.234,50 €" (de), "€1,234.50" (en); '' for non-numbers. */
     public function money(mixed $value, mixed $decimals = 2): string
     {
+        $this->guardDigits($value);
         $amount = self::decimal($value);
         if ($amount === null) {
             return '';
@@ -38,6 +39,7 @@ final class OpenbillFilters extends FiltersProvider
     /** Number in the document language with $decimals decimals (default 2); '' for non-numbers. */
     public function number(mixed $value, mixed $decimals = 2): string
     {
+        $this->guardDigits($value);
         $amount = self::decimal($value);
 
         return $amount === null ? '' : NumberText::format($amount, self::digits($decimals), $this->env()->locale);
@@ -58,6 +60,9 @@ final class OpenbillFilters extends FiltersProvider
             return $value;
         }
         if (is_string($format) && $format !== '') {
+            // every strftime directive expands to at most ~30 bytes
+            $this->guardLength(strlen($format) * 16);
+
             return (string) (new StandardFilters)->date($value, $format);
         }
 
@@ -67,6 +72,8 @@ final class OpenbillFilters extends FiltersProvider
     /** Line breaks → <br>. */
     public function nl2br(mixed $value): string
     {
+        $this->guardLength(is_scalar($value) ? strlen((string) $value) * 4 : 0);
+
         return is_scalar($value) ? str_replace(["\r\n", "\r", "\n"], '<br>', (string) $value) : '';
     }
 
@@ -92,17 +99,17 @@ final class OpenbillFilters extends FiltersProvider
      */
     public function plus(mixed $input, mixed $operand): int|string
     {
-        return self::math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->plus($b), fn (int $a, int $b): int => $a + $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->plus($b), fn (int $a, int $b): int => $a + $b);
     }
 
     public function minus(mixed $input, mixed $operand): int|string
     {
-        return self::math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->minus($b), fn (int $a, int $b): int => $a - $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->minus($b), fn (int $a, int $b): int => $a - $b);
     }
 
     public function times(mixed $input, mixed $operand): int|string
     {
-        return self::math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->multipliedBy($b), fn (int $a, int $b): int => $a * $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->multipliedBy($b), fn (int $a, int $b): int => $a * $b);
     }
 
     /**
@@ -114,7 +121,7 @@ final class OpenbillFilters extends FiltersProvider
             throw new StandardException('divided by 0');
         }
 
-        return self::math(
+        return $this->math(
             $input,
             $operand,
             fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->dividedBy($b, 10, RoundingMode::HalfUp)->strippedOfTrailingZeros(),
@@ -125,6 +132,7 @@ final class OpenbillFilters extends FiltersProvider
     /** Commercial rounding (half up) to $decimals decimals. */
     public function round(mixed $input, mixed $decimals = 0): int|string
     {
+        $this->guardDigits($input);
         if (is_int($input)) {
             return $input;
         }
@@ -194,9 +202,100 @@ final class OpenbillFilters extends FiltersProvider
         return $separator === '' ? str_split($input) : explode($separator, $input);
     }
 
+    public function modulo(mixed $input, mixed $operand): int|string
+    {
+        if ((self::decimal($operand) ?? BigDecimal::zero())->isZero()) {
+            throw new StandardException('divided by 0');
+        }
+
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->remainder($b), fn (int $a, int $b): int => $a % $b);
+    }
+
+    public function join(mixed $input, mixed $glue = ' '): string
+    {
+        $items = is_iterable($input) ? array_map(self::str(...), [...$input]) : [self::str($input)];
+        $glue = self::str($glue);
+        $this->guardCount(count($items));
+        $this->guardLength(array_sum(array_map(strlen(...), $items)) + max(0, count($items) - 1) * strlen($glue));
+
+        return implode($glue, $items);
+    }
+
+    /**
+     * @return list<mixed>
+     */
+    public function concat(mixed $input, mixed $join): array
+    {
+        $input = is_iterable($input) ? [...$input] : [];
+        $join = is_iterable($join) ? [...$join] : [];
+        $this->guardCount(count($input) + count($join));
+
+        return [...array_values($input), ...array_values($join)];
+    }
+
+    public function base64Encode(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(4 * intdiv(strlen($input) + 2, 3));
+
+        return base64_encode($input);
+    }
+
+    public function urlEncode(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(3 * strlen($input));
+
+        return urlencode($input);
+    }
+
+    public function newlineToBr(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(strlen($input) + 6 * substr_count($input, "\n"));
+
+        return preg_replace('/\r?\n/', "<br />\n", $input) ?? $input;
+    }
+
+    /** Multibyte case mapping can make a character up to three times longer ("ß" → "SS", "ŉ" → "ʼN"). */
+    public function upcase(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(3 * strlen($input));
+
+        return Str::upper($input);
+    }
+
+    public function downcase(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(3 * strlen($input));
+
+        return Str::lower($input);
+    }
+
+    public function capitalize(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(3 * strlen($input));
+
+        return Str::upper(Str::substr($input, 0, 1)).Str::lower(Str::substr($input, 1));
+    }
+
+    /** htmlentities: one byte becomes at most an 8-byte entity. Never escapes twice. */
+    public function escapeOnce(mixed $input): string
+    {
+        $input = self::str($input);
+        $this->guardLength(8 * strlen($input));
+
+        return htmlentities($input, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false);
+    }
+
     /** Context values are escaped already: escape works like escape_once and never escapes twice. */
     public function escape(mixed $input): string
     {
+        $this->guardLength(is_scalar($input) ? 6 * strlen((string) $input) : 0);
+
         return is_scalar($input) ? htmlspecialchars((string) $input, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false) : '';
     }
 
@@ -204,8 +303,10 @@ final class OpenbillFilters extends FiltersProvider
      * @param  Closure(BigDecimal, BigDecimal): BigDecimal  $decimal
      * @param  Closure(int, int): int  $integer
      */
-    private static function math(mixed $input, mixed $operand, Closure $decimal, Closure $integer): int|string
+    private function math(mixed $input, mixed $operand, Closure $decimal, Closure $integer): int|string
     {
+        $this->guardDigits($input);
+        $this->guardDigits($operand);
         if (is_int($input) && is_int($operand)) {
             return $integer($input, $operand);
         }
@@ -231,6 +332,17 @@ final class OpenbillFilters extends FiltersProvider
     {
         $this->env()->checkBudget();
         if ($items > 10 * (int) config('openbill.rendering.max_range')) {
+            throw new ResourceLimitException;
+        }
+    }
+
+    /**
+     * @throws ResourceLimitException
+     */
+    private function guardDigits(mixed $value): void
+    {
+        $this->env()->checkBudget();
+        if ((is_string($value) && strlen($value) > FilterPolicy::MAX_DIGITS)) {
             throw new ResourceLimitException;
         }
     }

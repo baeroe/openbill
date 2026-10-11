@@ -1,0 +1,4 @@
+# e2e/ is its own pnpm project, installed on the Mac (Playwright's browsers are macOS binaries, the root
+# node_modules are Linux binaries from the DDEV container). This file makes e2e/ its own workspace root,
+# so it never touches the app's workspace or pnpm-lock.yaml.
+packages: []

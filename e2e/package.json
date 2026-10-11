@@ -1,0 +1,13 @@
+{
+    "name": "openbill-e2e",
+    "private": true,
+    "type": "module",
+    "packageManager": "pnpm@12.8.1",
+    "scripts": {
+        "test": "playwright test",
+        "screenshots": "SCREENSHOTS=1 playwright test --project=screenshots"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.64.0"
+    }
+}

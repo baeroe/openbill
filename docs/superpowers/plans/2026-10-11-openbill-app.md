@@ -273,7 +273,7 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l√
 ## Fortschritt
 
 - [x] Phase 1: Fundament
-- [ ] Phase 2: Domain & Datenmodell
+- [x] Phase 2: Domain & Datenmodell
 - [ ] Phase 3: Rendering, PDF, E-Rechnung
 - [ ] Phase 4: REST-API
 - [ ] Phase 5: UI-Basis

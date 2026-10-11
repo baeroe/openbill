@@ -40,11 +40,14 @@ Finalizing turns a draft into an open document (a cancellation into a closed one
 1. checks the compliance profile of the document type (see below) and stops with a list of what is missing,
 2. assigns the next number of the number range,
 3. freezes the master data the document uses (organization, customer, contact, tax rates, units, template, custom field definitions and the legal note texts) in a snapshot,
-4. stores the totals.
+4. stores the totals,
+5. renders the PDF with the document's template and archives it; e-invoices also get the EN 16931 XML, embedded in a PDF/A-3b (see [E-invoices](/en/e-invoice)).
 
-If any step fails, nothing changes: the document stays a draft and the number stays free.
+If any step fails – also a template error or the PDF service not answering – nothing changes: the document stays a draft and the number stays free.
 
 After finalizing a document is **locked**. Only its status, the payment date and the link to its cancellation can still change. Later changes to customers, tax rates, units, templates or custom fields do not affect it, because it is shown and computed from its snapshot. To correct an invoice, cancel it and create a new one.
+
+Downloads of a finalized document always deliver the archived PDF (and XML), checked against the SHA-256 checksum stored when it was archived. A draft can be downloaded too: its PDF is rendered on the fly, marked "Draft" on every page and not archived. See [Templates](/en/templates) for how documents are rendered.
 
 The lock is enforced by the database too: writes that change a finalized document, its groups or positions, and any change to snapshots or archived files are refused, whichever way they arrive. A finalized document never goes back to draft.
 

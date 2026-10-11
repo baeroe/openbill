@@ -40,11 +40,14 @@ Abschließen macht aus einem Entwurf ein offenes Dokument (ein Storno wird abges
 1. prüft openbill das Prüfprofil des Dokumenttyps (siehe unten) und bricht mit einer Liste der fehlenden Angaben ab,
 2. vergibt die nächste Nummer aus dem Nummernkreis,
 3. friert die Stammdaten ein, die das Dokument nutzt (Organisation, Kunde, Ansprechpartner, Steuersätze, Einheiten, Template, Felddefinitionen und die Texte der gesetzlichen Hinweise),
-4. speichert die Summen.
+4. speichert die Summen,
+5. rendert das PDF mit dem Template des Dokuments und archiviert es; E-Rechnungen bekommen dazu die XML nach EN 16931, eingebettet in ein PDF/A-3b (siehe [E-Rechnung](/de/e-invoice)).
 
-Scheitert ein Schritt, ändert sich nichts: Das Dokument bleibt Entwurf und die Nummer bleibt frei.
+Scheitert ein Schritt – auch ein Template-Fehler oder ein PDF-Dienst, der nicht antwortet –, ändert sich nichts: Das Dokument bleibt Entwurf und die Nummer bleibt frei.
 
 Danach ist das Dokument **gesperrt**. Nur Status, Zahlungsdatum und der Verweis auf das Storno können sich noch ändern. Spätere Änderungen an Kunden, Steuersätzen, Einheiten, Templates oder eigenen Feldern wirken nicht mehr, weil das Dokument aus seinen eingefrorenen Stammdaten angezeigt und berechnet wird. Eine Rechnung korrigierst du mit einem Storno und einer neuen Rechnung.
+
+Downloads eines abgeschlossenen Dokuments liefern immer das archivierte PDF (und die XML), geprüft gegen die beim Archivieren gespeicherte SHA-256-Prüfsumme. Auch ein Entwurf lässt sich herunterladen: Sein PDF wird frisch gerendert, auf jeder Seite als „Entwurf“ markiert und nicht archiviert. Wie Dokumente gerendert werden, steht unter [Templates](/de/templates).
 
 Die Sperre sichert auch die Datenbank ab: Schreibzugriffe, die ein abgeschlossenes Dokument, seine Gruppen oder Positionen ändern, und jede Änderung an eingefrorenen Stammdaten oder archivierten Dateien werden abgelehnt, egal auf welchem Weg sie kommen. Ein abgeschlossenes Dokument wird nie wieder zum Entwurf.
 

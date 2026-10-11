@@ -7033,7 +7033,7 @@ ddev artisan db:seed --class=DemoSeeder
 git status
 git log --oneline main..HEAD
 git diff --stat main...HEAD
-grep -rniE "lulububu|hauss\.dev" app resources tests docs/en docs/de database lang || echo "clean"
+git grep -n -i -f ~/.config/openbill/denylist.txt || echo "clean"   # local denylist, never copied into the repo
 ```
 Erwartet: sauberer Arbeitsbaum, die Commits der Tasks 1–15 (+ eventuelle `fix:`-Commits), keine Treffer (`clean`). Alle Commits mit `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`:
 

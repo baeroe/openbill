@@ -109,3 +109,48 @@ it('never queries documents, positions, groups, snapshots or files through DB::t
 
     expect($hits)->toBe([]);
 });
+
+arch('api resources and the api layer are final')
+    ->expect(['App\ApiResource', 'App\State', 'App\Http\Api', 'App\Http\Controllers\Api', 'App\OpenApi'])
+    ->classes()
+    ->toBeFinal();
+
+arch('the api layer neither computes nor talks to the database facade')
+    ->expect(['App\State', 'App\Http\Api', 'App\Http\Controllers\Api'])
+    ->not->toUse(['App\Domain', 'Illuminate\Support\Facades\DB']);
+
+arch('actions never depend on the api layer')
+    ->expect('App\Actions')
+    ->not->toUse(['App\ApiResource', 'App\State', 'App\Http', 'ApiPlatform']);
+
+/**
+ * Model writes in the API layer: processors, providers and controllers hand writes to app/Actions.
+ *
+ * @return list<string>
+ */
+function apiLayerWrites(string $code, string $file = 'code'): array
+{
+    preg_match_all('/->(?:save|update|delete|forceFill|fill|insert|increment|decrement|restore|forceDelete)\(|::(?:create|insert|destroy)\(|->create\(/', $code, $matches, PREG_OFFSET_CAPTURE);
+
+    return array_map(fn (array $m): string => $file.':'.(substr_count(substr($code, 0, $m[1]), "\n") + 1).' '.$m[0], $matches[0]);
+}
+
+it('detects model writes in code', function () {
+    expect(apiLayerWrites("<?php\n\$document->save();\n\$this->delete->handle(\$a, \$b);\nCustomer::create([]);"))
+        ->toBe(['code:2 ->save(', 'code:4 ::create(']);
+});
+
+it('never writes models in api resources, state providers/processors or api controllers', function () {
+    $root = dirname(__DIR__, 2).'/app';
+    $hits = [];
+    foreach (['ApiResource', 'State', 'Http/Api', 'Http/Controllers/Api'] as $dir) {
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("{$root}/{$dir}", FilesystemIterator::SKIP_DOTS));
+        foreach ($files as $file) {
+            if ($file->getExtension() === 'php') {
+                array_push($hits, ...apiLayerWrites((string) file_get_contents($file->getPathname()), substr($file->getPathname(), strlen($root) + 1)));
+            }
+        }
+    }
+
+    expect($hits)->toBe([]);
+});

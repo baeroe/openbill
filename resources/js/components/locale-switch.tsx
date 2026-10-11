@@ -1,21 +1,19 @@
-import { getLocale, t } from '@/lib/i18n';
+import { getLocale, localeHref, t } from '@/lib/i18n';
 import type { Locale } from '@/types';
 
-/** Same page in the other language. A full page load, because translations are loaded once per page. */
+/** Same page in the other language (full page load, translations are loaded once per page). */
 export function LocaleSwitch() {
     const labels: Record<Locale, string> = { en: t('locale.en'), de: t('locale.de') };
-    const href = (locale: Locale) =>
-        window.location.pathname.replace(/^\/(en|de)(?=\/|$)/, `/${locale}`) + window.location.search;
 
     return (
         <nav aria-label={t('locale.switch')} className="flex gap-1">
             {(Object.keys(labels) as Locale[]).map((locale) => (
                 <a
                     key={locale}
-                    href={href(locale)}
+                    href={localeHref(locale)}
                     lang={locale}
                     aria-current={locale === getLocale() ? 'true' : undefined}
-                    className="rounded-full px-3 py-1 text-muted hover:bg-surface-2 aria-[current=true]:bg-accent-soft aria-[current=true]:text-accent"
+                    className="inline-flex h-8 items-center rounded-full px-3 text-sm font-medium text-muted no-underline transition-colors hover:bg-surface-2 hover:text-ink aria-[current=true]:bg-ink aria-[current=true]:text-bg"
                 >
                     {labels[locale]}
                 </a>

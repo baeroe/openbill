@@ -8,6 +8,7 @@ use App\Actions\SaveTextBlock;
 use App\Actions\SaveUnit;
 use App\Actions\UpdateDocumentType;
 use App\Actions\UpdateOrganization;
+use App\Domain\Fields\FieldRegistry;
 use App\Enums\ComplianceProfile;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
@@ -20,6 +21,7 @@ use App\Models\NumberSequence;
 use App\Models\TaxRate;
 use App\Models\TextBlock;
 use App\Models\Unit;
+use App\Support\SnapshotBuilder;
 use Illuminate\Validation\ValidationException;
 
 /** @return list<string> */
@@ -117,4 +119,13 @@ it('saves text blocks and clears document type defaults when one is deleted', fu
 
     expect(TextBlock::query()->count())->toBe(0)
         ->and(DocumentTypeSetting::query()->findOrFail('offer')->default_intro_block_id)->toBeNull();
+});
+
+it('stores the register number of the organization and freezes it in snapshots (review #4)', function () {
+    $org = app(UpdateOrganization::class)->handle(systemActor(), ['registration_id' => 'HRB 000000, Amtsgericht Hamburg']);
+
+    expect($org->fresh()->registration_id)->toBe('HRB 000000, Amtsgericht Hamburg')
+        ->and(app(SnapshotBuilder::class)->build(draft())['org']['registration_id'])->toBe('HRB 000000, Amtsgericht Hamburg')
+        ->and(FieldRegistry::isReserved(FieldScope::Org, 'registration_id'))->toBeTrue()
+        ->and(fn () => app(UpdateOrganization::class)->handle(systemActor(), ['registration_id' => str_repeat('x', 65)]))->toThrow(ValidationException::class);
 });

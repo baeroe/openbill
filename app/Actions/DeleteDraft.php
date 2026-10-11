@@ -17,13 +17,15 @@ final class DeleteDraft
      */
     public function handle(Actor $actor, Document $document): void
     {
-        if ($document->isFinalized()) {
-            throw DocumentLockedException::for($document);
-        }
-
         DB::transaction(function () use ($actor, $document): void {
-            EventLog::record($document, $actor, EventAction::Deleted, ['type' => $document->type->value, 'customer_id' => $document->customer_id]);
-            $document->delete();
+            // re-read under lock: $document may be stale (a finalize can commit in between)
+            $draft = Document::query()->lockForUpdate()->findOrFail($document->id);
+            if ($draft->isFinalized()) {
+                throw DocumentLockedException::for($draft);
+            }
+
+            EventLog::record($draft, $actor, EventAction::Deleted, ['type' => $draft->type->value, 'customer_id' => $draft->customer_id]);
+            $draft->delete();
         });
     }
 }

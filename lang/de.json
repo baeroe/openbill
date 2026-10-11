@@ -21,6 +21,7 @@
     "compliance.tax_rate_missing": "„:title“: Steuersatz fehlt.",
     "compliance.unit_code_missing": "„:title“: Die Einheit hat keinen E-Rechnungs-Code.",
     "compliance.unit_missing": "„:title“: Einheit fehlt.",
+    "errors.cancellation_customer": "Ein Storno gehört immer zum Kunden seiner Rechnung.",
     "errors.cancellation_needs_invoice": "Stornos entstehen nur aus einer Rechnung.",
     "errors.cancellation_source": "Die Rechnung zu diesem Storno ist nicht offen oder bezahlt oder schon storniert.",
     "errors.contact_not_of_customer": "Dieser Ansprechpartner gehört nicht zum gewählten Kunden.",

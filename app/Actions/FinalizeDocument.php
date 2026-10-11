@@ -58,6 +58,9 @@ final class FinalizeDocument
                     || $invoice->cancelled_by_id !== null) {
                     throw ActionNotAllowedException::cancellationSource();
                 }
+                if ($draft->customer_id !== $invoice->customer_id) {
+                    throw ActionNotAllowedException::cancellationCustomer();
+                }
             }
 
             $this->inspector->applyTotals($draft, $this->inspector->totals($draft, $sources));

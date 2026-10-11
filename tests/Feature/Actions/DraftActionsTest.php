@@ -161,7 +161,7 @@ it('refuses to update or delete a finalized document, also after a racing finali
     Document::query()->whereKey($document->id)->update(['number' => 'INV-1', 'status' => 'open', 'finalized_at' => now()]);
 
     expect(fn () => app(UpdateDraft::class)->handle(systemActor(), $stale, ['intro' => 'late autosave']))->toThrow(DocumentLockedException::class)
-        ->and(fn () => app(DeleteDraft::class)->handle(systemActor(), $document->fresh()))->toThrow(DocumentLockedException::class)
+        ->and(fn () => app(DeleteDraft::class)->handle(systemActor(), $stale))->toThrow(DocumentLockedException::class)
         ->and($document->fresh()->intro)->not->toBe('late autosave')
         ->and($document->fresh()->positions()->count())->toBe(1);
 });

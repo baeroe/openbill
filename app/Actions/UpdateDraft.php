@@ -8,6 +8,7 @@ use App\Enums\DocumentType;
 use App\Enums\EventAction;
 use App\Enums\FieldScope;
 use App\Enums\PositionKind;
+use App\Exceptions\ActionNotAllowedException;
 use App\Exceptions\DocumentLockedException;
 use App\Models\Contact;
 use App\Models\Document;
@@ -39,7 +40,7 @@ final class UpdateDraft
     /**
      * @param  array<string, mixed>  $input
      *
-     * @throws DocumentLockedException|ValidationException
+     * @throws DocumentLockedException|ValidationException|ActionNotAllowedException
      */
     public function handle(Actor $actor, Document $document, array $input): Document
     {
@@ -55,6 +56,10 @@ final class UpdateDraft
             $draft = Document::query()->lockForUpdate()->findOrFail($document->id);
             if ($draft->isFinalized()) {
                 throw DocumentLockedException::for($draft);
+            }
+
+            if ($draft->type === DocumentType::Cancellation && array_key_exists('customer_id', $data) && $data['customer_id'] !== $draft->customer_id) {
+                throw ActionNotAllowedException::cancellationCustomer();
             }
 
             $draft->fill(Arr::only($data, self::FIELDS));

@@ -19,19 +19,21 @@ final class SetDocumentStatus
      */
     public function handle(Actor $actor, Document $document, DocumentStatus $status): Document
     {
-        if (! $document->isFinalized() || ! StatusMachine::canSetManually($document->type, $document->status, $status)) {
-            throw ActionNotAllowedException::statusTransition($document->status, $status);
-        }
-
         return DB::transaction(function () use ($actor, $document, $status): Document {
-            $from = $document->status;
-            $document->forceFill([
-                'status' => $status,
-                'paid_at' => $status === DocumentStatus::Paid ? now() : $document->paid_at,
-            ])->save();
-            EventLog::record($document, $actor, EventAction::StatusChanged, ['from' => $from->value, 'to' => $status->value]);
+            // re-read under lock: $document may be stale (e.g. its cancellation was finalized in between)
+            $locked = Document::query()->lockForUpdate()->findOrFail($document->id);
+            if (! $locked->isFinalized() || ! StatusMachine::canSetManually($locked->type, $locked->status, $status)) {
+                throw ActionNotAllowedException::statusTransition($locked->status, $status);
+            }
 
-            return $document;
+            $from = $locked->status;
+            $locked->forceFill([
+                'status' => $status,
+                'paid_at' => $status === DocumentStatus::Paid ? now() : $locked->paid_at,
+            ])->save();
+            EventLog::record($locked, $actor, EventAction::StatusChanged, ['from' => $from->value, 'to' => $status->value]);
+
+            return $locked;
         });
     }
 }

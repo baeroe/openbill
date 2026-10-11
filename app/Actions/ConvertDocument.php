@@ -30,11 +30,14 @@ final class ConvertDocument
      */
     public function handle(Actor $actor, Document $source, DocumentType $target): ConversionResult
     {
-        if (! DocumentConverter::canConvert($source->type, $source->status, $source->cancelled_by_id !== null, $target)) {
-            throw ActionNotAllowedException::conversion($source->type, $target);
-        }
-
         return DB::transaction(function () use ($actor, $source, $target): ConversionResult {
+            // re-read under lock: serializes parallel conversions of the same source (one cancellation draft)
+            // and checks the current status, not the one of a stale model
+            $source = Document::query()->lockForUpdate()->findOrFail($source->id);
+            if (! DocumentConverter::canConvert($source->type, $source->status, $source->cancelled_by_id !== null, $target)) {
+                throw ActionNotAllowedException::conversion($source->type, $target);
+            }
+
             if ($target === DocumentType::Cancellation) {
                 $existing = Document::query()->where('source_id', $source->id)->where('type', DocumentType::Cancellation)->first();
                 if ($existing !== null) {

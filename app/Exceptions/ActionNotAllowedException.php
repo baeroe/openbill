@@ -39,6 +39,12 @@ final class ActionNotAllowedException extends DomainActionException
         return new self('cancellation_source', Text::t('errors.cancellation_source'));
     }
 
+    /** A cancellation always belongs to the customer of its invoice. */
+    public static function cancellationCustomer(): self
+    {
+        return new self('cancellation_customer', Text::t('errors.cancellation_customer'));
+    }
+
     public static function customerHasFinalizedDocuments(): self
     {
         return new self('customer_has_finalized_documents', Text::t('errors.customer_has_finalized_documents'));

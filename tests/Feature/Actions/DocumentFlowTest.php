@@ -6,6 +6,7 @@ use App\Actions\CreateDocument;
 use App\Actions\DuplicateDocument;
 use App\Actions\FinalizeDocument;
 use App\Actions\SetDocumentStatus;
+use App\Actions\UpdateDraft;
 use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
 use App\Enums\EventAction;
@@ -141,4 +142,43 @@ it('runs the main flow: offer → accepted → invoice → e-invoice check → p
         ->and($cancellation->gross_total)->toBe('-1059.10')
         ->and($invoice->fresh()->status)->toBe(DocumentStatus::Cancelled)
         ->and(Document::query()->count())->toBe(3);
+});
+
+it('never marks a cancelled invoice as paid, also from a stale model', function () {
+    $invoice = finalized(draft());
+    $stale = Document::query()->findOrFail($invoice->id);
+    finalized(app(CancelInvoice::class)->handle(systemActor(), $invoice)->document);
+
+    expect(fn () => app(SetDocumentStatus::class)->handle(systemActor(), $stale, DocumentStatus::Paid))->toThrow(ActionNotAllowedException::class)
+        ->and($invoice->fresh()->status)->toBe(DocumentStatus::Cancelled)
+        ->and($invoice->fresh()->paid_at)->toBeNull();
+});
+
+it('checks conversions against the current state, not a stale model', function () {
+    $invoice = finalized(draft());
+    $stale = Document::query()->findOrFail($invoice->id);
+    finalized(app(CancelInvoice::class)->handle(systemActor(), $invoice)->document);
+
+    expect(fn () => app(CancelInvoice::class)->handle(systemActor(), $stale))->toThrow(ActionNotAllowedException::class)
+        ->and(Document::query()->where('source_id', $invoice->id)->count())->toBe(1);
+});
+
+it('keeps a cancellation with the customer of its invoice', function () {
+    $invoice = finalized(draft());
+    $cancellation = app(CancelInvoice::class)->handle(systemActor(), $invoice)->document;
+    $other = Customer::factory()->create();
+
+    try {
+        app(UpdateDraft::class)->handle(systemActor(), $cancellation, ['customer_id' => $other->id]);
+        $this->fail('no exception');
+    } catch (ActionNotAllowedException $e) {
+        expect($e->reason)->toBe('cancellation_customer');
+    }
+
+    // a write that bypasses UpdateDraft is still caught when finalizing
+    Document::query()->whereKey($cancellation->id)->update(['customer_id' => $other->id]);
+
+    expect(fn () => finalized($cancellation->fresh()))->toThrow(ActionNotAllowedException::class)
+        ->and($invoice->fresh()->status)->toBe(DocumentStatus::Open)
+        ->and(app(UpdateDraft::class)->handle(systemActor(), $cancellation->fresh(), ['customer_id' => $other->id, 'intro' => 'ok'])->intro)->toBe('ok');
 });

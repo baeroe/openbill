@@ -38,12 +38,14 @@ fetch() { # url sha256 target
 }
 
 mkdir -p "$CACHE"
-fetch "$EN16931_URL" "$EN16931_SHA256" "$CACHE/en16931-cii.zip"
+fetch "$EN16931_URL" "$EN16931_SHA256" "$CACHE/en16931-cii-$EN16931_VERSION.zip"
 fetch "$SAXON_URL" "$SAXON_SHA256" "$CACHE/saxon-he.jar"
 fetch "$XMLRESOLVER_URL" "$XMLRESOLVER_SHA256" "$CACHE/xmlresolver.jar"
-if [ ! -f "$CACHE/cii/xslt/EN16931-CII-validation.xslt" ]; then
-    rm -rf "$CACHE/cii"
-    (cd "$CACHE" && python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])' en16931-cii.zip cii)
+# one directory per version: after raising EN16931_VERSION the new rules are unpacked, never the old ones reused
+CII="cii-$EN16931_VERSION"
+if [ ! -f "$CACHE/$CII/xslt/EN16931-CII-validation.xslt" ]; then
+    rm -rf "$CACHE/$CII"
+    (cd "$CACHE" && python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])' "en16931-cii-$EN16931_VERSION.zip" "$CII")
 fi
 
 SAMPLES=${1:-}
@@ -63,7 +65,7 @@ rm -rf "$SAMPLES/svrl"
 mkdir -p "$SAMPLES/svrl"
 docker run --rm -v "$CACHE:/validator:ro" -v "$SAMPLES:/samples" "$JAVA_IMAGE" \
     java -cp /validator/saxon-he.jar:/validator/xmlresolver.jar net.sf.saxon.Transform \
-    -s:/samples -o:/samples/svrl -xsl:/validator/cii/xslt/EN16931-CII-validation.xslt '-ext:off' >/dev/null
+    -s:/samples -o:/samples/svrl "-xsl:/validator/$CII/xslt/EN16931-CII-validation.xslt" '-ext:off' >/dev/null
 
 python3 - "$SAMPLES" "$EN16931_VERSION" <<'PY'
 import glob, os, sys

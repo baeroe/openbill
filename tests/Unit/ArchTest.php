@@ -21,3 +21,7 @@ arch('controllers carry the Controller suffix')
 arch('controllers do not query the database directly')
     ->expect('App\Http\Controllers')
     ->not->toUse('Illuminate\Support\Facades\DB');
+
+arch('enums are backed enums')
+    ->expect('App\Enums')
+    ->toBeStringBackedEnums();

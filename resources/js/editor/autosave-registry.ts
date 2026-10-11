@@ -1,6 +1,7 @@
 import { mutate } from 'swr';
 import { saveDraft } from '@/api/documents';
 import { keys } from '@/api/keys';
+import { invalidate } from '@/api/paged';
 import type { DocumentDetail } from '@/api/types';
 import { ApiError, errorMessage } from '@/lib/api';
 import { toast } from '@/lib/toast';
@@ -12,7 +13,8 @@ import { useEditor } from './store';
 import type { DraftPayload } from './types';
 
 export type Save = (id: string, payload: DraftPayload) => Promise<DocumentDetail>;
-export type AutosaveEntry = { id: string; autosave: Autosave; source: DraftSource; users: number };
+/** users: editors holding the entry (never dropped while > 0); disposed: dropped for good, never handed out again. */
+export type AutosaveEntry = { id: string; autosave: Autosave; source: DraftSource; users: number; disposed: boolean };
 
 /** PATCH, then the answer becomes the cached document (what useSWRMutation's populateCache did). */
 const patch: Save = async (id, payload) => {
@@ -24,7 +26,8 @@ const patch: Save = async (id, payload) => {
 /**
  * At most one autosave per document, outliving its editor: leaving the page while a save or a retry is still running
  * and coming back takes over the same instance with its newest local state – no second instance, no older cached
- * state overwriting newer input. An entry is dropped once nothing is pending and no editor uses it.
+ * state overwriting newer input. Taking and holding an entry is one step (acquireAutosave, in the editor's effect): an
+ * entry with users is never dropped, a dropped entry is never handed out again (its store subscription is gone).
  */
 const entries = new Map<string, AutosaveEntry>();
 
@@ -38,8 +41,12 @@ function create(id: string, save: Save): AutosaveEntry {
         save: (payload) => save(id, payload),
         onSaved: (sent, saved) => {
             if (mine()) useEditor.getState().applySaved(sent, saved);
+            // saves go on after leaving: lists that loaded meanwhile must not keep the older title, customer and totals
+            else void invalidate('/api/documents', [keys.document(id)]);
         },
         onState: (state, error, sent) => {
+            // nobody holds the entry anymore and it is done (saved, or blocked for good): drop it
+            if (entry.users === 0 && (state === 'saved' || state === 'locked' || state === 'gone')) queueMicrotask(() => dropIfIdle(entry));
             if (!mine()) return;
             const store = useEditor.getState();
             store.setSave(state, error ?? null);
@@ -51,7 +58,18 @@ function create(id: string, save: Save): AutosaveEntry {
             if (state === 'locked' || state === 'gone') void mutate(keys.document(id));
         },
     });
-    return { id, autosave, source, users: 0 };
+    const entry: AutosaveEntry = { id, autosave, source, users: 0, disposed: false };
+    return entry;
+}
+
+/** Drops an entry nobody holds once nothing is pending (or it can never save again). Disposed entries stay dead. */
+function dropIfIdle(entry: AutosaveEntry): void {
+    if (entry.disposed || entry.users > 0) return;
+    const blocked = entry.autosave.stopped || entry.autosave.state === 'locked' || entry.autosave.state === 'gone';
+    if (entry.autosave.pending && !blocked) return;
+    entry.disposed = true;
+    entry.source.unsubscribe();
+    if (entries.get(entry.id) === entry) entries.delete(entry.id);
 }
 
 let listening = false;
@@ -61,39 +79,29 @@ export function flushAllKeepalive(save: (id: string, payload: DraftPayload) => v
     for (const entry of entries.values()) entry.autosave.flushKeepalive((payload) => save(entry.id, payload));
 }
 
-/** The autosave of a document: the running one from an earlier visit, or a new one. */
-export function autosaveFor(id: string, save: Save = patch): AutosaveEntry {
+/**
+ * The editor of a document takes its autosave and holds it until releaseAutosave (one step, in the mount effect): the
+ * running entry from an earlier visit, or a fresh one with a live store subscription.
+ */
+export function acquireAutosave(id: string, save: Save = patch): AutosaveEntry {
     let entry = entries.get(id);
-    if (!entry || entry.autosave.stopped) {
-        entry?.source.unsubscribe();
+    if (!entry || entry.disposed || entry.autosave.stopped) {
+        if (entry) dropIfIdle(entry);
         entry = create(id, save);
         entries.set(id, entry);
     }
-    return entry;
-}
-
-/** An editor uses the entry (mount effect); pairs with releaseAutosave (cleanup). */
-export function retainAutosave(entry: AutosaveEntry): void {
     entry.users++;
-    if (entries.get(entry.id) !== entry && !entry.autosave.stopped) entries.set(entry.id, entry);
     if (!listening && typeof window !== 'undefined') {
         listening = true;
         window.addEventListener('pagehide', () => flushAllKeepalive());
     }
+    return entry;
 }
 
-/**
- * The editor goes away: save what is open; the entry stays until that is on the server (retries included). Dropping
- * happens after the flush promise settles, so StrictMode's immediate remount retains it again first.
- */
+/** The editor goes away: save what is open; the entry is dropped once that is on the server and nobody holds it. */
 export function releaseAutosave(entry: AutosaveEntry): Promise<void> {
     entry.users = Math.max(0, entry.users - 1);
-    const drop = () => {
-        if (entry.users > 0 || entries.get(entry.id) !== entry) return;
-        if (entry.autosave.pending && !entry.autosave.stopped) return;
-        entry.source.unsubscribe();
-        entries.delete(entry.id);
-    };
+    const drop = () => dropIfIdle(entry);
     return entry.autosave.flush().then(drop, drop);
 }
 
@@ -120,10 +128,17 @@ export function showDocument(entry: AutosaveEntry, document: DocumentDetail): vo
     }
 }
 
-/** Tests only: forget every entry. */
+/** Logout: one last attempt for every open document, then forget them all (another person may sign in in this tab). */
+export async function closeAutosaves(): Promise<void> {
+    await Promise.all([...entries.values()].map((entry) => entry.autosave.flush().catch(() => undefined)));
+    resetAutosaves();
+}
+
+/** Logout (another person may sign in in this tab) and tests: stop and forget every entry, nothing is sent anymore. */
 export function resetAutosaves(): void {
     for (const entry of entries.values()) {
         entry.autosave.stop();
+        entry.disposed = true;
         entry.source.unsubscribe();
     }
     entries.clear();

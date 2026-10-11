@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { PanelRightOpen } from 'lucide-react';
-import { useMemo, type MouseEvent } from 'react';
+import { useCallback, useMemo, type MouseEvent } from 'react';
 import type { DocumentDetail, DocumentPageContext } from '@/api/types';
 import { Button, cx, Tag } from '@/components/ui';
 import { t } from '@/lib/i18n';
@@ -8,6 +8,7 @@ import { useStoredFlag } from '@/lib/prefs';
 import { jumpToIssue } from '../jump';
 import { isAbort } from '../latest';
 import { fromDocument } from '../ops';
+import type { Draft } from '../types';
 import { useEditor } from '../store';
 import { useDocumentActions } from '../use-actions';
 import { useAutosave } from '../use-autosave';
@@ -33,7 +34,8 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
     const stored = useEditor((state) => state.draft);
     const saveState = useEditor((state) => state.saveState);
     const errors = useEditor((state) => state.errors);
-    const update = useEditor((state) => state.update);
+    // changes go only to this document (before the store has loaded it, a change must not land in the previous one)
+    const update = useCallback((fn: (d: Draft) => Draft) => useEditor.getState().updateFor(document.id, fn), [document.id]);
     // first render (before the store has loaded this document): show the server state
     const fallback = useMemo(() => fromDocument(document), [document]);
     const draft = stored?.id === document.id ? stored : fallback;

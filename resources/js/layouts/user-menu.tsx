@@ -3,9 +3,20 @@ import { Languages, LogOut, Monitor, Moon, Sun } from 'lucide-react';
 import { Avatar, cx, Menu, MenuItem, MenuLabel, MenuRadioGroup, MenuRadioItem, MenuSeparator } from '@/components/ui';
 import { localeHref, path, t } from '@/lib/i18n';
 import { isThemePref, setThemePref, useThemePref } from '@/lib/theme';
+import { mutate } from 'swr';
+import { closeAutosaves } from '@/editor/autosave-registry';
+import { useEditor } from '@/editor/store';
 import type { SharedProps } from '@/types';
 
 /** Account chip at the bottom of the sidebar; the menu opens upwards. */
+/** Saves what is open, then forgets drafts, autosaves and cached API data: the next person in this tab sees none of it. */
+async function logout(): Promise<void> {
+    await closeAutosaves();
+    useEditor.getState().reset();
+    await mutate(() => true, undefined, { revalidate: false });
+    router.post(path('/logout'));
+}
+
 export function UserMenu({ collapsed }: { collapsed: boolean }) {
     const { auth, org, locale } = usePage<SharedProps>().props;
     const theme = useThemePref();
@@ -55,7 +66,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                 </MenuRadioItem>
             </MenuRadioGroup>
             <MenuSeparator />
-            <MenuItem icon={<LogOut />} onSelect={() => router.post(path('/logout'))}>
+            <MenuItem icon={<LogOut />} onSelect={() => void logout()}>
                 {t('common.logout')}
             </MenuItem>
         </Menu>

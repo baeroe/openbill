@@ -1,51 +1,48 @@
 import { router } from '@inertiajs/react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DocumentDetail } from '@/api/types';
-import { autosaveFor, releaseAutosave, retainAutosave, showDocument } from './autosave-registry';
+import { acquireAutosave, releaseAutosave, showDocument, type AutosaveEntry } from './autosave-registry';
 import { useEditor } from './store';
 
 /**
  * Connects the editor of one document with its autosave (autosave-registry.ts: one instance per document, also across
  * leaving and coming back): local changes go out 600 ms after the last one, server states are taken over while
  * nothing is pending, and leaving the page saves first (closing the tab: keepalive, registered in the registry).
- * The editor component is keyed by document id, so one hook instance serves one document.
+ * The entry is taken and held in one step in the mount effect – never during render, where a save answer arriving
+ * before the effect could drop it and leave the editor with a dead entry. The editor is keyed by document id.
  */
 export function useAutosave(id: string, document: DocumentDetail | undefined): { flush(): Promise<void>; retry(): void; stop(): void } {
-    const entry = useMemo(() => autosaveFor(id), [id]);
-    const { autosave } = entry;
+    const [entry, setEntry] = useState<AutosaveEntry | null>(null);
 
-    // unmount (and StrictMode's second mount): give the instance back; it keeps saving until everything is stored
     useEffect(() => {
-        retainAutosave(entry);
+        const held = acquireAutosave(id);
+        setEntry(held);
         const off = router.on('before', () => {
-            void autosave.flush();
+            void held.autosave.flush();
+        });
+        // every local change (re)starts the debounce; load() bumps the revision too, reset() right after cancels that
+        const unsubscribe = useEditor.subscribe((state, previous) => {
+            if (state.revision !== previous.revision && state.draft?.id === id) held.autosave.changed();
         });
         return () => {
             off();
-            void releaseAutosave(entry);
+            unsubscribe();
+            // keeps saving until everything is stored; StrictMode's second mount takes the same entry again
+            void releaseAutosave(held);
         };
-    }, [entry, autosave]);
+    }, [id]);
 
     // server state → store: opening the document (with its newest local input, if any), a changed lock, an external change
     useEffect(() => {
-        if (document && document.id === id) showDocument(entry, document);
-    }, [document, id, entry]);
-
-    // every local change (re)starts the debounce; load() bumps the revision too, reset() right after cancels that
-    useEffect(
-        () =>
-            useEditor.subscribe((state, previous) => {
-                if (state.revision !== previous.revision && state.draft?.id === id) autosave.changed();
-            }),
-        [autosave, id],
-    );
+        if (entry && document && document.id === id) showDocument(entry, document);
+    }, [entry, document, id]);
 
     return useMemo(
         () => ({
-            flush: () => autosave.flush(),
-            retry: () => void autosave.retry(),
-            stop: () => autosave.stop(),
+            flush: () => entry?.autosave.flush() ?? Promise.resolve(),
+            retry: () => void entry?.autosave.retry(),
+            stop: () => entry?.autosave.stop(),
         }),
-        [autosave],
+        [entry],
     );
 }

@@ -6,7 +6,10 @@ use App\Exceptions\DocumentLockedException;
 use App\Exceptions\TemplateRenderFailedException;
 use App\Http\Api\ProblemResponse;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RequireApiAbility;
+use App\Http\Middleware\SetApiLocale;
 use App\Http\Middleware\SetLocale;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [SetLocale::class, HandleInertiaRequests::class]);
+        // /api: session of the own UI (Sanctum stateful + CSRF), rate limit "api", response language
+        $middleware->statefulApi();
+        $middleware->throttleApi();
+        $middleware->api(append: [SetApiLocale::class]);
+        // before auth (priority list), so a 401 is already in the requested language
+        $middleware->prependToPriorityList(AuthenticatesRequests::class, SetApiLocale::class);
+        $middleware->alias(['api.ability' => RequireApiAbility::class]);
         // auth runs before SetLocale (middleware priority), so resolve the language here as well
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['locale' => SetLocale::fromRequest($request)]));
         $middleware->redirectUsersTo(fn (Request $request) => route('home', ['locale' => SetLocale::fromRequest($request)]));

@@ -1,16 +1,19 @@
 <?php
 
 use App\Actions\CreateDocument;
+use App\Actions\IssueApiToken;
 use App\Enums\DocumentType;
 use App\Models\Customer;
 use App\Models\Document;
 use App\Models\Organization;
 use App\Models\TaxRate;
 use App\Models\Unit;
+use App\Models\User;
 use App\Support\Actor;
 use App\Support\GroupWriter;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\FeatureTestCase;
 use Tests\TestCase;
 
@@ -103,4 +106,39 @@ function completeOrganization(): void
         'name' => 'Studio Nordlicht', 'street' => 'Speicherstraße 12', 'zip' => '20457', 'city' => 'Hamburg', 'country' => 'DE',
         'vat_id' => 'DE123456789', 'iban' => 'DE02120300000000202051',
     ])->save();
+}
+
+/**
+ * Plain-text Sanctum token ("<id>|openbill_…") of a new (or the given) user.
+ *
+ * @param  list<string>  $abilities
+ */
+function apiToken(array $abilities = ['api:read', 'api:write'], ?string $templateId = null, ?User $user = null): string
+{
+    return app(IssueApiToken::class)->handle(systemActor(), $user ?? User::factory()->create(), [
+        'name' => 'test',
+        'abilities' => $abilities,
+        'template_id' => $templateId,
+    ])->plainTextToken;
+}
+
+/** Sanctum's guard keeps the user of the first request; call this before a request with another (or a revoked) token. */
+function forgetApiAuth(): void
+{
+    app('auth')->forgetGuards();
+}
+
+/**
+ * The errors of the ValidationException $run throws.
+ *
+ * @return array<string, list<string>>
+ */
+function validationErrors(Closure $run): array
+{
+    try {
+        $run();
+    } catch (ValidationException $e) {
+        return $e->errors();
+    }
+    throw new RuntimeException('Expected a ValidationException.');
 }

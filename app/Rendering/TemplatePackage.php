@@ -6,6 +6,7 @@ use App\Models\Template;
 use App\Support\Text;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use finfo;
 use JsonException;
 use RuntimeException;
 use ZipArchive;
@@ -37,6 +38,19 @@ final readonly class TemplatePackage
         public string $css,
         public array $assets = [],
     ) {}
+
+    /**
+     * MIME types finfo may report for an allowed extension (content check of untrusted assets).
+     *
+     * @var array<string, list<string>>
+     */
+    private const ASSET_CONTENT = [
+        'png' => ['image/png'], 'jpg' => ['image/jpeg'], 'jpeg' => ['image/jpeg'], 'gif' => ['image/gif'], 'webp' => ['image/webp'],
+        'svg' => ['image/svg+xml', 'text/xml', 'application/xml', 'text/plain', 'text/html'],
+        'woff' => ['font/woff', 'application/font-woff'], 'woff2' => ['font/woff2', 'application/font-woff2'],
+        'ttf' => ['font/ttf', 'font/sfnt', 'application/font-sfnt', 'application/x-font-ttf'],
+        'otf' => ['font/otf', 'font/sfnt', 'application/font-sfnt', 'application/vnd.ms-opentype'],
+    ];
 
     /** Trusted source (resources/templates/<slug>). */
     public static function fromDirectory(string $dir): self
@@ -125,6 +139,11 @@ final readonly class TemplatePackage
                 if (! mb_check_encoding($contents, 'UTF-8')) {
                     self::fail('package', 'template_package.not_utf8', ['file' => $file]);
                 }
+                // a part above the render limit would only ever render an error
+                $max = (int) config('openbill.rendering.max_source_bytes');
+                if ($file !== 'manifest.json' && strlen($contents) > $max) {
+                    self::fail('package', 'template_package.file_too_large', ['file' => $file, 'kb' => intdiv($max, 1024)]);
+                }
 
                 return $contents;
             };
@@ -144,6 +163,9 @@ final readonly class TemplatePackage
             foreach ($entries as $name => $index) {
                 if (str_starts_with($name, 'assets/')) {
                     $assets[$name] = (string) $zip->getFromIndex($index);
+                    if (! self::contentMatches($name, $assets[$name])) {
+                        self::fail("assets.{$name}", 'template_package.asset_content', ['path' => $name]);
+                    }
                 }
             }
 
@@ -201,6 +223,18 @@ final readonly class TemplatePackage
     public static function mimeOf(string $path): string
     {
         return self::ASSET_TYPES[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? 'application/octet-stream';
+    }
+
+    /** The content is what the extension says (an image is an image, a font a font, an SVG an SVG). */
+    private static function contentMatches(string $path, string $contents): bool
+    {
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->buffer($contents);
+        if (! in_array($mime, self::ASSET_CONTENT[$extension] ?? [], true)) {
+            return false;
+        }
+
+        return $extension !== 'svg' || preg_match('/<svg[\s>]/i', $contents) === 1;
     }
 
     private static function safePath(string $name): bool

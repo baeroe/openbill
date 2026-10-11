@@ -103,6 +103,10 @@ it('refuses unsafe or broken packages with a path and creates nothing', function
     'bad paper' => [packageFiles(['paper' => ['format' => 'A3']]), 'manifest.paper.format'],
     'bad document type' => [packageFiles(['documentTypes' => ['receipt']]), 'manifest.documentTypes'],
     'no name' => [packageFiles(['name' => '']), 'manifest.name'],
+    'part larger than the render limit (review #9)' => [packageFiles([], ['template.liquid' => str_repeat('x', 205 * 1024)]), 'package'],
+    'invalid field key (review #9)' => [packageFiles(['expectedFields' => [['scope' => 'document', 'key' => 'Project Name', 'type' => 'text']]]), 'manifest.expectedFields.0'],
+    'content does not match the type (review #9)' => [packageFiles([], ['assets/logo.png' => '<?php echo 1;']), 'assets.assets/logo.png'],
+    'svg that is no svg (review #9)' => [packageFiles([], ['assets/logo.svg' => 'plain text']), 'assets.assets/logo.svg'],
 ]);
 
 it('refuses a file that is no ZIP and a ZIP bomb', function () {

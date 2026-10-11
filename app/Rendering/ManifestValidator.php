@@ -2,6 +2,7 @@
 
 namespace App\Rendering;
 
+use App\Domain\Fields\KeySlugger;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
 use App\Enums\FieldType;
@@ -49,7 +50,7 @@ final class ManifestValidator
             $errors['expectedFields'] = Text::t('template_package.expected_fields', ['index' => 0]);
         } else {
             foreach ($fields as $i => $field) {
-                if (! is_array($field) || ! is_string($field['key'] ?? null)
+                if (! is_array($field) || ! is_string($field['key'] ?? null) || ! KeySlugger::isValid($field['key'])
                     || FieldScope::tryFrom((string) ($field['scope'] ?? '')) === null
                     || FieldType::tryFrom((string) ($field['type'] ?? '')) === null) {
                     $errors["expectedFields.{$i}"] = Text::t('template_package.expected_fields', ['index' => $i]);

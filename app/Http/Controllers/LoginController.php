@@ -21,10 +21,12 @@ class LoginController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-        // back to the page that asked for the login, but in the language the login was done in
-        $intended = $request->session()->pull('url.intended', route('home'));
-        $target = is_string($intended)
-            ? preg_replace('#^('.preg_quote(url('/'), '#').')/(en|de)(?=/|$)#', '$1/'.app()->getLocale(), $intended)
+        // back to the page that asked for the login, but in the language the login was done in;
+        // only targets on this app's own base URL are accepted
+        $intended = $request->session()->pull('url.intended');
+        $base = url('/');
+        $target = is_string($intended) && ($intended === $base || str_starts_with($intended, $base.'/'))
+            ? preg_replace('#^('.preg_quote($base, '#').')/(en|de)(?=/|$)#', '$1/'.app()->getLocale(), $intended)
             : null;
 
         return redirect()->to($target ?? route('home'));

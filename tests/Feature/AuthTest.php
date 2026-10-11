@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 beforeEach(function () {
     $this->user = User::factory()->create(['email' => 'anna@example.com', 'password' => 'secret-pass']);
@@ -26,10 +27,35 @@ it('validates the form', function () {
 });
 
 it('returns to the page that asked for the login, in the language of the login', function () {
-    $this->get('/en')->assertRedirect('/en/login');
+    // a protected page other than the start page, so the redirect can't be the home default
+    Route::middleware(['web', 'auth'])->get('{locale}/probe', fn () => 'ok')->where('locale', 'en|de');
+
+    $this->get('/en/probe?x=1')->assertRedirect('/en/login');
 
     $this->post('/de/login', ['email' => 'anna@example.com', 'password' => 'secret-pass'])
+        ->assertRedirect(url('/de/probe?x=1'));
+});
+
+it('ignores an intended URL on another host', function () {
+    $this->withSession(['url.intended' => 'https://evil.example/en'])
+        ->post('/de/login', ['email' => 'anna@example.com', 'password' => 'secret-pass'])
         ->assertRedirect(url('/de'));
+});
+
+it('regenerates the session on login', function () {
+    $this->get('/en/login');
+    $before = session()->getId();
+
+    // send the guest session along, as a browser would; a failed attempt keeps it (the cookie is honoured)
+    $this->withCookie(config('session.cookie'), $before)
+        ->post('/en/login', ['email' => 'anna@example.com', 'password' => 'wrong']);
+    expect(session()->getId())->toBe($before);
+
+    $this->withCookie(config('session.cookie'), $before)
+        ->post('/en/login', ['email' => 'anna@example.com', 'password' => 'secret-pass'])
+        ->assertRedirect(url('/en'));
+
+    expect(session()->getId())->not->toBe($before);
 });
 
 it('logs out and returns to the login in the same language', function () {

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DescribeDocumentPage;
 use App\Models\Customer;
 use App\Models\Document;
+use App\Models\User;
+use App\Support\Actor;
 use App\Support\DocumentQuery;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -35,9 +38,16 @@ class DocumentController extends Controller
         ]);
     }
 
-    /** Summary page of a document; phase 6 replaces it with the editor (same route and prop). */
-    public function show(string $id): Response
+    /** Document editor: the document itself comes from GET /api/documents/{id} (SWR), the server-side page context from here. */
+    public function show(Request $request, string $id, DescribeDocumentPage $describe): Response
     {
-        return Inertia::render('documents/show', ['document_id' => Document::query()->findOrFail($id)->id]);
+        $document = Document::query()->findOrFail($id);
+        /** @var User $user */
+        $user = $request->user();
+
+        return Inertia::render('documents/show', [
+            'document_id' => $document->id,
+            'context' => $describe->handle(Actor::user($user), $document),
+        ]);
     }
 }

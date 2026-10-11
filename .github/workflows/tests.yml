@@ -6,32 +6,89 @@ on:
     branches: [main]
 
 jobs:
+  # required check: the name must stay `tests`
   tests:
     runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: testing
+          MARIADB_USER: db
+          MARIADB_PASSWORD: db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      gotenberg:
+        image: gotenberg/gotenberg:8
+        ports:
+          - 3000:3000
+
+    env:
+      DB_CONNECTION: mariadb
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: db
+      DB_PASSWORD: db
+      GOTENBERG_URL: http://127.0.0.1:3000
+
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+
+      - uses: shivammathur/setup-php@v2
         with:
-          version: 12
+          php-version: '8.4'
+          extensions: intl, zip, bcmath, gd, pdo_mysql
+          coverage: none
+
+      # version comes from "packageManager" in package.json
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version-file: prototypes/clickdummy-v2/.node-version
+          node-version-file: .node-version
           cache: pnpm
-          cache-dependency-path: |
-            prototypes/clickdummy/pnpm-lock.yaml
-            prototypes/clickdummy-v2/pnpm-lock.yaml
-      # Fachlogik: Summen, Steuern, Nummernkreise, Dokumentkette, Liquid-Rendering, Seitenumbruch
-      - name: clickdummy
-        working-directory: prototypes/clickdummy
+
+      - name: Composer
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Environment
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Pint
+        run: vendor/bin/pint --test
+
+      - name: Larastan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Pest
+        run: php artisan test
+
+      - name: Gotenberg reachable
+        run: curl -fsS http://127.0.0.1:3000/health
+
+      # domain logic of the clickable prototypes (sums, taxes, numbering, chain, Liquid, page breaks)
+      - name: Prototypes
         run: |
-          pnpm install --frozen-lockfile
-          pnpm typecheck
-          pnpm test
-          pnpm build
-      - name: clickdummy-v2
-        working-directory: prototypes/clickdummy-v2
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm typecheck
-          pnpm test
-          pnpm build
+          pnpm --filter "./prototypes/*" run typecheck
+          pnpm --filter "./prototypes/*" run test
+          pnpm --filter "./prototypes/*" run build
+
+      - name: Docs
+        run: pnpm --dir docs build

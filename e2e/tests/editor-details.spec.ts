@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { fillRow, heading, newDocument, settle } from './editor-helpers';
-import { apiGet, apiPost, login } from './helpers';
+import { apiGet, apiPost } from './helpers';
 
 type Doc = { intro: string; gross_total: string; groups: { positions: { title: string; quantity: string }[] }[] };
 
 test.beforeEach(async ({ page }) => {
-    await login(page);
+    await page.goto('/en'); // signed in through the setup project (storageState)
 });
 
 test('keeps typing during a save and new positions across a reload, without duplicates (review focus 1)', async ({ page }) => {

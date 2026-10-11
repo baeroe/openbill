@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { login } from './helpers';
 
 test.beforeEach(async ({ page }) => {
-    await login(page);
+    await page.goto('/en'); // signed in through the setup project (storageState)
     await page.goto('/en/documents');
     await expect(page.locator('a[href^="/en/documents/"]').first()).toBeVisible();
 });

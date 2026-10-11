@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 import { finalize, fillRow, heading, newDocument, settle, today } from './editor-helpers';
-import { apiGet, login } from './helpers';
+import { apiGet } from './helpers';
 
 type Doc = { gross_total: string; net_total: string; status: string; number: string | null; groups: { title: string | null }[] };
 
 test('quote with groups → finalize → accepted → invoice → check green → finalize → PDF → paid → cancellation', async ({ page }) => {
     test.setTimeout(180_000);
-    await login(page);
+    await page.goto('/en'); // signed in through the setup project (storageState)
 
     // 1. quote for Hafenkontor Lindqvist with two groups
     const quoteId = await newDocument(page, 'Quote', /Hafenkontor Lindqvist/);

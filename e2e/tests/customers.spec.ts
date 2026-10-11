@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { apiGet, login } from './helpers';
+import { apiGet } from './helpers';
 
 test.beforeEach(async ({ page }) => {
-    await login(page);
+    await page.goto('/en'); // signed in through the setup project (storageState)
 });
 
 test('creates a customer with a contact over the API', async ({ page }) => {

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { AUTH_FILE } from './tests/helpers';
 
 // The app runs in DDEV, Playwright on the Mac. Phase 10 points it at the Compose stack via OPENBILL_URL.
 const baseURL = process.env.OPENBILL_URL ?? 'https://openbill.ddev.site';
@@ -20,7 +21,14 @@ export default defineConfig({
         trace: 'retain-on-failure',
     },
     projects: [
-        { name: 'chromium', testIgnore: /screenshots\.spec\.ts/, use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+        // signs in once and stores the session (login is throttled: 20 attempts a minute per IP)
+        { name: 'setup', testMatch: /auth\.setup\.ts/ },
+        {
+            name: 'chromium',
+            testIgnore: /screenshots\.spec\.ts/,
+            dependencies: ['setup'],
+            use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, storageState: AUTH_FILE },
+        },
         // review screenshots against the clickdummy (pnpm screenshots): only when asked for
         ...(process.env.SCREENSHOTS ? [{ name: 'screenshots', testMatch: /screenshots\.spec\.ts/, use: { ...devices['Desktop Chrome'] } }] : []),
     ],

@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { login, USER } from './helpers';
 
+// these tests log in themselves: no shared session
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test('logs in, shows the overview and logs out', async ({ page }) => {
     await login(page);
 

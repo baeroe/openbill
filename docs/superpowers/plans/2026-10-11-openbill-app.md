@@ -33,7 +33,7 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l�
 - UI-Texte nur über Schlüssel in `lang/en.json` und `lang/de.json` (gleiche Schlüssel); Admin-URLs mit Sprachpräfix `/{locale}` (`en|de`). Code und Kommentare Englisch.
 - Gestaltung nach `prototypes/clickdummy-v2/DESIGN.md` (Graphit & Kobalt), Tailwind-Tokens aus diesen Werten; keine shadcn-Defaults, Radix nur für Dialog/Menü/Popover.
 - Doku: Jede Phase liefert ihre VitePress-Seiten in `docs/en/` **und** `docs/de/` im selben PR.
-- Demo-Daten nur fiktiv (Studio Nordlicht, Hafenkontor Lindqvist, Fjord Analytics, Hotel Alpenglück, Kulturwerk Elbinsel). Keine echten Firmen, nie `lulububu`.
+- Demo-Daten nur fiktiv (Studio Nordlicht, Hafenkontor Lindqvist, Fjord Analytics, Hotel Alpenglück, Kulturwerk Elbinsel). Keine echten Firmen, Hosts oder Personen (auch nicht die Arbeitgeber oder Kunden der Maintainer).
 - CI: Pflicht-Check heißt `tests` und muss grün sein; weitere Jobs dürfen andere Namen haben.
 - Englisches README, MIT-Lizenz (`Copyright (c) 2026 Rafael Haußmann`).
 - `CLAUDE.md` im Repo wird in jeder Phase aktuell gehalten (Stack, Kommandos, Architektur, Fallstricke).

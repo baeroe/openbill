@@ -22,7 +22,7 @@
 - UI-Texte nur über Schlüssel in `lang/en.json` und `lang/de.json` (gleiche Schlüssel, flach, Punkt-Namensräume, Platzhalter `:name`); Admin-URLs mit Präfix `/{locale}` (`en|de`). Code und Kommentare Englisch.
 - Gestaltung nach `prototypes/clickdummy-v2/DESIGN.md` (Graphit & Kobalt); in Phase 1 nur Grundtokens (helle Farben, Radien, Schrift-Stack, Fokus), keine shadcn-Defaults, keine UI-Library.
 - Doku: VitePress-Seiten in `docs/en/` **und** `docs/de/` im selben PR.
-- Demo-Daten nur fiktiv; nie `lulububu`, keine echten Firmen, Hosts oder Personen (auch nicht in Tests: Beispieladressen nur `@example.com`).
+- Demo-Daten nur fiktiv; keine echten Firmen-, Kunden- oder Arbeitgebernamen, Hosts oder Personen (auch nicht in Tests: Beispieladressen nur `@example.com`).
 - CI: Pflicht-Job heißt `tests` und muss grün sein.
 - Englisches README, MIT-Lizenz (`Copyright (c) 2026 Rafael Haußmann`) bleibt unverändert.
 - `CLAUDE.md` im Repo wird in dieser Phase angelegt und bei jeder späteren Änderung aktuell gehalten.
@@ -2966,7 +2966,7 @@ Expected: `302 https://openbill.ddev.site/de`, dann `"component":"home"`. Dassel
 git config user.email                                  # rafael@hauss.dev
 git status --short                                     # leer
 git log --format='%an <%ae>%n%b' main..HEAD | grep -E "<|Co-Authored" | sort | uniq -c
-git grep -n -i "lulububu" || echo "clean"
+git grep -n -i -f ~/.config/openbill/denylist.txt || echo "clean"   # local, untracked list of names that must never appear
 git ls-files | grep -E "\.env$|^vendor/|node_modules/|public/build/|public/hot" || echo "no artifacts"
 ```
 

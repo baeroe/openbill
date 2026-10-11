@@ -15,6 +15,9 @@ use Keepsuit\Liquid\Tags\ForTag;
  */
 final class BoundedForTag extends ForTag
 {
+    /**
+     * @return array<array-key, mixed>
+     */
     protected function collectionSegment(RenderContext $context): array
     {
         $collection = $context->evaluate($this->collection);

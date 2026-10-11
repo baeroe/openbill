@@ -1,0 +1,136 @@
+<?php
+
+namespace App\Rendering;
+
+use App\Enums\PositionKind;
+use App\Enums\TaxationMode;
+use App\Models\Document;
+use App\Support\DocumentInspector;
+use App\Support\Text;
+
+/**
+ * Liquid context of a document (port of prototypes/clickdummy-v2/src/domain/templateContext.ts):
+ * org, customer, contact, document, groups, positions. Custom fields sit directly on their object;
+ * core values come last and win (FieldRegistry reserves those keys, so this only matters for bad data).
+ * Values are raw – LiquidRenderer escapes them. Amounts are strings, dates YYYY-MM-DD.
+ */
+final class ContextBuilder
+{
+    public function __construct(
+        private readonly DocumentInspector $inspector,
+        private readonly AssetInliner $assets,
+    ) {}
+
+    /**
+     * @param  array<string, mixed>  $sources  snapshot-shaped master data (SnapshotBuilder, snapshot, SampleDataFactory)
+     */
+    public function build(Document $document, array $sources): TemplateContext
+    {
+        $totals = $this->inspector->totals($document, $sources);
+        $summary = $totals->toArray();
+        $locale = $document->locale;
+        $units = array_column($sources['units'], null, 'id');
+
+        $index = 0;
+        $groups = [];
+        foreach ($document->groups as $group) {
+            $hasTitle = $group->title !== null && $group->title !== '';
+            $positions = [];
+            foreach ($group->positions as $position) {
+                $line = $totals->lines[$position->id] ?? null;
+                $unit = $position->unit_id === null ? null : ($units[$position->unit_id] ?? null);
+                $positions[] = [
+                    ...($position->custom ?? []),
+                    'index' => $position->kind === PositionKind::Text ? null : ++$index,
+                    'kind' => $position->kind->value,
+                    'is_item' => $position->kind === PositionKind::Item,
+                    'is_text' => $position->kind === PositionKind::Text,
+                    'is_optional' => $position->kind === PositionKind::Optional,
+                    'title' => $position->title,
+                    'description' => $position->description ?? '',
+                    'quantity' => Amounts::plain($position->quantity),
+                    'unit' => (string) ($unit['symbol'] ?? ''),
+                    'unit_name' => (string) ($unit['name'] ?? ''),
+                    'unit_code' => (string) ($unit['code'] ?? ''),
+                    'unit_price' => Amounts::price($position->unit_price),
+                    'tax_percent' => $line?->tax === null ? '0' : (string) $line->tax->percent->strippedOfTrailingZeros(),
+                    'total' => $line === null ? '0.00' : (string) $line->net,
+                    'group' => $hasTitle ? (string) $group->title : '',
+                ];
+            }
+            $groupTotal = $totals->groups[$group->id] ?? null;
+            $groups[] = [
+                'title' => $hasTitle ? (string) $group->title : '',
+                'has_title' => $hasTitle,
+                'total' => $groupTotal === null ? '0.00' : (string) $groupTotal->net,
+                'optional_total' => $groupTotal === null ? '0.00' : (string) $groupTotal->optionalNet,
+                'positions' => $positions,
+            ];
+        }
+
+        $org = $sources['org'];
+        $customer = $sources['customer'];
+        $contact = $sources['contact'];
+
+        return new TemplateContext([
+            'org' => [
+                ...($org['custom'] ?? []),
+                ...self::pick($org, ['name', 'street', 'zip', 'city', 'country', 'vat_id', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website']),
+                'logo' => $this->assets->logo($org['logo_path'] ?? null),
+                'taxation_mode' => (string) $org['taxation_mode'],
+                'small_business' => $org['taxation_mode'] === TaxationMode::SmallBusiness->value,
+                'locale' => (string) ($org['locale'] ?? 'en'),
+            ],
+            'customer' => $customer === null ? null : [
+                ...($customer['custom'] ?? []),
+                ...self::pick($customer, ['number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'tax_treatment']),
+                'locale' => $customer['locale'] ?? null,
+            ],
+            'contact' => $contact === null ? null : [
+                ...($contact['custom'] ?? []),
+                ...self::pick($contact, ['salutation', 'first_name', 'last_name']),
+                'full_name' => trim(($contact['first_name'] ?? '').' '.($contact['last_name'] ?? '')),
+                ...self::pick($contact, ['position', 'email', 'phone']),
+            ],
+            'document' => [
+                ...($document->custom ?? []),
+                'type' => $document->type->value,
+                'type_label' => Text::t('document_type.'.$document->type->value, [], $locale),
+                'status' => $document->status->value,
+                'number' => $document->number ?? Text::t('template.draft', [], $locale),
+                'date' => $document->date->toDateString(),
+                'due_date' => $document->due_date?->toDateString(),
+                'valid_until' => $document->valid_until?->toDateString(),
+                'service_date' => $document->service_date?->toDateString(),
+                'service_date_end' => $document->service_date_end?->toDateString(),
+                'locale' => $locale,
+                'intro' => $document->intro ?? '',
+                'closing' => $document->closing ?? '',
+                'net_total' => $summary['net'],
+                'tax_total' => $summary['tax'],
+                'gross_total' => $summary['gross'],
+                'optional_total' => $summary['optional_net'],
+                'tax_breakdown' => $summary['tax_breakdown'],
+                'legal_notes' => $summary['legal_notes'],
+                'source_number' => $document->source_id === null ? null : Document::query()->whereKey($document->source_id)->value('number'),
+            ],
+            'positions' => array_merge([], ...array_column($groups, 'positions')),
+            'groups' => $groups,
+        ], $totals);
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     * @param  list<string>  $keys
+     * @return array<string, string>
+     */
+    private static function pick(array $row, array $keys): array
+    {
+        $values = [];
+        foreach ($keys as $key) {
+            $values[$key] = (string) ($row[$key] ?? '');
+        }
+
+        return $values;
+    }
+}

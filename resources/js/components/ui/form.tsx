@@ -2,9 +2,10 @@ import { Check, ChevronDown, Search } from 'lucide-react';
 import { useId, type InputHTMLAttributes, type ReactNode, type Ref, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { cx } from './cx';
 
-// no height here: single-line controls add h-control, the textarea grows (two height classes would conflict)
+// no height here: single-line controls add h-control, the textarea grows (two height classes would conflict).
+// The read-only look is for text fields only: Chrome matches every <select> as :read-only.
 const CONTROL =
-    'w-full min-w-0 rounded-md border-0 bg-surface-2 px-3 text-md text-ink transition-[background-color,box-shadow] placeholder:text-faint hover:bg-surface-3 focus:bg-surface focus:shadow-[0_0_0_2px_var(--accent)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 read-only:bg-transparent read-only:shadow-[inset_0_0_0_1px_var(--surface-3)]';
+    'w-full min-w-0 rounded-md border-0 bg-surface-2 px-3 text-md text-ink transition-[background-color,box-shadow] placeholder:text-faint hover:bg-surface-3 focus:bg-surface focus:shadow-[0_0_0_2px_var(--accent)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 [&:is(input,textarea):read-only]:bg-transparent [&:is(input,textarea):read-only]:shadow-[inset_0_0_0_1px_var(--surface-3)]';
 const INVALID = 'shadow-[0_0_0_2px_var(--bad)] hover:shadow-[0_0_0_2px_var(--bad)]';
 
 /**
@@ -105,11 +106,12 @@ export function SearchInput({ className, ...rest }: Omit<InputHTMLAttributes<HTM
     );
 }
 
+/** Off state with a muted ring: a tinted box alone has 1.3:1 against the card (WCAG 1.4.11 asks 3:1). */
 export function Checkbox({ label, className, ...rest }: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { label: ReactNode }) {
     return (
         <label className={cx('inline-flex cursor-pointer items-center gap-2 select-none', className)}>
             <span className="relative inline-grid size-[1.125rem] shrink-0">
-                <input type="checkbox" className="peer size-full cursor-pointer appearance-none rounded-[6px] bg-surface-3 transition-colors checked:bg-accent disabled:cursor-not-allowed disabled:opacity-60" {...rest} />
+                <input type="checkbox" className="peer size-full cursor-pointer appearance-none rounded-[6px] bg-surface shadow-[inset_0_0_0_1.5px_var(--muted)] transition-[background-color,box-shadow] checked:bg-accent checked:shadow-none disabled:cursor-not-allowed disabled:opacity-60" {...rest} />
                 <Check aria-hidden strokeWidth={3} className="pointer-events-none absolute inset-0 m-auto size-3 text-accent-ink opacity-0 peer-checked:opacity-100" />
             </span>
             <span>{label}</span>
@@ -121,8 +123,8 @@ export function Switch({ label, className, ...rest }: Omit<InputHTMLAttributes<H
     return (
         <label className={cx('inline-flex cursor-pointer items-center gap-3 select-none', className)}>
             <span className="relative inline-grid h-[1.375rem] w-9 shrink-0">
-                <input type="checkbox" role="switch" className="peer size-full cursor-pointer appearance-none rounded-full bg-surface-3 transition-colors checked:bg-accent disabled:cursor-not-allowed disabled:opacity-60" {...rest} />
-                <span aria-hidden className="pointer-events-none absolute top-[3px] left-[3px] size-4 rounded-full bg-surface shadow-[0_1px_2px_rgb(0_0_0/0.2)] transition-transform peer-checked:translate-x-3.5" />
+                <input type="checkbox" role="switch" className="peer size-full cursor-pointer appearance-none rounded-full bg-surface shadow-[inset_0_0_0_1.5px_var(--muted)] transition-[background-color,box-shadow] checked:bg-accent checked:shadow-none disabled:cursor-not-allowed disabled:opacity-60" {...rest} />
+                <span aria-hidden className="pointer-events-none absolute top-[3px] left-[3px] size-4 rounded-full bg-muted transition-[transform,background-color] peer-checked:translate-x-3.5 peer-checked:bg-surface peer-checked:shadow-[0_1px_2px_rgb(0_0_0/0.2)]" />
             </span>
             <span>{label}</span>
         </label>

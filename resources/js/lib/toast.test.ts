@@ -56,3 +56,34 @@ describe('toast', () => {
         expect(currentToasts()).toEqual([]);
     });
 });
+
+describe('onExpire', () => {
+    it('runs when a toast with an action closes by itself or through its close button', () => {
+        const expired = vi.fn();
+        toast.success('Draft deleted', { label: 'Undo', run: () => undefined, onExpire: expired });
+        vi.advanceTimersByTime(6100);
+        expect(expired).toHaveBeenCalledTimes(1);
+
+        const closed = vi.fn();
+        const id = toast.success('Draft deleted', { label: 'Undo', run: () => undefined, onExpire: closed });
+        dismissToast(id);
+        expect(closed).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not run when the action was used', () => {
+        const expired = vi.fn();
+        const id = toast.success('Draft deleted', { label: 'Undo', run: () => undefined, onExpire: expired });
+
+        dismissToast(id, true);
+        vi.advanceTimersByTime(10_000);
+        expect(expired).not.toHaveBeenCalled();
+    });
+
+    it('runs for a toast pushed out by newer ones', () => {
+        const expired = vi.fn();
+        toast.success('Draft deleted', { label: 'Undo', run: () => undefined, onExpire: expired });
+        ['one', 'two', 'three'].forEach((message) => toast.info(message));
+
+        expect(expired).toHaveBeenCalledTimes(1);
+    });
+});

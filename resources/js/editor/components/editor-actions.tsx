@@ -1,4 +1,4 @@
-import { Ban, ChevronDown, Copy, Download, Lock, MoreHorizontal, Repeat2 } from 'lucide-react';
+import { Ban, ChevronDown, Copy, Download, Lock, MoreHorizontal, Repeat2, Trash2 } from 'lucide-react';
 import type { DocumentDetail, DocumentPageContext } from '@/api/types';
 import { Button, ConfirmDialog, Menu, MenuItem, MenuSeparator } from '@/components/ui';
 import { t } from '@/lib/i18n';
@@ -32,6 +32,14 @@ export function EditorActions({ document, context, actions }: { document: Docume
                         <MenuSeparator />
                         <MenuItem danger icon={<Ban />} disabled={busy} onSelect={actions.openCancel}>
                             {t('editor.cancel_invoice')}
+                        </MenuItem>
+                    </>
+                )}
+                {allowed.delete && (
+                    <>
+                        <MenuSeparator />
+                        <MenuItem danger icon={<Trash2 />} disabled={busy} onSelect={actions.remove}>
+                            {t('editor.delete')}
                         </MenuItem>
                     </>
                 )}

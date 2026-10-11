@@ -1,11 +1,12 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { mutate } from 'swr';
-import { cancelInvoice, convertDocument, duplicateDocument, finalizeDocument, setDocumentStatus } from '@/api/documents';
+import { cancelInvoice, convertDocument, deleteDocument, duplicateDocument, finalizeDocument, setDocumentStatus } from '@/api/documents';
 import { keys } from '@/api/keys';
 import type { DocumentDetail, DocumentStatus, DocumentType, Issue } from '@/api/types';
 import { ApiError, errorMessage } from '@/lib/api';
 import { path, t, tn } from '@/lib/i18n';
+import { scheduleDelete } from '@/lib/pending-delete';
 import { toast } from '@/lib/toast';
 import { jumpToIssue } from './jump';
 import { violationPath } from './paths';
@@ -26,16 +27,17 @@ export type DocumentActions = {
     confirmCancel(): Promise<void>;
     closeCancel(): void;
     duplicate(): Promise<void>;
+    remove(): void;
     openPdf(): Promise<void>;
 };
 
-type Args = { document: DocumentDetail; issues: Issue[]; flush(): Promise<void>; expand(): void };
+type Args = { document: DocumentDetail; issues: Issue[]; flush(): Promise<void>; stop(): void; expand(): void };
 
 /**
  * The document actions of the editor. Every rule (may this be finalized, converted, cancelled?) is the server's:
  * the buttons follow the page context, the API answers with the new document or a problem.
  */
-export function useDocumentActions({ document, issues, flush, expand }: Args): DocumentActions {
+export function useDocumentActions({ document, issues, flush, stop, expand }: Args): DocumentActions {
     const [pending, setPending] = useState<Running | null>(null);
     const [finalizeOpen, setFinalizeOpen] = useState(false);
     const [cancelOpen, setCancelOpen] = useState(false);
@@ -127,6 +129,23 @@ export function useDocumentActions({ document, issues, flush, expand }: Args): D
                 await open(await duplicateDocument(document.id));
                 toast.success(t('editor.duplicated'));
             }),
+        remove: () => {
+            // nothing may be saved anymore; an undo loads the draft fresh from the server
+            stop();
+            useEditor.getState().reset();
+            const id = document.id;
+            const pendingDelete = scheduleDelete(id, (options) => deleteDocument(id, options));
+            router.visit(path('/documents'));
+            toast.success(t('editor.deleted'), {
+                label: t('editor.undo'),
+                run: () => {
+                    if (!pendingDelete.undo()) return;
+                    router.visit(path(`/documents/${id}`));
+                    toast.info(t('editor.restored'));
+                },
+                onExpire: () => void pendingDelete.commit().catch((error: unknown) => toast.error(errorMessage(error))),
+            });
+        },
         openPdf: async () => {
             // a draft renders live (with watermark): save first, so the PDF shows what is on screen
             if (!document.is_locked) await flush();

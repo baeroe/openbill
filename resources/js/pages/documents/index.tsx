@@ -9,6 +9,7 @@ import { appLayout } from '@/layouts/app-shell';
 import { formatDate, formatMoney, formatMonth, groupByMonth } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks';
 import { path, t, tn } from '@/lib/i18n';
+import { usePendingDeletes } from '@/lib/pending-delete';
 
 type Filters = { type: DocumentType | null; status: DocumentFilters['status']; customer_id: string | null; q: string | null };
 
@@ -39,7 +40,10 @@ export default function Documents({ filters, counts, summary, customers }: Props
     const [query, setQuery] = useState(filters.q ?? '');
     const search = useDebounced(query, 300);
     const list = useDocumentList(filters);
-    const groups = groupByMonth(list.items);
+    // drafts deleted in the editor disappear at once; the DELETE follows when their undo toast is gone
+    const removed = usePendingDeletes();
+    const items = list.items.filter((row) => !removed.has(row.id));
+    const groups = groupByMonth(items);
     const filtered = Boolean(filters.type || filters.status || filters.customer_id || filters.q);
 
     // the URL is the state: every change is an Inertia visit that also brings fresh counts and sum
@@ -147,7 +151,7 @@ export default function Documents({ filters, counts, summary, customers }: Props
                     <ErrorState error={list.error} onRetry={list.retry} />
                 ) : list.isLoading ? (
                     <ListSkeleton rows={7} />
-                ) : list.items.length === 0 ? (
+                ) : items.length === 0 ? (
                     filtered ? (
                         <EmptyState icon={<SearchX />} title={t('documents.none_found')} actions={<Button onClick={reset}>{t('documents.reset')}</Button>}>
                             {t('documents.none_found_text')}

@@ -41,7 +41,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
     const expandAll = useEditor((state) => state.expandAll);
     const jump = (target: string) => jumpToIssue(target, expandAll);
     const templateName = context.templates.find((template) => template.id === draft.template_id)?.name ?? '–';
-    const actions = useDocumentActions({ document, issues, flush: autosave.flush, expand: expandAll });
+    const actions = useDocumentActions({ document, issues, flush: autosave.flush, stop: autosave.stop, expand: expandAll });
     const messages = useMemo(() => ({ ...Object.fromEntries(issues.map((issue) => [issue.path, issue.message])), ...errors }), [issues, errors]);
     const title = `${t(`document_type.${document.type}`)} ${document.number ?? t('overview.draft_label')}`;
 

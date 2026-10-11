@@ -18,11 +18,24 @@ final class ComplianceFailedException extends DomainActionException
     }
 
     /**
-     * @return list<array{path: string, message: string}>
+     * @return list<array{path: string, message: string, code: string}>
      */
     public function toArray(): array
     {
         return IssueList::toArray($this->issues);
+    }
+
+    public function reason(): string
+    {
+        return 'compliance_failed';
+    }
+
+    /**
+     * @return array{violations: list<array{path: string, message: string, code: string}>}
+     */
+    public function extensions(): array
+    {
+        return ['violations' => $this->toArray()];
     }
 
     public function status(): int

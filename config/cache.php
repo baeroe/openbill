@@ -34,6 +34,13 @@ return [
 
     'stores' => [
 
+        // API Platform metadata (config/api-platform.php): APCu keeps objects with native serialization and
+        // is not subject to serializable_classes, unlike file/database/redis. Driver App\Support\Cache\MetadataStore
+        // picks APCu or a per-process array at runtime (registered in AppServiceProvider)
+        'api-platform' => [
+            'driver' => 'apcu-or-array',
+        ],
+
         'array' => [
             'driver' => 'array',
             'serialize' => false,

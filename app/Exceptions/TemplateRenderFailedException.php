@@ -24,6 +24,19 @@ final class TemplateRenderFailedException extends DomainActionException
         return array_map(fn (RenderError $error): array => $error->toArray(), $this->errors);
     }
 
+    public function reason(): string
+    {
+        return 'template_render_failed';
+    }
+
+    /**
+     * @return array{errors: list<array{part: string, file: string|null, line: int|null, message: string}>}
+     */
+    public function extensions(): array
+    {
+        return ['errors' => $this->toArray()];
+    }
+
     public function status(): int
     {
         return 422;

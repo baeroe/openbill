@@ -15,6 +15,19 @@ final class EInvoiceInvalidException extends DomainActionException
         parent::__construct(Text::t('einvoice.invalid', ['errors' => implode('; ', array_slice($errors, 0, 3))]));
     }
 
+    public function reason(): string
+    {
+        return 'einvoice_invalid';
+    }
+
+    /**
+     * @return array{errors: list<string>}
+     */
+    public function extensions(): array
+    {
+        return ['errors' => $this->errors];
+    }
+
     public function status(): int
     {
         return 422;

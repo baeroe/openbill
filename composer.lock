@@ -4,8 +4,990 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "87b83bb2b7a41dbe3a926f500f210eb2",
+    "content-hash": "446791f90da3fa9543c312a8b32eab01",
     "packages": [
+        {
+            "name": "api-platform/documentation",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/documentation.git",
+                "reference": "594e43c1f5a9f573c02bb7b18af2403dcfca6449"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/documentation/zipball/594e43c1f5a9f573c02bb7b18af2403dcfca6449",
+                "reference": "594e43c1f5a9f573c02bb7b18af2403dcfca6449",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/metadata": "^5.0",
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0"
+            },
+            "type": "project",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\Documentation\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Platform documentation controller.",
+            "support": {
+                "source": "https://github.com/api-platform/documentation/tree/v5.0.3"
+            },
+            "time": "2026-09-22T14:19:04+00:00"
+        },
+        {
+            "name": "api-platform/hal",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/hal.git",
+                "reference": "9a66125de54a88146f26a2c028bd5429ca6dfc82"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/hal/zipball/9a66125de54a88146f26a2c028bd5429ca6dfc82",
+                "reference": "9a66125de54a88146f26a2c028bd5429ca6dfc82",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/documentation": "^5.0",
+                "api-platform/metadata": "^5.0",
+                "api-platform/serializer": "^5.0",
+                "api-platform/state": "^5.0",
+                "php": ">=8.2",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "api-platform/json-schema": "^5.0",
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\Hal\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Hal support",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "api",
+                "hal",
+                "rest"
+            ],
+            "support": {
+                "issues": "https://github.com/api-platform/hal/issues",
+                "source": "https://github.com/api-platform/hal/tree/v5.0.3"
+            },
+            "time": "2026-10-09T14:10:51+00:00"
+        },
+        {
+            "name": "api-platform/hydra",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/hydra.git",
+                "reference": "8b093d2d1051b6cf7b51d714211c9156c956c02f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/hydra/zipball/8b093d2d1051b6cf7b51d714211c9156c956c02f",
+                "reference": "8b093d2d1051b6cf7b51d714211c9156c956c02f",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/documentation": "^5.0",
+                "api-platform/json-schema": "^5.0",
+                "api-platform/jsonld": "^5.0",
+                "api-platform/metadata": "^5.0",
+                "api-platform/serializer": "^5.0",
+                "api-platform/state": "^5.0",
+                "php": ">=8.2",
+                "symfony/type-info": "^7.4 || ^8.0",
+                "symfony/web-link": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "api-platform/doctrine-common": "^5.0",
+                "api-platform/doctrine-odm": "^5.0",
+                "api-platform/doctrine-orm": "^5.0",
+                "phpspec/prophecy": "^1.19",
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\Hydra\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Hydra support",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "Hydra",
+                "JSON-LD",
+                "api",
+                "graphql",
+                "jsonapi",
+                "rest"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/hydra/tree/v5.0.3"
+            },
+            "time": "2026-10-09T14:34:35+00:00"
+        },
+        {
+            "name": "api-platform/json-api",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/json-api.git",
+                "reference": "160e39697afb2bb4eab0fdd21d024a90115c1dd7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/json-api/zipball/160e39697afb2bb4eab0fdd21d024a90115c1dd7",
+                "reference": "160e39697afb2bb4eab0fdd21d024a90115c1dd7",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/documentation": "^5.0",
+                "api-platform/json-schema": "^5.0",
+                "api-platform/metadata": "^5.0",
+                "api-platform/serializer": "^5.0",
+                "api-platform/state": "^5.0",
+                "php": ">=8.2",
+                "symfony/error-handler": "^7.4 || ^8.0",
+                "symfony/http-foundation": "^7.4 || ^8.0",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "phpspec/prophecy": "^1.19",
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\JsonApi\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API JSON-API support",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "api",
+                "jsonapi",
+                "rest"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/json-api/tree/v5.0.3"
+            },
+            "time": "2026-09-29T12:06:54+00:00"
+        },
+        {
+            "name": "api-platform/json-schema",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/json-schema.git",
+                "reference": "af70cd4578789977ec828cae62029ef011ab08cc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/json-schema/zipball/af70cd4578789977ec828cae62029ef011ab08cc",
+                "reference": "af70cd4578789977ec828cae62029ef011ab08cc",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/metadata": "^5.0",
+                "php": ">=8.2",
+                "symfony/console": "^7.4 || ^8.0",
+                "symfony/property-info": "^7.4 || ^8.0",
+                "symfony/serializer": "^7.4 || ^8.0",
+                "symfony/type-info": "^7.4 || ^8.0",
+                "symfony/uid": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\JsonSchema\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "Generate a JSON Schema from a PHP class",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "JSON Schema",
+                "api",
+                "json",
+                "openapi",
+                "rest",
+                "swagger"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/json-schema/tree/v5.0.3"
+            },
+            "time": "2026-09-29T12:08:41+00:00"
+        },
+        {
+            "name": "api-platform/jsonld",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/jsonld.git",
+                "reference": "8c85e35288931b169b524f980eb76bc34a646d16"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/jsonld/zipball/8c85e35288931b169b524f980eb76bc34a646d16",
+                "reference": "8c85e35288931b169b524f980eb76bc34a646d16",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/metadata": "^5.0",
+                "api-platform/serializer": "^5.0",
+                "api-platform/state": "^5.0",
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "./HydraContext.php"
+                ],
+                "psr-4": {
+                    "ApiPlatform\\JsonLd\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API JSON-LD support",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "Hydra",
+                "JSON-LD",
+                "api",
+                "graphql",
+                "rest"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/jsonld/tree/v5.0.3"
+            },
+            "time": "2026-09-30T12:49:41+00:00"
+        },
+        {
+            "name": "api-platform/laravel",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/laravel.git",
+                "reference": "ba4d0643f65a55c54758747168d2a4e70e98da18"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/laravel/zipball/ba4d0643f65a55c54758747168d2a4e70e98da18",
+                "reference": "ba4d0643f65a55c54758747168d2a4e70e98da18",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/documentation": "^5.0",
+                "api-platform/hal": "^5.0",
+                "api-platform/hydra": "^5.0",
+                "api-platform/json-api": "^5.0",
+                "api-platform/json-schema": "^5.0",
+                "api-platform/jsonld": "^5.0",
+                "api-platform/metadata": "^5.0",
+                "api-platform/openapi": "^5.0",
+                "api-platform/serializer": "^5.0",
+                "api-platform/state": "^5.0",
+                "illuminate/config": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/container": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/contracts": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/database": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/http": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/pagination": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/routing": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+                "laravel/framework": "^11.0 || ^12.0 || ^13.0",
+                "php": ">=8.2",
+                "symfony/deprecation-contracts": "^3.6",
+                "symfony/type-info": "^7.4 || ^8.0",
+                "symfony/web-link": "^7.4 || ^8.0",
+                "willdurand/negotiation": "^3.1"
+            },
+            "require-dev": {
+                "api-platform/graphql": "^5.0",
+                "api-platform/http-cache": "^5.0",
+                "api-platform/mcp": "^5.0",
+                "doctrine/dbal": "^4.0",
+                "larastan/larastan": "^2.0 || ^3.0",
+                "laravel/sanctum": "^4.0",
+                "mcp/sdk": ">=0.4 <1.0",
+                "orchestra/testbench": "^10.1 || ^11.0",
+                "phpdocumentor/type-resolver": "^1.7",
+                "phpstan/phpdoc-parser": "^1.29 || ^2.0",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "symfony/http-client": "^7.4 || ^8.0",
+                "symfony/mcp-bundle": "^0.13",
+                "symfony/object-mapper": "^7.4 || ^8.0"
+            },
+            "suggest": {
+                "api-platform/graphql": "Enable GraphQl support.",
+                "api-platform/http-cache": "Enable HTTP Cache support.",
+                "api-platform/mcp": "Enable MCP (Model Context Protocol) support for AI agents.",
+                "phpstan/phpdoc-parser": "To support extracting metadata from PHPDoc."
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "laravel": {
+                    "providers": [
+                        "ApiPlatform\\Laravel\\ApiPlatformProvider",
+                        "ApiPlatform\\Laravel\\ApiPlatformDeferredProvider",
+                        "ApiPlatform\\Laravel\\Eloquent\\ApiPlatformEventProvider"
+                    ]
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\Laravel\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/",
+                    "/workbench/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Platform support for Laravel",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "Hydra",
+                "JSON-LD",
+                "api",
+                "graphql",
+                "hal",
+                "jsonapi",
+                "laravel",
+                "openapi",
+                "rest",
+                "swagger"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/laravel/tree/v5.0.3"
+            },
+            "time": "2026-10-09T14:34:35+00:00"
+        },
+        {
+            "name": "api-platform/metadata",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/metadata.git",
+                "reference": "2d7078dac818aac576b1d81f1d6966b42c6e62ed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/metadata/zipball/2d7078dac818aac576b1d81f1d6966b42c6e62ed",
+                "reference": "2d7078dac818aac576b1d81f1d6966b42c6e62ed",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/inflector": "^2.0",
+                "php": ">=8.2",
+                "psr/cache": "^1.0 || ^2.0 || ^3.0",
+                "psr/log": "^1.0 || ^2.0 || ^3.0",
+                "symfony/property-info": "^7.4 || ^8.0",
+                "symfony/string": "^7.4 || ^8.0",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "api-platform/json-schema": "^5.0",
+                "api-platform/openapi": "^5.0",
+                "api-platform/state": "^5.0",
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpstan/phpdoc-parser": "^1.29 || ^2.0",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "symfony/config": "^7.4 || ^8.0",
+                "symfony/routing": "^7.4 || ^8.0",
+                "symfony/var-dumper": "^7.4 || ^8.0",
+                "symfony/web-link": "^7.4 || ^8.0",
+                "symfony/yaml": "^7.4 || ^8.0"
+            },
+            "suggest": {
+                "phpstan/phpdoc-parser": "For PHP documentation support.",
+                "symfony/config": "For XML resource configuration.",
+                "symfony/yaml": "For YAML resource configuration."
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\Metadata\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Resource-oriented metadata attributes and factories",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "Hydra",
+                "JSON-LD",
+                "api",
+                "graphql",
+                "hal",
+                "jsonapi",
+                "openapi",
+                "rest",
+                "swagger"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/metadata/tree/v5.0.3"
+            },
+            "time": "2026-10-09T14:12:03+00:00"
+        },
+        {
+            "name": "api-platform/openapi",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/openapi.git",
+                "reference": "a5e3e782b2f7291a1a85323e827e6eeb4aefa8d0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/openapi/zipball/a5e3e782b2f7291a1a85323e827e6eeb4aefa8d0",
+                "reference": "a5e3e782b2f7291a1a85323e827e6eeb4aefa8d0",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/json-schema": "^5.0.2",
+                "api-platform/metadata": "^5.0",
+                "api-platform/state": "^5.0",
+                "php": ">=8.2",
+                "symfony/console": "^7.4 || ^8.0",
+                "symfony/filesystem": "^7.4 || ^8.0",
+                "symfony/property-access": "^7.4 || ^8.0",
+                "symfony/serializer": "^7.4 || ^8.0",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "api-platform/doctrine-common": "^5.0",
+                "api-platform/doctrine-odm": "^5.0",
+                "api-platform/doctrine-orm": "^5.0",
+                "api-platform/serializer": "^5.0",
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "symfony/type-info": "^7.4 || ^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\OpenApi\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "Models to build and serialize an OpenAPI specification.",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "Hydra",
+                "JSON-LD",
+                "api",
+                "graphql",
+                "hal",
+                "jsonapi",
+                "openapi",
+                "rest",
+                "swagger"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/openapi/tree/v5.0.3"
+            },
+            "time": "2026-10-09T14:34:35+00:00"
+        },
+        {
+            "name": "api-platform/serializer",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/serializer.git",
+                "reference": "0e5e8b28fe59d383d985a1ac722d0aa952993dd9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/serializer/zipball/0e5e8b28fe59d383d985a1ac722d0aa952993dd9",
+                "reference": "0e5e8b28fe59d383d985a1ac722d0aa952993dd9",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/metadata": "^5.0",
+                "api-platform/state": "^5.0",
+                "php": ">=8.2",
+                "symfony/property-access": "^7.4 || ^8.0",
+                "symfony/property-info": "^7.4 || ^8.0",
+                "symfony/serializer": "^7.4.9 || ^8.0.9",
+                "symfony/validator": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "api-platform/doctrine-common": "^5.0",
+                "api-platform/doctrine-odm": "^5.0",
+                "api-platform/doctrine-orm": "^5.0",
+                "api-platform/json-schema": "^5.0",
+                "api-platform/openapi": "^5.0",
+                "doctrine/collections": "^2.1",
+                "phpspec/prophecy-phpunit": "^2.2",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "sebastian/exporter": "^6.3.2 || ^7.0.2 || ^8.2",
+                "symfony/mercure-bundle": "^0.4.3|^0.5",
+                "symfony/type-info": "^7.4 || ^8.0",
+                "symfony/var-dumper": "^7.4 || ^8.0",
+                "symfony/yaml": "^7.4 || ^8.0"
+            },
+            "suggest": {
+                "api-platform/doctrine-odm": "To support Doctrine MongoDB ODM state options.",
+                "api-platform/doctrine-orm": "To support Doctrine ORM state options."
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\Serializer\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Platform core Serializer",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "api",
+                "graphql",
+                "rest",
+                "serializer"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/serializer/tree/v5.0.3"
+            },
+            "time": "2026-10-09T14:10:27+00:00"
+        },
+        {
+            "name": "api-platform/state",
+            "version": "v5.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/api-platform/state.git",
+                "reference": "af8f567d4fc07b5af0842129d9fb4b82ef81814d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/api-platform/state/zipball/af8f567d4fc07b5af0842129d9fb4b82ef81814d",
+                "reference": "af8f567d4fc07b5af0842129d9fb4b82ef81814d",
+                "shasum": ""
+            },
+            "require": {
+                "api-platform/metadata": "^5.0",
+                "php": ">=8.2",
+                "psr/container": "^1.0 || ^2.0",
+                "symfony/deprecation-contracts": "^3.1",
+                "symfony/http-kernel": "^7.4 || ^8.0",
+                "symfony/serializer": "^7.4 || ^8.0"
+            },
+            "conflict": {
+                "symfony/object-mapper": "<7.3.4"
+            },
+            "require-dev": {
+                "api-platform/serializer": "^5.0",
+                "api-platform/validator": "^5.0",
+                "phpunit/phpunit": "^11.5 || ^12.2 || ^13.0",
+                "symfony/http-foundation": "^7.4 || ^8.0",
+                "symfony/object-mapper": "^7.4 || ^8.0",
+                "symfony/type-info": "^7.4 || ^8.0",
+                "symfony/web-link": "^7.4 || ^8.0",
+                "willdurand/negotiation": "^3.1"
+            },
+            "suggest": {
+                "api-platform/serializer": "To use API Platform serializer.",
+                "api-platform/validator": "To use API Platform validation.",
+                "symfony/http-foundation": "To use our HTTP providers and processor.",
+                "symfony/web-link": "To support adding web links to the response headers.",
+                "willdurand/negotiation": "To use the API Platform content negoatiation provider."
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/api-platform/api-platform",
+                    "name": "api-platform/api-platform"
+                },
+                "symfony": {
+                    "require": "^7.4 || ^8.0"
+                },
+                "branch-alias": {
+                    "dev-3.4": "3.4.x-dev",
+                    "dev-4.1": "4.1.x-dev",
+                    "dev-4.2": "4.2.x-dev",
+                    "dev-main": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ApiPlatform\\State\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "kevin@dunglas.fr",
+                    "homepage": "https://dunglas.fr"
+                },
+                {
+                    "name": "API Platform Community",
+                    "homepage": "https://api-platform.com/community/contributors"
+                }
+            ],
+            "description": "API Platform State component ",
+            "homepage": "https://api-platform.com",
+            "keywords": [
+                "Hydra",
+                "JSON-LD",
+                "api",
+                "graphql",
+                "hal",
+                "jsonapi",
+                "openapi",
+                "rest",
+                "swagger"
+            ],
+            "support": {
+                "source": "https://github.com/api-platform/state/tree/v5.0.3"
+            },
+            "time": "2026-10-05T08:21:29+00:00"
+        },
         {
             "name": "brick/math",
             "version": "1.0.0",
@@ -2046,6 +3028,69 @@
             "time": "2026-10-06T02:25:49+00:00"
         },
         {
+            "name": "laravel/sanctum",
+            "version": "v4.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/sanctum.git",
+                "reference": "fee27a573d1a013af3721d86153a65e0b11927e6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/sanctum/zipball/fee27a573d1a013af3721d86153a65e0b11927e6",
+                "reference": "fee27a573d1a013af3721d86153a65e0b11927e6",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/console": "^11.0|^12.0|^13.0",
+                "illuminate/contracts": "^11.0|^12.0|^13.0",
+                "illuminate/database": "^11.0|^12.0|^13.0",
+                "illuminate/support": "^11.0|^12.0|^13.0",
+                "php": "^8.2",
+                "symfony/console": "^7.0|^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^9.15|^10.8|^11.0",
+                "phpstan/phpstan": "^1.10"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Sanctum\\SanctumServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Sanctum\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Laravel Sanctum provides a featherweight authentication system for SPAs and simple APIs.",
+            "keywords": [
+                "auth",
+                "laravel",
+                "sanctum"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/sanctum/issues",
+                "source": "https://github.com/laravel/sanctum"
+            },
+            "time": "2026-06-23T18:26:55+00:00"
+        },
+        {
             "name": "laravel/serializable-closure",
             "version": "v2.1.0",
             "source": {
@@ -3448,6 +4493,55 @@
             "time": "2026-09-27T20:07:45+00:00"
         },
         {
+            "name": "psr/cache",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/cache.git",
+                "reference": "aa5030cfa5405eccfdcb1083ce040c2cb8d253bf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/cache/zipball/aa5030cfa5405eccfdcb1083ce040c2cb8d253bf",
+                "reference": "aa5030cfa5405eccfdcb1083ce040c2cb8d253bf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Cache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for caching libraries",
+            "keywords": [
+                "cache",
+                "psr",
+                "psr-6"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/cache/tree/3.0.0"
+            },
+            "time": "2021-02-03T23:26:27+00:00"
+        },
+        {
             "name": "psr/clock",
             "version": "1.0.0",
             "source": {
@@ -3757,6 +4851,62 @@
                 "source": "https://github.com/php-fig/http-message/tree/2.0"
             },
             "time": "2023-04-04T09:54:51+00:00"
+        },
+        {
+            "name": "psr/link",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/link.git",
+                "reference": "84b159194ecfd7eaa472280213976e96415433f7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/link/zipball/84b159194ecfd7eaa472280213976e96415433f7",
+                "reference": "84b159194ecfd7eaa472280213976e96415433f7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "suggest": {
+                "fig/link-util": "Provides some useful PSR-13 utilities"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Link\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interfaces for HTTP links",
+            "homepage": "https://github.com/php-fig/link",
+            "keywords": [
+                "http",
+                "http-link",
+                "link",
+                "psr",
+                "psr-13",
+                "rest"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/link/tree/2.0.1"
+            },
+            "time": "2021-03-11T23:00:27+00:00"
         },
         {
             "name": "psr/log",
@@ -4824,6 +5974,77 @@
                 }
             ],
             "time": "2026-06-05T06:23:12+00:00"
+        },
+        {
+            "name": "symfony/filesystem",
+            "version": "v8.1.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/filesystem.git",
+                "reference": "7599ebb855fede59413ddb7f15198d67bfcae7ba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/7599ebb855fede59413ddb7f15198d67bfcae7ba",
+                "reference": "7599ebb855fede59413ddb7f15198d67bfcae7ba",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "symfony/deprecation-contracts": "^2.5|^3",
+                "symfony/polyfill-ctype": "~1.8",
+                "symfony/polyfill-mbstring": "~1.8"
+            },
+            "require-dev": {
+                "symfony/process": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Filesystem\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides basic utilities for the filesystem",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/filesystem/tree/v8.1.6"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-08-23T10:06:25+00:00"
         },
         {
             "name": "symfony/finder",
@@ -6225,6 +7446,173 @@
             "time": "2026-09-02T12:40:29+00:00"
         },
         {
+            "name": "symfony/property-access",
+            "version": "v8.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/property-access.git",
+                "reference": "1a41232c678972b93ce499a504e19ea09dfcd0b2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/property-access/zipball/1a41232c678972b93ce499a504e19ea09dfcd0b2",
+                "reference": "1a41232c678972b93ce499a504e19ea09dfcd0b2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "symfony/property-info": "^7.4.4|^8.0.4"
+            },
+            "require-dev": {
+                "symfony/cache": "^7.4|^8.0",
+                "symfony/var-exporter": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\PropertyAccess\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides functions to read and write from/to an object or array using a simple string notation",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "access",
+                "array",
+                "extraction",
+                "index",
+                "injection",
+                "object",
+                "property",
+                "property-path",
+                "reflection"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/property-access/tree/v8.1.4"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-07-30T12:40:56+00:00"
+        },
+        {
+            "name": "symfony/property-info",
+            "version": "v8.1.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/property-info.git",
+                "reference": "fe727d4888a92ac9200a2c1b8e0a995b6022afa7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/property-info/zipball/fe727d4888a92ac9200a2c1b8e0a995b6022afa7",
+                "reference": "fe727d4888a92ac9200a2c1b8e0a995b6022afa7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "symfony/string": "^7.4|^8.0",
+                "symfony/type-info": "^7.4.7|^8.0.7"
+            },
+            "conflict": {
+                "phpdocumentor/reflection-docblock": "<5.2|>=7",
+                "phpdocumentor/type-resolver": "<1.5.1"
+            },
+            "require-dev": {
+                "phpdocumentor/reflection-docblock": "^5.2|^6.0",
+                "phpstan/phpdoc-parser": "^1.0|^2.0",
+                "symfony/cache": "^7.4|^8.0",
+                "symfony/dependency-injection": "^7.4|^8.0",
+                "symfony/serializer": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\PropertyInfo\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "dunglas@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Extracts information about PHP class' properties using metadata of popular sources",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "doctrine",
+                "phpdoc",
+                "property",
+                "symfony",
+                "type",
+                "validator"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/property-info/tree/v8.1.8"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-28T19:13:15+00:00"
+        },
+        {
             "name": "symfony/routing",
             "version": "v8.1.8",
             "source": {
@@ -6303,6 +7691,105 @@
                 }
             ],
             "time": "2026-09-28T19:13:15+00:00"
+        },
+        {
+            "name": "symfony/serializer",
+            "version": "v8.1.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/serializer.git",
+                "reference": "df54c4fe859d945eb633d2c5e6a410ce535f21e4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/serializer/zipball/df54c4fe859d945eb633d2c5e6a410ce535f21e4",
+                "reference": "df54c4fe859d945eb633d2c5e6a410ce535f21e4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "symfony/deprecation-contracts": "^2.5|^3",
+                "symfony/polyfill-ctype": "^1.8"
+            },
+            "conflict": {
+                "phpdocumentor/reflection-docblock": "<5.2|>=7",
+                "phpdocumentor/type-resolver": "<1.5.1",
+                "symfony/property-access": "<8.1",
+                "symfony/property-info": "<7.4.15",
+                "symfony/type-info": "<7.4"
+            },
+            "require-dev": {
+                "phpdocumentor/reflection-docblock": "^5.2|^6.0",
+                "phpstan/phpdoc-parser": "^1.0|^2.0",
+                "seld/jsonlint": "^1.10",
+                "symfony/cache": "^7.4|^8.0",
+                "symfony/config": "^7.4|^8.0",
+                "symfony/console": "^7.4|^8.0",
+                "symfony/dependency-injection": "^7.4|^8.0",
+                "symfony/error-handler": "^7.4|^8.0",
+                "symfony/filesystem": "^7.4|^8.0",
+                "symfony/form": "^7.4|^8.0",
+                "symfony/http-foundation": "^7.4|^8.0",
+                "symfony/http-kernel": "^7.4|^8.0",
+                "symfony/messenger": "^7.4|^8.0",
+                "symfony/mime": "^7.4|^8.0",
+                "symfony/property-access": "^8.1",
+                "symfony/property-info": "^7.4.15|~8.0.15|^8.1.2",
+                "symfony/translation-contracts": "^2.5|^3",
+                "symfony/type-info": "^7.4|^8.0",
+                "symfony/uid": "^7.4|^8.0",
+                "symfony/validator": "^7.4|^8.0",
+                "symfony/var-dumper": "^7.4|^8.0",
+                "symfony/var-exporter": "^7.4|^8.0",
+                "symfony/yaml": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Serializer\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Handles serializing and deserializing data structures, including object graphs, into array structures or other formats like XML and JSON.",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/serializer/tree/v8.1.8"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-28T09:40:25+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -6657,6 +8144,88 @@
             "time": "2026-06-05T06:23:12+00:00"
         },
         {
+            "name": "symfony/type-info",
+            "version": "v8.1.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/type-info.git",
+                "reference": "18e1d891f0b8776141f281f7b6f5e67e4df9d9cd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/type-info/zipball/18e1d891f0b8776141f281f7b6f5e67e4df9d9cd",
+                "reference": "18e1d891f0b8776141f281f7b6f5e67e4df9d9cd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "psr/container": "^1.1|^2.0"
+            },
+            "conflict": {
+                "phpstan/phpdoc-parser": "<1.30"
+            },
+            "require-dev": {
+                "phpstan/phpdoc-parser": "^1.30|^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\TypeInfo\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mathias Arlaud",
+                    "email": "mathias.arlaud@gmail.com"
+                },
+                {
+                    "name": "Baptiste LEDUC",
+                    "email": "baptiste.leduc@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Extracts PHP types information.",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "PHPStan",
+                "phpdoc",
+                "symfony",
+                "type"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/type-info/tree/v8.1.8"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-28T19:13:15+00:00"
+        },
+        {
             "name": "symfony/uid",
             "version": "v8.1.8",
             "source": {
@@ -6917,6 +8486,90 @@
                 }
             ],
             "time": "2026-09-03T16:02:27+00:00"
+        },
+        {
+            "name": "symfony/web-link",
+            "version": "v8.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/web-link.git",
+                "reference": "87ca04297acf837a1de25d3f6c31b9551235dcbd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/web-link/zipball/87ca04297acf837a1de25d3f6c31b9551235dcbd",
+                "reference": "87ca04297acf837a1de25d3f6c31b9551235dcbd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1",
+                "psr/link": "^1.1|^2.0"
+            },
+            "provide": {
+                "psr/link-implementation": "1.0|2.0"
+            },
+            "require-dev": {
+                "symfony/http-kernel": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\WebLink\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kévin Dunglas",
+                    "email": "dunglas@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Manages links between resources",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "dns-prefetch",
+                "http",
+                "http2",
+                "link",
+                "performance",
+                "prefetch",
+                "preload",
+                "prerender",
+                "psr13",
+                "push"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/web-link/tree/v8.1.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-05-29T05:06:50+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -7206,6 +8859,62 @@
                 }
             ],
             "time": "2026-04-26T05:33:54+00:00"
+        },
+        {
+            "name": "willdurand/negotiation",
+            "version": "3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/willdurand/Negotiation.git",
+                "reference": "68e9ea0553ef6e2ee8db5c1d98829f111e623ec2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/willdurand/Negotiation/zipball/68e9ea0553ef6e2ee8db5c1d98829f111e623ec2",
+                "reference": "68e9ea0553ef6e2ee8db5c1d98829f111e623ec2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "symfony/phpunit-bridge": "^5.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Negotiation\\": "src/Negotiation"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "William Durand",
+                    "email": "will+git@drnd.me"
+                }
+            ],
+            "description": "Content Negotiation tools for PHP provided as a standalone library.",
+            "homepage": "http://williamdurand.fr/Negotiation/",
+            "keywords": [
+                "accept",
+                "content",
+                "format",
+                "header",
+                "negotiation"
+            ],
+            "support": {
+                "issues": "https://github.com/willdurand/Negotiation/issues",
+                "source": "https://github.com/willdurand/Negotiation/tree/3.1.0"
+            },
+            "time": "2022-01-30T20:08:53+00:00"
         }
     ],
     "packages-dev": [

@@ -51,15 +51,21 @@ final class AllocateDocumentNumber
         return $number;
     }
 
+    /** The counter value the next finalize on $date would use; nothing is locked or reserved. */
+    public function nextValue(DocumentType $type, string $date): int
+    {
+        $config = NumberSequence::query()->where('doc_type', $type->value)->whereNull('year')->firstOrFail();
+
+        return $config->reset_yearly
+            ? (int) (NumberSequence::query()->where('doc_type', $type->value)->where('year', (int) CarbonImmutable::parse($date)->format('Y'))->value('next_value') ?? 1)
+            : $config->next_value;
+    }
+
     /** The number the next finalize on $date would get; nothing is locked or reserved. */
     public function preview(DocumentType $type, string $date): string
     {
-        $day = CarbonImmutable::parse($date);
         $config = NumberSequence::query()->where('doc_type', $type->value)->whereNull('year')->firstOrFail();
-        $next = $config->reset_yearly
-            ? (int) (NumberSequence::query()->where('doc_type', $type->value)->where('year', (int) $day->format('Y'))->value('next_value') ?? 1)
-            : $config->next_value;
 
-        return NumberFormatter::format($config->pattern, $day, $next);
+        return NumberFormatter::format($config->pattern, CarbonImmutable::parse($date), $this->nextValue($type, $date));
     }
 }

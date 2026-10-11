@@ -2,6 +2,7 @@
 
 use App\Domain\Compliance\ComplianceRule;
 use App\Domain\Fields\FieldErrorCode;
+use App\Support\Problem;
 
 it('has the same keys in English and German', function () {
     $keys = fn (string $locale): array => array_keys(json_decode(
@@ -44,4 +45,18 @@ it('has a message for every domain code', function () {
 
     expect(array_values(array_diff($needed, $keys('en'))))->toBe([])
         ->and(array_values(array_diff($needed, $keys('de'))))->toBe([]);
+});
+
+it('has a text for every problem title and API message', function () {
+    $root = dirname(__DIR__, 2);
+    $needed = [
+        ...array_map(fn (string $slug): string => "api.problem.{$slug}", array_values(Problem::SLUGS)),
+        'api.problem.http_error', 'api.problem.server_error_detail', 'api.problem.invalid_json',
+        'api.problem.body_not_object', 'api.problem.missing_ability',
+    ];
+
+    foreach (['en', 'de'] as $locale) {
+        $keys = array_keys(json_decode((string) file_get_contents("{$root}/lang/{$locale}.json"), true, flags: JSON_THROW_ON_ERROR));
+        expect(array_values(array_diff($needed, $keys)))->toBe([], "missing in {$locale}.json");
+    }
 });

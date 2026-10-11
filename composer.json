@@ -7,12 +7,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "api-platform/laravel": "^5.0",
         "brick/math": "^1.0",
         "gotenberg/gotenberg-php": "^2.25",
         "horstoeko/zugferd": "^1.0.132",
         "inertiajs/inertia-laravel": "^3.5",
         "keepsuit/liquid": "^0.12",
         "laravel/framework": "^13.17",
+        "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
@@ -46,7 +48,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan vendor:publish --tag=api-platform-assets --force --ansi"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

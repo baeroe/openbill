@@ -27,6 +27,19 @@ final class DocumentLockedException extends DomainActionException
         return new self($document->id, $document->getOriginal('number') ?? $document->number, $fields);
     }
 
+    public function reason(): string
+    {
+        return 'document_locked';
+    }
+
+    /**
+     * @return array{document_id: string, number: string|null}
+     */
+    public function extensions(): array
+    {
+        return ['document_id' => $this->documentId, 'number' => $this->number];
+    }
+
     public function status(): int
     {
         return 409;

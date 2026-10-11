@@ -80,6 +80,7 @@ final class SaveCustomer
         }
         FieldErrors::throwIfAny($errors);
 
+        // retried on deadlocks with UpdateDraft (see there)
         return DB::transaction(function () use ($actor, $data, $customer): Customer {
             $customer ??= new Customer;
             foreach (['name', 'tax_treatment', 'locale', 'custom'] as $key) {
@@ -104,8 +105,9 @@ final class SaveCustomer
                 $this->syncContacts($actor, $customer, $data['contacts']);
             }
 
-            return $customer->load('contacts');
-        });
+            // refresh: columns with database defaults (tax_treatment) are not on a new model otherwise
+            return $customer->refresh()->load('contacts');
+        }, 3);
     }
 
     /** Highest numeric customer number + 1, with its prefix ("K-1004" → "K-1005"); first customer "C-1001". */

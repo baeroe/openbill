@@ -39,7 +39,9 @@ final class ConvertDocument
             }
 
             if ($target === DocumentType::Cancellation) {
-                $existing = Document::query()->where('source_id', $source->id)->where('type', DocumentType::Cancellation)->first();
+                // locking read: sees a cancellation draft committed after this (possibly outer) transaction
+                // took its read view, so a second draft is never created next to it (M-B)
+                $existing = Document::query()->where('source_id', $source->id)->where('type', DocumentType::Cancellation)->lockForUpdate()->first();
                 if ($existing !== null) {
                     return new ConversionResult($existing->load('groups.positions'), []);
                 }

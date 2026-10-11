@@ -41,3 +41,19 @@ it('never uses floating point in app/Domain', function () {
 
     expect($hits)->toBe([]);
 });
+
+it('never uses floating point in rendering and e-invoice code, except CiiAmount', function () {
+    $root = dirname(__DIR__, 2).'/app';
+    $hits = [];
+    foreach (['Rendering', 'EInvoice'] as $dir) {
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("{$root}/{$dir}", FilesystemIterator::SKIP_DOTS));
+        foreach ($files as $file) {
+            $relative = substr($file->getPathname(), strlen($root) + 1);
+            if ($file->getExtension() === 'php' && $relative !== 'EInvoice/CiiAmount.php') {
+                array_push($hits, ...floatUsages((string) file_get_contents($file->getPathname()), $relative));
+            }
+        }
+    }
+
+    expect($hits)->toBe([]);
+});

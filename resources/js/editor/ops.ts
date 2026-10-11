@@ -210,6 +210,22 @@ export function movePosition(draft: Draft, positionId: string, toGroupId: string
     };
 }
 
+/**
+ * Where a dragged position lands (drag and drop): over another position → that position's group and index; over the
+ * body of a group (empty groups) → the end of that group. Ids are the dnd-kit ids "pos:<id>" and "body:<group id>".
+ * null for anything else (a group, nothing, a position that is gone).
+ */
+export function dropTarget(draft: Draft, overId: string): { groupId: string; index: number } | null {
+    if (overId.startsWith('body:')) {
+        const group = draft.groups.find((g) => g.id === overId.slice('body:'.length));
+        return group ? { groupId: group.id, index: group.positions.length } : null;
+    }
+    if (!overId.startsWith('pos:')) return null;
+    const id = overId.slice('pos:'.length);
+    const group = groupOf(draft, id);
+    return group ? { groupId: group.id, index: group.positions.findIndex((p) => p.id === id) } : null;
+}
+
 /** Text block into the introduction/closing: after a blank line, or alone when the field is empty. */
 export function appendText(current: string, block: string): string {
     return current.trim() ? `${current.trimEnd()}\n\n${block}` : block;

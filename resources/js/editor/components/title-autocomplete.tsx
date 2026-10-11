@@ -6,6 +6,7 @@ import { controlClass, cx } from '@/components/ui';
 import { formatMoney } from '@/lib/format';
 import { t, tn } from '@/lib/i18n';
 import { useDebounced } from '@/lib/hooks';
+import { focusSoon } from '../focus';
 
 type Props = {
     value: string;
@@ -33,9 +34,10 @@ export function TitleAutocomplete({ value, onChange, onPick, onEnter, withSugges
     const matches = data.filter((s) => s.title.toLowerCase() !== value.trim().toLowerCase()).slice(0, 6);
     const show = open && matches.length > 0;
 
-    // focus after inserting a row; an effect, because autoFocus gets lost after clicks
+    // focus after inserting a row; an effect, because autoFocus gets lost after clicks. Never steals the focus from a field
+    // the user went into meanwhile (that lost the typed input: the "invalid number" flake of phase 6)
     useEffect(() => {
-        if (autoFocus) requestAnimationFrame(() => input.current?.focus());
+        if (autoFocus) focusSoon(() => input.current);
     }, [autoFocus]);
 
     const pick = (suggestion: PositionSuggestion) => {
@@ -80,7 +82,7 @@ export function TitleAutocomplete({ value, onChange, onPick, onEnter, withSugges
                 aria-label={t('editor.col_title')}
                 aria-invalid={error ? true : undefined}
                 aria-expanded={show}
-                aria-controls={listId}
+                aria-controls={show ? listId : undefined}
                 aria-autocomplete="list"
                 aria-activedescendant={show && active >= 0 ? `${listId}-${active}` : undefined}
                 onChange={(e) => {
@@ -93,33 +95,35 @@ export function TitleAutocomplete({ value, onChange, onPick, onEnter, withSugges
                 onKeyDown={onKeyDown}
             />
             {show && (
-                <ul id={listId} role="listbox" aria-label={t('editor.suggestions')} className="absolute top-[calc(100%+4px)] left-0 z-30 m-0 grid w-[min(28rem,100%)] min-w-64 animate-pop-in list-none rounded-md bg-surface p-1.5 shadow-float">
-                    <li aria-hidden className="flex items-center gap-1.5 px-2 pt-1 pb-1.5 text-xs text-muted [&_svg]:size-3">
+                <div className="absolute top-[calc(100%+4px)] left-0 z-30 grid w-[min(28rem,100%)] min-w-64 animate-pop-in rounded-md bg-surface p-1.5 shadow-float">
+                    <div aria-hidden className="flex items-center gap-1.5 px-2 pt-1 pb-1.5 text-xs text-muted [&_svg]:size-3">
                         <History />
                         {t('editor.suggestions')}
-                    </li>
-                    {matches.map((s, i) => (
-                        <li
-                            key={s.title}
-                            id={`${listId}-${i}`}
-                            role="option"
-                            aria-selected={i === active}
-                            className={cx('grid cursor-pointer gap-px rounded-sm px-2.5 py-[7px]', i === active && 'bg-accent-soft')}
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                pick(s);
-                            }}
-                            onMouseEnter={() => setActive(i)}
-                        >
-                            <span className={cx('font-medium', i === active && 'text-accent')}>{s.title}</span>
-                            <span className="num text-xs text-muted">
-                                {formatMoney(s.unit_price)}
-                                {unitSymbol(s.unit_id) && ` / ${unitSymbol(s.unit_id)}`}
-                                {` · ${tn('editor.used_count', s.used_count)}`}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
+                    </div>
+                    <ul id={listId} role="listbox" aria-label={t('editor.suggestions')} className="m-0 grid list-none p-0">
+                        {matches.map((s, i) => (
+                            <li
+                                key={s.title}
+                                id={`${listId}-${i}`}
+                                role="option"
+                                aria-selected={i === active}
+                                className={cx('grid cursor-pointer gap-px rounded-sm px-2.5 py-[7px]', i === active && 'bg-accent-soft')}
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    pick(s);
+                                }}
+                                onMouseEnter={() => setActive(i)}
+                            >
+                                <span className={cx('font-medium', i === active && 'text-accent')}>{s.title}</span>
+                                <span className="num text-xs text-muted">
+                                    {formatMoney(s.unit_price)}
+                                    {unitSymbol(s.unit_id) && ` / ${unitSymbol(s.unit_id)}`}
+                                    {` · ${tn('editor.used_count', s.used_count)}`}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             )}
         </div>
     );

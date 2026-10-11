@@ -7,15 +7,17 @@ import {
     useDroppable,
     useSensor,
     useSensors,
+    type Announcements,
     type CollisionDetection,
     type DragEndEvent,
     type DragOverEvent,
     type DragStartEvent,
+    type KeyboardCoordinateGetter,
 } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ChevronDown, FolderPlus, GripVertical, MoreHorizontal, Plus, Trash2, Ungroup } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useFieldDefinitions } from '@/api/fields';
 import { useTaxRates, useUnits } from '@/api/master-data';
 import type { ApiGroup, ApiPosition, Totals } from '@/api/types';
@@ -24,6 +26,7 @@ import { formatMoney } from '@/lib/format';
 import { t, tn } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { isZeroDecimal } from '../decimal';
+import { focusAfterMenu, focusSoon } from '../focus';
 import * as ops from '../ops';
 import { useEditor } from '../store';
 import type { Draft } from '../types';
@@ -41,6 +44,24 @@ type Props = {
 const gid = (id: string) => `group:${id}`;
 const pid = (id: string) => `pos:${id}`;
 const bodyId = (id: string) => `body:${id}`;
+const isGroupId = (id: string | number | undefined) => String(id).startsWith('group:');
+
+/**
+ * Arrow keys of the keyboard drag: like dnd-kit's sortable coordinates, but a group only jumps between groups and a
+ * position only between positions and group bodies (as in the collision detection) – otherwise an arrow press can
+ * land on a row inside a group and leave the dragged group where it was.
+ */
+const keyboardCoordinates: KeyboardCoordinateGetter = (event, args) => {
+    const { droppableContainers, active } = args.context;
+    const sameKind = (entry: { id: string | number } | undefined) => !!entry && isGroupId(entry.id) === isGroupId(active?.id);
+    const only = {
+        ...droppableContainers,
+        getEnabled: () => droppableContainers.getEnabled().filter(sameKind),
+        get: (id: string | number) => droppableContainers.get(id),
+    } as typeof droppableContainers;
+    return sortableKeyboardCoordinates(event, { ...args, context: { ...args.context, droppableContainers: only } });
+};
+
 const strip = (id: string | number) => String(id).replace(/^(group|pos|body):/, '');
 
 /** Groups with drag and drop: groups among each other, positions within and between groups (keyboard: Space, arrows, Space). */
@@ -55,7 +76,7 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
     const fields = (useFieldDefinitions('position').data ?? []).filter((d) => d.doc_types.includes(draft.type));
     const [focusId, setFocusId] = useState<string | null>(null);
     const [dragging, setDragging] = useState<string | null>(null);
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: keyboardCoordinates }));
 
     const defaults: ops.PositionDefaults = {
         unitId: units.find((u) => u.archived_at === null)?.id ?? null,
@@ -69,23 +90,26 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
         return closestCenter({ ...args, droppableContainers: args.droppableContainers.filter((c) => String(c.id).startsWith('group:') === isGroup) });
     };
 
-    const targetGroup = (overId: string) => (overId.startsWith('body:') ? strip(overId) : overId.startsWith('pos:') ? ops.groupOf(draft, strip(overId))?.id : undefined);
+    // groups before the drag: Escape (cancel) puts a position back that onDragOver already moved into another group
+    const beforeDrag = useRef<ApiGroup[] | null>(null);
 
-    const onDragStart = (e: DragStartEvent) => setDragging(String(e.active.id));
+    const onDragStart = (e: DragStartEvent) => {
+        beforeDrag.current = draft.groups;
+        setDragging(String(e.active.id));
+    };
 
     const onDragOver = ({ active, over }: DragOverEvent) => {
         if (!over || !String(active.id).startsWith('pos:')) return;
         const positionId = strip(active.id);
         const from = ops.groupOf(draft, positionId);
-        const to = targetGroup(String(over.id));
-        if (!from || !to || from.id === to) return;
-        const target = draft.groups.find((g) => g.id === to)!;
-        const index = String(over.id).startsWith('pos:') ? target.positions.findIndex((p) => p.id === strip(over.id)) : target.positions.length;
-        update((d) => ops.movePosition(d, positionId, to, index < 0 ? target.positions.length : index));
+        const target = ops.dropTarget(draft, String(over.id));
+        if (!from || !target || from.id === target.groupId) return;
+        update((d) => ops.movePosition(d, positionId, target.groupId, target.index));
     };
 
     const onDragEnd = ({ active, over }: DragEndEvent) => {
         setDragging(null);
+        beforeDrag.current = null;
         if (!over || active.id === over.id) return;
         const activeId = String(active.id);
         if (activeId.startsWith('group:')) {
@@ -96,9 +120,49 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
         }
         const positionId = strip(activeId);
         const group = ops.groupOf(draft, positionId);
-        if (!group || group.id !== targetGroup(String(over.id))) return;
-        const index = String(over.id).startsWith('pos:') ? group.positions.findIndex((p) => p.id === strip(over.id)) : group.positions.length - 1;
-        update((d) => ops.movePosition(d, positionId, group.id, index));
+        const target = ops.dropTarget(draft, String(over.id));
+        if (!group || !target || target.groupId !== group.id) return;
+        update((d) => ops.movePosition(d, positionId, group.id, target.index));
+    };
+
+    const onDragCancel = () => {
+        setDragging(null);
+        const groups = beforeDrag.current;
+        beforeDrag.current = null;
+        if (groups) update((d) => ({ ...d, groups }));
+    };
+
+    // screen reader texts of the keyboard drag and drop: in the UI language and with titles, never with ids
+    const name = (dndId: string | number) => {
+        const id = strip(dndId);
+        if (String(dndId).startsWith('group:')) return draft.groups.find((g) => g.id === id)?.title ?? t('editor.loose');
+        return ops.groupOf(draft, id)?.positions.find((p) => p.id === id)?.title || t('editor.position');
+    };
+    const place = (activeId: string | number, overId: string | number) => {
+        if (String(activeId).startsWith('group:')) {
+            const n = draft.groups.findIndex((g) => g.id === strip(overId));
+            return n < 0 ? null : { group: '', n: n + 1, count: draft.groups.length };
+        }
+        const target = ops.dropTarget(draft, String(overId));
+        if (!target) return null;
+        const group = draft.groups.find((g) => g.id === target.groupId)!;
+        const own = group.positions.some((p) => p.id === strip(activeId));
+        const count = group.positions.length + (own ? 0 : 1);
+        return { group: group.title ?? t('editor.loose'), n: Math.min(target.index, count - 1) + 1, count };
+    };
+    const announce = (kind: 'moved' | 'dropped', activeId: string | number, overId: string | number | undefined) => {
+        const title = name(activeId);
+        const at = overId === undefined ? null : place(activeId, overId);
+        if (!at) return t('editor.dnd.no_target', { title });
+        const isGroup = String(activeId).startsWith('group:');
+        return t(`editor.dnd.${kind}_${isGroup ? 'group' : 'position'}`, { title, group: at.group, n: at.n, count: at.count });
+    };
+    const announcements: Announcements = {
+        onDragStart: ({ active }) => t('editor.dnd.picked', { title: name(active.id) }),
+        // dnd-kit reports "over itself" right after the pick-up: saying it would replace the pick-up announcement
+        onDragOver: ({ active, over }) => (over?.id === active.id ? undefined : announce('moved', active.id, over?.id)),
+        onDragEnd: ({ active, over }) => announce('dropped', active.id, over?.id),
+        onDragCancel: ({ active }) => t('editor.dnd.cancelled', { title: name(active.id) }),
     };
 
     const addPosition = (groupId: string, afterId?: string) => {
@@ -112,11 +176,7 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
         const before = new Set(draft.groups.map((g) => g.id));
         update((d) => ops.addGroup(d, t('editor.group_default', { n: titled + 1 }), ops.newPosition('item', defaults)));
         // new group: focus and select its title so the name can be typed right away
-        requestAnimationFrame(() => {
-            const input = [...document.querySelectorAll<HTMLInputElement>('input[data-group-title]')].find((el) => !before.has(el.dataset.groupTitle ?? ''));
-            input?.focus();
-            input?.select();
-        });
+        focusSoon(() => [...document.querySelectorAll<HTMLInputElement>('input[data-group-title]')].find((el) => !before.has(el.dataset.groupTitle ?? '')), { select: true });
     };
 
     const addLoose = () => {
@@ -125,25 +185,61 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
         setFocusId(position.id);
     };
 
+    // the undo toast stays after leaving the page: it may only restore into this document
+    const documentId = draft.id;
+    const undoFor = (fn: (d: Draft) => Draft) => useEditor.getState().updateFor(documentId, fn);
+
+    /** Focus target after a removal (the menu trigger is gone with its row): a row title, a group name or an add button. */
+    const rowTitle = (id: string) => () => document.querySelector<HTMLElement>(`[data-path="positions.${id}.title"] input`);
+    const groupStart = (group: ApiGroup | undefined) => () => {
+        if (!group) return document.querySelector<HTMLElement>('[data-add-group]');
+        const box = document.querySelector<HTMLElement>(`[data-group-id="${group.id}"]`);
+        return box?.querySelector<HTMLElement>('input[data-group-title], [data-position-row] input[role="combobox"], [data-add-position]') ?? null;
+    };
+
     const removeGroup = (group: ApiGroup) => {
         const { group: removed, index } = ops.removeGroup(draft, group.id);
         if (!removed) return;
+        const next = draft.groups[index + 1] ?? draft.groups[index - 1];
         update((d) => ops.removeGroup(d, group.id).draft);
-        toast.info(t('editor.group_removed', { title: group.title ?? t('editor.loose') }), { label: t('editor.undo'), run: () => update((d) => ops.restoreGroup(d, removed, index)) });
+        focusAfterMenu(groupStart(next));
+        toast.info(t('editor.group_removed', { title: group.title ?? t('editor.loose') }), {
+            label: t('editor.undo'),
+            run: () => {
+                undoFor((d) => ops.restoreGroup(d, removed, index));
+                focusSoon(groupStart(removed));
+            },
+        });
     };
 
     const removePosition = (position: ApiPosition) => {
         const result = ops.removePosition(draft, position.id);
         if (!result.position || !result.groupId) return;
         const { groupId, index } = result;
+        const siblings = draft.groups.find((g) => g.id === groupId)!.positions;
+        const next = siblings[index + 1] ?? siblings[index - 1];
         update((d) => ops.removePosition(d, position.id).draft);
+        focusAfterMenu(next ? rowTitle(next.id) : () => document.querySelector<HTMLElement>(`[data-group-id="${groupId}"] [data-add-position]`) ?? document.querySelector<HTMLElement>('[data-add-group]'));
         if (position.title.trim() || !isZeroDecimal(position.unit_price)) {
             toast.info(t('editor.position_removed', { title: position.title || t('editor.position') }), {
                 label: t('editor.undo'),
-                run: () => update((d) => ops.restorePosition(d, groupId, position, index)),
+                run: () => {
+                    undoFor((d) => ops.restorePosition(d, groupId, position, index));
+                    focusSoon(rowTitle(position.id));
+                },
             });
         }
     };
+
+    // the last render answer may still key lines, groups and issue paths by the local id a row had before its first save
+    const rowMessages = { ...messages };
+    for (const [server, local] of Object.entries(aliases)) {
+        for (const [path, message] of Object.entries(messages)) {
+            for (const prefix of [`positions.${local}.`, `groups.${local}.`]) {
+                if (path.startsWith(prefix)) rowMessages[`${prefix.split('.')[0]}.${server}.${path.slice(prefix.length)}`] ??= message;
+            }
+        }
+    }
 
     const titled = draft.groups.filter((g) => g.title !== null).length;
     const draggingGroup = dragging?.startsWith('group:') ? draft.groups.find((g) => g.id === strip(dragging)) : null;
@@ -161,18 +257,21 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
                 <span />
             </div>
 
-            <DndContext sensors={sensors} collisionDetection={collision} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
+            <DndContext sensors={sensors} collisionDetection={collision} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}
+                onDragCancel={onDragCancel}
+                accessibility={{ announcements, screenReaderInstructions: { draggable: t('editor.dnd.instructions') } }}
+            >
                 <SortableContext items={draft.groups.map((g) => gid(g.id))} strategy={verticalListSortingStrategy}>
-                    {draft.groups.map((group) => (
+                    {(readOnly ? draft.groups.filter((g) => g.positions.length > 0) : draft.groups).map((group) => (
                         <SortableGroup
                             key={keyOf(group.id)}
                             group={group}
                             readOnly={readOnly}
                             collapsed={collapsed.includes(group.id)}
                             canDrag={titled > 0 || draft.groups.length > 1}
-                            total={totals?.groups[group.id]?.net}
-                            optionalTotal={totals?.groups[group.id]?.optional_net}
-                            error={messages[`groups.${group.id}.title`]}
+                            total={(totals?.groups[group.id] ?? totals?.groups[keyOf(group.id)])?.net}
+                            optionalTotal={(totals?.groups[group.id] ?? totals?.groups[keyOf(group.id)])?.optional_net}
+                            error={rowMessages[`groups.${group.id}.title`]}
                             onToggle={() => toggleGroup(group.id)}
                             onRename={(title) => update((d) => ops.updateGroup(d, group.id, { title }))}
                             onRemove={() => removeGroup(group)}
@@ -188,10 +287,10 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
                                         taxRates={taxRates}
                                         units={units}
                                         fields={fields}
-                                        net={totals?.lines[position.id]?.net}
+                                        net={(totals?.lines[position.id] ?? totals?.lines[keyOf(position.id)])?.net}
                                         readOnly={readOnly}
                                         smallBusiness={smallBusiness}
-                                        messages={messages}
+                                        messages={rowMessages}
                                         autoFocus={focusId === position.id}
                                         onChange={(patch) => update((d) => ops.updatePosition(d, position.id, patch))}
                                         onKind={(kind) => update((d) => ops.setPositionKind(d, position.id, kind, defaults))}
@@ -219,7 +318,7 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
 
             {!readOnly && (
                 <div className="flex flex-wrap gap-2 pt-1">
-                    <Button variant="soft" size="sm" icon={<FolderPlus />} onClick={addGroup}>
+                    <Button variant="soft" size="sm" icon={<FolderPlus />} onClick={addGroup} data-add-group>
                         {t('editor.add_group')}
                     </Button>
                     {!draft.groups.some((g) => g.title === null) && (
@@ -259,6 +358,7 @@ function SortableGroup({ group: g, readOnly, collapsed, canDrag, total, optional
         <div
             ref={setNodeRef}
             role="group"
+            data-group-id={g.id}
             aria-label={g.title ?? t('editor.loose')}
             style={{ transform: CSS.Translate.toString(transform), transition }}
             className={cx('rounded-lg px-1 py-2 transition-[box-shadow,background-color]', loose ? 'bg-transparent' : 'bg-bg', isDragging && 'opacity-40', isOver && 'shadow-[inset_0_0_0_2px_var(--accent-soft-hover)]')}
@@ -311,7 +411,10 @@ function SortableGroup({ group: g, readOnly, collapsed, canDrag, total, optional
                         {optionalTotal !== undefined && !isZeroDecimal(optionalTotal) && <span className="text-xs font-medium text-muted">{t('editor.group_optional', { amount: formatMoney(optionalTotal) })}</span>}
                         <span className="num">{total === undefined ? '–' : formatMoney(total)}</span>
                     </span>
-                    {!readOnly && (
+                    {readOnly ? (
+                        // keeps the subtotal in line with the row totals, which reserve the room of their menu
+                        <span aria-hidden className="w-8 shrink-0" />
+                    ) : (
                         <Menu
                             trigger={
                                 <Button variant="ghost" size="sm" iconOnly icon={<MoreHorizontal />}>
@@ -332,10 +435,10 @@ function SortableGroup({ group: g, readOnly, collapsed, canDrag, total, optional
             {!collapsed && (
                 <div ref={setBodyRef} className="grid min-h-10 gap-0.5">
                     {children}
-                    {g.positions.length === 0 && <p className="px-4 py-3 text-sm text-faint">{t('editor.group_empty')}</p>}
+                    {g.positions.length === 0 && !readOnly && <p className="px-4 py-3 text-sm text-faint">{t('editor.group_empty')}</p>}
                     {!readOnly && (
                         <div className="flex gap-2 pt-0.5 pr-2 pl-9">
-                            <button type="button" onClick={onAdd} className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-sm font-medium text-accent hover:bg-accent-soft [&_svg]:size-[0.95rem]">
+                            <button type="button" data-add-position onClick={onAdd} className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-sm font-medium text-accent hover:bg-accent-soft [&_svg]:size-[0.95rem]">
                                 <Plus aria-hidden />
                                 {t('editor.add_position')}
                             </button>

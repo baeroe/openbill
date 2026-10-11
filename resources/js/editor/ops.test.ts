@@ -154,6 +154,31 @@ describe('groups', () => {
     });
 });
 
+describe('dropTarget', () => {
+    const base = draft([group('loose', null, [position('a')]), group('g1', 'Konzept', [position('b'), position('c')]), group('empty', 'Leer', [])]);
+
+    it('drops over a position at its index, in its group', () => {
+        expect(ops.dropTarget(base, 'pos:c')).toEqual({ groupId: 'g1', index: 1 });
+        expect(ops.dropTarget(base, 'pos:a')).toEqual({ groupId: 'loose', index: 0 });
+    });
+
+    it('drops over the body of a group at its end (empty groups, end of the list)', () => {
+        expect(ops.dropTarget(base, 'body:empty')).toEqual({ groupId: 'empty', index: 0 });
+        expect(ops.dropTarget(base, 'body:g1')).toEqual({ groupId: 'g1', index: 2 });
+    });
+
+    it('moving to the end of the own group keeps the position last (index is clamped after removal)', () => {
+        const target = ops.dropTarget(base, 'body:g1')!;
+        expect(ids(ops.movePosition(base, 'b', target.groupId, target.index))).toEqual(['loose:a', 'g1:c,b', 'empty:']);
+    });
+
+    it('knows nothing else', () => {
+        expect(ops.dropTarget(base, 'group:g1')).toBeNull();
+        expect(ops.dropTarget(base, 'pos:gone')).toBeNull();
+        expect(ops.dropTarget(base, 'body:gone')).toBeNull();
+    });
+});
+
 describe('texts', () => {
     it('appends a text block after a blank line', () => {
         expect(ops.appendText('', 'Vielen Dank.')).toBe('Vielen Dank.');

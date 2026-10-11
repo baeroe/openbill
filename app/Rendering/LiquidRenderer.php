@@ -194,11 +194,18 @@ final class LiquidRenderer
             .$markCss.$css."\n</style></head><body>{$mark}{$body}</body></html>";
     }
 
-    /** Header/footer: own document like in Chromium, page wide, as high as its margin, without the body CSS. */
+    /**
+     * Header/footer: own document like in Chromium, page wide, as high as its margin, without the body CSS.
+     * Chromium puts the template into its own flex container, where the template's top element would shrink
+     * to its content width; the band wrapper keeps it page wide (justify-content etc. work like in a browser).
+     */
     private static function bandShell(string $content, Paper $paper, BigDecimal $height, string $locale): string
     {
+        $size = "width:{$paper->pageWidthPx()}px;height:{$height}px;overflow:hidden";
+
         return self::head($locale, '')
             .'<style>html{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}'
-            ."body{margin:0;width:{$paper->pageWidthPx()}px;height:{$height}px;overflow:hidden}</style></head><body>{$content}</body></html>";
+            ."body{margin:0;{$size}}.openbill-band{box-sizing:border-box;flex:none;{$size}}</style></head>"
+            ."<body><div class=\"openbill-band\">{$content}</div></body></html>";
     }
 }

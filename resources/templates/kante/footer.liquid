@@ -5,7 +5,7 @@
 </style>
 <div class="kf"><div class="kf-row">
   <span>{{ org.name }}, {{ org.street }}, {{ org.zip }} {{ org.city }}</span>
-  <span>{% if org.vat_id %}{{ 'vat_id' | t }} {{ org.vat_id }}{% else %}{{ 'tax_number' | t }} {{ org.tax_number }}{% endif %}</span>
+  <span>{% if org.vat_id != blank %}{{ 'vat_id' | t }} {{ org.vat_id }}{% else %}{{ 'tax_number' | t }} {{ org.tax_number }}{% endif %}</span>
   <span>IBAN {{ org.iban }}</span>
   <span class="kf-page">{{ page.number }}/{{ page.total }}</span>
 </div></div>

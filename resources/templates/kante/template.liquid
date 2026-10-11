@@ -1,6 +1,6 @@
 <header class="band">
   <div class="band-top">
-    {% if org.logo %}<img class="logo" src="{{ org.logo }}" alt="">{% else %}<span class="org">{{ org.name }}</span>{% endif %}
+    {% if org.logo != blank %}<img class="logo" src="{{ org.logo }}" alt="">{% else %}<span class="org">{{ org.name }}</span>{% endif %}
   </div>
   <div class="band-main">
     <h1>{{ document.type_label }}</h1>
@@ -15,7 +15,7 @@
   <div>
     <p class="label">{{ 'for' | t }}</p>
     {% if customer %}
-      <p><b>{{ customer.name }}</b>{% if contact %}<br>{{ contact.full_name }}{% endif %}<br>{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}</p>
+      <p><b>{{ customer.name }}</b>{% if contact %}<br>{{ contact.full_name }}{% endif %}<br>{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% if customer.vat_id != blank %}<br>{{ 'vat_id' | t }} {{ customer.vat_id }}{% endif %}</p>
     {% endif %}
   </div>
   <div>
@@ -29,7 +29,7 @@
       {% if document.source_number %}<br>{{ 'reference' | t }} {{ document.source_number }}{% endif %}
     </p>
   </div>
-  {% if document.project_name %}
+  {% if document.project_name != blank %}
   <div>
     <p class="label">{{ 'project' | t }}</p>
     <p><b>{{ document.project_name }}</b></p>
@@ -38,7 +38,7 @@
 </section>
 
 <main class="content">
-  {% if document.intro %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
+  {% if document.intro != blank %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
 
   <table class="items">
     <thead><tr><th>{{ 'service' | t }}</th><th class="r">{{ 'quantity' | t }}</th><th class="r">{{ 'price' | t }}</th><th class="r">{{ 'sum' | t }}</th></tr></thead>
@@ -50,7 +50,7 @@
           <tr class="note"><td colspan="4">{{ p.title }}</td></tr>
         {% else %}
           <tr class="{% if p.is_optional %}optional{% endif %}">
-            <td><b>{{ p.title }}</b>{% if p.is_optional %} · {{ 'optional' | t }}{% endif %}{% if p.description %}<br><small>{{ p.description }}</small>{% endif %}</td>
+            <td><b>{{ p.title }}</b>{% if p.is_optional %} · {{ 'optional' | t }}{% endif %}{% if p.description != blank %}<br><small>{{ p.description }}</small>{% endif %}</td>
             <td class="r">{{ p.quantity | number: 2 }} {{ p.unit }}</td>
             <td class="r">{{ p.unit_price | money }}</td>
             <td class="r">{{ p.total | money }}</td>
@@ -68,5 +68,5 @@
   </div>
 
   {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
-  {% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
+  {% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
 </main>

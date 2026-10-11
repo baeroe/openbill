@@ -1,5 +1,5 @@
 <section class="to">
-  {% if customer %}{{ customer.name }}<br>{% if contact %}{{ contact.full_name }}<br>{% endif %}{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% endif %}
+  {% if customer %}{{ customer.name }}<br>{% if contact %}{{ contact.full_name }}<br>{% endif %}{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% if customer.vat_id != blank %}<br>{{ 'vat_id' | t }} {{ customer.vat_id }}{% endif %}{% endif %}
 </section>
 
 <h1>{{ document.type_label }}</h1>
@@ -7,7 +7,7 @@
   {{ 'number_short' | t }} {{ document.number }}, {{ document.date | date }}{% if document.service_date %}, {{ 'service_date' | t }} {{ document.service_date | date }}{% endif %}{% if document.valid_until %}, {{ 'valid_until' | t | downcase }} {{ document.valid_until | date }}{% endif %}{% if document.source_number %}, {{ 'reference' | t }} {{ document.source_number }}{% endif %}
 </p>
 
-{% if document.intro %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
+{% if document.intro != blank %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
 
 <table class="items">
   {% for g in groups %}
@@ -17,7 +17,7 @@
         <tr><td colspan="3" class="note">{{ p.title }}</td></tr>
       {% else %}
         <tr class="{% if p.is_optional %}optional{% endif %}">
-          <td>{{ p.title }}{% if p.is_optional %} ({{ 'optional' | t }}){% endif %}{% if p.description %}<span>{{ p.description }}</span>{% endif %}</td>
+          <td>{{ p.title }}{% if p.is_optional %} ({{ 'optional' | t }}){% endif %}{% if p.description != blank %}<span>{{ p.description }}</span>{% endif %}</td>
           <td class="r q">{{ p.quantity | number: 2 }} {{ p.unit }} × {{ p.unit_price | money }}</td>
           <td class="r">{{ p.total | money }}</td>
         </tr>
@@ -33,4 +33,4 @@
 </table>
 
 {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
-{% if document.closing %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
+{% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}

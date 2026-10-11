@@ -45,7 +45,11 @@ it('renders every built-in template with every scenario in both languages withou
 
         expect($result->errors)->toBe([])
             ->and($result->footer)->toContain('<span class="pageNumber"></span>')
-            ->and($result->body)->not->toContain('openbill-error');
+            ->and($result->body)->not->toContain('openbill-error')
+            // empty strings are truthy in Liquid: templates must test text with "!= blank" (no logo → no broken image)
+            ->and($result->header.$result->body.$result->footer)->not->toContain('src=""')
+            ->and($result->body)->not->toMatch('#<(span|small) class="desc"></(span|small)>|<small></small>#')
+            ->and($result->body)->toContain((string) $sample->sources['customer']['vat_id']);
     }
 })->with(SyncBuiltInTemplates::SLUGS)->with(RenderScenario::cases());
 

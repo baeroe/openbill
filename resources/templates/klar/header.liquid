@@ -6,6 +6,6 @@
   .h-doc b { color: #1b1a17; font-weight: 600; }
 </style>
 <div class="h">
-  {% if org.logo %}<img class="h-logo" src="{{ org.logo }}" alt="">{% else %}<span class="h-name">{{ org.name }}</span>{% endif %}
+  {% if org.logo != blank %}<img class="h-logo" src="{{ org.logo }}" alt="">{% else %}<span class="h-name">{{ org.name }}</span>{% endif %}
   <span class="h-doc">{{ document.type_label }} <b>{{ document.number }}</b></span>
 </div>

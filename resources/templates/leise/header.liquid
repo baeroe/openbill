@@ -5,6 +5,6 @@
   .lh-addr { font-size: 7.5pt; color: #888; text-align: right; line-height: 1.5; }
 </style>
 <div class="lh">
-  <span class="lh-org">{% if org.logo %}<img src="{{ org.logo }}" alt="">{% else %}{{ org.name }}{% endif %}</span>
+  <span class="lh-org">{% if org.logo != blank %}<img src="{{ org.logo }}" alt="">{% else %}{{ org.name }}{% endif %}</span>
   <span class="lh-addr">{{ org.street }}, {{ org.zip }} {{ org.city }}<br>{{ org.email }}</span>
 </div>

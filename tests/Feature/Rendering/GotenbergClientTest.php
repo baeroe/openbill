@@ -64,4 +64,3 @@ it('turns errors, timeouts and non-PDF answers into PdfRenderFailedException (50
     'timeout' => [fn () => GotenbergFake::timeOut()],
     'no PDF' => [fn () => GotenbergFake::answerWithHtml()],
 ]);
-

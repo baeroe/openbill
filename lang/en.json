@@ -25,6 +25,7 @@
     "document_type.confirmation": "Order confirmation",
     "document_type.invoice": "Invoice",
     "document_type.offer": "Quote",
+    "einvoice.invalid": "The e-invoice XML is not valid: :errors",
     "errors.cancellation_customer": "A cancellation always belongs to the customer of its invoice.",
     "errors.cancellation_needs_invoice": "Cancellations are created from an invoice.",
     "errors.cancellation_source": "The invoice of this cancellation is not open or paid, or it is already cancelled.",

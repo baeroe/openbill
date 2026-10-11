@@ -25,6 +25,7 @@
     "document_type.confirmation": "Auftragsbestätigung",
     "document_type.invoice": "Rechnung",
     "document_type.offer": "Angebot",
+    "einvoice.invalid": "Die E-Rechnung (XML) ist ungültig: :errors",
     "errors.cancellation_customer": "Ein Storno gehört immer zum Kunden seiner Rechnung.",
     "errors.cancellation_needs_invoice": "Stornos entstehen nur aus einer Rechnung.",
     "errors.cancellation_source": "Die Rechnung zu diesem Storno ist nicht offen oder bezahlt oder schon storniert.",

@@ -5,7 +5,7 @@ import { path, t } from '@/lib/i18n';
 const field = 'h-[2.375rem] w-full rounded-md bg-surface-2 px-3 text-ink placeholder:text-faint';
 
 export default function Login() {
-    const form = useForm({ email: '', password: '' });
+    const form = useForm({ email: '', password: '', remember: false });
 
     return (
         <main className="relative grid min-h-dvh place-items-center px-6 py-16">
@@ -57,6 +57,16 @@ export default function Login() {
                             required
                         />
                     </div>
+                    <label className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            name="remember"
+                            className="size-4 accent-accent"
+                            checked={form.data.remember}
+                            onChange={(e) => form.setData('remember', e.target.checked)}
+                        />
+                        {t('login.remember')}
+                    </label>
                     {form.errors.email && (
                         <p id="login-error" role="alert" className="rounded-md bg-bad-soft px-3 py-2 text-bad">
                             {form.errors.email}

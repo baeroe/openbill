@@ -14,6 +14,17 @@ it('logs in and lands on the start page in the language of the login', function 
     $this->assertAuthenticatedAs($this->user);
 });
 
+it('only remembers the login when asked to', function () {
+    $recaller = fn () => auth()->guard('web')->getRecallerName();
+
+    $this->post('/en/login', ['email' => 'anna@example.com', 'password' => 'secret-pass'])
+        ->assertCookieMissing($recaller());
+    auth()->logout();
+
+    $this->post('/en/login', ['email' => 'anna@example.com', 'password' => 'secret-pass', 'remember' => '1'])
+        ->assertCookie($recaller());
+});
+
 it('rejects a wrong password with a translated message', function () {
     $this->post('/de/login', ['email' => 'anna@example.com', 'password' => 'wrong'])
         ->assertSessionHasErrors(['email' => 'E-Mail oder Passwort stimmen nicht.']);

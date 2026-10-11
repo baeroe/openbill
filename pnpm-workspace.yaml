@@ -1,0 +1,13 @@
+# The root package (the Laravel app's frontend) is always part of the workspace.
+packages:
+  - packages/*
+  - docs
+  - prototypes/*
+
+# Only listed packages may run build scripts; any other package with build scripts makes
+# `pnpm install` fail until it is added here as `true` (fetches/builds a native binary) or `false`.
+allowBuilds:
+  esbuild: true
+
+overrides:
+  vitepress>vite: ^6.4.3

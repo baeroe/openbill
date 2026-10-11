@@ -1,0 +1,16 @@
+{
+    "common.logout": "Abmelden",
+    "home.placeholder": "Hier erscheinen bald Dokumente, Kunden und Templates.",
+    "home.signed_in_as": "Angemeldet als :name.",
+    "home.title": "Übersicht",
+    "locale.de": "Deutsch",
+    "locale.en": "English",
+    "locale.switch": "Sprache",
+    "login.email": "E-Mail",
+    "login.failed": "E-Mail oder Passwort stimmen nicht.",
+    "login.password": "Passwort",
+    "login.remember": "Angemeldet bleiben",
+    "login.submit": "Anmelden",
+    "login.throttled": "Zu viele Anmeldeversuche. Bitte in :seconds Sekunden erneut versuchen.",
+    "login.title": "Anmelden"
+}

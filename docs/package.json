@@ -1,0 +1,14 @@
+{
+    "name": "openbill-docs",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vitepress dev --host 0.0.0.0 --port 5174",
+        "build": "vitepress build",
+        "preview": "vitepress preview"
+    },
+    "devDependencies": {
+        "vitepress": "^1.6.4",
+        "vitepress-plugin-llms": "^1.14.0"
+    }
+}

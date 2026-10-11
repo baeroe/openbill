@@ -1,0 +1,74 @@
+/* Only resources/ is scanned: the prototypes and docs carry their own (old) classes. */
+@import 'tailwindcss' source(none);
+@source '../js';
+@source '../views';
+
+/*
+ * Base tokens "Graphit & Kobalt" from prototypes/clickdummy-v2/src/styles/tokens.css (light only).
+ * Dark mode, the Schibsted Grotesk font files and the component set follow in phase 5.
+ */
+:root {
+    --bg: #f4f4f2;
+    --surface: #ffffff;
+    --surface-2: #ecece9;
+    --surface-3: #e3e3df;
+    --ink: #23252b;
+    --muted: #73767e;
+    --faint: #a2a4aa;
+    --accent: #2f55d4;
+    --accent-hover: #2647b8;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3e9fb;
+    --ok: #2e7d4f;
+    --ok-soft: #dff0e5;
+    --warn: #8f5b00;
+    --warn-soft: #faefd7;
+    --bad: #b4322e;
+    --bad-soft: #fbe3e1;
+    --font: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --dur: 180ms;
+    --ease: cubic-bezier(0.2, 0, 0, 1);
+    color-scheme: light;
+}
+
+@theme inline {
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-surface-2: var(--surface-2);
+    --color-surface-3: var(--surface-3);
+    --color-ink: var(--ink);
+    --color-muted: var(--muted);
+    --color-faint: var(--faint);
+    --color-accent: var(--accent);
+    --color-accent-hover: var(--accent-hover);
+    --color-accent-ink: var(--accent-ink);
+    --color-accent-soft: var(--accent-soft);
+    --color-ok: var(--ok);
+    --color-ok-soft: var(--ok-soft);
+    --color-warn: var(--warn);
+    --color-warn-soft: var(--warn-soft);
+    --color-bad: var(--bad);
+    --color-bad-soft: var(--bad-soft);
+
+    --font-sans: var(--font);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+}
+
+@layer base {
+    body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 0.875rem;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}

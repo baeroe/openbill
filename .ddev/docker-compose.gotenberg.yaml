@@ -1,0 +1,11 @@
+# Gotenberg 8 for PDF rendering, reachable from the web container as http://gotenberg:3000
+services:
+  gotenberg:
+    container_name: ddev-${DDEV_SITENAME}-gotenberg
+    image: gotenberg/gotenberg:8
+    restart: "no"
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+    expose:
+      - "3000"

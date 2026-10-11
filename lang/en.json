@@ -1,0 +1,16 @@
+{
+    "common.logout": "Log out",
+    "home.placeholder": "Documents, customers and templates will show up here.",
+    "home.signed_in_as": "Signed in as :name.",
+    "home.title": "Overview",
+    "locale.de": "Deutsch",
+    "locale.en": "English",
+    "locale.switch": "Language",
+    "login.email": "Email",
+    "login.failed": "Email or password is incorrect.",
+    "login.password": "Password",
+    "login.remember": "Keep me signed in",
+    "login.submit": "Log in",
+    "login.throttled": "Too many login attempts. Please try again in :seconds seconds.",
+    "login.title": "Log in"
+}

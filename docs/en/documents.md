@@ -95,6 +95,35 @@ Defaults: `Q-{YYYY}-{0000}` (offers), `OC-{YYYY}-{0000}` (order confirmations), 
 
 Every change to a document is logged with who made it (user, API token or the system; for a token also the user it belongs to, which stays in the log after the token is deleted): created, updated, finalized, status changed, converted, cancelled, duplicated, deleted. Entries of deleted drafts stay in the log.
 
+## In the app
+
+### Overview
+
+After logging in you land on the overview. Four figures sum up the money side: open invoices, how much of that is overdue, open quotes, and what was paid this month (with the total since the start of the year). Each figure opens the matching filtered list. **Needs your attention** lists overdue invoices first, then open quotes whose validity ends within seven days or has ended, then drafts. **Recently edited** shows the six documents changed last.
+
+### Document list
+
+**Documents** shows all documents, newest first and grouped by month. Filter by type (each pill shows how many documents that type has under the other filters), by status, by customer, and search number and customer name. The status filter also offers **Overdue**: open invoices past their due date. Every filter is part of the address, for example `/en/documents?type=invoice&status=overdue`, so a filtered list can be bookmarked, shared and reached again with the browser's back button. The list loads 50 documents at a time (**Load more**); the line below it counts all matching documents and sums their gross amounts.
+
+### New document
+
+**New document** in the sidebar – or the key **N** anywhere, as long as you are not typing in a field – opens a dialog: choose the type and the customer (or choose the customer later), and openbill creates a draft with the defaults of the document type. Cancellations are not created here; they always come from an invoice. Editing documents in the app comes with the document editor; until then a document's page shows its key data and its PDF.
+
+### Customers
+
+**Customers** lists all customers with their default contact and what is open: the sum of their open invoices, overdue ones marked. The search looks through name, number and email.
+
+A customer's page holds the master data, the **tax treatment** (domestic; EU with VAT ID, which means reverse charge; third country), the customer's custom fields, the **contacts** and the customer's documents. Contacts are edited in a side panel; one of them is the default that new documents use. All changes, contacts included, are saved together with **Save**:
+
+- Mistakes are shown at the field they belong to (or at the contact), and nothing is saved until everything is valid.
+- Leading and trailing spaces are removed; an empty customer number gets the next free number.
+- Leaving the page with unsaved changes asks first.
+- A customer with finalized documents cannot be deleted.
+
+### Appearance and language
+
+The account menu at the bottom of the sidebar switches between light, dark and the system setting (remembered per browser) and between English and German. The sidebar can be collapsed to icons; on small screens it opens from the menu button.
+
 ## Demo data
 
 For development and trying things out:

@@ -98,6 +98,8 @@ Pfade gibt es in zwei Formen. Die **Validierung** nutzt die Stelle in der Anfrag
 
 Ein Dokument in einer Liste hat die Kurzform (Nummer, Status, Kunde, Summen, Datumswerte). `GET /api/documents/{id}` ergänzt Texte, eigene Felder, `groups` mit ihren Positionen, `totals` (netto, Steuer, brutto, Steueraufschlüsselung, Rechtshinweise) und bei Entwürfen `issues`: alles, was das Abschließen noch bemängeln würde.
 
+Der Filter `status` von `GET /api/documents` kennt zusätzlich `overdue`: offene Rechnungen, deren Fälligkeit überschritten ist. Überfällig ist kein eigener Status; Dokumente tragen ihn nie.
+
 ## Der Hauptablauf mit curl
 
 ```bash

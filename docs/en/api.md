@@ -98,6 +98,8 @@ Paths come in two forms. **Validation** uses the position in the request: `group
 
 A document in a list has the short form (number, status, customer, totals, dates). `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes) and – for drafts – `issues`: everything finalizing would still complain about.
 
+The `status` filter of `GET /api/documents` also takes `overdue`: open invoices whose due date has passed. Overdue is not a status of its own, so documents never carry it.
+
 ## The main flow with curl
 
 ```bash

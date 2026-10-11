@@ -11,13 +11,15 @@ use App\Support\Actor;
 use App\Support\GroupWriter;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\FeatureTestCase;
 use Tests\TestCase;
 
 /*
  * Feature tests boot Laravel and run against the MariaDB database `testing`.
  * Unit tests are plain PHP (domain, architecture, file consistency) and don't boot the app.
+ * Gotenberg is faked and the archive/local disks are fake disks (`Tests\FeatureTestCase`).
  */
-pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
+pest()->extend(FeatureTestCase::class)->use(RefreshDatabase::class)->in('Feature');
 
 /*
  * Integration tests need committed data (other processes and connections must see it), so they

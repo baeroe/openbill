@@ -47,6 +47,14 @@ return [
             'report' => false,
         ],
 
+        // archived PDF/XML of finalized documents (storage/app/archive/{yyyy}/{document_id}.pdf|xml), never changed
+        'archive' => [
+            'driver' => 'local',
+            'root' => storage_path('app/archive'),
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OverviewController;
@@ -17,6 +18,7 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
         Route::get('/', OverviewController::class)->name('home');
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::get('/documents/{id}', [DocumentController::class, 'show'])->whereUlid('id')->name('documents.show');
+        Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     });
 });

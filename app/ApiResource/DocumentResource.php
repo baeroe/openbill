@@ -40,7 +40,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             normalizationContext: [...Normalization::CONTEXT, 'groups' => [self::LIST]],
             parameters: [
                 'type' => new QueryParameter(description: 'offer, confirmation, invoice or cancellation'),
-                'status' => new QueryParameter(description: 'draft, open, accepted, rejected, done, paid, cancelled or closed'),
+                'status' => new QueryParameter(description: 'draft, open, accepted, rejected, done, paid, cancelled, closed, or overdue (open invoices past their due date)'),
                 'customer_id' => new QueryParameter(description: 'customer ULID'),
                 'q' => new QueryParameter(description: 'number or customer name contains'),
                 'date_from' => new QueryParameter(description: 'document date from (YYYY-MM-DD)'),

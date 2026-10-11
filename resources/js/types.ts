@@ -14,4 +14,5 @@ export type SharedProps = {
     locale: Locale;
     translations: Record<string, string>;
     auth: { user: AuthUser | null };
+    org: { name: string } | null;
 };

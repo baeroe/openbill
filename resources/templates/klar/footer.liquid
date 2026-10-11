@@ -7,7 +7,7 @@
   <div class="f-cols">
     <div>{{ org.name }}<br>{{ org.street }}<br>{{ org.zip }} {{ org.city }}</div>
     <div>{{ org.email }}<br>{{ org.phone }}<br>{{ org.website }}</div>
-    <div>{% if org.vat_id != blank %}{{ 'vat_id' | t }} {{ org.vat_id }}{% else %}{{ 'tax_number' | t }} {{ org.tax_number }}{% endif %}{% if org.register != blank %}<br>{{ org.register }}{% endif %}</div>
+    <div>{% if org.vat_id != blank %}{{ 'vat_id' | t }} {{ org.vat_id }}{% else %}{{ 'tax_number' | t }} {{ org.tax_number }}{% endif %}{% if org.registration_id != blank %}<br>{{ org.registration_id }}{% endif %}</div>
     <div>{{ org.bank_name }}<br>IBAN {{ org.iban }}<br>BIC {{ org.bic }}</div>
   </div>
   <div class="f-page">{{ 'page' | t }} {{ page.number }} {{ 'of' | t }} {{ page.total }}</div>

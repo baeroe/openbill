@@ -18,6 +18,8 @@ enum ComplianceRule: string
     case PositionFieldMissing = 'position_field_missing';
     case OrgAddressMissing = 'org_address_missing';
     case OrgTaxIdMissing = 'org_tax_id_missing';
+    case OrgSellerIdMissing = 'org_seller_id_missing';
+    case OrgVatIdRequired = 'org_vat_id_required';
     case OrgIbanMissing = 'org_iban_missing';
     case CustomerAddressIncomplete = 'customer_address_incomplete';
     case CustomerVatIdMissing = 'customer_vat_id_missing';

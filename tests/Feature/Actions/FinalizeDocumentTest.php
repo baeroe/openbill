@@ -60,7 +60,7 @@ it('refuses with the issue list when the profile check fails and uses no number'
         app(FinalizeDocument::class)->handle(systemActor(), $document);
         $this->fail('no exception');
     } catch (ComplianceFailedException $e) {
-        expect(array_column($e->toArray(), 'path'))->toBe(['document.customer', 'document.custom.po_number', 'org.address', 'org.vat_id', 'org.iban'])
+        expect(array_column($e->toArray(), 'path'))->toBe(['document.customer', 'document.custom.po_number', 'org.address', 'org.vat_id', 'org.registration_id', 'org.iban'])
             ->and($e->toArray()[1]['message'])->toBe('PO number is missing.')
             ->and($e->status())->toBe(422);
     }

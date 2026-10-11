@@ -112,6 +112,7 @@ final class DomainMapper
             iban: (string) ($row['iban'] ?? ''),
             custom: $row['custom'] ?? [],
             taxTreatment: isset($row['tax_treatment']) ? TaxTreatment::from($row['tax_treatment']) : null,
+            registrationId: (string) ($row['registration_id'] ?? ''),
         );
     }
 

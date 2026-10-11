@@ -12,11 +12,19 @@ use LogicException;
  */
 final class CiiAmount
 {
-    public static function of(BigDecimal|string $value): float
+    public const AMOUNT = 2;
+
+    public const UNIT = 4;
+
+    /**
+     * @param  int  $decimals  what horstoeko prints: AMOUNT (amounts, percentages) or UNIT (unit prices, quantities)
+     */
+    public static function of(BigDecimal|string $value, int $decimals): float
     {
         $decimal = BigDecimal::of($value);
         $float = $decimal->toFloat();
-        if (! BigDecimal::of(sprintf('%.4F', $float))->isEqualTo($decimal)) {
+        // the printed text must be exactly the decimal: catches lost digits and values with more decimals than printed
+        if (! BigDecimal::of(sprintf("%.{$decimals}F", $float))->isEqualTo($decimal)) {
             throw new LogicException("Amount {$decimal} can't be passed to the e-invoice builder without losing digits.");
         }
 

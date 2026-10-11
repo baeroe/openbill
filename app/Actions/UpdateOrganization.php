@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 final class UpdateOrganization
 {
-    private const STRINGS = ['name', 'street', 'zip', 'city', 'country', 'vat_id', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website'];
+    private const STRINGS = ['name', 'street', 'zip', 'city', 'country', 'vat_id', 'tax_number', 'registration_id', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website'];
 
     /**
      * @param  array<string, mixed>  $input
@@ -33,6 +33,7 @@ final class UpdateOrganization
             'country' => ['sometimes', 'nullable', 'string', 'size:2'],
             'vat_id' => ['sometimes', 'nullable', 'string', 'max:32'],
             'tax_number' => ['sometimes', 'nullable', 'string', 'max:32'],
+            'registration_id' => ['sometimes', 'nullable', 'string', 'max:64'],
             'iban' => ['sometimes', 'nullable', 'string', 'max:42'],
             'bic' => ['sometimes', 'nullable', 'string', 'max:11'],
             'bank_name' => ['sometimes', 'nullable', 'string', 'max:255'],

@@ -69,7 +69,7 @@ final class SnapshotBuilder
     public static function orgRow(Organization $org): array
     {
         return [
-            ...$org->only(['name', 'street', 'zip', 'city', 'country', 'logo_path', 'vat_id', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website', 'locale']),
+            ...$org->only(['name', 'street', 'zip', 'city', 'country', 'logo_path', 'vat_id', 'tax_number', 'registration_id', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website', 'locale']),
             'taxation_mode' => $org->taxation_mode->value,
             'custom' => $org->custom ?? [],
         ];

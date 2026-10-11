@@ -75,7 +75,7 @@ final class ContextBuilder
         return new TemplateContext([
             'org' => [
                 ...($org['custom'] ?? []),
-                ...self::pick($org, ['name', 'street', 'zip', 'city', 'country', 'vat_id', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website']),
+                ...self::pick($org, ['name', 'street', 'zip', 'city', 'country', 'vat_id', 'tax_number', 'registration_id', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website']),
                 'logo' => $this->assets->logo($org['logo_path'] ?? null),
                 'taxation_mode' => (string) $org['taxation_mode'],
                 'small_business' => $org['taxation_mode'] === TaxationMode::SmallBusiness->value,

@@ -10,7 +10,7 @@ final class FieldRegistry
 {
     /** @var array<string, list<string>> */
     public const CORE = [
-        'org' => ['name', 'street', 'zip', 'city', 'country', 'logo', 'vat_id', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website', 'taxation_mode', 'small_business', 'locale'],
+        'org' => ['name', 'street', 'zip', 'city', 'country', 'logo', 'vat_id', 'tax_number', 'registration_id', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website', 'taxation_mode', 'small_business', 'locale'],
         'customer' => ['number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'tax_treatment', 'locale'],
         'contact' => ['salutation', 'first_name', 'last_name', 'full_name', 'position', 'email', 'phone'],
         'document' => ['number', 'date', 'type_label', 'status', 'due_date', 'valid_until', 'service_date', 'service_date_end', 'intro', 'closing', 'net_total', 'tax_total', 'gross_total', 'optional_total', 'tax_breakdown', 'legal_notes', 'source_number', 'locale'],

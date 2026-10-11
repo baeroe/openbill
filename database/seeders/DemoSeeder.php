@@ -124,7 +124,8 @@ class DemoSeeder extends Seeder
             'website' => 'nordlicht.example',
             'taxation_mode' => TaxationMode::Regular,
             'locale' => 'de',
-            'custom' => ['register' => 'Amtsgericht Hamburg HRB 000000'],
+            'registration_id' => 'HRB 000000, Amtsgericht Hamburg',
+            'custom' => ['managing_director' => 'Ida Sommer'],
         ])->save();
     }
 
@@ -176,7 +177,7 @@ class DemoSeeder extends Seeder
     {
         $all = ['offer', 'confirmation', 'invoice', 'cancellation'];
         $fields = [
-            [FieldScope::Org, 'register', 'Handelsregister', FieldType::Text, [], [], ''],
+            [FieldScope::Org, 'managing_director', 'Geschäftsführung', FieldType::Text, [], [], ''],
             [FieldScope::Customer, 'industry', 'Branche', FieldType::Select, [], ['Handel', 'Software', 'Hotellerie', 'Logistik', 'Kultur'], ''],
             [FieldScope::Customer, 'supplier_number', 'Unsere Lieferantennummer', FieldType::Text, [], [], 'Die Nummer, unter der uns der Kunde führt.'],
             [FieldScope::Contact, 'department', 'Abteilung', FieldType::Text, [], [], ''],

@@ -12,6 +12,7 @@ use App\Models\Customer;
 use App\Models\Document;
 use App\Models\DocumentTypeSetting;
 use App\Models\Organization;
+use App\Models\TaxRate;
 use App\Support\DocumentInspector;
 use App\Support\NullDocumentArchiver;
 use App\Support\SnapshotBuilder;
@@ -117,7 +118,62 @@ it('reports XSD errors for broken XML and refuses to hand out an invalid e-invoi
 });
 
 it('converts amounts to float only when they survive the round trip', function () {
-    expect(CiiAmount::of('1234567890123.45'))->toBe(1234567890123.45)
-        ->and(CiiAmount::of('12.3456'))->toBe(12.3456)
-        ->and(fn () => CiiAmount::of('12345678901234567.89'))->toThrow(LogicException::class);
+    expect(CiiAmount::of('1234567890123.45', CiiAmount::AMOUNT))->toBe(1234567890123.45)
+        ->and(CiiAmount::of('12.3456', CiiAmount::UNIT))->toBe(12.3456)
+        ->and(fn () => CiiAmount::of('12345678901234567.89', CiiAmount::AMOUNT))->toThrow(LogicException::class)
+        // horstoeko prints amounts with two decimals: a third one would be rounded away silently (review #12)
+        ->and(fn () => CiiAmount::of('12.345', CiiAmount::AMOUNT))->toThrow(LogicException::class);
+});
+
+it('gives a credit note payment terms, so the positive amount due has terms (BR-CO-25, review #3)', function () {
+    app()->bind(DocumentArchiver::class, NullDocumentArchiver::class);
+    $invoice = app(FinalizeDocument::class)->handle(systemActor(), draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95')], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+    $cancellation = app(CancelInvoice::class)->handle(systemActor(), $invoice)->document;
+
+    $xml = ciiOf($cancellation, 'CN-2026-0002');
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and($xml)->toContain('<ram:SpecifiedTradePaymentTerms>')
+        ->toContain('<ram:Description>'.Text::t('einvoice.credit_note_terms', [], $cancellation->locale).'</ram:Description>');
+});
+
+it('identifies the seller by its register number (BT-30) when it has no VAT ID (BR-CO-26, review #4)', function () {
+    Organization::current()->forceFill(['taxation_mode' => 'small_business', 'vat_id' => '', 'tax_number' => '12/345/67890', 'registration_id' => 'HRB 000000'])->save();
+
+    $xml = ciiOf(draft(DocumentType::Invoice, [itemRow()], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and($xml)->toContain('<ram:SpecifiedLegalOrganization>')
+        ->toContain('<ram:ID>HRB 000000</ram:ID>')
+        ->toContain('schemeID="FC">12/345/67890</ram:ID>');
+});
+
+it('moves the sign of a discount line from the price to the quantity (BR-27, review #5)', function () {
+    $invoice = ciiOf(draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95'), itemRow('Rabatt', '1', '-100')], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+
+    expect(CiiBuilder::validate($invoice))->toBe([])
+        ->and($invoice)->not->toContain('<ram:ChargeAmount>-')
+        ->toContain('<ram:ChargeAmount>100.0000</ram:ChargeAmount>')
+        ->toContain('unitCode="HUR">-1.0000</ram:BilledQuantity>')
+        ->toContain('<ram:LineTotalAmount>-100.00</ram:LineTotalAmount>')
+        ->toContain('<ram:LineTotalAmount>850.00</ram:LineTotalAmount>');
+
+    app()->bind(DocumentArchiver::class, NullDocumentArchiver::class);
+    $done = app(FinalizeDocument::class)->handle(systemActor(), draft(DocumentType::Invoice, [itemRow('Workshop', '10', '95'), itemRow('Rabatt', '1', '-100')], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+    $credit = ciiOf(app(CancelInvoice::class)->handle(systemActor(), $done)->document, 'CN-2026-0003');
+
+    expect(CiiBuilder::validate($credit))->toBe([])
+        ->and($credit)->not->toContain('<ram:ChargeAmount>-')
+        ->toContain('unitCode="HUR">-1.0000</ram:BilledQuantity>')
+        ->toContain('<ram:LineTotalAmount>-100.00</ram:LineTotalAmount>')
+        ->toContain('<ram:GrandTotalAmount>1011.50</ram:GrandTotalAmount>');
+});
+
+it('falls back to a standard exemption reason when an exempt rate has no note (BR-E-10, review #11)', function () {
+    $rate = TaxRate::query()->create(['label' => 'steuerfrei', 'percent' => '0.00', 'category' => 'E', 'exemption_note' => null, 'sort' => 99]);
+
+    $xml = ciiOf(draft(DocumentType::Invoice, [itemRow(extra: ['tax_rate_id' => $rate->id])], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and($xml)->toContain('<ram:ExemptionReason>'.Text::t('einvoice.exemption.e', [], 'en').'</ram:ExemptionReason>');
 });

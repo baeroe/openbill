@@ -31,7 +31,7 @@ final class SampleDataFactory
 
     private const ORG = [
         'name' => 'Studio Nordlicht', 'street' => 'Speicherstraße 12', 'zip' => '20457', 'city' => 'Hamburg', 'country' => 'DE',
-        'vat_id' => 'DE123456789', 'tax_number' => '', 'iban' => 'DE02 1203 0000 0000 2020 51', 'bic' => 'BYLADEM1001',
+        'vat_id' => 'DE123456789', 'tax_number' => '', 'registration_id' => 'HRB 000000, Amtsgericht Hamburg', 'iban' => 'DE02 1203 0000 0000 2020 51', 'bic' => 'BYLADEM1001',
         'bank_name' => 'Demo Bank', 'email' => 'hallo@nordlicht.example', 'phone' => '+49 40 1234567', 'website' => 'nordlicht.example',
     ];
 

@@ -106,3 +106,21 @@ it('checks organization, customer and units for e-invoices', function () {
         'positions.p1.unit', 'positions.p1.quantity',
     ]);
 });
+
+it('needs a VAT ID or a register number to identify the seller of an e-invoice (BR-CO-26, review #4)', function () {
+    $invoice = ['type' => DocumentType::Invoice, 'profile' => ComplianceProfile::En16931, 'serviceDate' => '2026-10-01', 'dueDate' => '2026-10-15'];
+
+    expect(compliancePaths([...$invoice, 'org' => new PartyFacts('O', 's', 'z', 'c', 'DE', taxNumber: '12/345', iban: 'X')]))->toBe(['org.registration_id'])
+        ->and(compliancePaths([...$invoice, 'org' => new PartyFacts('O', 's', 'z', 'c', 'DE', taxNumber: '12/345', iban: 'X', registrationId: 'HRB 1')]))->toBe([])
+        ->and(compliancePaths([...$invoice, 'org' => new PartyFacts('O', 's', 'z', 'c', 'DE', vatId: 'DE1', iban: 'X')]))->toBe([]);
+});
+
+it('requires the seller VAT ID for reverse charge and third-country customers (BR-AE-02, BR-G-02, review #4)', function (TaxTreatment $treatment) {
+    $paths = compliancePaths([
+        'type' => DocumentType::Invoice, 'profile' => ComplianceProfile::En16931, 'serviceDate' => '2026-10-01', 'dueDate' => '2026-10-15',
+        'org' => new PartyFacts('O', 's', 'z', 'c', 'DE', taxNumber: '12/345', iban: 'X', registrationId: 'HRB 1'),
+        'customer' => new PartyFacts('C', 's', 'z', 'c', 'SE', vatId: 'SE1', taxTreatment: $treatment),
+    ]);
+
+    expect($paths)->toBe(['org.vat_id']);
+})->with([TaxTreatment::EuReverseCharge, TaxTreatment::ThirdCountry]);

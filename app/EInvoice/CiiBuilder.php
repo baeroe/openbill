@@ -8,6 +8,7 @@ use App\Enums\PositionKind;
 use App\Enums\TaxCategory;
 use App\Exceptions\EInvoiceInvalidException;
 use App\Models\Document;
+use App\Support\Text;
 use Brick\Math\BigDecimal;
 use DOMDocument;
 use horstoeko\zugferd\ZugferdDocumentBuilder;
@@ -37,7 +38,7 @@ final class CiiBuilder
         ZugferdSettings::setQuantityDecimals(4);
 
         $credit = $document->type === DocumentType::Cancellation;
-        $amount = fn (BigDecimal $value) => CiiAmount::of($credit ? $value->negated() : $value);
+        $amount = fn (BigDecimal $value, int $decimals = CiiAmount::AMOUNT) => CiiAmount::of($credit ? $value->negated() : $value, $decimals);
         $org = $sources['org'];
         $customer = $sources['customer'] ?? [];
         $unitCodes = array_column($sources['units'], 'code', 'id');
@@ -55,6 +56,10 @@ final class CiiBuilder
         }
         if (self::text($org['tax_number'] ?? null) !== null) {
             $cii->addDocumentSellerTaxRegistration('FC', $org['tax_number']);
+        }
+        if (self::text($org['registration_id'] ?? null) !== null) {
+            // BT-30: with the VAT ID (BT-31) the identifiers BR-CO-26 accepts
+            $cii->setDocumentSellerLegalOrganisation(self::text($org['registration_id']), null, null);
         }
         if (self::text($org['email'] ?? null) !== null) {
             $cii->setDocumentSellerCommunication('EM', $org['email']);
@@ -81,7 +86,10 @@ final class CiiBuilder
         if (! $credit && self::text($org['iban'] ?? null) !== null) {
             $cii->addDocumentPaymentMeanToCreditTransfer(str_replace(' ', '', (string) $org['iban']), self::text($org['name'] ?? null), null, self::text($org['bic'] ?? null));
         }
-        if ($document->due_date !== null) {
+        if ($credit) {
+            // BR-CO-25: a positive amount due needs a due date (BT-9) or payment terms (BT-20)
+            $cii->addDocumentPaymentTerm(Text::t('einvoice.credit_note_terms', [], $document->locale), $document->due_date);
+        } elseif ($document->due_date !== null) {
             $cii->addDocumentPaymentTerm(null, $document->due_date);
         }
 
@@ -93,17 +101,23 @@ final class CiiBuilder
                 }
                 $total = $totals->lines[$position->id] ?? throw new LogicException("Position {$position->id} has no line total.");
                 $tax = $total->tax ?? throw new LogicException("Position {$position->id} has no tax rate.");
+                // BR-27: the net price (BT-146) must not be negative – a discount line carries its sign in the quantity
+                $price = BigDecimal::of($position->unit_price);
+                $quantity = BigDecimal::of($position->quantity);
+                if ($price->isNegative()) {
+                    [$price, $quantity] = [$price->negated(), $quantity->negated()];
+                }
                 $cii->addNewPosition((string) ++$line)
                     ->setDocumentPositionProductDetails($position->title, self::text($position->description))
-                    ->setDocumentPositionNetPrice(CiiAmount::of(BigDecimal::of($position->unit_price)))
-                    ->setDocumentPositionQuantity($amount(BigDecimal::of($position->quantity)), $position->unit_id === null ? 'C62' : ($unitCodes[$position->unit_id] ?? 'C62'))
-                    ->addDocumentPositionTax($tax->category->value, 'VAT', CiiAmount::of($tax->percent))
+                    ->setDocumentPositionNetPrice(CiiAmount::of($price, CiiAmount::UNIT))
+                    ->setDocumentPositionQuantity($amount($quantity, CiiAmount::UNIT), $position->unit_id === null ? 'C62' : ($unitCodes[$position->unit_id] ?? 'C62'))
+                    ->addDocumentPositionTax($tax->category->value, 'VAT', CiiAmount::of($tax->percent, CiiAmount::AMOUNT))
                     ->setDocumentPositionLineSummation($amount($total->net));
             }
         }
 
         foreach ($totals->taxBreakdown as $row) {
-            $cii->addDocumentTax($row->category->value, 'VAT', $amount($row->net), $amount($row->tax), CiiAmount::of($row->percent), self::exemptionReason($row->category, $totals));
+            $cii->addDocumentTax($row->category->value, 'VAT', $amount($row->net), $amount($row->tax), CiiAmount::of($row->percent, CiiAmount::AMOUNT), self::exemptionReason($row->category, $totals, $document->locale));
         }
         $cii->setDocumentSummation($amount($totals->gross), $amount($totals->gross), $amount($totals->net), null, null, $amount($totals->net), $amount($totals->tax));
 
@@ -144,8 +158,11 @@ final class CiiBuilder
         return array_map(fn (LibXMLError $e): string => trim($e->message)." (line {$e->line})", libxml_get_errors());
     }
 
-    /** BT-120 for exempt categories: the position's tax note (e.g. § 19 UStG), else the first legal note. */
-    private static function exemptionReason(TaxCategory $category, Totals $totals): ?string
+    /**
+     * BT-120 for exempt categories: the position's tax note (e.g. § 19 UStG), else the first legal note, else
+     * a standard text per category (BR-E-10, BR-AE-10, BR-G-10, BR-IC-10 require a reason).
+     */
+    private static function exemptionReason(TaxCategory $category, Totals $totals, string $locale): ?string
     {
         if (in_array($category, [TaxCategory::S, TaxCategory::Z], true)) {
             return null;
@@ -156,7 +173,7 @@ final class CiiBuilder
             }
         }
 
-        return $totals->legalNotes[0] ?? null;
+        return $totals->legalNotes[0] ?? Text::t('einvoice.exemption.'.strtolower($category->value), [], $locale);
     }
 
     private static function text(mixed $value): ?string

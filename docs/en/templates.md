@@ -41,7 +41,7 @@ Reference assets with a relative path, in HTML and in CSS:
 @font-face { font-family: Brand; src: url(assets/brand.woff2); }
 ```
 
-openbill embeds them as data URLs while rendering. Images and fonts can only come this way – as template assets (or the organization logo, `org.logo`): a rendered document may not load anything else. Every document carries a Content-Security-Policy (`default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'`), so links to `http(s)://…` images, fonts, stylesheets or frames and all scripts are blocked, and Gotenberg runs without JavaScript and without network access as a second line of defence.
+openbill embeds them as data URLs while rendering. Images and fonts can only come this way – as template assets (or the organization logo, `org.logo`): a rendered document may not load anything else. Every document carries a Content-Security-Policy (`default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'`), so links to `http(s)://…` images, fonts, stylesheets or frames and all scripts are blocked, and Gotenberg runs without JavaScript and without network access as a second line of defence.
 
 ## manifest.json
 
@@ -216,7 +216,8 @@ A template can never break openbill or block it:
 - the paper must leave room for the body: twice `marginX` less than the page width, `headerHeight + footerHeight` at least 20mm less than the page height,
 - on import, every part must stay within the 200 KB, field keys in `expectedFields` must look like `project_name`, and assets must really be what their extension says,
 - a rendering stops after 5 seconds,
-- no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets).
+- no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets), and `<meta http-equiv="refresh">` is a template error,
+- a rendering may use at most 128 MB of memory; `capture` and string filters like `replace` or `append` count against the output limit while they build their text.
 
 Every problem is reported with the **part** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), the **file** and the **line**, for example `body · template.liquid · line 3 · Unexpected character }`. The preview shows the error in place of the broken part. Finalizing and the draft PDF refuse to run while the template has errors, so a broken template never ends up in an archived PDF.
 

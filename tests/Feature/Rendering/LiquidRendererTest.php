@@ -211,9 +211,9 @@ it('stops an expensive filter in a loop at the deadline (review #2)', function (
         ->and(microtime(true) - $start)->toBeLessThan(3);
 });
 
-it('locks body, header and footer down with a Content-Security-Policy as first head element (review #1)', function () {
+it('locks body, header and footer down with a Content-Security-Policy as first head element (review #1, re-review M2)', function () {
     $result = renderParts(['body' => '<script>x()</script>', 'header' => 'h', 'footer' => 'f']);
-    $csp = '<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'">';
+    $csp = '<head><meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; font-src data:; style-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\'">';
 
     foreach ([$result->body, $result->header, $result->footer] as $html) {
         expect($html)->toContain($csp);
@@ -267,4 +267,16 @@ it('ends rendering cleanly when the memory budget is used up (re-review #2)', fu
 
     expect($result->errors)->toHaveCount(1)
         ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.memory'));
+});
+
+it('refuses a meta refresh with its part and line instead of letting Gotenberg fail (re-review M1)', function () {
+    $result = renderParts([
+        'body' => "<p>ok</p>\n<META HTTP-EQUIV='Refresh' content=\"0; url=http://web/\">",
+        'footer' => '{{ "<meta http-equiv=refresh content=0>" }}',
+    ]);
+
+    expect(array_map(fn ($e) => [$e->part, $e->line], $result->errors))->toBe([[RenderPart::Body, 2], [RenderPart::Footer, 1]])
+        ->and($result->errors[0]->message)->toBe(Text::t('rendering.error.meta_refresh'))
+        ->and($result->body)->not->toContain('HTTP-EQUIV')
+        ->and($result->footer)->not->toContain('http-equiv=refresh');
 });

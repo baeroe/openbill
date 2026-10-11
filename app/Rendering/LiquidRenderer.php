@@ -110,6 +110,13 @@ final class LiquidRenderer
                 $env->checkBudget();
             }
 
+            if (preg_match(self::META_REFRESH, $output) === 1) {
+                $line = preg_match(self::META_REFRESH, $source, $m, PREG_OFFSET_CAPTURE) === 1 ? substr_count($source, "\n", 0, $m[0][1]) + 1 : null;
+                $errors[] = new RenderError($part, $line, Text::t('rendering.error.meta_refresh'));
+
+                return null;
+            }
+
             return $output;
         } catch (RenderMemoryException) {
             $errors[] = new RenderError($part, null, Text::t('rendering.error.memory'));
@@ -201,7 +208,10 @@ final class LiquidRenderer
      * the template can only tighten this one, never loosen it. Gotenberg is hardened as well (no JavaScript,
      * no http(s), see docs/en/development.md).
      */
-    public const CSP = "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'";
+    public const CSP = "default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
+
+    /** <meta http-equiv="refresh"> navigates away (no CSP covers it) and makes Chromium fail the whole PDF. */
+    private const META_REFRESH = '/<meta\b[^>]*http-equiv\s*=\s*["\']?\s*refresh/i';
 
     private static function head(string $locale, string $title): string
     {

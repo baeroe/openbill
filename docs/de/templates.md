@@ -41,7 +41,7 @@ Assets verweist du mit relativem Pfad an, in HTML und in CSS:
 @font-face { font-family: Brand; src: url(assets/brand.woff2); }
 ```
 
-openbill bettet sie beim Rendern als Data-URL ein. Bilder und Schriften kommen nur auf diesem Weg ins Dokument – als Template-Assets (oder das Logo der Organisation, `org.logo`): Ein gerendertes Dokument darf nichts anderes laden. Jedes Dokument trägt eine Content-Security-Policy (`default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'`), Bilder, Schriften, Stylesheets oder Frames von `http(s)://…` und alle Skripte werden also blockiert; zusätzlich läuft Gotenberg ohne JavaScript und ohne Netzzugriff.
+openbill bettet sie beim Rendern als Data-URL ein. Bilder und Schriften kommen nur auf diesem Weg ins Dokument – als Template-Assets (oder das Logo der Organisation, `org.logo`): Ein gerendertes Dokument darf nichts anderes laden. Jedes Dokument trägt eine Content-Security-Policy (`default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'`), Bilder, Schriften, Stylesheets oder Frames von `http(s)://…` und alle Skripte werden also blockiert; zusätzlich läuft Gotenberg ohne JavaScript und ohne Netzzugriff.
 
 ## manifest.json
 
@@ -216,7 +216,8 @@ Ein Template kann openbill weder kaputt machen noch blockieren:
 - das Papier muss Platz für den Inhalt lassen: doppelter `marginX` kleiner als die Seitenbreite, `headerHeight + footerHeight` mindestens 20mm kleiner als die Seitenhöhe,
 - beim Import muss jeder Teil unter 200 KB bleiben, Feldschlüssel in `expectedFields` müssen wie `project_name` aussehen, und Assets müssen wirklich das sein, was ihre Endung sagt,
 - ein Rendering bricht nach 5 Sekunden ab,
-- keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen).
+- keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen), und `<meta http-equiv="refresh">` ist ein Template-Fehler,
+- ein Rendering darf höchstens 128 MB Speicher nutzen; `capture` und Textfilter wie `replace` oder `append` zählen schon beim Aufbau gegen die Ausgabegrenze.
 
 Jeder Fehler wird mit **Bereich** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), **Datei** und **Zeile** gemeldet, zum Beispiel `body · template.liquid · Zeile 3 · Unexpected character }`. Die Vorschau zeigt den Fehler anstelle des kaputten Teils. Abschließen und Entwurfs-PDF verweigern, solange das Template Fehler hat; ein kaputtes Template landet so nie in einem archivierten PDF.
 

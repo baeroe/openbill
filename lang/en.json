@@ -137,6 +137,8 @@
     "template_package.paper_format": "paper.format must be one of :formats.",
     "template_package.paper_invalid": "paper must be an object.",
     "template_package.paper_length": "paper.:key must be a length like 20mm (mm, cm, in, pt or px).",
+    "template_package.paper_too_high": "paper.headerHeight and paper.footerHeight leave less than 20mm for the content.",
+    "template_package.paper_too_wide": "paper.marginX leaves no room for the content (twice the margin must be less than the page width).",
     "template_package.required": ":field is required.",
     "template_package.string": ":field must be a text of at most :max characters.",
     "template_package.too_large": "The package is too large (at most :mb MB).",

@@ -137,6 +137,8 @@
     "template_package.paper_format": "paper.format muss eins von :formats sein.",
     "template_package.paper_invalid": "paper muss ein Objekt sein.",
     "template_package.paper_length": "paper.:key muss eine Länge wie 20mm sein (mm, cm, in, pt oder px).",
+    "template_package.paper_too_high": "paper.headerHeight und paper.footerHeight lassen weniger als 20mm für den Inhalt.",
+    "template_package.paper_too_wide": "paper.marginX lässt keinen Platz für den Inhalt (der doppelte Rand muss kleiner als die Seitenbreite sein).",
     "template_package.required": ":field ist Pflicht.",
     "template_package.string": ":field muss ein Text mit höchstens :max Zeichen sein.",
     "template_package.too_large": "Das Paket ist zu groß (höchstens :mb MB).",

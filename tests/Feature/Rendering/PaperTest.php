@@ -75,3 +75,10 @@ it('builds a template source from a model with its assets and from a snapshot ro
         ->and($source->with(['body' => 'new'])->assets)->toBe($source->assets)
         ->and(TemplateSource::fromSnapshot([])->body)->toBe('');
 });
+
+it('refuses margins that leave no room for the content (review #8)', function () {
+    expect(array_keys(Paper::errors(['marginX' => '105mm'])))->toBe(['paper.marginX'])
+        ->and(array_keys(Paper::errors(['headerHeight' => '150mm', 'footerHeight' => '130mm'])))->toBe(['paper.headerHeight'])
+        ->and(Paper::errors(['format' => 'Letter', 'marginX' => '1in', 'headerHeight' => '2in', 'footerHeight' => '2in']))->toBe([])
+        ->and(Paper::fromManifest(['paper' => ['marginX' => '200mm']])->marginX)->toBe('20mm');
+});

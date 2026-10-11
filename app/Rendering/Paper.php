@@ -67,6 +67,18 @@ final readonly class Paper
             }
         }
 
+        if ($errors === []) {
+            // the body needs room: at least 20mm of height and some width between the margins
+            [$width, $height] = self::FORMATS[is_string($paper['format'] ?? null) ? $paper['format'] : self::DEFAULT['format']];
+            $length = fn (string $key): BigDecimal => self::lengthToPx(is_string($paper[$key] ?? null) ? $paper[$key] : self::DEFAULT[$key]);
+            if ($length('marginX')->multipliedBy(2)->isGreaterThanOrEqualTo(self::lengthToPx($width))) {
+                $errors['paper.marginX'] = Text::t('template_package.paper_too_wide');
+            }
+            if ($length('headerHeight')->plus($length('footerHeight'))->plus(self::lengthToPx('20mm'))->isGreaterThan(self::lengthToPx($height))) {
+                $errors['paper.headerHeight'] = Text::t('template_package.paper_too_high');
+            }
+        }
+
         return $errors;
     }
 

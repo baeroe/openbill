@@ -10,11 +10,14 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
+use App\ApiResource\Input\ConvertInput;
+use App\ApiResource\Input\StatusInput;
 use App\Domain\Lifecycle\StatusMachine;
 use App\Http\Api\ApiMiddleware;
 use App\Models\Document;
 use App\Models\Position;
 use App\Models\PositionGroup;
+use App\State\Processor\DocumentActionProcessor;
 use App\State\Processor\DocumentProcessor;
 use App\State\Provider\DocumentProvider;
 use App\Support\DocumentInspector;
@@ -63,6 +66,58 @@ use Symfony\Component\Serializer\Attribute\Groups;
             description: 'Saves a draft (autosave). Missing keys stay, "groups" replaces all groups and positions. Finalized: 409.',
         ),
         new Delete(uriTemplate: '/documents/{id}', middleware: ApiMiddleware::WRITE, read: false, processor: DocumentProcessor::class),
+        new Post(
+            uriTemplate: '/documents/{id}/finalize',
+            name: 'document_finalize',
+            status: 200,
+            input: false,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentActionProcessor::class,
+            description: 'Checks the profile, allocates the number, freezes master data and archives PDF (and e-invoice XML).',
+        ),
+        new Post(
+            uriTemplate: '/documents/{id}/status',
+            name: 'document_status',
+            status: 200,
+            input: StatusInput::class,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentActionProcessor::class,
+        ),
+        new Post(
+            uriTemplate: '/documents/{id}/convert',
+            name: 'document_convert',
+            status: 200,
+            input: ConvertInput::class,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentActionProcessor::class,
+        ),
+        new Post(
+            uriTemplate: '/documents/{id}/cancel',
+            name: 'document_cancel',
+            status: 200,
+            input: false,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentActionProcessor::class,
+            description: 'Creates (or returns) the cancellation draft of an open or paid invoice.',
+        ),
+        new Post(
+            uriTemplate: '/documents/{id}/duplicate',
+            name: 'document_duplicate',
+            status: 201,
+            input: false,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: DocumentActionProcessor::class,
+        ),
     ],
 )]
 final class DocumentResource

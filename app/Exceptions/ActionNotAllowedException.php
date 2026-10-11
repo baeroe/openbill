@@ -56,6 +56,18 @@ final class ActionNotAllowedException extends DomainActionException
         return new self('customer_has_finalized_documents', Text::t('errors.customer_has_finalized_documents'));
     }
 
+    /** Built-in templates are read-only (change a copy instead). */
+    public static function templateBuiltIn(): self
+    {
+        return new self('template_built_in', Text::t('errors.template_built_in'));
+    }
+
+    /** Documents still point at the template (finalized ones keep a copy in their snapshot). */
+    public static function templateInUse(): self
+    {
+        return new self('template_in_use', Text::t('errors.template_in_use'));
+    }
+
     public function reason(): string
     {
         return $this->reason;

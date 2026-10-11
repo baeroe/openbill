@@ -225,6 +225,31 @@ final readonly class TemplatePackage
         return self::ASSET_TYPES[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? 'application/octet-stream';
     }
 
+    /**
+     * One asset written outside a ZIP (PUT /api/templates/{id}/files): path, type, size and content follow
+     * the import rules. Returns [translation key, replacements] of the first problem, null when fine.
+     *
+     * @return array{0: string, 1: array<string, string|int>}|null
+     */
+    public static function assetProblem(string $path, string $contents): ?array
+    {
+        if (! str_starts_with($path, 'assets/') || ! self::safePath($path)) {
+            return ['template_package.bad_path', ['path' => $path]];
+        }
+        if (! array_key_exists(strtolower(pathinfo($path, PATHINFO_EXTENSION)), self::ASSET_TYPES)) {
+            return ['template_package.asset_type', ['path' => $path]];
+        }
+        $max = (int) config('openbill.templates.max_asset_bytes');
+        if (strlen($contents) > $max) {
+            return ['template_package.asset_too_large', ['path' => $path, 'mb' => intdiv($max, 1024 * 1024)]];
+        }
+        if (! self::contentMatches($path, $contents)) {
+            return ['template_package.asset_content', ['path' => $path]];
+        }
+
+        return null;
+    }
+
     /** The content is what the extension says (an image is an image, a font a font, an SVG an SVG). */
     private static function contentMatches(string $path, string $contents): bool
     {

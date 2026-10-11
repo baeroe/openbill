@@ -153,3 +153,13 @@ it('reads a package from a directory', function () {
         ->and($package->body)->toContain('<h1>')
         ->and($package->assets)->toBe(['assets/logo.svg' => '<svg xmlns="http://www.w3.org/2000/svg"/>']);
 });
+
+it('checks single assets with the rules of the ZIP import', function (string $path, string $contents, ?string $key) {
+    expect(TemplatePackage::assetProblem($path, $contents)[0] ?? null)->toBe($key);
+})->with([
+    'svg' => ['assets/logo.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>', null],
+    'traversal' => ['assets/../evil.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>', 'template_package.bad_path'],
+    'outside assets' => ['logo.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>', 'template_package.bad_path'],
+    'script' => ['assets/run.js', 'alert(1)', 'template_package.asset_type'],
+    'fake png' => ['assets/logo.png', '<svg xmlns="http://www.w3.org/2000/svg"></svg>', 'template_package.asset_content'],
+]);

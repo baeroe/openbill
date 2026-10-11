@@ -4,6 +4,7 @@ use App\Http\Api\ApiMiddleware;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
 use App\Http\Controllers\Api\SignedDownloadController;
+use App\Http\Controllers\Api\TemplatePackageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,3 +23,7 @@ Route::get('/downloads/documents/{id}/{kind}', SignedDownloadController::class)
     ->whereIn('kind', ['pdf', 'xml'])
     ->middleware(['signed:relative', 'throttle:60,1'])
     ->name('api.downloads');
+
+Route::get('/templates/{id}/package', TemplatePackageController::class)
+    ->middleware(ApiMiddleware::TEMPLATE_READ)
+    ->name('api.templates.package');

@@ -25,10 +25,15 @@ export class Autosave {
     private inFlight: Promise<void> | null = null;
     private attempt = 0;
     private current: SaveState = 'saved';
-    private stopped = false;
+    private stoppedFlag = false;
 
     constructor(private readonly options: AutosaveOptions) {
         this.savedRevision = options.revision();
+    }
+
+    /** stop() was called (draft deleted): this instance saves nothing anymore. */
+    get stopped(): boolean {
+        return this.stoppedFlag;
     }
 
     get state(): SaveState {
@@ -61,7 +66,7 @@ export class Autosave {
                 this.inFlight = null;
                 this.savedRevision = revision;
                 this.attempt = 0;
-                if (this.stopped) return;
+                if (this.stoppedFlag) return;
                 this.options.onSaved(payload, saved);
                 if (this.options.revision() !== this.savedRevision) {
                     this.set('dirty');
@@ -72,7 +77,7 @@ export class Autosave {
             },
             (error: unknown) => {
                 this.inFlight = null;
-                if (!this.stopped) this.fail(error, payload);
+                if (!this.stoppedFlag) this.fail(error, payload);
             },
         );
         return this.inFlight;
@@ -102,12 +107,12 @@ export class Autosave {
 
     /** No more saves (the draft is being deleted). */
     stop(): void {
-        this.stopped = true;
+        this.stoppedFlag = true;
         this.clear();
     }
 
     private blocked(): boolean {
-        return this.stopped || this.current === 'locked' || this.current === 'gone';
+        return this.stoppedFlag || this.current === 'locked' || this.current === 'gone';
     }
 
     private fail(error: unknown, sent: DraftPayload): void {

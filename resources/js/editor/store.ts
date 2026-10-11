@@ -16,7 +16,8 @@ export type EditorState = {
     collapsed: string[];
     /** Server id → the local id it replaced: stable React keys, so a row keeps focus and input state across a save. */
     aliases: Record<string, string>;
-    load(document: DocumentDetail): void;
+    /** local: the newest unsaved state of this document (back to it while its autosave still works), shown over the server state. */
+    load(document: DocumentDetail, local?: { payload: DraftPayload; saveState: SaveState }): void;
     update(fn: (draft: Draft) => Draft): void;
     /** update() only while this document is still in the editor: undo toasts outlive a page change. */
     updateFor(documentId: string, fn: (draft: Draft) => Draft): void;
@@ -36,16 +37,17 @@ const initial = (): Data => ({ draft: null, revision: 0, synced: null, saveState
 export const useEditor = create<EditorState>()((set, get) => ({
     ...initial(),
 
-    load: (document) =>
+    load: (document, local) =>
         set((state) => {
             const same = state.draft?.id === document.id;
-            const draft = fromDocument(document);
+            const server = fromDocument(document);
+            const draft = local ? { ...server, ...local.payload } : server;
             const conflict = same && (state.saveState === 'locked' || state.saveState === 'gone');
             return {
                 draft,
-                synced: toPayload(draft),
+                synced: toPayload(server),
                 revision: state.revision + 1,
-                saveState: conflict ? state.saveState : 'saved',
+                saveState: conflict ? state.saveState : (local?.saveState ?? 'saved'),
                 saveError: conflict ? state.saveError : null,
                 errors: {},
                 collapsed: same ? state.collapsed : [],

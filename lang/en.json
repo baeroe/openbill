@@ -686,6 +686,7 @@
     "settings.no_custom_fields": "No custom fields yet. Add them under custom fields, for example for commercial register or managing directors.",
     "settings.none": "None",
     "settings.none_yet": "None yet.",
+    "settings.number_taken": ":number exists already. Finalizing skips used numbers and assigns :next.",
     "settings.numbering": "Number range",
     "settings.numbering_text": "The number is assigned when finalizing. Drafts have none yet.",
     "settings.org_name": "Name",

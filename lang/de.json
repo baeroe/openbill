@@ -686,6 +686,7 @@
     "settings.no_custom_fields": "Noch keine eigenen Felder. Lege sie unter „Eigene Felder“ an, etwa für Handelsregister oder Geschäftsführung.",
     "settings.none": "Keine",
     "settings.none_yet": "Noch keine.",
+    "settings.number_taken": ":number gibt es schon. Beim Abschließen werden vergebene Nummern übersprungen, vergeben wird :next.",
     "settings.numbering": "Nummernkreis",
     "settings.numbering_text": "Die Nummer wird erst beim Abschließen vergeben. Entwürfe haben noch keine.",
     "settings.org_name": "Name",

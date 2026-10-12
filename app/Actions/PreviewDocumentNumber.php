@@ -6,6 +6,7 @@ use App\Domain\Numbering\NumberFormatter;
 use App\Enums\DocumentType;
 use App\Support\Actor;
 use App\Support\Text;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -38,9 +39,17 @@ final class PreviewDocumentNumber
         if ((bool) ($data['reset_yearly'] ?? false) && ! NumberFormatter::hasYear($pattern)) {
             return ['number' => null, 'valid' => false, 'message' => Text::t('errors.number_pattern_year')];
         }
-        $today = now();
-        $sequence = isset($data['next_value']) ? (int) $data['next_value'] : $this->numbers->nextValue($type, $today->toDateString());
+        $today = CarbonImmutable::now();
+        $resetYearly = (bool) ($data['reset_yearly'] ?? false);
+        $sequence = isset($data['next_value']) ? (int) $data['next_value'] : $this->numbers->nextValue($type, $today->toDateString(), $resetYearly);
+        // finalizing skips numbers that exist already: show the number it would really assign
+        $wanted = NumberFormatter::format($pattern, $today, $sequence);
+        [, $number] = AllocateDocumentNumber::firstFree($pattern, $today, $sequence);
 
-        return ['number' => NumberFormatter::format($pattern, $today, $sequence), 'valid' => true, 'message' => null];
+        return [
+            'number' => $number,
+            'valid' => true,
+            'message' => $number === $wanted ? null : Text::t('settings.number_taken', ['number' => $wanted, 'next' => $number]),
+        ];
     }
 }

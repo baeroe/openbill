@@ -2,6 +2,8 @@
 
 use App\Actions\PreviewDocumentNumber;
 use App\Enums\DocumentType;
+use App\Models\Document;
+use App\Models\NumberSequence;
 
 beforeEach(fn () => $this->travelTo('2026-10-12 10:00:00'));
 
@@ -32,4 +34,22 @@ it('answers over the API and 404 for unknown types', function () {
         ->assertJsonPath('number', 'INV-2026-0007');
     $this->getJson('/api/document-types/invoice/number-preview')->assertUnprocessable()->assertJsonPath('violations.0.path', 'pattern');
     $this->getJson('/api/document-types/receipt/number-preview?pattern=X-{0}')->assertNotFound();
+});
+
+it('shows the number finalizing would really assign when the wanted one exists (review #7)', function () {
+    Document::factory()->finalized()->create(['type' => DocumentType::Invoice, 'number' => 'RE-2026-0001']);
+    Document::factory()->finalized()->create(['type' => DocumentType::Invoice, 'number' => 'RE-2026-0002']);
+
+    $result = app(PreviewDocumentNumber::class)->handle(systemActor(), DocumentType::Invoice, ['pattern' => 'RE-{YYYY}-{0000}', 'next_value' => '1']);
+
+    expect($result['number'])->toBe('RE-2026-0003')
+        ->and($result['valid'])->toBeTrue()
+        ->and($result['message'])->toContain('RE-2026-0001')->toContain('RE-2026-0003');
+});
+
+it('uses the reset setting of the form, not the saved one', function () {
+    NumberSequence::query()->where('doc_type', 'offer')->whereNull('year')->update(['reset_yearly' => false, 'next_value' => 40]);
+
+    expect(app(PreviewDocumentNumber::class)->handle(systemActor(), DocumentType::Offer, ['pattern' => 'Q-{YYYY}-{0000}', 'reset_yearly' => '1'])['number'])->toBe('Q-2026-0001')
+        ->and(app(PreviewDocumentNumber::class)->handle(systemActor(), DocumentType::Offer, ['pattern' => 'Q-{YYYY}-{0000}', 'reset_yearly' => '0'])['number'])->toBe('Q-2026-0040');
 });

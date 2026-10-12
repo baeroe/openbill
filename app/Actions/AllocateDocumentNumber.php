@@ -51,14 +51,31 @@ final class AllocateDocumentNumber
         return $number;
     }
 
-    /** The counter value the next finalize on $date would use; nothing is locked or reserved. */
-    public function nextValue(DocumentType $type, string $date): int
+    /**
+     * The counter value the next finalize on $date would use; nothing is locked or reserved. $resetYearly overrides the
+     * saved setting (settings form with an unsaved checkbox).
+     */
+    public function nextValue(DocumentType $type, string $date, ?bool $resetYearly = null): int
     {
         $config = NumberSequence::query()->where('doc_type', $type->value)->whereNull('year')->firstOrFail();
 
-        return $config->reset_yearly
+        return ($resetYearly ?? $config->reset_yearly)
             ? (int) (NumberSequence::query()->where('doc_type', $type->value)->where('year', (int) CarbonImmutable::parse($date)->format('Y'))->value('next_value') ?? 1)
             : $config->next_value;
+    }
+
+    /**
+     * First value from $sequence on whose number is still free – the same skip as handle(), read-only.
+     *
+     * @return array{0: int, 1: string} value and number
+     */
+    public static function firstFree(string $pattern, CarbonImmutable $day, int $sequence): array
+    {
+        while (Document::query()->where('number', $number = NumberFormatter::format($pattern, $day, $sequence))->exists()) {
+            $sequence++;
+        }
+
+        return [$sequence, $number];
     }
 
     /** The number the next finalize on $date would get; nothing is locked or reserved. */

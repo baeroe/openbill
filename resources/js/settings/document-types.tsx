@@ -157,7 +157,7 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                     <div aria-live="polite" className="grid gap-1 rounded-lg bg-accent-soft p-5">
                         <span className="text-sm text-muted">{t('settings.next_number')}</span>
                         <strong className="num text-2xl font-bold tracking-brand break-all text-accent">{preview.data?.valid ? preview.data.number : '–'}</strong>
-                        {preview.data && !preview.data.valid && <span className="text-xs text-bad">{preview.data.message}</span>}
+                        {preview.data?.message && <span className={preview.data.valid ? 'text-xs text-muted' : 'text-xs text-bad'}>{preview.data.message}</span>}
                     </div>
                 </div>
             </SettingsCard>

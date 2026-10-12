@@ -20,6 +20,10 @@ final class OpenbillServer extends Server
     /** @var array<int, class-string<Tool>> */
     protected array $tools = [
         Tools\GetOverviewTool::class,
+        Tools\ListCustomersTool::class,
+        Tools\GetCustomerTool::class,
+        Tools\CreateCustomerTool::class,
+        Tools\UpdateCustomerTool::class,
     ];
 
     /** @var array<int, class-string<Server\Resource>> */

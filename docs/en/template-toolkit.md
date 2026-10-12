@@ -26,7 +26,7 @@ Open the template in the editor and choose **Toolkit → Download toolkit**. Uns
 Every download creates a new token for you, named *Toolkit: &lt;template&gt; (&lt;date&gt;)*, with the abilities `templates:render` and `templates:write`, bound to this template. It can
 
 - render every document of the instance in the preview – **this is read access to all documents** (customers, addresses, positions, amounts), the same as `templates:render` in the [REST API](/en/api);
-- read and write this one template (`GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`).
+- read and write this one template (`GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`). With a `template_id`, `POST /api/render` accepts only this template (another one → 403).
 
 It cannot change documents, customers or settings, cannot read or change other templates, cannot delete or duplicate this template, cannot create tokens and cannot use MCP. Keep `.env.local` private. The token appears under **Settings → API & MCP** as *Toolkit · &lt;template&gt;*; **Revoke** ends it at once. Deleting the template deletes its toolkit tokens. Older downloads keep working until you revoke their tokens.
 

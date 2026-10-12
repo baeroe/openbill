@@ -10,7 +10,7 @@ use Laravel\Sanctum\TransientToken;
 
 /**
  * Which token may use which endpoint. The session of the own UI (Sanctum TransientToken) may do everything.
- * A toolkit token (templates:write with template_id) reads and writes only its own template.
+ * A toolkit token (templates:write with template_id) reads and writes only its own template and renders only with it.
  * SESSION: only the own UI (user management), never a token.
  * MCP: only a token with the ability "mcp", never the session of the UI.
  */
@@ -65,5 +65,18 @@ final class ApiAccess
             && $token instanceof PersonalAccessToken
             && $token->template_id === $templateId
             && $token->can(TokenAbility::TemplatesWrite->value);
+    }
+
+    /**
+     * POST /api/render with a template_id: a token bound to one template (toolkit) renders only with that one, so it
+     * never sees the output of foreign template sources. Unbound tokens and the session may use any template.
+     */
+    public static function rendersWith(?HasAbilities $token, ?string $templateId): bool
+    {
+        if ($templateId === null || ! $token instanceof PersonalAccessToken || $token->template_id === null) {
+            return true;
+        }
+
+        return $token->template_id === $templateId || $token->can('api:read') || $token->can('api:write');
     }
 }

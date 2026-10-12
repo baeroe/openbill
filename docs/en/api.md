@@ -27,7 +27,7 @@ php artisan app:create-token admin@example.com --name=agent --ability=api:read -
 | `api:read` | reading all resources, PDF/XML downloads, position suggestions, previews |
 | `api:write` | everything `api:read` allows, plus creating, changing and deleting |
 | `templates:render` | previews: `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema`. **This is read access to all documents:** the token can render every document (customer, address, positions, amounts) and `render/sources` lists recent documents with number and customer name. The toolkit needs this to preview templates with real documents. |
-| `templates:write` | reading and writing **one** template (`--template=<id>`): `GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`. The [template toolkit](/en/template-toolkit) download creates such a token together with `templates:render`. |
+| `templates:write` | reading and writing **one** template (`--template=<id>`): `GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`. The [template toolkit](/en/template-toolkit) download creates such a token together with `templates:render`; such a bound token renders (`POST /api/render` with `template_id`) only with its own template. |
 | `mcp` | the [MCP server](/en/mcp) only (no REST endpoint) |
 
 Without a valid token the API answers `401`, with a token that lacks the ability `403`. A revoked or expired token gets `401`.

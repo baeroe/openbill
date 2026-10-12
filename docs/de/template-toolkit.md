@@ -26,7 +26,7 @@ Mit dem Template-Toolkit schreibst du ein Template in deinem eigenen Editor mit 
 Jeder Download legt einen neuen Token für dich an, Name *Toolkit: &lt;Template&gt; (&lt;Datum&gt;)*, mit den Fähigkeiten `templates:render` und `templates:write`, gebunden an dieses Template. Er kann
 
 - jedes Dokument der Instanz in der Vorschau rendern – **das ist lesender Zugriff auf alle Dokumente** (Kunden, Adressen, Positionen, Beträge), genau wie `templates:render` in der [REST-API](/de/api);
-- dieses eine Template lesen und schreiben (`GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`).
+- dieses eine Template lesen und schreiben (`GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`). Mit `template_id` nimmt `POST /api/render` nur dieses Template an (ein anderes → 403).
 
 Er kann keine Dokumente, Kunden oder Einstellungen ändern, andere Templates weder lesen noch ändern, dieses Template weder löschen noch duplizieren, keine Tokens anlegen und kein MCP nutzen. Gib `.env.local` nicht weiter. Der Token steht unter **Einstellungen → API & MCP** als *Toolkit · &lt;Template&gt;*; **Widerrufen** beendet ihn sofort. Wird das Template gelöscht, verschwinden seine Toolkit-Tokens mit. Ältere Downloads funktionieren weiter, bis du ihre Tokens widerrufst.
 

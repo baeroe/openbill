@@ -65,6 +65,8 @@ it('refuses everything else with 403 and changes nothing', function () {
     $templatesBefore = Template::query()->count();
     $denied = [
         ['PUT', "/api/templates/{$other}/files", ['body' => '<p>taken over</p>']],
+        ['POST', '/api/render', ['scenario' => 'long_invoice', 'template_id' => $other]],
+        ['POST', '/api/render', ['document_id' => $doc, 'template_id' => $other]],
         ['GET', "/api/templates/{$other}"],
         ['GET', "/api/templates/{$other}/package"],
         ['GET', '/api/templates'],

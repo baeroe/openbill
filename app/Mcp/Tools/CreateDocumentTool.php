@@ -14,11 +14,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('create-document')]
+#[Title('Create draft')]
 #[Description('Create a draft: type offer, confirmation or invoice (a cancellation comes from cancel-invoice), customer_id, and any field update-document takes, e.g. groups with positions. Dates, payment term, validity, texts and template come from the document type settings unless sent. Answers like get-document, with totals and issues.')]
 #[IsDestructive(false)]
+#[IsOpenWorld(false)]
 final class CreateDocumentTool extends OpenbillTool
 {
     public function __construct(

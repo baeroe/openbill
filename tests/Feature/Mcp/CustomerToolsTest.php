@@ -65,3 +65,12 @@ it('changes only the sent keys and keeps the contacts', function () {
         ->and($updated['contacts'][0]['id'])->toBe($customer['contacts'][0]['id']);
     mcpTool(UpdateCustomerTool::class, ['id' => '01jaaaaaaaaaaaaaaaaaaaaaaa', 'city' => 'Oslo'])->assertHasErrors(['There is no customer']);
 });
+
+it('clears a field with null, as the schema allows (review #4)', function () {
+    $customer = Customer::factory()->create(['vat_id' => 'ATU12345678', 'tax_treatment' => 'eu_reverse_charge']);
+    $tool = app(UpdateCustomerTool::class)->toArray()['inputSchema']['properties'];
+
+    expect($tool['vat_id']['type'])->toBe(['string', 'null'])
+        ->and(mcpJson(mcpTool(UpdateCustomerTool::class, ['id' => $customer->id, 'tax_treatment' => 'domestic', 'vat_id' => null])->assertOk()))
+        ->toMatchArray(['tax_treatment' => 'domestic', 'vat_id' => null]);
+});

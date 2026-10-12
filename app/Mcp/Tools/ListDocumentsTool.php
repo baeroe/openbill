@@ -13,11 +13,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('list-documents')]
+#[Title('List documents')]
 #[Description('Documents in short form (number, type, status, customer, dates, totals; no texts or positions), newest date first. Filters: type, status (overdue = open invoices past their due date), customer_id, q (number or customer name), date_from/date_to, sort. Paged with page and per_page. get-document returns one document completely.')]
 #[IsReadOnly]
+#[IsOpenWorld(false)]
 final class ListDocumentsTool extends OpenbillTool
 {
     private const FILTERS = ['type', 'status', 'customer_id', 'q', 'date_from', 'date_to', 'sort'];

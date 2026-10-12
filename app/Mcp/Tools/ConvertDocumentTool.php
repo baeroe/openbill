@@ -16,11 +16,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('convert-document')]
+#[Title('Convert document')]
 #[Description('Create the next document from a finalized one as a new draft: an accepted offer into a confirmation or an invoice, a confirmation into an invoice. Groups, positions and matching custom values move along; "dropped_fields" names custom values the target type does not use. For a cancellation use cancel-invoice.')]
 #[IsDestructive(false)]
+#[IsOpenWorld(false)]
 final class ConvertDocumentTool extends OpenbillTool
 {
     public function __construct(

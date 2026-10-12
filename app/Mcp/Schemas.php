@@ -28,14 +28,14 @@ final class Schemas
         $name = $schema->string()->description('Company or person name');
 
         return [
-            'number' => $schema->string()->description('Customer number; left out: the next free number'),
+            'number' => $schema->string()->nullable()->description('Customer number; left out or null: the next free number'),
             'name' => $create ? $name->required() : $name,
-            'street' => $schema->string(),
-            'zip' => $schema->string(),
-            'city' => $schema->string(),
-            'country' => $schema->string()->description('ISO 3166-1 alpha-2 code, e.g. DE, AT, NO'),
-            'email' => $schema->string(),
-            'vat_id' => $schema->string()->description('VAT ID; needed for eu_reverse_charge'),
+            'street' => $schema->string()->nullable(),
+            'zip' => $schema->string()->nullable(),
+            'city' => $schema->string()->nullable(),
+            'country' => $schema->string()->nullable()->description('ISO 3166-1 alpha-2 code, e.g. DE, AT, NO'),
+            'email' => $schema->string()->nullable(),
+            'vat_id' => $schema->string()->nullable()->description('VAT ID; needed for eu_reverse_charge; null clears it'),
             'tax_treatment' => $schema->string()->enum(['domestic', 'eu_reverse_charge', 'third_country'])
                 ->description('domestic (default); eu_reverse_charge: EU business with VAT ID, no VAT; third_country: outside the EU'),
             'supply_type' => $schema->string()->enum(['services', 'goods'])->description('Only for third_country: services (default) or goods'),
@@ -84,8 +84,8 @@ final class Schemas
                     'id' => $schema->string()->description('Keeps an existing position'),
                     'kind' => $schema->string()->enum(['item', 'optional', 'text'])->required()
                         ->description('item; optional (offers only, not in the total); text (a line without amount)'),
-                    'title' => $schema->string(),
-                    'description' => $schema->string(),
+                    'title' => $schema->string()->nullable(),
+                    'description' => $schema->string()->nullable(),
                     'quantity' => $schema->string()->description('Decimal as string, e.g. "8" or "1.5"'),
                     'unit_price' => $schema->string()->description('Net price as string, e.g. "120" or "49.90"'),
                     'unit_id' => $schema->string()->nullable()->description('Unit (list-tax-rates-and-units)'),

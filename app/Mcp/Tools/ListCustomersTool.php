@@ -13,11 +13,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('list-customers')]
+#[Title('List customers')]
 #[Description('Customers with their contacts, sorted by name. "q" searches name, number and email. Paged with page and per_page (up to 100); the answer has items, total and has_more.')]
 #[IsReadOnly]
+#[IsOpenWorld(false)]
 final class ListCustomersTool extends OpenbillTool
 {
     protected function run(Request $request, Actor $actor): Response

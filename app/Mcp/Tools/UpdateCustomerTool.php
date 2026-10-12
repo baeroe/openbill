@@ -14,13 +14,17 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('update-customer')]
+#[Title('Update customer')]
 #[Description('Change a customer. Only the keys you send change. "contacts", when sent, is the complete list: send the id of a contact to keep it, contacts left out are removed. Finalized documents keep the data they were finalized with.')]
 #[IsDestructive]
 #[IsIdempotent]
+#[IsOpenWorld(false)]
 final class UpdateCustomerTool extends OpenbillTool
 {
     public function __construct(private readonly SaveCustomer $save) {}

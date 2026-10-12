@@ -16,13 +16,17 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('update-document')]
+#[Title('Update draft')]
 #[Description('Change a draft. Only the keys you send change; "groups", when sent, replaces all groups and positions (send their ids to keep them). Amounts and quantities are strings. Finalized documents cannot be changed (reason document_locked). Answers like get-document: check "issues" before finalize-document.')]
 #[IsDestructive]
 #[IsIdempotent]
+#[IsOpenWorld(false)]
 final class UpdateDocumentTool extends OpenbillTool
 {
     public function __construct(

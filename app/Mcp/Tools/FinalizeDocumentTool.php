@@ -14,11 +14,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('finalize-document')]
+#[Title('Finalize document')]
 #[Description('Finalize a draft: checks the profile (basic or EN 16931 e-invoice), assigns the number, freezes customer and organization data and archives the PDF (and the e-invoice XML). It cannot be undone – ask the user first. When data is missing, the error (reason compliance_failed) lists every issue with its path; fix them with update-document, update-customer or update-organization.')]
 #[IsDestructive]
+#[IsOpenWorld(false)]
 final class FinalizeDocumentTool extends OpenbillTool
 {
     public function __construct(

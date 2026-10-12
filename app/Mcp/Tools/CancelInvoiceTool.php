@@ -14,13 +14,17 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('cancel-invoice')]
+#[Title('Cancel invoice')]
 #[Description('Start the cancellation of an open or paid invoice: creates the cancellation draft (or returns the existing one). Finalizing that draft with finalize-document marks the invoice as cancelled – ask the user before you do.')]
 #[IsDestructive]
 #[IsIdempotent]
+#[IsOpenWorld(false)]
 final class CancelInvoiceTool extends OpenbillTool
 {
     public function __construct(

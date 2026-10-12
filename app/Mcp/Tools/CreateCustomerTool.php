@@ -12,11 +12,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('create-customer')]
+#[Title('Create customer')]
 #[Description('Create a customer. Only "name" is required; the number is assigned when left out. "contacts" lists the contact persons, exactly one becomes the default. Custom fields go into "custom" (keys from list-field-definitions). eu_reverse_charge needs a business customer with a VAT ID.')]
 #[IsDestructive(false)]
+#[IsOpenWorld(false)]
 final class CreateCustomerTool extends OpenbillTool
 {
     public function __construct(private readonly SaveCustomer $save) {}

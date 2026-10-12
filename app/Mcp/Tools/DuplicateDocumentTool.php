@@ -14,11 +14,15 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('duplicate-document')]
+#[Title('Duplicate document')]
 #[Description('Copy a document (draft or finalized, not a cancellation) into a new draft of the same type with today\'s date. The source stays unchanged. Answers with the new draft.')]
 #[IsDestructive(false)]
+#[IsOpenWorld(false)]
 final class DuplicateDocumentTool extends OpenbillTool
 {
     public function __construct(

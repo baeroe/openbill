@@ -16,13 +16,17 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
 use Laravel\Mcp\Server\Tools\Annotations\IsIdempotent;
+use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('set-document-status')]
+#[Title('Set document status')]
 #[Description('Set the status of a finalized document by hand, e.g. an offer to accepted or rejected, a confirmation to done, an invoice to paid. Drafts get their status only from finalize-document; "cancelled" comes from finalizing a cancellation. Ask the user before marking an invoice as paid.')]
 #[IsDestructive]
 #[IsIdempotent]
+#[IsOpenWorld(false)]
 final class SetDocumentStatusTool extends OpenbillTool
 {
     public function __construct(

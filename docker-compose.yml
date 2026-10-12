@@ -20,7 +20,8 @@ services:
       # optional: without it, a key is generated once and kept in the data volume
       APP_KEY: "${APP_KEY:-}"
       ADMIN_EMAIL: "${ADMIN_EMAIL:?ADMIN_EMAIL missing}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?ADMIN_PASSWORD missing (set it in .env before the first start)}"
+      # only for the first start (app:ensure-admin creates the owner once); remove it from .env afterwards
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
       DB_HOST: mariadb
       DB_DATABASE: openbill
       DB_USERNAME: openbill

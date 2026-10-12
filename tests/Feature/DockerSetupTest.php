@@ -239,14 +239,22 @@ it('publishes openbill on localhost only unless OPENBILL_BIND says otherwise', f
         ->and(dockerCompose()['services']['openbill']['environment']['TRUSTED_PROXIES'])->toBe('${TRUSTED_PROXIES:-}');
 });
 
-it('ships no usable passwords, so Compose refuses to start until they are set', function () {
+it('ships no usable passwords, so Compose refuses to start until the database ones are set', function () {
     $example = dockerRepoFile('.env.docker.example');
     $compose = dockerRepoFile('docker-compose.yml');
 
     foreach (['ADMIN_PASSWORD', 'DB_PASSWORD', 'DB_ROOT_PASSWORD'] as $name) {
-        expect($example)->toMatch('/^'.$name.'=$/m')
-            ->and($compose)->toContain('${'.$name.':?');
+        expect($example)->toMatch('/^'.$name.'=$/m');
     }
+    foreach (['DB_PASSWORD', 'DB_ROOT_PASSWORD'] as $name) {
+        expect($compose)->toContain('${'.$name.':?');
+    }
+});
+
+it('needs ADMIN_PASSWORD only for the first start (review I2), so it can be removed from .env afterwards', function () {
+    expect(dockerCompose()['services']['openbill']['environment']['ADMIN_PASSWORD'])->toBe('${ADMIN_PASSWORD:-}')
+        ->and(dockerRepoFile('.env.docker.example'))->toContain('Remove ADMIN_PASSWORD once the owner exists')
+        ->toContain('app:reset-password');
 });
 
 it('reports openbill healthy only when Laravel answers for the host of APP_URL', function () {

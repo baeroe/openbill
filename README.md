@@ -5,9 +5,9 @@
 
 Open, self-hosted quotes, order confirmations, invoices and cancellations. Your own fields on every level, line items in groups, PDF templates in Liquid and EN 16931 e-invoices (ZUGFeRD/Factur-X) – in the browser, over a REST API and for AI agents over MCP.
 
-**Docs: [baeroe.github.io/openbill](https://baeroe.github.io/openbill/)** (English and German)
+**Docs: [openbill.dev](https://openbill.dev)** (English and German)
 
-![The document editor: a draft invoice with groups of positions, custom fields, the compliance check and the live preview (the demo company writes its invoices in German)](https://baeroe.github.io/openbill/screenshots/en/editor.png)
+![The document editor: a draft invoice with groups of positions, custom fields, the compliance check and the live preview (the demo company writes its invoices in German)](https://openbill.dev/screenshots/en/editor.png)
 
 ## Features
 
@@ -35,15 +35,15 @@ docker compose pull && docker compose up -d       # update
 
 openbill listens on `127.0.0.1:7739`. Put a reverse proxy with HTTPS in front, set `APP_URL` to its address and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-- [Setup](https://baeroe.github.io/openbill/en/setup) and [Reverse proxy](https://baeroe.github.io/openbill/en/reverse-proxy)
-- [Backup](https://baeroe.github.io/openbill/en/backup) and [Upgrading](https://baeroe.github.io/openbill/en/upgrading)
-- [Templates](https://baeroe.github.io/openbill/en/templates), [E-invoices](https://baeroe.github.io/openbill/en/e-invoice), [REST API](https://baeroe.github.io/openbill/en/api), [MCP](https://baeroe.github.io/openbill/en/mcp)
+- [Setup](https://openbill.dev/en/setup) and [Reverse proxy](https://openbill.dev/en/reverse-proxy)
+- [Backup](https://openbill.dev/en/backup) and [Upgrading](https://openbill.dev/en/upgrading)
+- [Templates](https://openbill.dev/en/templates), [E-invoices](https://openbill.dev/en/e-invoice), [REST API](https://openbill.dev/en/api), [MCP](https://openbill.dev/en/mcp)
 
 Images: `baeroe/openbill` on Docker Hub for `linux/amd64` and `linux/arm64`, tagged `X.Y.Z`, `X.Y` and `latest`.
 
 ## Development
 
-Local development runs in [DDEV](https://ddev.com) (PHP 8.4, MariaDB 11.4, Node 24 with pnpm, Gotenberg); the guide is [Development](https://baeroe.github.io/openbill/en/development). The docs live in [`docs/`](docs) (VitePress): `ddev exec pnpm --dir docs dev`.
+Local development runs in [DDEV](https://ddev.com) (PHP 8.4, MariaDB 11.4, Node 24 with pnpm, Gotenberg); the guide is [Development](https://openbill.dev/en/development). The docs live in [`docs/`](docs) (VitePress): `ddev exec pnpm --dir docs dev`.
 
 The clickable prototypes in [`prototypes/`](prototypes) (`clickdummy` and `clickdummy-v2` with its `DESIGN.md`) are the design reference the app was built from; they are not part of the app.
 

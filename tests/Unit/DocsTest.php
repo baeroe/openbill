@@ -79,14 +79,15 @@ it('has upgrade notes for the first release in both languages', function () {
     }
 });
 
-it('builds the docs for GitHub Pages under /openbill/ and redirects relative to the base', function () {
+it('builds the docs for openbill.dev and keeps the base configurable', function () {
     $root = dirname(__DIR__, 2);
     $workflow = (string) file_get_contents("{$root}/.github/workflows/docs.yml");
 
     expect((string) file_get_contents("{$root}/docs/.vitepress/config.ts"))->toContain('process.env.DOCS_BASE', 'process.env.DOCS_URL')
         ->and((string) file_get_contents("{$root}/docs/.vitepress/theme/index.ts"))->toContain('import.meta.env.BASE_URL')
-        ->and($workflow)->toContain('DOCS_BASE: /openbill/', 'DOCS_URL: https://baeroe.github.io/openbill', 'actions/deploy-pages', 'fetch-depth: 0')
-        ->and((string) file_get_contents("{$root}/.github/workflows/tests.yml"))->toContain('DOCS_BASE: /openbill/');
+        ->and($workflow)->toContain('DOCS_URL: https://openbill.dev', 'actions/deploy-pages', 'fetch-depth: 0')
+        ->and((string) file_get_contents("{$root}/.github/workflows/tests.yml"))->toContain('DOCS_URL: https://openbill.dev')
+        ->and($workflow)->not->toContain('DOCS_BASE:');
 });
 
 it('has the same documentation screenshots in English and German, the editor among them', function () {

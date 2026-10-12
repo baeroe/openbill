@@ -3,7 +3,7 @@ import { inBrowser } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
 import './style.css';
 
-// pages live under /en and /de below the base (/ locally, /openbill/ on GitHub Pages): paths without a language
+// pages live under /en and /de below the base (/ locally and on openbill.dev, DOCS_BASE for a sub-path): paths without a language
 // (/, /development) land in English. Runs on GitHub Pages' 404 page too.
 const base = import.meta.env.BASE_URL;
 if (inBrowser && location.pathname.startsWith(base)) {

@@ -10,11 +10,10 @@ services:
         condition: service_healthy
       gotenberg:
         condition: service_healthy
-    # localhost only by default: a reverse proxy on this host forwards to it (docs/en/reverse-proxy.md).
-    # Anyone who reaches the port from a trusted network can set X-Forwarded-* headers: before publishing it with
-    # OPENBILL_BIND for a proxy on another host, narrow TRUSTED_PROXIES to that proxy.
+    # reachable on all addresses of the host, so a reverse proxy anywhere (also one in a container, like Nginx Proxy
+    # Manager) forwards to host:7739. OPENBILL_BIND=127.0.0.1 keeps it local (docs/en/reverse-proxy.md).
     ports:
-      - "${OPENBILL_BIND:-127.0.0.1}:${OPENBILL_PORT:-7739}:8080"
+      - "${OPENBILL_BIND:-0.0.0.0}:${OPENBILL_PORT:-7739}:8080"
     environment:
       APP_URL: "${APP_URL:?APP_URL missing (public https address, see .env.docker.example)}"
       # optional: without it, a key is generated once and kept in the data volume

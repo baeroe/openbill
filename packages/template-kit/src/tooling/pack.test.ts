@@ -1,10 +1,11 @@
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { unzipSync } from 'fflate';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { pack, slug } from './pack';
-import { TemplateProblemError } from './template-files';
+import { LIMITS, TemplateProblemError } from './template-files';
 
 let root: string;
 let lines: string[];
@@ -61,6 +62,18 @@ describe('pack', () => {
         const error = await pack(root, { log }).then(() => null, (e: unknown) => e);
 
         expect((error as TemplateProblemError).message).toBe('No package was written: manifest.json needs "name" and "version".');
+        expect(zips()).toEqual([]);
+    });
+});
+
+describe('package size', () => {
+    it('writes no ZIP larger than the import takes (already compressed assets)', async () => {
+        for (let i = 0; i < 6; i++) writeFileSync(path.join(root, 'template', 'assets', `photo-${i}.png`), randomBytes(LIMITS.assetBytes - 1024));
+
+        const error = await pack(root, { log }).then(() => null, (e: unknown) => e);
+
+        expect(error).toBeInstanceOf(TemplateProblemError);
+        expect((error as TemplateProblemError).problems[0]).toMatch(/^The package would be \d+\.\d MB, at most 10\.0 MB are allowed\.$/);
         expect(zips()).toEqual([]);
     });
 });

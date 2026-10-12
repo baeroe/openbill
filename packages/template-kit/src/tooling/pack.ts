@@ -1,14 +1,14 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { zipSync } from 'fflate';
-import { listTemplateFiles, MANIFEST_FILE, parseManifest, TEMPLATE_DIR, TemplateProblemError } from './template-files';
+import { LIMITS, listTemplateFiles, MANIFEST_FILE, mb, parseManifest, TEMPLATE_DIR, TemplateProblemError } from './template-files';
 
 /** File name part from the template name: "Hotel Alpenglück" → "hotel-alpengluck". */
 export function slug(name: string): string {
     return (
         name
             .normalize('NFKD')
-            .replace(/[̀-ͯ]/g, '')
+            .replace(/[\u0300-\u036f]/g, '')
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '') || 'template'
@@ -33,8 +33,13 @@ export async function pack(root: string, { out, log }: { out?: string; log(line:
     const files: Record<string, Uint8Array> = {};
     for (const entry of entries) files[entry.path] = new Uint8Array(await readFile(entry.absolute));
     const target = path.resolve(root, out ?? `${slug(name)}-${version.replace(/[^A-Za-z0-9._-]+/g, '-')}.zip`);
+    const zip = zipSync(files, { level: 6 });
+    // the import takes at most templates.max_package_bytes – compressed assets (png, woff2) hardly shrink
+    if (zip.length > LIMITS.packageBytes) {
+        throw new TemplateProblemError('No package was written: it is too large for the import.', [`The package would be ${mb(zip.length)}, at most ${mb(LIMITS.packageBytes)} are allowed.`]);
+    }
     await mkdir(path.dirname(target), { recursive: true });
-    await writeFile(target, zipSync(files, { level: 6 }));
+    await writeFile(target, zip);
     log(`Packed ${entries.length} files into ${path.relative(root, target)} (import it under Templates → Import ZIP).`);
 
     return target;

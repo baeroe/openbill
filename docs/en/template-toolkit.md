@@ -61,11 +61,11 @@ Example: a click on *document → number* copies `{{ document.number }}`, on *po
 | Command | What it does |
 |---|---|
 | `pnpm dev` | preview at `http://localhost:5180` |
-| `pnpm push` | writes all files of `template/` to openbill (`PUT /api/templates/{id}/files`): the four parts, `manifest.json` and the complete assets list (files missing locally are removed in openbill). Checked first, before anything is sent: only package files, assets png, jpg, jpeg, gif, webp, svg, woff, woff2, ttf, otf up to 2 MB each, 20 MB in total, at most 100 files, no symbolic links, valid `manifest.json`. |
+| `pnpm push` | writes all files of `template/` to openbill (`PUT /api/templates/{id}/files`): the four parts, `manifest.json` and the complete assets list (files missing locally are removed in openbill). Checked first, before anything is sent: only package files, parts up to 200 KB each, assets png, jpg, jpeg, gif, webp, svg, woff, woff2, ttf, otf up to 2 MB each, 20 MB in total, at most 100 files, no symbolic links, valid `manifest.json`. |
 | `pnpm pull` | fetches the saved template into `template/` and the field schema into `schema.json`. When local files differ, it stops and lists them; `pnpm pull --force` overwrites them and removes local package files openbill does not have. |
-| `pnpm run pack` | packs `template/` as template package (`<name>-<version>.zip`, or `--out file.zip`) for **Templates → Import ZIP**, e.g. on another instance. Same checks as `push`. |
+| `pnpm run pack` | packs `template/` as template package (`<name>-<version>.zip`, or `--out file.zip`) for **Templates → Import ZIP**, e.g. on another instance. Same checks as `push`, and the ZIP may be at most 10 MB like the import. |
 
-Use `pnpm run pack`: `pnpm pack` without `run` is pnpm's own command and creates an npm tarball.
+Use `pnpm run pack`: `pnpm pack` without `run` is pnpm's own command (it builds npm tarballs) and fails in the toolkit folder.
 
 ## Local instance with its own certificate
 

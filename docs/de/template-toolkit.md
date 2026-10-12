@@ -63,11 +63,11 @@ Beispiel: Ein Klick auf *document → number* kopiert `{{ document.number }}`, a
 | Befehl | Was er tut |
 |---|---|
 | `pnpm dev` | Vorschau unter `http://localhost:5180` |
-| `pnpm push` | schreibt alle Dateien aus `template/` nach openbill (`PUT /api/templates/{id}/files`): die vier Teile, `manifest.json` und die vollständige Asset-Liste (lokal fehlende Dateien werden in openbill entfernt). Vorher geprüft, bevor etwas gesendet wird: nur Paketdateien, Assets png, jpg, jpeg, gif, webp, svg, woff, woff2, ttf, otf bis 2 MB je Datei, 20 MB insgesamt, höchstens 100 Dateien, keine symbolischen Links, gültiges `manifest.json`. |
+| `pnpm push` | schreibt alle Dateien aus `template/` nach openbill (`PUT /api/templates/{id}/files`): die vier Teile, `manifest.json` und die vollständige Asset-Liste (lokal fehlende Dateien werden in openbill entfernt). Vorher geprüft, bevor etwas gesendet wird: nur Paketdateien, Teile bis 200 KB je Datei, Assets png, jpg, jpeg, gif, webp, svg, woff, woff2, ttf, otf bis 2 MB je Datei, 20 MB insgesamt, höchstens 100 Dateien, keine symbolischen Links, gültiges `manifest.json`. |
 | `pnpm pull` | holt das gespeicherte Template nach `template/` und das Feldschema nach `schema.json`. Weichen lokale Dateien ab, bricht es ab und listet sie; `pnpm pull --force` überschreibt sie und entfernt lokale Paketdateien, die openbill nicht hat. |
-| `pnpm run pack` | packt `template/` als Template-Paket (`<name>-<version>.zip`, oder `--out datei.zip`) für **Templates → ZIP importieren**, z. B. auf einer anderen Instanz. Gleiche Prüfungen wie `push`. |
+| `pnpm run pack` | packt `template/` als Template-Paket (`<name>-<version>.zip`, oder `--out datei.zip`) für **Templates → ZIP importieren**, z. B. auf einer anderen Instanz. Gleiche Prüfungen wie `push`, und das ZIP darf wie beim Import höchstens 10 MB groß sein. |
 
-Nutze `pnpm run pack`: `pnpm pack` ohne `run` ist ein eigener Befehl von pnpm und erzeugt ein npm-Tarball.
+Nutze `pnpm run pack`: `pnpm pack` ohne `run` ist ein eigener Befehl von pnpm (er baut npm-Tarballs) und schlägt im Toolkit-Ordner fehl.
 
 ## Lokale Instanz mit eigenem Zertifikat
 

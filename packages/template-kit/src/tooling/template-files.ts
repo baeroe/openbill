@@ -10,8 +10,8 @@ export type Part = keyof typeof PART_FILES;
 export const MANIFEST_FILE = 'manifest.json';
 export const REQUIRED_FILES = [MANIFEST_FILE, PART_FILES.body];
 
-/** config/openbill.php "templates" and TemplatePackage::ASSET_TYPES (limits.drift.test.ts keeps them equal). */
-export const LIMITS = { assetBytes: 2 * 1024 * 1024, totalBytes: 20 * 1024 * 1024, entries: 100 } as const;
+/** config/openbill.php "templates", "rendering.max_source_bytes" and TemplatePackage::ASSET_TYPES (limits.drift.test.ts keeps them equal). */
+export const LIMITS = { assetBytes: 2 * 1024 * 1024, totalBytes: 20 * 1024 * 1024, entries: 100, packageBytes: 10 * 1024 * 1024, sourceBytes: 200 * 1024 } as const;
 export const ASSET_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'woff', 'woff2', 'ttf', 'otf'] as const;
 
 export type ManifestProblem = { line: number | null; message: string };
@@ -92,7 +92,8 @@ export function excerpt(source: string, line: number, around = 2): ExcerptLine[]
     return result;
 }
 
-const mb = (bytes: number): string => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+export const mb = (bytes: number): string => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+const kb = (bytes: number): string => `${(bytes / 1024).toFixed(1)} KB`;
 
 /**
  * Every file of template/ that belongs into a template package, checked like the import (TemplatePackage::fromZip):
@@ -126,6 +127,8 @@ export async function listTemplateFiles(templateDir: string): Promise<{ entries:
             } else if (!known.includes(rel)) {
                 problems.push(`${rel}: unknown file (allowed: ${known.join(', ')}, assets/…).`);
             } else {
+                // a too large part is still there (not "missing"), but blocks push and pack
+                if (rel !== MANIFEST_FILE && stat.size > LIMITS.sourceBytes) problems.push(`${rel}: ${kb(stat.size)} is larger than ${kb(LIMITS.sourceBytes)} per part.`);
                 entries.push({ path: rel, absolute, size: stat.size });
             }
         }

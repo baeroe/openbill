@@ -21,11 +21,11 @@ Open http://localhost:5180 . Choose the data on top (sample scenarios or one of 
 | Command | What it does |
 |---|---|
 | `pnpm dev` | Preview at http://localhost:5180 (`pnpm dev --port 5181` for another port). |
-| `pnpm push` | Writes all files of `template/` to openbill: the parts, `manifest.json` and the complete `assets/` folder. Checked first: only package files, assets png/jpg/jpeg/gif/webp/svg/woff/woff2/ttf/otf up to 2 MB each, 20 MB in total, at most 100 files, no symbolic links. |
+| `pnpm push` | Writes all files of `template/` to openbill: the parts, `manifest.json` and the complete `assets/` folder. Checked first: only package files, parts up to 200 KB each, assets png/jpg/jpeg/gif/webp/svg/woff/woff2/ttf/otf up to 2 MB each, 20 MB in total, at most 100 files, no symbolic links. |
 | `pnpm pull` | Fetches the template saved in openbill into `template/` and the field schema into `schema.json`. Stops when local files differ; `pnpm pull --force` overwrites them. |
 | `pnpm run pack` | Packs `template/` as template package (`<name>-<version>.zip`, or `--out file.zip`) for **Templates → Import ZIP**. |
 
-Use `pnpm run pack`, not `pnpm pack`: `pnpm pack` is pnpm's own command and creates an npm tarball.
+Use `pnpm run pack`, not `pnpm pack`: `pnpm pack` is pnpm's own command (it builds npm tarballs) and fails here.
 
 ## Files
 

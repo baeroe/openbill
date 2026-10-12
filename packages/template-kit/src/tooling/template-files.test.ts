@@ -117,4 +117,10 @@ describe('listTemplateFiles', () => {
         expect(entries).toEqual([]);
         expect(problems).toEqual(['template/ is missing.']);
     });
+
+    it('refuses parts larger than openbill renders', async () => {
+        const { problems } = await listTemplateFiles(templateDir({ 'manifest.json': '{}', 'template.liquid': 'x'.repeat(LIMITS.sourceBytes + 1) }));
+
+        expect(problems).toEqual(['template.liquid: 200.0 KB is larger than 200.0 KB per part.']);
+    });
 });

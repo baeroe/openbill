@@ -29,6 +29,11 @@ final class OpenbillServer extends Server
         Tools\CreateDocumentTool::class,
         Tools\UpdateDocumentTool::class,
         Tools\DuplicateDocumentTool::class,
+        Tools\FinalizeDocumentTool::class,
+        Tools\SetDocumentStatusTool::class,
+        Tools\ConvertDocumentTool::class,
+        Tools\CancelInvoiceTool::class,
+        Tools\GetDocumentPdfUrlTool::class,
     ];
 
     /** @var array<int, class-string<Server\Resource>> */

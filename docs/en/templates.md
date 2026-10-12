@@ -10,11 +10,17 @@ openbill renders every document on the server from a template written in HTML, C
 | Kante | bold: a strong colour band, a large total, heavy rules |
 | Leise | minimal: lots of white space, a serif typeface, hairlines |
 
-The built-in templates speak English and German (they follow the language of the document), show group subtotals, optional items, tax rows, legal notes and page numbers. They are read-only and are updated with openbill (`php artisan migrate` creates them, `php artisan app:sync-templates` brings them up to date). To change one, export it and import the package as your own template.
+The built-in templates speak English and German (they follow the language of the document), show group subtotals, optional items, tax rows, legal notes and page numbers. They are read-only and are updated with openbill (`php artisan migrate` creates them, `php artisan app:sync-templates` brings them up to date). To change one, duplicate it (Templates → Duplicate) and edit the copy.
 
 ## Which template a document uses
 
 A document uses its own template if it has one, else the default template of its document type, else Klar. When a document is finalized, the template is frozen together with the other master data and the PDF is archived. Changing or deleting the template later never changes a finalized document or its PDF.
+
+## Template editor
+
+**Templates** shows every template with a preview of its first page (rendered on the server with sample data). **Import ZIP** adds a template package, **Duplicate** creates an editable copy (“Klar (copy)”), **Delete** removes your own templates (not while documents still use them).
+
+The editor has five tabs – header, content, footer, CSS and manifest – with syntax highlighting; the manifest tab also has a form for the paper (format, header and footer height, side margins). On the left, the field bar lists the core and custom fields of every level; a click inserts the expression at the cursor. On the right, the preview renders the unsaved state on the server 250 ms after the last change and highlights the area of the current tab. **Sample data** switches between the sample scenarios and real documents (also drafts). Errors appear above the preview with file and line and are underlined in the code; a click jumps there. **Save** (⌘S / Ctrl+S) writes the parts, **Export** downloads the saved state as package. Built-in templates open read-only. Assets (fonts, images) are not edited here: import them with the package or upload them with `PUT /api/templates/{id}/files`.
 
 ## Template package
 
@@ -218,6 +224,7 @@ A template can never break openbill or block it:
 - a rendering stops after 5 seconds; the clock is checked in every loop iteration and before every filter call, so a long filter chain stops in time as well,
 - no scripts and no external URLs: `<script>`, `<iframe>`, `http(s)://` images, fonts and stylesheets are blocked (use template assets), and every `<meta http-equiv>` (refresh, own policies) is a template error,
 - a rendering may use at most 128 MB of memory; `capture` and every filter that can make its result larger than its input (`replace`, `append`, `join`, `split`, `base64_encode`, `url_encode`, `upcase`, …) check the size of the result against the output limit before building it, arrays from filters have at most 100 000 items, and numbers in math filters at most 1 000 digits.
+- `file:` URLs: Gotenberg may read local files, but the content security policy at the top of every rendered document blocks everything except `data:` – a template referring to `file:///tmp/…` or other local paths shows nothing. Never use `file:` in templates; use assets.
 
 Every problem is reported with the **part** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), the **file** and the **line**, for example `body · template.liquid · line 3 · Unexpected character }`. The preview shows the error in place of the broken part. Finalizing and the draft PDF refuse to run while the template has errors, so a broken template never ends up in an archived PDF.
 

@@ -35,9 +35,12 @@ Ein Rabatt ist eine Position mit negativem Preis. In der XML bleibt der Preis po
 | Nullsatz | `Z` | – |
 | Kleinunternehmer (§ 19 UStG) | `E` | der Kleinunternehmer-Hinweis |
 | Reverse Charge in der EU | `AE` (USt-ID des Kunden nötig) | der Reverse-Charge-Hinweis |
-| außerhalb der EU | `G` | der Drittland-Hinweis |
+| Waren an Kunden außerhalb der EU | `G` | der Drittland-Hinweis |
+| Dienstleistungen an Kunden außerhalb der EU | `O` (ohne Satz) | der Hinweis auf die im Inland nicht steuerbare Leistung |
 
 Ohne Steuer- oder Rechtshinweis bekommt eine steuerbefreite Kategorie einen Standardgrund (z. B. „Steuerbefreit“).
+
+`O` – nicht steuerbar: Dienstleistungen an Kunden außerhalb der EU (Kundenoption „Leistungsart“ = Dienstleistung). Die XML enthält dann weder deine USt-ID noch die des Kunden (BR-O-02) und keinen Steuersatz; deine Registernummer identifiziert dich (BR-CO-26), deshalb verlangt das E-Rechnungs-Profil sie. Waren an Kunden außerhalb der EU bleiben Ausfuhren (`G`) und brauchen deine USt-ID. Dokumente, die vor dieser Option abgeschlossen wurden, behalten ihre Kategorie über ihren Snapshot.
 
 Die gesetzlichen Hinweise stehen außerdem als Dokumentnotizen in der XML.
 

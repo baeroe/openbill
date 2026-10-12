@@ -68,13 +68,14 @@ final class SaveCustomer
             'contacts.*.custom' => ['sometimes', 'array'],
         ])->validate();
 
-        // reverse charge (§ 13b UStG) shifts the VAT to a business; a private person always pays it
-        if (array_key_exists('customer_kind', $data) || array_key_exists('tax_treatment', $data)) {
-            $kind = $data['customer_kind'] ?? $customer?->customer_kind->value ?? CustomerKind::Business->value;
-            $treatment = $data['tax_treatment'] ?? $customer?->tax_treatment->value ?? TaxTreatment::Domestic->value;
-            if ($kind === CustomerKind::Consumer->value && $treatment === TaxTreatment::EuReverseCharge->value) {
-                throw ValidationException::withMessages(['customer_kind' => Text::t('customer.consumer_reverse_charge')]);
-            }
+        // reverse charge (§ 13b UStG) shifts the VAT to a business; a private person always pays it. Checked only
+        // when the combination is new: customers stored before this rule stay editable (the form always sends both
+        // keys and shows a hint to correct them) as long as kind and treatment stay as they are
+        $kind = $data['customer_kind'] ?? $customer?->customer_kind->value ?? CustomerKind::Business->value;
+        $treatment = $data['tax_treatment'] ?? $customer?->tax_treatment->value ?? TaxTreatment::Domestic->value;
+        $changed = $customer === null || $kind !== $customer->customer_kind->value || $treatment !== $customer->tax_treatment->value;
+        if ($changed && $kind === CustomerKind::Consumer->value && $treatment === TaxTreatment::EuReverseCharge->value) {
+            throw ValidationException::withMessages(['customer_kind' => Text::t('customer.consumer_reverse_charge')]);
         }
 
         $definitions = DomainMapper::currentFieldDefinitions();

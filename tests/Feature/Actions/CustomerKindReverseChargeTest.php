@@ -38,3 +38,17 @@ it('keeps the other combinations and untouched older rows working', function () 
         ->and($reverseCharge->tax_treatment->value)->toBe('eu_reverse_charge')
         ->and($renamed->name)->toBe('Kulturwerk Elbinsel e. V.');
 });
+
+it('keeps an older contradictory customer editable through the full form payload while kind and treatment stay (review #2)', function () {
+    $legacy = Customer::factory()->create(['name' => 'Kulturwerk Elbinsel', 'customer_kind' => 'consumer', 'tax_treatment' => 'eu_reverse_charge']);
+    $save = app(SaveCustomer::class);
+
+    // the customer form always sends every field, also the unchanged contradiction
+    $saved = $save->handle(systemActor(), ['name' => 'Kulturwerk Elbinsel', 'city' => 'Hamburg', 'customer_kind' => 'consumer', 'tax_treatment' => 'eu_reverse_charge', 'contacts' => []], $legacy);
+    $fixed = $save->handle(systemActor(), ['customer_kind' => 'consumer', 'tax_treatment' => 'domestic'], $legacy);
+
+    expect($saved->city)->toBe('Hamburg')
+        ->and($fixed->tax_treatment->value)->toBe('domestic')
+        // once corrected, the contradiction cannot come back
+        ->and(array_keys(validationErrors(fn () => $save->handle(systemActor(), ['tax_treatment' => 'eu_reverse_charge'], $legacy->fresh()))))->toBe(['customer_kind']);
+});

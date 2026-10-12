@@ -75,6 +75,8 @@
     "customer.base": "Master data",
     "customer.city": "City",
     "customer.consumer_reverse_charge": "Reverse charge needs a business customer: a private person pays VAT.",
+    "customer.consumer_reverse_charge_text": "Reverse charge needs a business customer, a private person pays VAT. Choose another tax treatment or set the kind to business.",
+    "customer.consumer_reverse_charge_title": "Private person with reverse charge.",
     "customer.contact_actions": "Actions for :name",
     "customer.contact_default": "Default",
     "customer.contact_edit": "Edit",

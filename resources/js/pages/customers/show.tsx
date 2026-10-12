@@ -78,6 +78,8 @@ function CustomerEditor({ id, initial }: { id: string | null; initial: CustomerD
     const set = (patch: Partial<CustomerDraft>) => setDraft((current) => ({ ...current, ...patch }));
     const nameError = errors.name ?? (triedSave && !draft.name.trim() ? t('customer.name_required') : undefined);
     const vatMissing = draft.tax_treatment === 'eu_reverse_charge' && !draft.vat_id.trim();
+    // stored before SaveCustomer refused it: still saveable as long as it stays, but it should be corrected
+    const consumerReverseCharge = draft.tax_treatment === 'eu_reverse_charge' && draft.customer_kind === 'consumer';
     const title = draft.name.trim() || (isNew ? t('customer.new_title') : t('customer.no_name'));
     const editingIndex = editing ? draft.contacts.findIndex((contact) => contact.key === editing.contact.key) : -1;
 
@@ -277,6 +279,11 @@ function CustomerEditor({ id, initial }: { id: string | null; initial: CustomerD
                                     </Select>
                                 )}
                             </div>
+                            {consumerReverseCharge && (
+                                <Notice tone="warn" icon={<AlertTriangle />} className="mt-4">
+                                    <b>{t('customer.consumer_reverse_charge_title')}</b> {t('customer.consumer_reverse_charge_text')}
+                                </Notice>
+                            )}
                             {vatMissing && (
                                 <Notice tone="warn" icon={<AlertTriangle />} className="mt-4">
                                     <b>{t('customer.vat_missing')}</b> {t('customer.vat_missing_text')}

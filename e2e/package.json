@@ -5,7 +5,8 @@
     "packageManager": "pnpm@12.8.1",
     "scripts": {
         "test": "playwright test",
-        "screenshots": "SCREENSHOTS=1 playwright test --project=screenshots"
+        "screenshots": "SCREENSHOTS=1 playwright test --project=screenshots",
+        "docs:screenshots": "DOCS_SCREENSHOTS=1 playwright test --project=docs-screenshots-en --project=docs-screenshots-de"
     },
     "devDependencies": {
         "@playwright/test": "^1.64.0",

@@ -82,3 +82,11 @@ it('builds the docs for GitHub Pages under /openbill/ and redirects relative to 
         ->and($workflow)->toContain('DOCS_BASE: /openbill/', 'DOCS_URL: https://baeroe.github.io/openbill', 'actions/deploy-pages', 'fetch-depth: 0')
         ->and((string) file_get_contents("{$root}/.github/workflows/tests.yml"))->toContain('DOCS_BASE: /openbill/');
 });
+
+it('has the same documentation screenshots in English and German, the editor among them', function () {
+    $root = dirname(__DIR__, 2);
+    $shots = fn (string $locale): array => array_map('basename', glob("{$root}/docs/public/screenshots/{$locale}/*.png") ?: []);
+
+    expect($shots('en'))->toContain('editor.png', 'editor-dark.png')
+        ->toEqualCanonicalizing($shots('de'));
+});

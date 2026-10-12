@@ -3,6 +3,7 @@ import { AUTH_FILE } from './tests/helpers';
 
 // The app runs in DDEV, Playwright on the Mac. OPENBILL_URL points it at another instance, e.g. the Compose stack
 // (http://localhost:7739 with E2E_ARTISAN, see e2e/compose.sh and the CI job e2e).
+// Screenshots for the docs (docs/public/screenshots, committed): pnpm --dir e2e docs:screenshots
 const baseURL = process.env.OPENBILL_URL ?? 'https://openbill.ddev.site';
 
 export default defineConfig({
@@ -31,6 +32,27 @@ export default defineConfig({
             use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, storageState: AUTH_FILE },
         },
         // review screenshots against the clickdummy (pnpm screenshots): only when asked for
-        ...(process.env.SCREENSHOTS ? [{ name: 'screenshots', testMatch: /screenshots\.spec\.ts/, use: { ...devices['Desktop Chrome'] } }] : []),
+        ...(process.env.SCREENSHOTS ? [{ name: 'screenshots', testMatch: /\/screenshots\.spec\.ts$/, use: { ...devices['Desktop Chrome'] } }] : []),
+        // screenshots for the docs (pnpm docs:screenshots): signed in like the suite, 1440×900, device scale 1; one
+        // project per language because date inputs follow the browser's UI language (--lang), not the context locale
+        ...(process.env.DOCS_SCREENSHOTS
+            ? (['en', 'de'] as const).map((language) => {
+                  const locale = language === 'de' ? 'de-DE' : 'en-GB';
+                  return {
+                      name: `docs-screenshots-${language}`,
+                      testMatch: /docs-screenshots\.spec\.ts$/,
+                      grep: new RegExp(`docs-${language} `),
+                      dependencies: ['setup'],
+                      use: {
+                          ...devices['Desktop Chrome'],
+                          viewport: { width: 1440, height: 900 },
+                          deviceScaleFactor: 1,
+                          storageState: AUTH_FILE,
+                          locale,
+                          launchOptions: { args: [`--lang=${locale}`] },
+                      },
+                  };
+              })
+            : []),
     ],
 });

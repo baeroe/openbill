@@ -9,17 +9,19 @@ use App\Domain\Totals\GroupInput;
 use App\Domain\Totals\PositionInput;
 use App\Domain\Totals\TotalsCalculator;
 use App\Enums\PositionKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
 
-function totalsCtx(TaxationMode $mode = TaxationMode::Regular, TaxTreatment $treatment = TaxTreatment::Domestic): TaxContext
+function totalsCtx(TaxationMode $mode = TaxationMode::Regular, TaxTreatment $treatment = TaxTreatment::Domestic, SupplyType $supply = SupplyType::Goods): TaxContext
 {
     return new TaxContext(
         [new TaxRateData('r19', Decimal::of('19'), TaxCategory::S), new TaxRateData('r7', Decimal::of('7'), TaxCategory::S)],
         $mode,
         $treatment,
-        new LegalNotes('small business note', 'reverse charge note', 'third country note'),
+        new LegalNotes('small business note', 'reverse charge note', 'third country note', 'third country services note'),
+        $supply,
     );
 }
 
@@ -150,4 +152,15 @@ describe('Decimal', function () {
         [null, 4, false],
         ['123456789012', 4, false],
     ]);
+
+    it('uses O with its own note for services to third-country customers, G for goods', function () {
+        $services = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Services));
+        $goods = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Goods));
+
+        expect($services?->category)->toBe(TaxCategory::O)
+            ->and((string) $services?->percent)->toBe('0')
+            ->and($services?->note)->toBe('third country services note')
+            ->and($goods?->category)->toBe(TaxCategory::G)
+            ->and($goods?->note)->toBe('third country note');
+    });
 });

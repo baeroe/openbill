@@ -11,6 +11,7 @@ use App\Enums\FieldType;
 use App\Enums\PositionKind;
 use App\Enums\RenderPart;
 use App\Enums\RenderScenario;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
@@ -25,7 +26,8 @@ it('uses the exact values from the spec', function (string $enum, array $values)
     'position kinds' => [PositionKind::class, ['item', 'text', 'optional']],
     'field scopes' => [FieldScope::class, ['org', 'customer', 'contact', 'document', 'position']],
     'field types' => [FieldType::class, ['text', 'textarea', 'number', 'money', 'date', 'select', 'boolean', 'image']],
-    'tax categories' => [TaxCategory::class, ['S', 'Z', 'E', 'AE', 'K', 'G']],
+    'tax categories' => [TaxCategory::class, ['S', 'Z', 'E', 'AE', 'K', 'G', 'O']],
+    'supply types' => [SupplyType::class, ['goods', 'services']],
     'taxation modes' => [TaxationMode::class, ['regular', 'small_business']],
     'tax treatments' => [TaxTreatment::class, ['domestic', 'eu_reverse_charge', 'third_country']],
     'profiles' => [ComplianceProfile::class, ['basic', 'en16931']],

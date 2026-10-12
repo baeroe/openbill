@@ -3,6 +3,7 @@
 namespace App\Domain\Tax;
 
 use App\Domain\Money\Decimal;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
@@ -26,7 +27,9 @@ final readonly class EffectiveTax
             return new self(Decimal::zero(), TaxCategory::AE, $ctx->notes->reverseCharge);
         }
         if ($ctx->taxTreatment === TaxTreatment::ThirdCountry) {
-            return new self(Decimal::zero(), TaxCategory::G, $ctx->notes->thirdCountry);
+            return $ctx->supplyType === SupplyType::Services
+                ? new self(Decimal::zero(), TaxCategory::O, $ctx->notes->thirdCountryServices)
+                : new self(Decimal::zero(), TaxCategory::G, $ctx->notes->thirdCountry);
         }
 
         $rate = $ctx->rate($taxRateId);

@@ -21,6 +21,7 @@ it('creates a customer with contacts, the default contact first', function () {
     $response->assertJsonPath('number', 'C-1001')
         ->assertJsonPath('country', 'DE')
         ->assertJsonPath('tax_treatment', 'domestic')
+        ->assertJsonPath('supply_type', 'services')
         ->assertJsonPath('contacts.0.last_name', 'Lindqvist')
         ->assertJsonPath('contacts.0.is_default', true)
         ->assertJsonCount(2, 'contacts');

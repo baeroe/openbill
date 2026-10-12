@@ -57,7 +57,12 @@ function eInvoiceCases(): array
             return finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry]);
         },
         'reverse_charge' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Fjord Analytics AB', 'street' => 'Storgatan 1', 'zip' => '11122', 'city' => 'Stockholm', 'country' => 'SE', 'vat_id' => 'SE556677889901', 'tax_treatment' => TaxTreatment::EuReverseCharge]),
-        'third_country' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry]),
+        'third_country' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry, 'supply_type' => 'goods']),
+        'third_country_services' => function () {
+            Organization::current()->forceFill(['registration_id' => 'HRB 000000'])->save();
+
+            return finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => 'CHE123456789', 'tax_treatment' => TaxTreatment::ThirdCountry, 'supply_type' => 'services']);
+        },
         'discount' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95'), itemRow('Stammkundenrabatt', '1', '-100')]),
         'discount_cancellation' => fn () => app(FinalizeDocument::class)->handle(systemActor(), app(CancelInvoice::class)->handle(systemActor(), finalizedInvoice([itemRow('Workshop', '10', '95'), itemRow('Stammkundenrabatt', '1', '-100')]))->document),
     ];
@@ -74,3 +79,12 @@ it('archives a schema-valid e-invoice for every Schematron case', function (stri
         file_put_contents("{$dir}/{$case}.xml", $xml);
     }
 })->with(array_keys(eInvoiceCases()));
+
+it('leaves out the VAT IDs for services to third-country customers (BR-O-02)', function () {
+    $xml = archivedXml(eInvoiceCases()['third_country_services']());
+
+    expect($xml)->toContain('<ram:CategoryCode>O</ram:CategoryCode>')
+        ->and($xml)->not->toContain('schemeID="VA"')
+        ->and($xml)->not->toContain('RateApplicablePercent')
+        ->and($xml)->toContain('HRB 000000');
+});

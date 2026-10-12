@@ -51,14 +51,16 @@ final class CiiBuilder
 
         $cii->setDocumentSeller((string) $org['name'])
             ->setDocumentSellerAddress(self::text($org['street'] ?? null), null, null, self::text($org['zip'] ?? null), self::text($org['city'] ?? null), self::text($org['country'] ?? null));
-        if (self::text($org['vat_id'] ?? null) !== null) {
+        // BR-O-02: an invoice with category O carries neither the seller's nor the buyer's VAT ID
+        $notSubjectToVat = array_filter($totals->taxBreakdown, fn ($row): bool => $row->category === TaxCategory::O) !== [];
+        if (! $notSubjectToVat && self::text($org['vat_id'] ?? null) !== null) {
             $cii->addDocumentSellerTaxRegistration('VA', $org['vat_id']);
         }
         if (self::text($org['tax_number'] ?? null) !== null) {
             $cii->addDocumentSellerTaxRegistration('FC', $org['tax_number']);
         }
         if (self::text($org['registration_id'] ?? null) !== null) {
-            // BT-30: with the VAT ID (BT-31) the identifiers BR-CO-26 accepts
+            // BT-30: with the VAT ID (BT-31) the identifiers BR-CO-26 accepts, and the only one with category O
             $cii->setDocumentSellerLegalOrganisation(self::text($org['registration_id']), null, null);
         }
         if (self::text($org['email'] ?? null) !== null) {
@@ -67,7 +69,7 @@ final class CiiBuilder
 
         $cii->setDocumentBuyer((string) ($customer['name'] ?? ''), self::text($customer['number'] ?? null))
             ->setDocumentBuyerAddress(self::text($customer['street'] ?? null), null, null, self::text($customer['zip'] ?? null), self::text($customer['city'] ?? null), self::text($customer['country'] ?? null));
-        if (self::text($customer['vat_id'] ?? null) !== null) {
+        if (! $notSubjectToVat && self::text($customer['vat_id'] ?? null) !== null) {
             $cii->addDocumentBuyerTaxRegistration('VA', $customer['vat_id']);
         }
 
@@ -111,13 +113,13 @@ final class CiiBuilder
                     ->setDocumentPositionProductDetails($position->title, self::text($position->description))
                     ->setDocumentPositionNetPrice(CiiAmount::of($price, CiiAmount::UNIT))
                     ->setDocumentPositionQuantity($amount($quantity, CiiAmount::UNIT), $position->unit_id === null ? 'C62' : ($unitCodes[$position->unit_id] ?? 'C62'))
-                    ->addDocumentPositionTax($tax->category->value, 'VAT', CiiAmount::of($tax->percent, CiiAmount::AMOUNT))
+                    ->addDocumentPositionTax($tax->category->value, 'VAT', self::rate($tax->category, $tax->percent))
                     ->setDocumentPositionLineSummation($amount($total->net));
             }
         }
 
         foreach ($totals->taxBreakdown as $row) {
-            $cii->addDocumentTax($row->category->value, 'VAT', $amount($row->net), $amount($row->tax), CiiAmount::of($row->percent, CiiAmount::AMOUNT), self::exemptionReason($row->category, $totals, $document->locale));
+            $cii->addDocumentTax($row->category->value, 'VAT', $amount($row->net), $amount($row->tax), self::rate($row->category, $row->percent), self::exemptionReason($row->category, $totals, $document->locale));
         }
         $cii->setDocumentSummation($amount($totals->gross), $amount($totals->gross), $amount($totals->net), null, null, $amount($totals->net), $amount($totals->tax));
 
@@ -174,6 +176,12 @@ final class CiiBuilder
         }
 
         return $totals->legalNotes[0] ?? Text::t('einvoice.exemption.'.strtolower($category->value), [], $locale);
+    }
+
+    /** BT-152/BT-119: category O (not subject to VAT) carries no rate at all (BR-O-05, BR-O-09). */
+    private static function rate(TaxCategory $category, BigDecimal $percent): ?float
+    {
+        return $category === TaxCategory::O ? null : CiiAmount::of($percent, CiiAmount::AMOUNT);
     }
 
     private static function text(mixed $value): ?string

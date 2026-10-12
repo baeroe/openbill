@@ -2,6 +2,7 @@
 
 namespace App\Domain\Tax;
 
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxTreatment;
 
@@ -15,6 +16,7 @@ final readonly class TaxContext
         public TaxationMode $taxationMode,
         public TaxTreatment $taxTreatment,
         public LegalNotes $notes,
+        public SupplyType $supplyType = SupplyType::Goods,
     ) {}
 
     public function rate(?string $id): ?TaxRateData

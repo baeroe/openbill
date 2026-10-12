@@ -12,6 +12,7 @@ use App\Enums\DocumentType;
 use App\Enums\FieldScope;
 use App\Enums\FieldType;
 use App\Enums\PositionKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxTreatment;
 
@@ -145,4 +146,12 @@ it('still needs a register number from a small business without VAT ID for forei
     ]);
 
     expect($paths)->toBe(['org.registration_id']);
+});
+
+it('needs no VAT ID but a register number for services to third-country customers (BR-O-02, BR-CO-26)', function () {
+    $invoice = ['type' => DocumentType::Invoice, 'profile' => ComplianceProfile::En16931, 'serviceDate' => '2026-10-01', 'dueDate' => '2026-10-15'];
+    $customer = new PartyFacts('C', 's', 'z', 'c', 'CH', taxTreatment: TaxTreatment::ThirdCountry, supplyType: SupplyType::Services);
+
+    expect(compliancePaths([...$invoice, 'org' => new PartyFacts('O', 's', 'z', 'c', 'DE', vatId: 'DE1', iban: 'X'), 'customer' => $customer]))->toBe(['org.registration_id'])
+        ->and(compliancePaths([...$invoice, 'org' => new PartyFacts('O', 's', 'z', 'c', 'DE', iban: 'X', registrationId: 'HRB 1'), 'customer' => $customer]))->toBe([]);
 });

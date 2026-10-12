@@ -25,6 +25,9 @@ export type Contact = {
     custom: CustomValues;
 };
 
+/** Goods or services: decides the tax category for third-country customers (G or O). */
+export type SupplyType = 'goods' | 'services';
+
 export type Customer = {
     id: string;
     number: string;
@@ -36,6 +39,7 @@ export type Customer = {
     email: string;
     vat_id: string;
     tax_treatment: TaxTreatment;
+    supply_type: SupplyType;
     locale: string | null;
     custom: CustomValues;
     contacts: Contact[];

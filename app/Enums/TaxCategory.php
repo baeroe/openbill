@@ -11,4 +11,7 @@ enum TaxCategory: string
     case AE = 'AE';
     case K = 'K';
     case G = 'G';
+
+    /** Not subject to VAT (services to third-country customers). */
+    case O = 'O';
 }

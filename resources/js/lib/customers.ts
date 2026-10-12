@@ -29,7 +29,7 @@ export type ContactDraft = ContactInput & { key: string };
 export type CustomerDraft = Omit<CustomerInput, 'contacts'> & { contacts: ContactDraft[] };
 
 export function emptyCustomer(): CustomerDraft {
-    return { number: '', name: '', street: '', zip: '', city: '', country: 'DE', email: '', vat_id: '', tax_treatment: 'domestic', locale: null, custom: {}, contacts: [] };
+    return { number: '', name: '', street: '', zip: '', city: '', country: 'DE', email: '', vat_id: '', tax_treatment: 'domestic', supply_type: 'services', locale: null, custom: {}, contacts: [] };
 }
 
 export function draftOf(customer: Customer): CustomerDraft {
@@ -43,6 +43,7 @@ export function draftOf(customer: Customer): CustomerDraft {
         email: customer.email,
         vat_id: customer.vat_id,
         tax_treatment: customer.tax_treatment,
+        supply_type: customer.supply_type,
         locale: customer.locale,
         custom: { ...customer.custom },
         contacts: customer.contacts.map((contact) => ({ ...contact, custom: { ...contact.custom }, key: contact.id })),
@@ -61,6 +62,7 @@ export function inputOf(draft: CustomerDraft): CustomerInput {
         email: draft.email,
         vat_id: draft.vat_id,
         tax_treatment: draft.tax_treatment,
+        supply_type: draft.supply_type,
         locale: draft.locale,
         custom: draft.custom,
         contacts: draft.contacts.map((contact) => ({

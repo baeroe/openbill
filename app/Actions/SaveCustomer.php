@@ -6,6 +6,7 @@ use App\Domain\Fields\CustomValueValidator;
 use App\Domain\Fields\FieldRegistry;
 use App\Enums\EventAction;
 use App\Enums\FieldScope;
+use App\Enums\SupplyType;
 use App\Enums\TaxTreatment;
 use App\Models\Contact;
 use App\Models\Customer;
@@ -48,6 +49,7 @@ final class SaveCustomer
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'vat_id' => ['sometimes', 'nullable', 'string', 'max:32'],
             'tax_treatment' => ['sometimes', Rule::enum(TaxTreatment::class)],
+            'supply_type' => ['sometimes', Rule::enum(SupplyType::class)],
             'locale' => ['sometimes', 'nullable', Rule::in(['en', 'de'])],
             'custom' => ['sometimes', 'array'],
             'contacts' => ['sometimes', 'array', 'list', 'max:100'],
@@ -84,7 +86,7 @@ final class SaveCustomer
         // retried on deadlocks with UpdateDraft (see there)
         return DB::transaction(function () use ($actor, $data, $customer): Customer {
             $customer ??= new Customer;
-            foreach (['name', 'tax_treatment', 'locale', 'custom'] as $key) {
+            foreach (['name', 'tax_treatment', 'supply_type', 'locale', 'custom'] as $key) {
                 if (array_key_exists($key, $data)) {
                     $customer->{$key} = $data[$key];
                 }

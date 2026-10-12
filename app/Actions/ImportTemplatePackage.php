@@ -54,7 +54,7 @@ final class ImportTemplatePackage
     }
 
     /** Built-in slugs stay reserved, so syncing them never overwrites an imported template. */
-    private static function freeSlug(string $base): string
+    public static function freeSlug(string $base): string
     {
         $slug = $base;
         for ($n = 2; in_array($slug, SyncBuiltInTemplates::SLUGS, true) || Template::query()->where('slug', $slug)->exists(); $n++) {

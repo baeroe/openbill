@@ -76,6 +76,7 @@ const MATRIX_ROUTES = [
     'own template' => ['GET', '/api/templates/{A}', MATRIX_OWN_TEMPLATE_READ],
     'own package' => ['GET', '/api/templates/{A}/package', MATRIX_OWN_TEMPLATE_READ],
     'write own template' => ['PUT', '/api/templates/{A}/files', ['api:write', 'templates:write(A)']],
+    'duplicate own template' => ['POST', '/api/templates/{A}/duplicate', ['api:write']],
     'delete own template' => ['DELETE', '/api/templates/{A}', ['api:write']],
     'other template' => ['GET', '/api/templates/{B}', MATRIX_READ],
     'other package' => ['GET', '/api/templates/{B}/package', MATRIX_READ],

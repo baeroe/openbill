@@ -19,4 +19,12 @@ describe('keys', () => {
         expect(keys.documentXml('01k9')).toBe('/api/documents/01k9/xml');
         expect(keys.documentPdf('01k9')).toBe('/api/documents/01k9/pdf?inline=1');
     });
+
+    it('know the template and settings URLs', () => {
+        expect(keys.templates()).toBe('/api/templates');
+        expect(keys.template('01k9')).toBe('/api/templates/01k9');
+        expect(keys.renderSources()).toBe('/api/render/sources?limit=50');
+        expect(keys.renderSchema()).toBe('/api/render/schema');
+        expect(keys.documentTypes()).toBe('/api/document-types');
+    });
 });

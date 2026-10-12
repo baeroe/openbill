@@ -33,4 +33,9 @@ export const keys = {
     suggestions: (q: string) => (q.trim() ? apiUrl('/api/position-suggestions', { q: q.trim(), limit: 6 }) : null),
     documentXml: (id: string) => `/api/documents/${id}/xml`,
     documentPdf: (id: string) => `/api/documents/${id}/pdf?inline=1`,
+    templates: () => '/api/templates',
+    template: (id: string) => `/api/templates/${id}`,
+    renderSources: () => apiUrl('/api/render/sources', { limit: 50 }),
+    renderSchema: () => '/api/render/schema',
+    documentTypes: () => '/api/document-types',
 };

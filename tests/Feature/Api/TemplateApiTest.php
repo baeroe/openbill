@@ -112,3 +112,19 @@ it('downloads the template package as ZIP', function () {
     $zip->close();
     unlink($path);
 });
+
+it('lists the document types of every template', function () {
+    $list = collect($this->getJson('/api/templates')->assertOk()->json())->keyBy('slug');
+
+    expect($list['klar']['document_types'])->toBe(['offer', 'confirmation', 'invoice', 'cancellation']);
+});
+
+it('duplicates a template over the API in the language of the request', function () {
+    $klar = Template::query()->where('slug', 'klar')->sole();
+
+    $this->postJson("/api/templates/{$klar->id}/duplicate", [], ['Accept-Language' => 'de'])
+        ->assertCreated()
+        ->assertJsonPath('name', 'Klar (Kopie)')
+        ->assertJsonPath('built_in', false)
+        ->assertJsonPath('manifest.name', 'Klar (Kopie)');
+});

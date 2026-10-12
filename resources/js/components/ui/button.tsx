@@ -46,7 +46,7 @@ export function Button({ variant, size, iconOnly, icon, pending = false, classNa
     );
 }
 
-type ButtonLinkProps = Look & ComponentProps<typeof Link> & { icon?: ReactNode };
+type ButtonLinkProps = Look & Omit<ComponentProps<typeof Link>, 'size'> & { icon?: ReactNode };
 
 export function ButtonLink({ variant, size, iconOnly, icon, className, children, ...rest }: ButtonLinkProps) {
     return (

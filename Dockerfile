@@ -67,6 +67,8 @@ USER root
 # intl (numbering, slugs), bcmath (brick/math), gd (fpdf inside horstoeko/zugferd), apcu (API Platform metadata cache);
 # pdo_mysql, zip, dom, simplexml, fileinfo, mbstring come with the base image
 RUN install-php-extensions intl bcmath gd apcu
+# start-up: wait for the database, APP_KEY, migrations, built-in templates, owner, caches
+COPY --chmod=755 docker/entrypoint.d/ /etc/entrypoint.d/
 USER www-data
 WORKDIR /var/www/html
 

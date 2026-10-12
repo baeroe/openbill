@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\Process\Process;
+
 /*
  * Keeps the self-hosting files consistent with the app and with each other: Dockerfile, .dockerignore, entrypoint,
  * docker-compose.yml, DDEV, CI and scripts (phase 10). Pure file checks; the image itself is verified by building it.
@@ -84,4 +86,34 @@ it('keeps secrets, dependencies and local caches out of the build context', func
     $ignore = array_map('trim', explode("\n", dockerRepoFile('.dockerignore')));
 
     expect($ignore)->toContain('.env', '.env.*', '**/node_modules', 'vendor', 'storage', 'bootstrap/cache/*.php', '.git', '.ddev', 'e2e', 'tests');
+});
+
+it('starts through the openbill entrypoint script in the right order', function () {
+    $path = 'docker/entrypoint.d/99-openbill.sh';
+    $script = dockerRepoFile($path);
+    $steps = [
+        'mkdir -p storage/app/private storage/app/public storage/app/archive',
+        'KEY_FILE=storage/app/.app-key',
+        'php artisan config:clear',
+        'DB_WAIT_TIMEOUT',
+        'php artisan migrate --force',
+        'php artisan app:sync-templates',
+        'php artisan app:ensure-admin',
+        'php artisan optimize',
+    ];
+    $positions = array_map(fn (string $step): int|false => strpos($script, $step), $steps);
+    $sorted = $positions;
+    sort($sorted);
+
+    expect(is_executable(base_path($path)))->toBeTrue()
+        ->and(dockerRepoFile('Dockerfile'))->toContain('COPY --chmod=755 docker/entrypoint.d/ /etc/entrypoint.d/')
+        ->and($positions)->not->toContain(false)
+        ->and($positions)->toBe($sorted);
+});
+
+it('has an entrypoint script a POSIX shell accepts', function () {
+    $process = new Process(['sh', '-n', base_path('docker/entrypoint.d/99-openbill.sh')]);
+    $process->run();
+
+    expect($process->getExitCode())->toBe(0, $process->getErrorOutput());
 });

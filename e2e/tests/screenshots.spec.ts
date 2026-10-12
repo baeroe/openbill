@@ -44,6 +44,16 @@ const SHOTS: Shot[] = [
             await page.locator('input[value="Hafenkontor Lindqvist GmbH"]').waitFor();
         },
     },
+    {
+        name: 'editor',
+        open: async (page, prefix) => {
+            await go(page, prefix, '/documents');
+            await page.getByRole('link', { name: /Hafenkontor Lindqvist GmbH/ }).first().click();
+            await page.waitForURL(/\/documents\/[^/?]+$/);
+            // the preview is ready when the first page of paged-preview is laid out
+            await page.locator('.pp-page').first().waitFor();
+        },
+    },
 ];
 
 async function capture(page: Page, dir: string, name: string): Promise<void> {

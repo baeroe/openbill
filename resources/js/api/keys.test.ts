@@ -10,5 +10,13 @@ describe('keys', () => {
         expect(keys.customer('01k9')).toBe('/api/customers/01k9');
         expect(keys.document('01k9')).toBe('/api/documents/01k9');
         expect(keys.fieldDefinitions('contact')).toBe('/api/field-definitions?scope=contact');
+        expect(keys.taxRates()).toBe('/api/tax-rates?include_archived=1');
+        expect(keys.units()).toBe('/api/units?include_archived=1');
+        expect(keys.textBlocks()).toBe('/api/text-blocks');
+        expect(keys.customerChoices()).toBe('/api/customers?itemsPerPage=100');
+        expect(keys.suggestions(' Work ')).toBe('/api/position-suggestions?q=Work&limit=6');
+        expect(keys.suggestions('')).toBeNull();
+        expect(keys.documentXml('01k9')).toBe('/api/documents/01k9/xml');
+        expect(keys.documentPdf('01k9')).toBe('/api/documents/01k9/pdf?inline=1');
     });
 });

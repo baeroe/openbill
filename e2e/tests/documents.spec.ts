@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { login } from './helpers';
 
 test.beforeEach(async ({ page }) => {
-    await login(page);
+    await page.goto('/en'); // signed in through the setup project (storageState)
     await page.goto('/en/documents');
     await expect(page.locator('a[href^="/en/documents/"]').first()).toBeVisible();
 });
@@ -70,5 +69,6 @@ test('creates a document from the dialog and opens it', async ({ page }) => {
 
     await expect(page).toHaveURL(/\/en\/documents\/[0-9a-z]{26}$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Invoice (draft)');
-    await expect(page.getByText('Hotel Alpenglück')).toBeVisible();
+    // the customer select carries the name too: look at the editor header
+    await expect(page.locator('.ed-head').getByText('Hotel Alpenglück')).toBeVisible();
 });

@@ -23,4 +23,14 @@ export const keys = {
         }),
     document: (id: string) => `/api/documents/${id}`,
     fieldDefinitions: (scope: FieldScope) => apiUrl('/api/field-definitions', { scope }),
+    // archived rates and units stay readable in old drafts and finalized documents; pickers offer only active ones
+    taxRates: () => apiUrl('/api/tax-rates', { include_archived: true }),
+    units: () => apiUrl('/api/units', { include_archived: true }),
+    textBlocks: () => '/api/text-blocks',
+    /** Customer select of the editor: the first 100 by name. */
+    customerChoices: () => apiUrl('/api/customers', { itemsPerPage: 100 }),
+    /** Suggestions for a typed title; null (nothing to fetch) while the title is empty. */
+    suggestions: (q: string) => (q.trim() ? apiUrl('/api/position-suggestions', { q: q.trim(), limit: 6 }) : null),
+    documentXml: (id: string) => `/api/documents/${id}/xml`,
+    documentPdf: (id: string) => `/api/documents/${id}/pdf?inline=1`,
 };

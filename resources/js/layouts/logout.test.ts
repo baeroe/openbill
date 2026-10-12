@@ -1,0 +1,133 @@
+import { mutate, SWRConfig } from 'swr';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { DocumentDetail } from '@/api/types';
+import { acquireAutosave, resetAutosaves, showDocument } from '@/editor/autosave-registry';
+import { useEditor } from '@/editor/store';
+import type { DraftPayload } from '@/editor/types';
+import { currentToasts, dismissToast } from '@/lib/toast';
+import { LOGOUT_SAVE_WAIT, logout } from './logout';
+
+const detail = (id: string, intro = ''): DocumentDetail =>
+    ({
+        id,
+        type: 'invoice',
+        status: 'draft',
+        number: null,
+        date: '2026-10-11',
+        customer_id: null,
+        customer_name: null,
+        contact_id: null,
+        service_date: null,
+        service_date_end: null,
+        due_date: null,
+        valid_until: null,
+        intro,
+        closing: '',
+        template_id: null,
+        locale: 'de',
+        custom: {},
+        source_id: null,
+        cancelled_by_id: null,
+        is_locked: false,
+        is_overdue: false,
+        finalized_at: null,
+        paid_at: null,
+        net_total: '0.00',
+        tax_total: '0.00',
+        gross_total: '0.00',
+        created_at: null,
+        updated_at: null,
+        groups: [],
+        totals: null,
+        issues: [],
+        dropped_fields: [],
+    }) satisfies DocumentDetail;
+
+type Call = { intro: string; resolve(answer: DocumentDetail): void };
+let calls: Call[];
+const save = (_id: string, payload: DraftPayload) => new Promise<DocumentDetail>((resolve) => calls.push({ intro: payload.intro, resolve }));
+
+/** The editor of A with unsaved input "Hallo". */
+function editing() {
+    const entry = acquireAutosave('a', save);
+    showDocument(entry, detail('a'));
+    const type = (intro: string) => {
+        useEditor.getState().update((d) => ({ ...d, intro }));
+        entry.autosave.changed();
+    };
+    type('Hallo');
+    return { entry, type };
+}
+
+const cache = SWRConfig.defaultValue.cache;
+
+beforeEach(() => {
+    vi.useFakeTimers();
+    calls = [];
+    resetAutosaves();
+    useEditor.getState().reset();
+    for (const key of [...cache.keys()]) cache.delete(key);
+    for (const toast of currentToasts()) dismissToast(toast.id);
+});
+afterEach(() => vi.useRealTimers());
+
+describe('logout', () => {
+    it('saves what is open, ends the session, then forgets autosaves, the draft and every cached answer', async () => {
+        const { entry } = editing();
+        const order: string[] = [];
+        const done = logout({ post: async () => void order.push(`post, stopped: ${entry.autosave.stopped}`), leave: () => order.push('leave') });
+        expect(calls.map((call) => call.intro)).toEqual(['Hallo']); // the last save goes out first …
+        calls[0].resolve(detail('a', 'Hallo'));
+
+        expect(await done).toBe(true);
+        expect(order).toEqual(['post, stopped: false', 'leave']); // … nothing is stopped before the session ended
+        expect(entry.autosave.stopped).toBe(true);
+        expect(useEditor.getState().draft).toBeNull();
+    });
+
+    it('also clears the cached pages of the paginated lists, which a filter-mutate skips (rereview 3)', async () => {
+        await mutate('/api/documents/a', detail('a'), { revalidate: false });
+        // what useSWRInfinite keeps for the document list of the person logging out
+        cache.set('$inf$/api/documents?page=1&itemsPerPage=50', { data: [{ items: [{ id: 'a' }], total: 1, page: 1, hasMore: false }] });
+        expect([...cache.keys()]).toHaveLength(2);
+
+        expect(await logout({ post: async () => undefined, leave: () => undefined })).toBe(true);
+
+        expect([...cache.keys()]).toEqual([]);
+    });
+
+    it('a failed logout keeps the editor saving, keeps its draft and says so (rereview 3)', async () => {
+        const { entry, type } = editing();
+        const leave = vi.fn();
+        const done = logout({
+            post: () => Promise.reject(new Error('offline')),
+            leave,
+        });
+        calls[0].resolve(detail('a', 'Hallo'));
+
+        expect(await done).toBe(false);
+        expect(leave).not.toHaveBeenCalled();
+        expect(currentToasts().map((toast) => [toast.tone, toast.message])).toEqual([['error', 'user_menu.logout_failed']]);
+        expect(entry.autosave.stopped).toBe(false);
+        expect(useEditor.getState().draft?.intro).toBe('Hallo');
+
+        type('Hallo Jana'); // still editable, and still saved
+        await vi.advanceTimersByTimeAsync(600);
+        expect(calls.map((call) => call.intro)).toEqual(['Hallo', 'Hallo Jana']);
+    });
+
+    it('waits at most 3 s for a hanging save, then logs out anyway (rereview 3)', async () => {
+        editing();
+        const post = vi.fn(async () => undefined);
+        const done = logout({ post, leave: () => undefined });
+        expect(calls).toHaveLength(1); // this save never answers
+
+        await vi.advanceTimersByTimeAsync(LOGOUT_SAVE_WAIT - 1);
+        expect(post).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1);
+
+        expect(await done).toBe(true);
+        expect(post).toHaveBeenCalledOnce();
+        expect(LOGOUT_SAVE_WAIT).toBe(3000);
+    });
+});

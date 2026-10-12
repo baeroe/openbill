@@ -169,12 +169,24 @@ importers:
 
   .:
     dependencies:
+      '@dnd-kit/core':
+        specifier: ^6.3.1
+        version: 6.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@dnd-kit/sortable':
+        specifier: ^10.0.0
+        version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
+      '@dnd-kit/utilities':
+        specifier: ^3.2.2
+        version: 3.2.2(react@19.3.0)
       '@fontsource-variable/schibsted-grotesk':
         specifier: ^5.3.0
         version: 5.3.0
       '@inertiajs/react':
         specifier: ^3.9.1
         version: 3.9.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@openbill/paged-preview':
+        specifier: workspace:*
+        version: link:packages/paged-preview
       '@radix-ui/react-dialog':
         specifier: ^1.2.0
         version: 1.2.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -193,6 +205,9 @@ importers:
       swr:
         specifier: ^2.5.1
         version: 2.5.1(react@19.3.0)
+      zustand:
+        specifier: ^5.0.15
+        version: 5.0.15(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
@@ -230,6 +245,27 @@ importers:
       vitepress-plugin-llms:
         specifier: ^1.14.0
         version: 1.14.0
+
+  packages/paged-preview:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      react:
+        specifier: ^19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: ^19.3.0
+        version: 19.3.0(react@19.3.0)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@24.19.2)(vite@8.3.4(@types/node@24.19.2)(jiti@2.7.0))
 
   prototypes/clickdummy:
     dependencies:

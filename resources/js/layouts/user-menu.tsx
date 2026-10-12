@@ -1,11 +1,13 @@
-import { router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Languages, LogOut, Monitor, Moon, Sun } from 'lucide-react';
 import { Avatar, cx, Menu, MenuItem, MenuLabel, MenuRadioGroup, MenuRadioItem, MenuSeparator } from '@/components/ui';
-import { localeHref, path, t } from '@/lib/i18n';
+import { localeHref, t } from '@/lib/i18n';
 import { isThemePref, setThemePref, useThemePref } from '@/lib/theme';
 import type { SharedProps } from '@/types';
+import { logout } from './logout';
 
 /** Account chip at the bottom of the sidebar; the menu opens upwards. */
+
 export function UserMenu({ collapsed }: { collapsed: boolean }) {
     const { auth, org, locale } = usePage<SharedProps>().props;
     const theme = useThemePref();
@@ -55,7 +57,7 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
                 </MenuRadioItem>
             </MenuRadioGroup>
             <MenuSeparator />
-            <MenuItem icon={<LogOut />} onSelect={() => router.post(path('/logout'))}>
+            <MenuItem icon={<LogOut />} onSelect={() => void logout()}>
                 {t('common.logout')}
             </MenuItem>
         </Menu>

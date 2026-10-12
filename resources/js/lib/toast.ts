@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react';
 
 export type ToastTone = 'neutral' | 'success' | 'error';
-export type ToastAction = { label: string; run(): void };
+/** onExpire: the toast closed without its action (time up, close button, pushed out) – e.g. the delayed delete. */
+export type ToastAction = { label: string; run(): void; onExpire?(): void };
 export type Toast = { id: number; message: string; tone: ToastTone; action?: ToastAction };
 
 /** How long a toast stays: errors and toasts with an action (undo) longer, so they can be read and used. */
@@ -19,12 +20,15 @@ export function currentToasts(): Toast[] {
     return toasts;
 }
 
-export function dismissToast(id: number): void {
+/** `used`: the action ran (undo), so onExpire does not. */
+export function dismissToast(id: number, used = false): void {
     const timer = timers.get(id);
     if (timer?.handle) clearTimeout(timer.handle);
     timers.delete(id);
-    toasts = toasts.filter((item) => item.id !== id);
+    const item = toasts.find((entry) => entry.id === id);
+    toasts = toasts.filter((entry) => entry.id !== id);
     emit();
+    if (item && !used) item.action?.onExpire?.();
 }
 
 function start(id: number): void {
@@ -46,6 +50,7 @@ function push(message: string, tone: ToastTone, action?: ToastAction): number {
     timers.set(id, { remaining: action || tone === 'error' ? DURATION.long : DURATION.short, started: 0, handle: null });
     if (!paused) start(id);
     emit();
+    dropped.forEach((item) => item.action?.onExpire?.());
     return id;
 }
 

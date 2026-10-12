@@ -49,7 +49,7 @@ function ToastItem({ item }: { item: Toast }) {
                     className="h-7 shrink-0 rounded-full bg-white/15 px-3 text-xs font-strong hover:bg-white/25 dark:bg-black/10 dark:hover:bg-black/20"
                     onClick={() => {
                         item.action?.run();
-                        dismissToast(item.id);
+                        dismissToast(item.id, true);
                     }}
                 >
                     {item.action.label}

@@ -1,11 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { login } from './helpers';
 
 test.describe('on a phone', () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
     test('opens the navigation as a modal dialog that keeps the focus (review focus)', async ({ page }) => {
-        await login(page);
+        await page.goto('/en'); // signed in through the setup project (storageState)
         const opener = page.getByRole('button', { name: 'Open navigation' });
         await opener.click();
 
@@ -26,7 +25,7 @@ test.describe('on a phone', () => {
     });
 
     test('closes the navigation after choosing a page', async ({ page }) => {
-        await login(page);
+        await page.goto('/en'); // signed in through the setup project (storageState)
         await page.getByRole('button', { name: 'Open navigation' }).click();
         await page.getByRole('dialog', { name: 'Sidebar' }).getByRole('link', { name: 'Customers' }).click();
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api, ApiError, apiPage, apiUrl, errorMessage, setUnauthenticatedHandler } from './api';
+import { api, ApiError, apiPage, apiText, apiUrl, errorMessage, setUnauthenticatedHandler } from './api';
 
 const json = (status: number, body: unknown, type = 'application/json') =>
     new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { 'Content-Type': type } });
@@ -153,5 +153,23 @@ describe('apiUrl', () => {
         expect(apiUrl('/api/documents', { type: 'invoice', status: '', q: undefined, customer_id: null, page: 2 })).toBe('/api/documents?type=invoice&page=2');
         expect(apiUrl('/api/documents')).toBe('/api/documents');
         expect(apiUrl('/api/documents', { q: 'Fjord & Co' })).toBe('/api/documents?q=Fjord+%26+Co');
+    });
+});
+
+describe('keepalive and text answers', () => {
+    it('passes keepalive through (saving while the tab closes)', async () => {
+        fetchMock.mockResolvedValue(json(200, {}));
+
+        await api('/api/documents/d1', { method: 'PATCH', body: { intro: 'Hi' }, keepalive: true });
+        expect(sent().init.keepalive).toBe(true);
+    });
+
+    it('reads text (e-invoice XML) and still throws problems as ApiError', async () => {
+        fetchMock.mockResolvedValueOnce(new Response('<rsm:CrossIndustryInvoice/>', { status: 200, headers: { 'Content-Type': 'application/xml' } }));
+        await expect(apiText('/api/documents/d1/xml')).resolves.toBe('<rsm:CrossIndustryInvoice/>');
+        expect(sent().headers.Accept).toBe('application/xml, application/problem+json');
+
+        fetchMock.mockResolvedValueOnce(problem(409, 'no_e_invoice'));
+        await expect(apiText('/api/documents/d1/xml')).rejects.toMatchObject({ status: 409, reason: 'no_e_invoice' });
     });
 });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\AllocateDocumentNumber;
 use App\Enums\DocumentType;
 use App\Models\Customer;
 use App\Models\Document;
@@ -50,15 +51,36 @@ it('ignores invalid filters of a typed URL (review focus)', function () {
             ->where('summary.count', 1));
 });
 
-it('renders the page of an existing document only', function () {
+it('renders the editor of an existing document only', function () {
     $document = Document::factory()->create();
     $this->actingAs(User::factory()->create());
 
     $this->get("/en/documents/{$document->id}")
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('documents/show')->where('document_id', $document->id));
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('documents/show')
+            ->where('document_id', $document->id)
+            ->has('context', fn (Assert $context) => $context
+                ->hasAll(['profile', 'next_number', 'small_business', 'chain', 'templates', 'allowed'])));
     $this->get('/en/documents/'.strtolower((string) Str::ulid()))->assertNotFound();
     $this->get('/en/documents/not-an-id')->assertNotFound();
+});
+
+it('passes the editor context: profile, number preview, templates and allowed actions', function () {
+    $document = draft(DocumentType::Offer);
+
+    $this->actingAs(User::factory()->create())
+        ->get("/de/documents/{$document->id}")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('documents/show')
+            ->where('document_id', $document->id)
+            ->where('context.profile', 'basic')
+            ->where('context.next_number', app(AllocateDocumentNumber::class)->preview(DocumentType::Offer, '2026-10-11'))
+            ->where('context.small_business', false)
+            ->where('context.chain', [])
+            ->has('context.templates', 3)
+            ->where('context.allowed', ['finalize' => true, 'delete' => true, 'duplicate' => true, 'statuses' => [], 'conversions' => [], 'cancel' => false]));
 });
 
 it('sends guests to the login', function () {

@@ -327,6 +327,7 @@
     "editor.read_only_invoice": "Korrekturen gehen nur über ein Storno.",
     "editor.read_only_other": "Für eine neue Fassung duplizierst du es.",
     "editor.remove": "Entfernen",
+    "editor.restore_discarded": "Deine Änderungen von vor der Anmeldung wurden nicht übernommen: Der Entwurf wurde inzwischen geändert.",
     "editor.restored": "Entwurf behalten",
     "editor.restored_after_login": "Deine Änderungen von vor der Anmeldung sind wieder da und werden gespeichert.",
     "editor.save.dirty": "Ungespeichert",

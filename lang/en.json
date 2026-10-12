@@ -327,6 +327,7 @@
     "editor.read_only_invoice": "Corrections only work through a cancellation.",
     "editor.read_only_other": "Duplicate it for a new version.",
     "editor.remove": "Remove",
+    "editor.restore_discarded": "Your changes from before the login were not restored: the draft was changed in the meantime.",
     "editor.restored": "Draft kept",
     "editor.restored_after_login": "Your changes from before the login are back and are being saved.",
     "editor.save.dirty": "Unsaved",

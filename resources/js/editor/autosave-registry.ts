@@ -12,7 +12,7 @@ import { fromDocument, samePayload, toPayload } from './ops';
 import { fieldErrors } from './paths';
 import { useEditor } from './store';
 import type { DraftPayload } from './types';
-import { stashDrafts, takeDraft } from './unsaved-drafts';
+import { stashDrafts, takeKept, type KeptDraft } from './unsaved-drafts';
 
 export type Save = (id: string, payload: DraftPayload) => Promise<DocumentDetail>;
 /** users: editors holding the entry (never dropped while > 0); disposed: dropped for good, never handed out again. */
@@ -87,11 +87,11 @@ export function flushAllKeepalive(save: (id: string, payload: DraftPayload) => v
  * leaves for the login. Opening the document again after logging in brings it back (showDocument).
  */
 export function stashUnsavedDrafts(): void {
-    const drafts: { id: string; payload: DraftPayload }[] = [];
+    const drafts: ({ id: string } & KeptDraft)[] = [];
     for (const entry of entries.values()) {
         if (!entry.autosave.pending || entry.autosave.stopped) continue;
         const payload = entry.source.payload();
-        if (payload) drafts.push({ id: entry.id, payload });
+        if (payload) drafts.push({ id: entry.id, payload, base: entry.source.base() });
     }
     stashDrafts(drafts);
 }
@@ -138,14 +138,17 @@ export function showDocument(entry: AutosaveEntry, document: DocumentDetail): vo
     const store = useEditor.getState();
     if (store.draft === null || store.draft.id !== entry.id) {
         const local = autosave.pending && !autosave.stopped ? source.payload() : null;
-        // input kept from before an expired session (stashed on 401): only into a document that is still a draft
-        const kept = local === null ? takeDraft(entry.id) : null;
-        const restored = kept !== null && !document.is_locked ? kept : null;
+        // input kept from before an expired session (stashed on 401): only into a document that is still a draft and that
+        // nobody changed in the meantime (API, MCP, another person) – the old input must not silently overwrite that
+        const kept = local === null ? takeKept(entry.id) : null;
+        const unchanged = kept !== null && (kept.base === null || samePayload(kept.base, toPayload(fromDocument(document))));
+        const restored = kept !== null && !document.is_locked && unchanged ? kept.payload : null;
         const payload = local ?? restored;
         store.load(document, payload ? { payload, saveState: local ? autosave.state : 'dirty' } : undefined);
         if (payload) autosave.changed();
         else autosave.reset();
         if (restored) toast.info(t('editor.restored_after_login'));
+        else if (kept !== null && !document.is_locked) toast.error(t('editor.restore_discarded'));
         return;
     }
     const lockChanged = (store.draft.status !== 'draft') !== document.is_locked;

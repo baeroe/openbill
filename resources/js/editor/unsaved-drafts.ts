@@ -9,7 +9,9 @@ const PREFIX = 'openbill:unsaved:';
 /** Older input is more likely to confuse than to help. */
 export const UNSAVED_MAX_AGE = 24 * 60 * 60 * 1000;
 
-type Stash = { user: string; at: number; payload: DraftPayload };
+/** base: the server state the input was made on – restored only while the server still has exactly that. */
+type Stash = { user: string; at: number; payload: DraftPayload; base: DraftPayload | null };
+export type KeptDraft = { payload: DraftPayload; base: DraftPayload | null };
 
 let owner: string | null = null;
 
@@ -53,12 +55,12 @@ function prune(drop: (stash: Partial<Stash> | null) => boolean): void {
     }
 }
 
-export function stashDrafts(drafts: { id: string; payload: DraftPayload }[]): void {
+export function stashDrafts(drafts: { id: string; payload: DraftPayload; base?: DraftPayload | null }[]): void {
     const store = storage();
     if (!store || owner === null) return;
-    for (const { id, payload } of drafts) {
+    for (const { id, payload, base } of drafts) {
         try {
-            store.setItem(PREFIX + id, JSON.stringify({ user: owner, at: Date.now(), payload } satisfies Stash));
+            store.setItem(PREFIX + id, JSON.stringify({ user: owner, at: Date.now(), payload, base: base ?? null } satisfies Stash));
         } catch {
             // quota or blocked storage: the input is lost as before, nothing else breaks
         }
@@ -67,6 +69,11 @@ export function stashDrafts(drafts: { id: string; payload: DraftPayload }[]): vo
 
 /** The kept input of one document for the current person, removed on reading; null if none, too old or someone else's. */
 export function takeDraft(id: string): DraftPayload | null {
+    return takeKept(id)?.payload ?? null;
+}
+
+/** takeDraft with the server state the input was based on (null for stashes without one). */
+export function takeKept(id: string): KeptDraft | null {
     const store = storage();
     if (!store) return null;
     let raw: string | null;
@@ -80,7 +87,7 @@ export function takeDraft(id: string): DraftPayload | null {
     try {
         const stash = JSON.parse(raw) as Partial<Stash>;
         if (stash.user !== owner || typeof stash.at !== 'number' || Date.now() - stash.at > UNSAVED_MAX_AGE || !stash.payload) return null;
-        return stash.payload;
+        return { payload: stash.payload, base: stash.base ?? null };
     } catch {
         return null;
     }

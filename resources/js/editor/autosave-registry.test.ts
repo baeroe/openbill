@@ -248,4 +248,20 @@ describe('autosave registry', () => {
         expect(useEditor.getState().draft?.intro).toBe('');
         expect(sessionStorage.length).toBe(0);
     });
+
+    it('drops kept input when the draft was changed elsewhere in the meantime, and says so (review phase 11)', () => {
+        vi.stubGlobal('sessionStorage', memoryStorage());
+        setDraftOwner('u1');
+        open('a', detail('a')).type('Hallo Jana');
+        stashUnsavedDrafts();
+        resetAutosaves();
+        useEditor.getState().reset();
+
+        // meanwhile an agent wrote another introduction over the API
+        open('a', detail('a', 'Von der API'));
+        expect(useEditor.getState().draft?.intro).toBe('Von der API');
+        expect(useEditor.getState().saveState).toBe('saved');
+        expect(currentToasts().map((toast) => [toast.tone, toast.message])).toContainEqual(['error', 'editor.restore_discarded']);
+        expect(sessionStorage.length).toBe(0);
+    });
 });

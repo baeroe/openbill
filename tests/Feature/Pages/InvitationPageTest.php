@@ -39,3 +39,10 @@ it('keeps the form errors on the page', function () {
         ->assertSessionHasErrors(['name', 'password']);
     $this->assertGuest();
 });
+
+it('shows the invitation of a disabled inviter as no longer valid', function () {
+    $inviter = User::factory()->owner()->create(['disabled_at' => now()]);
+    $invitation = UserInvitation::factory()->create(['invited_by_id' => $inviter->id]);
+
+    $this->get(relativeLink($invitation))->assertOk()->assertInertia(fn (Assert $page) => $page->where('state', 'closed'));
+});

@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Support\Actor;
+use App\Support\InvitationLinks;
 use App\Support\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -27,7 +28,7 @@ final class AcceptInvitation
 
         return DB::transaction(function () use ($invitation, $data): User {
             $invitation = UserInvitation::query()->lockForUpdate()->findOrFail($invitation->id);
-            if ($invitation->accepted_at !== null || $invitation->expires_at->isPast()) {
+            if ($invitation->accepted_at !== null || $invitation->expires_at->isPast() || ! InvitationLinks::inviterActive($invitation)) {
                 throw ValidationException::withMessages(['invitation' => [Text::t('invitations.closed')]]);
             }
             if (User::query()->where('email', $invitation->email)->exists()) {

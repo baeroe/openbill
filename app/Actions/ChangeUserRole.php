@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Exceptions\ActionNotAllowedException;
 use App\Exceptions\OwnerRequiredException;
 use App\Models\User;
+use App\Models\UserInvitation;
 use App\Support\Actor;
 use App\Support\Owners;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,10 @@ final class ChangeUserRole
         return DB::transaction(function () use ($user, $role): User {
             if ($role === UserRole::Member && Owners::lockActive() === [$user->id]) {
                 throw ActionNotAllowedException::lastOwner();
+            }
+            if ($role === UserRole::Member && $user->role === UserRole::Owner) {
+                // a former owner's open invitations would still let people in
+                UserInvitation::query()->where('invited_by_id', $user->id)->whereNull('accepted_at')->delete();
             }
             $user->forceFill(['role' => $role])->save();
 

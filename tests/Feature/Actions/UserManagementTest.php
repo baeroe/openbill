@@ -127,3 +127,21 @@ it('enables a disabled user again; old tokens stay revoked and new ones need an 
     expect($user->fresh()->disabled_at)->toBeNull()
         ->and(Auth::guard('web')->getProvider()->retrieveById($user->id)?->getAuthIdentifier())->toBe($user->id);
 });
+
+it('revokes the open invitations of a disabled or demoted owner and refuses links of inactive inviters (review #1)', function () {
+    [, $actor] = ownerActor();
+    $leaving = User::factory()->owner()->create();
+    $demoted = User::factory()->owner()->create();
+    $kept = app(InviteUser::class)->handle(Actor::user($leaving), ['email' => 'second.self@example.com', 'role' => 'owner']);
+    $other = app(InviteUser::class)->handle(Actor::user($demoted), ['email' => 'friend@example.com', 'role' => 'member']);
+    $input = ['name' => 'Back Door', 'password' => 'long-enough', 'password_confirmation' => 'long-enough'];
+
+    app(DisableUser::class)->handle($actor, $leaving);
+    app(ChangeUserRole::class)->handle($actor, $demoted, ['role' => 'member']);
+
+    expect(UserInvitation::query()->whereKey([$kept->id, $other->id])->count())->toBe(0);
+    // a link that survived (e.g. created in a race) is still refused once its inviter is no active owner
+    $stale = UserInvitation::factory()->create(['invited_by_id' => $leaving->id, 'role' => 'owner']);
+    expect(array_keys(validationErrors(fn () => app(AcceptInvitation::class)->handle(systemActor(), $stale, $input))))->toBe(['invitation'])
+        ->and(User::query()->where('email', $stale->email)->exists())->toBeFalse();
+});

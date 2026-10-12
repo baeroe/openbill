@@ -1045,6 +1045,7 @@
     "uploads.type": "Erlaubt sind :types.",
     "user_menu.appearance": "Darstellung",
     "user_menu.language": "Sprache",
+    "user_menu.logging_out": "Abmelden …",
     "user_menu.logout_failed": "Abmelden hat nicht geklappt. Bitte noch einmal versuchen.",
     "user_menu.open": "Kontomenü",
     "user_menu.theme_dark": "Dunkel",

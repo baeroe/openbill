@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { commitAllKeepalive, pendingDeleteIds, scheduleDelete } from './pending-delete';
+import { commitAllKeepalive, flushPendingDeletes, pendingDeleteIds, scheduleDelete } from './pending-delete';
 
 afterEach(() => commitAllKeepalive());
 
@@ -49,5 +49,26 @@ describe('scheduleDelete', () => {
 
         expect(run).toHaveBeenCalledWith({ keepalive: true });
         expect(pendingDeleteIds().size).toBe(0);
+    });
+
+    it('flushPendingDeletes sends every waiting delete without keepalive and resolves once they answered (logout)', async () => {
+        const runs: boolean[] = [];
+        let finish!: () => void;
+        scheduleDelete('f1', ({ keepalive }) => {
+            runs.push(keepalive);
+            return new Promise<void>((resolve) => (finish = resolve));
+        });
+        const undone = scheduleDelete('f2', async () => void runs.push(true));
+        undone.undo();
+
+        let done = false;
+        const flushing = flushPendingDeletes().then(() => (done = true));
+        expect(runs).toEqual([false]);
+        expect(pendingDeleteIds().size).toBe(0);
+        await Promise.resolve();
+        expect(done).toBe(false);
+        finish();
+        await flushing;
+        expect(done).toBe(true);
     });
 });

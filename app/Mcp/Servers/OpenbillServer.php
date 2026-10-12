@@ -7,7 +7,7 @@ use App\Mcp\Tools;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
-use Laravel\Mcp\Server\Attributes\Version;
+use Laravel\Mcp\Server\Contracts\Transport;
 use Laravel\Mcp\Server\Tool;
 
 /**
@@ -15,7 +15,6 @@ use Laravel\Mcp\Server\Tool;
  * Every tool name used in a text must exist (tests/Feature/Mcp/McpServerTest.php, also for docs/{en,de}/mcp.md).
  */
 #[Name('openbill')]
-#[Version('1.0.0')]
 #[Instructions(<<<'TXT'
     openbill keeps the offers, order confirmations, invoices and cancellations of one organization, with custom fields and Liquid templates rendered to PDF; invoices can carry an EN 16931 e-invoice.
     Start with get-overview. Look up ids before writing: list-customers, list-documents, list-tax-rates-and-units (tax_rate_id and unit_id of positions), list-field-definitions (keys for "custom"), list-text-blocks, get-settings.
@@ -28,6 +27,13 @@ use Laravel\Mcp\Server\Tool;
     TXT)]
 final class OpenbillServer extends Server
 {
+    public function __construct(Transport $transport)
+    {
+        parent::__construct($transport);
+        // serverInfo.version = the release version (one place: config/openbill.php)
+        $this->version = (string) config('openbill.version');
+    }
+
     /** All tools in one tools/list answer (laravel/mcp pages by 15 otherwise; there are 25). */
     public int $defaultPaginationLength = 50;
 

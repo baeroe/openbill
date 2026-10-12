@@ -77,6 +77,17 @@ it('lists every tool with a description in one tools/list answer', function () {
         ->and($tools->every(fn (array $tool): bool => mb_strlen((string) $tool['description']) > 40))->toBeTrue();
 });
 
+it('reports the release version from config/openbill.php as serverInfo.version', function () {
+    $result = mcpRpc(apiToken(['mcp']), 'initialize', [
+        'protocolVersion' => '2025-06-18',
+        'capabilities' => (object) [],
+        'clientInfo' => ['name' => 'test', 'version' => '1'],
+    ])['result'];
+
+    expect(config('openbill.version'))->toBe('0.1.0')
+        ->and($result['serverInfo'])->toMatchArray(['name' => 'openbill', 'version' => '0.1.0']);
+});
+
 it('annotates read-only, additive and destructive tools', function () {
     $tools = openbillTools();
 

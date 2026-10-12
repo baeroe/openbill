@@ -12,7 +12,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:11.4
+        image: mariadb:11.4.13@sha256:1292844148b311e4ed4300022a996d39083f415a963e970cf47cad1b3b18e3a6
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: testing
@@ -39,10 +39,11 @@ jobs:
       - uses: actions/checkout@v4
 
       # not a service container: services can't take a command, and Gotenberg must run hardened
-      # (no JavaScript, no URLs but its own files and data:) – same flags as .ddev/docker-compose.gotenberg.yaml
+      # (no JavaScript, no URLs but its own files and data:) – same image and flags as docker-compose.yml and
+      # .ddev/docker-compose.gotenberg.yaml (DockerSetupTest)
       - name: Gotenberg
         run: >-
-          docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:8 gotenberg
+          docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769 gotenberg
           --chromium-disable-javascript=true
           '--chromium-deny-list=^file:(?!//\/tmp/).*'
           '--chromium-deny-list=^(?!(file|data):).*'
@@ -141,6 +142,13 @@ jobs:
         with:
           name: einvoice-samples
           path: einvoice-samples
+
+      # Schematron, Saxon-HE and xmlresolver: downloaded once per version of the script (it pins URLs and SHA-256),
+      # so a flaky download source only hurts the first run after a version bump
+      - uses: actions/cache@v4
+        with:
+          path: storage/framework/testing/einvoice-validator
+          key: einvoice-validator-${{ hashFiles('scripts/validate-einvoice.sh') }}
 
       - name: EN 16931 Schematron
         run: scripts/validate-einvoice.sh einvoice-samples

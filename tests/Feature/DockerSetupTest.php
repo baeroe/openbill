@@ -181,3 +181,29 @@ it('documents every variable of the compose file in .env.docker.example', functi
         expect($example)->toMatch('/^#?\s*'.$name.'=/m');
     }
 });
+
+it('uses the same pinned Gotenberg and MariaDB images in DDEV, CI and Compose', function () {
+    $services = dockerCompose()['services'];
+    $ddev = Yaml::parse(dockerRepoFile('.ddev/docker-compose.gotenberg.yaml'));
+    $ci = Yaml::parse(dockerRepoFile('.github/workflows/tests.yml'));
+
+    expect($ddev['services']['gotenberg']['image'])->toBe($services['gotenberg']['image'])
+        ->and($ci['jobs']['tests']['services']['mariadb']['image'])->toBe($services['mariadb']['image'])
+        ->and(dockerRepoFile('.github/workflows/tests.yml'))->toContain('docker run -d --name gotenberg -p 3000:3000 '.$services['gotenberg']['image'].' gotenberg');
+});
+
+it('starts Gotenberg in CI with the hardening flags of DDEV', function () {
+    $flags = array_slice(Yaml::parse(dockerRepoFile('.ddev/docker-compose.gotenberg.yaml'))['services']['gotenberg']['command'], 1);
+    $workflow = dockerRepoFile('.github/workflows/tests.yml');
+
+    expect($flags)->toHaveCount(5);
+    foreach ($flags as $flag) {
+        expect($workflow)->toContain($flag);
+    }
+});
+
+it('pins the Java image of the e-invoice validator', function () {
+    preg_match('/^JAVA_IMAGE=(\S+)$/m', dockerRepoFile('scripts/validate-einvoice.sh'), $m);
+
+    expect($m[1] ?? '')->toMatch('/^eclipse-temurin:21[\w.-]*@sha256:[0-9a-f]{64}$/');
+});

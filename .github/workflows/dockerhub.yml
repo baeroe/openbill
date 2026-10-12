@@ -10,6 +10,9 @@ on:
     types: [completed]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   sync:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
@@ -27,9 +30,9 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # needs a Docker Hub token with read/write/delete scope
+      # needs a Docker Hub token with read/write/delete scope; pinned by commit because it sees that token
       - if: steps.hub.outputs.exists == 'true'
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}

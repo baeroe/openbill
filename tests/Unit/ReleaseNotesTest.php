@@ -29,3 +29,8 @@ it('refuses a version without notes, before anything is published', function () 
     expect($process->getExitCode())->toBe(1)
         ->and($process->getErrorOutput())->toContain('docs/en/upgrading.md has no section "### 9.9.9"');
 });
+
+it('has only absolute links, which also work in the GitHub release', function () {
+    expect(releaseNotes('0.1.0')->getOutput())->not->toContain('](/')
+        ->toContain('](https://github.com/baeroe/openbill/blob/main/docs/en/setup.md)');
+});

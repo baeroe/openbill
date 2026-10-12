@@ -19,7 +19,9 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 ## Notes per version
 
+<!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
+
 ### 0.1.0
 
 - First release: quotes, order confirmations, invoices and cancellations with custom fields, Liquid templates (Klar, Kante, Leise and your own), EN 16931 e-invoices as PDF/A-3 with embedded XML, REST API, MCP server and the template toolkit.
-- Runs as Docker Compose stack with MariaDB 11.4 and Gotenberg 8, see [Setup](/en/setup).
+- Runs as Docker Compose stack with MariaDB 11.4 and Gotenberg 8, see [Setup](https://github.com/baeroe/openbill/blob/main/docs/en/setup.md).

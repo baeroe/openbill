@@ -115,6 +115,29 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     'required' => ['scope', 'ids'],
                 ]]]), true),
             )),
+            '/api/organization/logo' => new PathItem(
+                get: new Operation(
+                    operationId: 'getOrganizationLogo',
+                    tags: ['Organization'],
+                    responses: self::responses(self::file('image/*', 'The current logo (404 without one).')),
+                    summary: 'Downloads the logo of the organization.',
+                ),
+                post: new Operation(
+                    operationId: 'uploadOrganizationLogo',
+                    tags: ['Organization'],
+                    responses: self::responses(self::json('has_logo and updated_at.')),
+                    summary: 'Replaces the logo (PNG, JPEG, GIF, WebP, SVG, at most 1 MB).',
+                    requestBody: new RequestBody('Multipart form with the field "logo"', new ArrayObject(['multipart/form-data' => ['schema' => [
+                        'type' => 'object', 'properties' => ['logo' => ['type' => 'string', 'format' => 'binary']], 'required' => ['logo'],
+                    ]]]), true),
+                ),
+                delete: new Operation(
+                    operationId: 'removeOrganizationLogo',
+                    tags: ['Organization'],
+                    responses: self::responses(new Response('Logo removed')),
+                    summary: 'Removes the logo; templates show the company name again.',
+                ),
+            ),
             '/api/render' => new PathItem(post: new Operation(
                 operationId: 'render',
                 tags: ['Render'],

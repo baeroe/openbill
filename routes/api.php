@@ -4,6 +4,7 @@ use App\Http\Api\ApiMiddleware;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
 use App\Http\Controllers\Api\FieldOrderController;
+use App\Http\Controllers\Api\OrganizationLogoController;
 use App\Http\Controllers\Api\PositionSuggestionsController;
 use App\Http\Controllers\Api\RenderController;
 use App\Http\Controllers\Api\RenderSchemaController;
@@ -26,11 +27,14 @@ Route::middleware(ApiMiddleware::READ)->group(function (): void {
     Route::get('/uploads/{name}', [UploadController::class, 'show'])
         ->where('name', '[0-9a-z]{26}\.(png|jpg|jpeg|gif|webp|svg)')
         ->name('api.uploads.show');
+    Route::get('/organization/logo', [OrganizationLogoController::class, 'show'])->name('api.organization.logo');
 });
 
 Route::middleware(ApiMiddleware::WRITE)->group(function (): void {
     Route::post('/uploads', [UploadController::class, 'store'])->name('api.uploads.store');
     Route::post('/field-definitions/reorder', FieldOrderController::class)->name('api.field-definitions.reorder');
+    Route::post('/organization/logo', [OrganizationLogoController::class, 'store'])->name('api.organization.logo.store');
+    Route::delete('/organization/logo', [OrganizationLogoController::class, 'destroy'])->name('api.organization.logo.destroy');
 });
 
 Route::middleware(ApiMiddleware::RENDER)->group(function (): void {

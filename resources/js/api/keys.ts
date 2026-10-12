@@ -39,4 +39,5 @@ export const keys = {
     renderSources: () => apiUrl('/api/render/sources', { limit: 50 }),
     renderSchema: () => '/api/render/schema',
     documentTypes: () => '/api/document-types',
+    organization: () => '/api/organization',
 };

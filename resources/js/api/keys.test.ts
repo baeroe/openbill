@@ -27,5 +27,6 @@ describe('keys', () => {
         expect(keys.renderSchema()).toBe('/api/render/schema');
         expect(keys.documentTypes()).toBe('/api/document-types');
         expect(keys.allFieldDefinitions()).toBe('/api/field-definitions');
+        expect(keys.organization()).toBe('/api/organization');
     });
 });

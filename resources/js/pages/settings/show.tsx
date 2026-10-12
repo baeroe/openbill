@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Page, PageHeader, Skeleton, cx } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
 import { path, t } from '@/lib/i18n';
+import { OrganizationSettings } from '@/settings/organization';
 import { SECTION_ICONS, SETTINGS_SECTIONS, sectionKey, type SettingsSection } from '@/settings/sections';
 
 type Props = { section: SettingsSection; can_manage_users: boolean };
@@ -39,6 +40,8 @@ export default function SettingsPage({ section, can_manage_users: canManageUsers
 function renderSection(section: SettingsSection, canManageUsers: boolean): ReactNode {
     void canManageUsers;
     switch (section) {
+        case 'organization':
+            return <OrganizationSettings />;
         default:
             return <Skeleton h={320} r={18} />;
     }

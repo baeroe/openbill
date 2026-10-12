@@ -216,6 +216,7 @@ VitePress in `docs/`, Englisch unter `docs/en/` (Locale `root` mit `link: '/en/'
 - `App\Http\Middleware\TrustProxies::headers()` glaubt `X-Forwarded-Prefix` nie (Laravel täte es standardmäßig): openbill läuft nur an der Wurzel seines Hosts. `TRUSTED_PROXIES` nimmt nur IPs/CIDR.
 - Liquid-Rechenfilter mit zwei Ganzzahlen rechnen über `BigInteger`; jenseits von `PHP_INT_MAX` kommt ein exakter String statt eines Floats. `date` nimmt Ganzzahlen als Unix-Zeitstempel.
 - Toasts pausieren über Halter (`pauseToasts('pointer'|'focus')`); wird eine Toast-Aktion benutzt, gibt `dismissToast(id, true)` den Fokus-Halter frei (Browser schicken kein `blur` für entfernte Elemente).
+- Neue Positionen bekommen Steuersatz und Einheit aus `useTaxRates()`/`useUnits()`: die Hinzufügen-Knöpfe im `GroupsEditor` bleiben deaktiviert, bis beides geladen ist (sonst entstand eine Position ohne beides, und Abschließen scheiterte).
 - Radix-Dialoge/Drawer/mobile Seitenleiste haben Exit-Animationen über `data-[state=closed]:animate-*-out` (Variante gewinnt über die Attribut-Spezifität).
 - Doku-Screenshots: je Sprache ein Playwright-Projekt (`docs-screenshots-en`/`-de`), weil Chromium Datumsfelder nach `--lang` formatiert; `browser.newContext()` im Test übernimmt die `storageState` des Projekts (für abgemeldete Bilder leeren).
 - Ein Entwurf übernimmt das Template seines Dokumenttyps beim Anlegen (`CreateDocument`); später geänderte Vorgaben am Dokumenttyp wirken nicht auf bestehende Entwürfe.

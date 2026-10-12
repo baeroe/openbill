@@ -60,6 +60,23 @@ test('stops saving and turns read-only when the document is finalized elsewhere 
     expect(((await apiGet(page, `/api/documents/${id}`)) as Doc).intro).not.toBe('Noch eine Änderung');
 });
 
+test('gives a position added right after opening the editor the default tax rate and unit (flake of review focus 2)', async ({ page }) => {
+    const id = await newDocument(page, 'Quote', /Hafenkontor Lindqvist/);
+    // a full page load with slow master data: "Add position" must wait for the tax rates and units
+    await page.route('**/api/tax-rates*', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await route.continue();
+    });
+    await page.reload();
+    const loose = page.getByRole('group', { name: 'Loose positions' });
+    await loose.getByRole('button', { name: 'Add position' }).click();
+    await fillRow(loose, 0, 'Beratung', '1', '100');
+    await settle(page);
+
+    const doc = (await apiGet(page, `/api/documents/${id}`)) as { groups: { positions: { tax_rate_id: string | null; unit_id: string | null }[] }[] };
+    expect(doc.groups.flatMap((group) => group.positions).map((position) => [position.tax_rate_id !== null, position.unit_id !== null])).toEqual([[true, true]]);
+});
+
 test('shows the totals of the server after fast typing (review focus 3)', async ({ page }) => {
     const id = await newDocument(page, 'Invoice', /Hafenkontor Lindqvist/);
     const loose = page.getByRole('group', { name: 'Loose positions' });

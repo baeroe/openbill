@@ -130,15 +130,14 @@ jobs:
           pnpm --filter "./prototypes/*" run test
           pnpm --filter "./prototypes/*" run build
 
-      # built like docs.yml publishes it (GitHub Pages under /openbill/): links, assets and the favicon carry the base
+      # built like docs.yml publishes it (https://openbill.dev): llms.txt and link previews use the absolute address
       - name: Docs
         run: |
           pnpm --dir docs build
-          grep -q 'href="/openbill/favicon.svg"' docs/.vitepress/dist/en/index.html
-          grep -q 'https://baeroe.github.io/openbill/setup.md' docs/.vitepress/dist/llms.txt
+          grep -q 'href="/favicon.svg"' docs/.vitepress/dist/en/index.html
+          grep -q 'https://openbill.dev/setup.md' docs/.vitepress/dist/llms.txt
         env:
-          DOCS_BASE: /openbill/
-          DOCS_URL: https://baeroe.github.io/openbill
+          DOCS_URL: https://openbill.dev
 
   # EN 16931 business rules on the e-invoices the tests archive: the official CEN CII Schematron (Saxon-HE) and the
   # KoSIT validator (scenario "EN16931 (CII)" of its XRechnung configuration). Not a required check; see

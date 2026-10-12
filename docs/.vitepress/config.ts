@@ -1,8 +1,9 @@
 import { defineConfig, type DefaultTheme, type HeadConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 
-// Published on GitHub Pages under /openbill/ until the docs get a domain of their own (.github/workflows/docs.yml sets
-// DOCS_BASE and DOCS_URL). Locally and in DDEV the site lives at /.
+// Published on GitHub Pages at https://openbill.dev (.github/workflows/docs.yml sets DOCS_URL). DOCS_BASE is only needed
+// for a copy below a sub-path (e.g. https://<user>.github.io/<repo>/); locally, in DDEV and on openbill.dev the site
+// lives at /.
 const base = process.env.DOCS_BASE ?? '/';
 /** Absolute address of the published docs without trailing slash (llms.txt links, link previews); unset locally. */
 const site = process.env.DOCS_URL?.replace(/\/$/, '');
@@ -70,7 +71,7 @@ export default defineConfig({
     ],
     vite: {
         // agents get the English docs only
-        // the plugin puts the base after the domain itself: the origin only (https://baeroe.github.io)
+        // the plugin puts the base after the domain itself: the origin only (https://openbill.dev)
         plugins: [llmstxt({ workDir: 'en', ...(site ? { domain: new URL(site).origin } : {}) })],
         // dev server behind DDEV (https://openbill.ddev.site:5174): Vite only answers known hosts
         server: { allowedHosts: ['.ddev.site'] },

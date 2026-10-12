@@ -1,7 +1,7 @@
 name: Docs
 
-# GitHub Pages: https://baeroe.github.io/openbill/ – until the docs get a domain of their own (then drop DOCS_BASE,
-# point DOCS_URL at the domain and add docs/public/CNAME)
+# GitHub Pages with the custom domain https://openbill.dev (set in the repository's Pages settings; with a custom
+# workflow no CNAME file is needed). The site lives at the root (base /).
 on:
   push:
     branches: [main]
@@ -20,8 +20,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DOCS_BASE: /openbill/
-      DOCS_URL: https://baeroe.github.io/openbill
+      DOCS_URL: https://openbill.dev
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,7 +37,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir docs build
 
-      # no actions/configure-pages: its outputs (base_url …) are not used, the base comes from DOCS_BASE, and it would
+      # no actions/configure-pages: its outputs (base_url …) are not used, the base is the default /, and it would
       # need pages: read in this job
       - uses: actions/upload-pages-artifact@v3
         with:

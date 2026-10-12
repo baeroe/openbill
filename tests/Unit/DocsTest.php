@@ -23,3 +23,12 @@ it('marks templates:render as read access to all documents in the API docs', fun
     expect((string) file_get_contents("{$root}/docs/en/api.md"))->toContain('read access to all documents')
         ->and((string) file_get_contents("{$root}/docs/de/api.md"))->toContain('lesender Zugriff auf alle Dokumente');
 });
+
+it('explains the toolkit token, pnpm run pack and local certificates on the toolkit page', function () {
+    $root = dirname(__DIR__, 2);
+
+    expect((string) file_get_contents("{$root}/docs/en/template-toolkit.md"))
+        ->toContain('read access to all documents', '.env.local', 'pnpm run pack', '--use-system-ca', 'pnpm pull --force')
+        ->and((string) file_get_contents("{$root}/docs/de/template-toolkit.md"))
+        ->toContain('lesender Zugriff auf alle Dokumente', '.env.local', 'pnpm run pack', '--use-system-ca', 'pnpm pull --force');
+});

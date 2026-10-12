@@ -57,6 +57,7 @@ arch('domain exceptions carry an HTTP status')
     ->expect([
         'App\Exceptions\DocumentLockedException', 'App\Exceptions\ActionNotAllowedException', 'App\Exceptions\ComplianceFailedException',
         'App\Exceptions\TemplateRenderFailedException', 'App\Exceptions\PdfRenderFailedException', 'App\Exceptions\EInvoiceInvalidException',
+        'App\Exceptions\OwnerRequiredException',
     ])
     ->toExtend('App\Exceptions\DomainActionException');
 

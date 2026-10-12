@@ -19,6 +19,12 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasUlids, Notifiable;
 
+    /** Disabled accounts cannot log in; their tokens and sessions are gone (DisableUser). */
+    public function isDisabled(): bool
+    {
+        return $this->disabled_at !== null;
+    }
+
     /**
      * @return array<string, string>
      */
@@ -28,6 +34,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'disabled_at' => 'datetime',
         ];
     }
 }

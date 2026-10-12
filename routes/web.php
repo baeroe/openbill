@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\FieldController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\SettingsController;
@@ -15,6 +16,10 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
         Route::get('/login', [LoginController::class, 'show'])->name('login');
         // per-account lockout lives in LoginRequest; this caps password spraying per address
         Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:20,1');
+        Route::get('/invitations/{invitation}', [InvitationController::class, 'show'])
+            ->whereUlid('invitation')->middleware('signed:relative')->name('invitations.show');
+        Route::post('/invitations/{invitation}', [InvitationController::class, 'store'])
+            ->whereUlid('invitation')->middleware(['signed:relative', 'throttle:10,1']);
     });
 
     Route::middleware('auth')->group(function (): void {

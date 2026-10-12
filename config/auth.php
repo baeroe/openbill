@@ -63,7 +63,8 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
+            // App\Auth\ActiveUserProvider: disabled accounts never sign in (sessions, remember cookies, login)
+            'driver' => 'active-eloquent',
             'model' => env('AUTH_MODEL', User::class),
         ],
 

@@ -11,6 +11,7 @@ use Laravel\Sanctum\TransientToken;
 /**
  * Which token may use which endpoint. The session of the own UI (Sanctum TransientToken) may do everything.
  * A toolkit token (templates:write with template_id) reads and writes only its own template.
+ * SESSION: only the own UI (user management), never a token.
  */
 final class ApiAccess
 {
@@ -26,6 +27,9 @@ final class ApiAccess
 
     public const MCP = 'mcp';
 
+    /** Only the own UI (user management): no ability opens it, only the session. */
+    public const SESSION = 'session';
+
     /** Abilities that open a rule on their own. */
     private const OPEN = [
         self::READ => ['api:read', 'api:write'],
@@ -34,6 +38,7 @@ final class ApiAccess
         self::TEMPLATE_READ => ['api:read', 'api:write'],
         self::TEMPLATE_WRITE => ['api:write'],
         self::MCP => ['mcp'],
+        self::SESSION => [],
     ];
 
     public static function allows(?HasAbilities $token, string $rule, ?string $templateId = null): bool

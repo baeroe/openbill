@@ -14,4 +14,7 @@ final class ApiMiddleware
     public const TEMPLATE_READ = ['auth:sanctum', 'api.ability:template-read'];
 
     public const TEMPLATE_WRITE = ['auth:sanctum', 'api.ability:template-write'];
+
+    /** Session of the own UI only (user management); every API token gets 403. */
+    public const SESSION = ['auth:sanctum', 'api.ability:session'];
 }

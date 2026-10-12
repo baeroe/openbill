@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -42,10 +44,18 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), remember: $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey(), self::DECAY_SECONDS);
 
-            throw ValidationException::withMessages(['email' => __('login.failed')]);
+            throw ValidationException::withMessages(['email' => $this->isDisabledAccount() ? __('login.disabled') : __('login.failed')]);
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /** The own message for a disabled account, only with the right password (no hint which addresses exist). */
+    private function isDisabledAccount(): bool
+    {
+        $user = User::query()->where('email', $this->string('email')->value())->whereNotNull('disabled_at')->first();
+
+        return $user !== null && Hash::check($this->string('password')->value(), $user->password);
     }
 
     private function ensureIsNotRateLimited(): void

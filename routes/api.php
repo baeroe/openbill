@@ -4,6 +4,7 @@ use App\Http\Api\ApiMiddleware;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
 use App\Http\Controllers\Api\FieldOrderController;
+use App\Http\Controllers\Api\InvitationsController;
 use App\Http\Controllers\Api\NumberPreviewController;
 use App\Http\Controllers\Api\OrganizationLogoController;
 use App\Http\Controllers\Api\PositionSuggestionsController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\RenderSourcesController;
 use App\Http\Controllers\Api\SignedDownloadController;
 use App\Http\Controllers\Api\TemplatePackageController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\UsersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -43,6 +45,17 @@ Route::middleware(ApiMiddleware::RENDER)->group(function (): void {
     Route::post('/render', RenderController::class)->name('api.render');
     Route::get('/render/sources', RenderSourcesController::class)->name('api.render.sources');
     Route::get('/render/schema', RenderSchemaController::class)->name('api.render.schema');
+});
+
+// user management: only the session of the own UI, never API tokens (not in the OpenAPI document). Accounts are
+// disabled, never deleted (documents and their events keep their author)
+Route::middleware(ApiMiddleware::SESSION)->group(function (): void {
+    Route::get('/users', [UsersController::class, 'index'])->name('api.users');
+    Route::patch('/users/{id}', [UsersController::class, 'update'])->whereUlid('id')->name('api.users.update');
+    Route::post('/users/{id}/disable', [UsersController::class, 'disable'])->whereUlid('id')->name('api.users.disable');
+    Route::post('/users/{id}/enable', [UsersController::class, 'enable'])->whereUlid('id')->name('api.users.enable');
+    Route::post('/invitations', [InvitationsController::class, 'store'])->name('api.invitations.store');
+    Route::delete('/invitations/{id}', [InvitationsController::class, 'destroy'])->whereUlid('id')->name('api.invitations.destroy');
 });
 
 // signed links (MCP get-document-pdf-url, 15 minutes): no token, the signature is the permission

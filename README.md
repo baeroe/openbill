@@ -55,6 +55,10 @@ The clickable prototypes in [`prototypes/`](prototypes) (`clickdummy` and `click
 
 A tag `vX.Y.Z` builds the image for amd64 and arm64, pushes it to Docker Hub and creates a GitHub release with the notes from [`docs/en/upgrading.md`](docs/en/upgrading.md).
 
+## Disclaimer
+
+openbill is no tax or legal advice and does not guarantee that your invoices, your archive or your processes meet the rules that apply to you (e.g. GoBD, VAT law). Check your setup with your tax advisor. It comes without warranty, see the license.
+
 ## License
 
 [MIT](LICENSE)

@@ -2,6 +2,10 @@
 
 openbill erzeugt E-Rechnungen nach **EN 16931** in der Syntax UN/CEFACT CII (Factur-X / ZUGFeRD, Profil EN 16931). Die XML steckt in einem **PDF/A-3b**, eine Datei reicht also für Menschen und Buchhaltungssoftware.
 
+::: warning Keine Steuer- oder Rechtsberatung
+openbill hilft dir, Rechnungen nach EN 16931 zu schreiben, und prüft, was es prüfen kann. Es ist aber keine Steuer- oder Rechtsberatung und sichert nicht zu, dass deine Dokumente, dein Archiv oder deine Abläufe die für dich geltenden Vorschriften erfüllen (z. B. GoBD, Umsatzsteuerrecht). Stimm deine Einrichtung mit deiner Steuerberatung ab. openbill kommt ohne Gewährleistung (MIT-Lizenz).
+:::
+
 ## Einschalten
 
 Das Prüfprofil wird je Dokumenttyp eingestellt: `basic` oder `en16931`. Das E-Rechnungsprofil gibt es nur für Rechnungen und Stornos. Mit `en16931` prüft das Abschließen alles, was eine E-Rechnung braucht (siehe [Prüfprofile](/de/documents#prufprofile)), und bricht mit einer Liste der fehlenden Angaben ab.

@@ -1,0 +1,113 @@
+# openbill in one file, no .env needed. Paste it into Dockge or Portainer
+# (or save it as compose.yaml), change the values below, deploy.
+# Docs: https://openbill.dev/en/setup
+x-openbill: &openbill-env
+  # public https address (your reverse proxy forwards it to port 7739)
+  APP_URL: https://invoices.example.com
+  # owner account, created on the first start (password: 8+ characters)
+  ADMIN_EMAIL: admin@example.com
+  ADMIN_PASSWORD: change-me
+  # database password: MariaDB keeps it from the first start on
+  DB_PASSWORD: &db-password change-me
+  # proxy on another host? Only its X-Forwarded-* headers count then:
+  # TRUSTED_PROXIES: 192.168.1.10
+# openbill refuses to start while a password is still change-me.
+
+# Data lives in the volumes openbill-data (PDFs/XMLs, templates, uploads, the
+# generated APP_KEY) and openbill-db (MariaDB). Removing the stack keeps them
+# unless you delete the volumes too.
+services:
+  openbill:
+    # pin a version with baeroe/openbill:0.1.0
+    image: baeroe/openbill:latest
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+    # localhost only: a reverse proxy on this host forwards to it. For a proxy on another host, drop "127.0.0.1:" and
+    # set TRUSTED_PROXIES above to that proxy (anyone who reaches the port could otherwise set X-Forwarded-* headers).
+    ports:
+      - "127.0.0.1:7739:8080"
+    environment:
+      <<: *openbill-env
+      DB_HOST: mariadb
+      DB_DATABASE: openbill
+      DB_USERNAME: openbill
+      GOTENBERG_URL: http://gotenberg:3000
+    volumes:
+      - openbill-data:/var/www/html/storage/app
+    # Laravel answers (/up) with the host of APP_URL – the image's own check only pings nginx and PHP-FPM
+    healthcheck:
+      test: ["CMD", "sh", "-c", "h=$${APP_URL#*://}; h=$${h%%/*}; curl -fsS -o /dev/null -H \"Host: $${h%%:*}\" http://localhost:8080/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    networks:
+      - default
+      - backend
+
+  mariadb:
+    image: mariadb:11.4.13@sha256:1292844148b311e4ed4300022a996d39083f415a963e970cf47cad1b3b18e3a6
+    restart: unless-stopped
+    # refuses the placeholder before MariaDB stores it in its volume, then starts as usual
+    entrypoint:
+      - sh
+      - -c
+      - 'if [ "$$MARIADB_PASSWORD" = change-me ]; then echo "openbill: set DB_PASSWORD at the top of the compose file (still change-me)" >&2; exit 1; fi; exec docker-entrypoint.sh "$$@"'
+      - docker-entrypoint.sh
+    # Binary logging is off in this image. The document lock triggers need SUPER or this switch as soon as someone
+    # turns it on (replication, point-in-time backups), so it is set either way.
+    command:
+      - --log-bin-trust-function-creators=1
+    environment:
+      MARIADB_DATABASE: openbill
+      MARIADB_USER: openbill
+      MARIADB_PASSWORD: *db-password
+      # nobody needs root: backups use the openbill user (docs: backup)
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+      # runs mariadb-upgrade after a new MariaDB patch version
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - openbill-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - backend
+
+  # PDF rendering. Templates may come from untrusted packages, so Chromium runs no JavaScript and loads nothing but
+  # Gotenberg's own files and data: URLs.
+  gotenberg:
+    image: gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-deny-list=^file:(?!//\/tmp/).*
+      - --chromium-deny-list=^(?!(file|data):).*
+      - --chromium-deny-private-ips=true
+      - --chromium-deny-public-ips=true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - backend
+
+networks:
+  default:
+  # MariaDB and Gotenberg: reachable from openbill only, no published ports, no internet access
+  backend:
+    internal: true
+
+volumes:
+  openbill-data:
+  openbill-db:

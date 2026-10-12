@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Validator;
  */
 class EnsureAdminUser extends Command
 {
+    /** Placeholder of docker-compose.standalone.yml; the entrypoint refuses the same value for DB_PASSWORD. */
+    public const PLACEHOLDER = 'change-me';
+
     protected $signature = 'app:ensure-admin';
 
     protected $description = 'Create the owner account from ADMIN_EMAIL / ADMIN_PASSWORD if it does not exist yet';
@@ -31,6 +34,12 @@ class EnsureAdminUser extends Command
             ['email' => $email, 'password' => $password],
             ['email' => ['email'], 'password' => ['min:8']],
         );
+
+        if ($password === self::PLACEHOLDER) {
+            $this->error('ADMIN_PASSWORD is still the placeholder "'.self::PLACEHOLDER.'": set your own password (docker-compose.standalone.yml: the block at the top).');
+
+            return self::FAILURE;
+        }
 
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $message) {

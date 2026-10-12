@@ -155,8 +155,13 @@ describe('logout', () => {
         expect(pendingDeleteIds().size).toBe(0);
     });
 
-    it.each([401, 419])('counts %i on logout as a session that had ended already: cleans up and leaves (ledger phase 6)', async (status) => {
-        const fetch = vi.fn(async () => new Response(null, { status }));
+    it.each([
+        [[401], 1],
+        [[419, 204, 401], 3], // CSRF token changed: fresh token, then the session turns out to be over
+        [[419, 204, 204], 3], // CSRF token changed, session still valid: logged out on the second try (review phase 11)
+    ])('counts the answers %j on logout as logged out: cleans up and leaves (ledger phase 6)', async (statuses, fetches) => {
+        const answers = [...statuses];
+        const fetch = vi.fn(async () => new Response(null, { status: answers.shift() }));
         vi.stubGlobal('fetch', fetch);
         const { entry } = editing();
         const leave = vi.fn();
@@ -164,9 +169,18 @@ describe('logout', () => {
         calls[0].resolve(detail('a', 'Hallo'));
 
         expect(await done).toBe(true);
-        expect(fetch).toHaveBeenCalledOnce();
+        expect(fetch).toHaveBeenCalledTimes(fetches);
         expect(leave).toHaveBeenCalledOnce();
         expect(entry.autosave.stopped).toBe(true);
+    });
+
+    it('fails when the CSRF token is refused even after renewing it (review phase 11)', async () => {
+        const answers = [419, 204, 419];
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: answers.shift() })));
+        const leave = vi.fn();
+
+        expect(await logout({ leave })).toBe(false);
+        expect(leave).not.toHaveBeenCalled();
     });
 
     it('still fails on a server error of the logout', async () => {

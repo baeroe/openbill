@@ -21,16 +21,27 @@ export type LogoutOptions = {
     timeout?: number;
 };
 
-/** 401/419: the session ended on its own (expired, or logged out in another tab) – which is what logging out wants. */
+/**
+ * 401: the session ended on its own (expired, or logged out in another tab) – which is what logging out wants.
+ * 419 only says the CSRF token changed; the session may still be valid (a shared computer must not stay signed in):
+ * fetch a fresh token and send once more, like api() does. A second 419 counts as failed.
+ */
 export async function postLogout(signal: AbortSignal): Promise<void> {
-    const xsrf = cookie('XSRF-TOKEN');
-    const response = await fetch(path('/logout'), {
-        method: 'POST',
-        credentials: 'same-origin',
-        signal,
-        headers: { Accept: 'text/html', 'X-Requested-With': 'XMLHttpRequest', ...(xsrf ? { 'X-XSRF-TOKEN': xsrf } : {}) },
-    });
-    if (response.status === 401 || response.status === 419) return;
+    const send = () => {
+        const xsrf = cookie('XSRF-TOKEN');
+        return fetch(path('/logout'), {
+            method: 'POST',
+            credentials: 'same-origin',
+            signal,
+            headers: { Accept: 'text/html', 'X-Requested-With': 'XMLHttpRequest', ...(xsrf ? { 'X-XSRF-TOKEN': xsrf } : {}) },
+        });
+    };
+    let response = await send();
+    if (response.status === 419) {
+        await fetch('/sanctum/csrf-cookie', { credentials: 'same-origin', signal });
+        response = await send();
+    }
+    if (response.status === 401) return;
     if (!response.ok) throw new Error(`logout: ${response.status}`);
 }
 

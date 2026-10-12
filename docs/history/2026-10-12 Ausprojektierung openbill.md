@@ -32,7 +32,7 @@ openbill soll wie prevju laufen: ein Image auf Docker Hub, `docker compose up -d
 - **Der Server rechnet, der Browser formatiert**: Kennzahlen als Inertia-Props, Summen aus der Render-Antwort, Listen per SWR.
 - **Barrierefreiheit vor Gestaltung**: `--muted` wurde abgedunkelt, obwohl DESIGN.md heller war.
 - **Editor**: Zustand-Store mit reinen Ops, lokale IDs + `reconcileIds()`, höchstens eine Autosave-Instanz je Dokument (überlebt den Editor), last-write-wins, Löschen verzögert mit Undo statt Wiederherstellen.
-- **Logout leert alle Caches** (auch `$inf$`-Seiten) – fremde Daten nach einem Login im selben Tab wären ein Datenschutzproblem. Seit Phase 11: 401/419 gilt als abgemeldet, Timeout 10 s, wartende Löschungen gehen vorher raus, ungespeicherte Eingaben überleben eine abgelaufene Sitzung in `sessionStorage` (nur für dieselbe Person).
+- **Logout leert alle Caches** (auch `$inf$`-Seiten) – fremde Daten nach einem Login im selben Tab wären ein Datenschutzproblem. Seit Phase 11: 401 gilt als abgemeldet, 419 wird einmal mit frischem CSRF-Token wiederholt (die Sitzung kann noch gültig sein), Timeout 10 s, wartende Löschungen gehen vorher raus, ungespeicherte Eingaben überleben eine abgelaufene Sitzung in `sessionStorage` (nur für dieselbe Person).
 - **Benutzer werden deaktiviert, nie gelöscht**: `created_by` abgeschlossener Dokumente darf sich nicht an den Triggern vorbei ändern.
 - **Kundenart und Kategorie O**: Drittland + Dienstleistung + Unternehmen → nicht steuerbar (`O`), an Privatpersonen normaler Satz (§ 3a UStG).
 - **MCP nur per Token**, eine Basisklasse übersetzt Fehler für das Modell, Ausgabe = REST-Formate, 25 Tools, eigener Limiter für Vorschau-PDFs (Agenten-Schleifen sollen Gotenberg nicht fürs Abschließen blockieren).

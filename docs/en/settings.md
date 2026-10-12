@@ -38,6 +38,12 @@ Users are never deleted, they are **disabled**: the account stays so that docume
 
 User management is only available in the app (not through API tokens or MCP).
 
+## Your account
+
+Shows who is signed in and lets you change your own password: enter the current one and the new one twice (at least 8 characters). You stay signed in here; every other session of your account is signed out and “Stay signed in” stops working on other devices. API tokens stay valid – revoke them under **API & MCP** if they may have leaked too.
+
+Forgotten password: an owner can't see or set passwords. Whoever runs the server resets it with `php artisan app:reset-password <email>` (see [Setup](/en/setup#passwords)).
+
 ## API & MCP
 
 ![API tokens and the MCP setup](/screenshots/en/settings-api.png)

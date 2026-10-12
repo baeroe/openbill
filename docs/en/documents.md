@@ -6,7 +6,7 @@ openbill knows four document types. Each one moves through a small set of status
 |---|---|
 | Offer | draft → open → accepted / rejected |
 | Order confirmation | draft → open → done |
-| Invoice | draft → open → paid; cancelled (set by a cancellation) |
+| Invoice | draft → open → paid; cancelled (set by a cancellation that covers the rest) |
 | Cancellation | draft → closed |
 
 "Overdue" is not a status: an open invoice whose due date has passed is shown as overdue.
@@ -21,7 +21,7 @@ Position kinds:
 - **Text** – a line without amount.
 - **Optional** – offers only; shown with its price but not part of the total.
 
-Amounts and quantities are exact decimals. Through the API they are sent as strings with a dot (`"12.50"`); numbers like `12.5` or `"12,5"` are rejected with a message for that field.
+Amounts and quantities are exact decimals. Through the API they are sent as strings with a dot (`"12.50"`); numbers like `12.5` or `"12,5"` are rejected with a message for that field. Quantities and unit prices have at most 11 digits before the dot (and 4 after it); line, group and document totals may be at most 9,999,999,999,999.99. Larger values are rejected with a message at the position (or the positions) instead of being saved.
 
 ## Taxes and totals
 
@@ -32,6 +32,8 @@ Totals are computed per tax rate (net, tax, gross) and for the whole document; t
 - **Customer in a third country:** no VAT (category G), the export note is added.
 
 Legal notes are written in the document's language.
+
+A cancellation always uses the tax of the invoice it cancels, as frozen when the invoice was finalized: small-business status, the customer's tax treatment, supply type and kind, and the percent and category of the invoice's tax rates. Changes made since then – switching to regular taxation, a customer's new reverse-charge status, an edited rate – do not change the cancellation, neither its totals nor its e-invoice. Rates the invoice didn't use (added later) count with their current values.
 
 ## Finalizing
 
@@ -70,7 +72,12 @@ Documents can be converted along the chain:
 
 The new document is a draft with the customer, contact, groups, positions and texts of its source. Optional positions are dropped, groups that end up empty are dropped. Custom field values move along when the field is defined for the target type too; other values are dropped and reported. Every document knows its source, and an invoice knows the cancellation that cancelled it.
 
-A cancellation copies the positions of its invoice with negative quantities. Each invoice has at most one cancellation; asking again returns the existing draft. A cancellation always belongs to the customer of its invoice; its customer cannot be changed. When the cancellation is finalized, the invoice becomes **cancelled**, and a cancelled invoice can no longer be marked as paid.
+A cancellation copies the positions of its invoice with negative quantities. An invoice has at most one cancellation **draft** at a time; asking again returns it. A cancellation always belongs to the customer of its invoice; its customer cannot be changed.
+
+A cancellation must credit an amount (its total is below 0) and at most what is left of the invoice: the invoice total minus its earlier finalized cancellations. Otherwise the editor shows it as missing information and finalizing stops (`cancellation_not_credit`, `cancellation_exceeds_invoice`). To cancel only part of an invoice, reduce the positions or quantities of the cancellation draft before finalizing it (**partial cancellation**):
+
+- A cancellation that covers the rest makes the invoice **cancelled**; a cancelled invoice can no longer be marked as paid or cancelled again.
+- A partial cancellation leaves the invoice open (or paid). From then on it counts with what is left of it – in the open and overdue figures of the overview, the open amounts of the customer list, the document list (“after cancellations …”) and its sum for open or overdue invoices – and it can still be marked as paid or cancelled again, until it is covered.
 
 Duplicating creates a new draft dated today without number and without chain. Cancellations cannot be duplicated.
 

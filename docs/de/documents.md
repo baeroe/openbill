@@ -6,7 +6,7 @@ openbill kennt vier Dokumenttypen. Jeder durchläuft wenige Status; beim Abschli
 |---|---|
 | Angebot | Entwurf → Offen → Angenommen / Abgelehnt |
 | Auftragsbestätigung | Entwurf → Offen → Erledigt |
-| Rechnung | Entwurf → Offen → Bezahlt; Storniert (durch ein Storno) |
+| Rechnung | Entwurf → Offen → Bezahlt; Storniert (durch ein Storno, das den Rest abdeckt) |
 | Storno | Entwurf → Abgeschlossen |
 
 „Überfällig“ ist kein Status: Eine offene Rechnung, deren Fälligkeit vorbei ist, wird als überfällig angezeigt.
@@ -21,7 +21,7 @@ Positionsarten:
 - **Textzeile** – eine Zeile ohne Betrag.
 - **Optional** – nur in Angeboten; mit Preis angezeigt, aber nicht Teil der Summe.
 
-Beträge und Mengen sind exakte Dezimalzahlen. Über die API werden sie als Text mit Punkt geschickt (`"12.50"`); Zahlen wie `12.5` oder `"12,5"` werden mit einer Meldung zum Feld abgelehnt.
+Beträge und Mengen sind exakte Dezimalzahlen. Über die API werden sie als Text mit Punkt geschickt (`"12.50"`); Zahlen wie `12.5` oder `"12,5"` werden mit einer Meldung zum Feld abgelehnt. Mengen und Einzelpreise haben höchstens 11 Stellen vor dem Punkt (und 4 danach); Zeilen-, Gruppen- und Dokumentsummen dürfen höchstens 9.999.999.999.999,99 betragen. Größere Werte werden mit einer Meldung an der Position (bzw. den Positionen) abgelehnt statt gespeichert.
 
 ## Steuern und Summen
 
@@ -32,6 +32,8 @@ Summen entstehen je Steuersatz (Netto, Steuer, Brutto) und für das ganze Dokume
 - **Kunde im Drittland:** keine Umsatzsteuer (Kategorie G), der Ausfuhrhinweis wird gesetzt.
 
 Gesetzliche Hinweise stehen in der Sprache des Dokuments.
+
+Ein Storno rechnet immer mit der Steuer der Rechnung, die es storniert, so wie sie beim Abschließen der Rechnung eingefroren wurde: Kleinunternehmer-Status, Steuerbehandlung, Leistungsart und Kundenart des Kunden sowie Prozentsatz und Kategorie der Steuersätze der Rechnung. Was sich seitdem geändert hat – Wechsel zur Regelbesteuerung, ein Kunde jetzt mit Reverse Charge, ein geänderter Steuersatz –, ändert das Storno nicht, weder seine Summen noch seine E-Rechnung. Steuersätze, die die Rechnung nicht kannte (später angelegt), zählen mit ihren aktuellen Werten.
 
 ## Abschließen
 
@@ -70,7 +72,12 @@ Dokumente lassen sich entlang der Kette umwandeln:
 
 Das neue Dokument ist ein Entwurf mit Kunde, Ansprechpartner, Gruppen, Positionen und Texten der Quelle. Optionale Positionen fallen weg, danach leere Gruppen ebenfalls. Werte eigener Felder wandern mit, wenn das Feld auch für den Zieltyp gilt; andere Werte fallen weg und werden gemeldet. Jedes Dokument kennt seine Quelle, und eine Rechnung kennt das Storno, das sie storniert hat.
 
-Ein Storno übernimmt die Positionen seiner Rechnung mit negativen Mengen. Jede Rechnung hat höchstens ein Storno; ein zweiter Versuch liefert den vorhandenen Entwurf. Ein Storno gehört immer zum Kunden seiner Rechnung; der Kunde lässt sich nicht ändern. Wird das Storno abgeschlossen, ist die Rechnung **storniert**, und eine stornierte Rechnung lässt sich nicht mehr auf bezahlt setzen.
+Ein Storno übernimmt die Positionen seiner Rechnung mit negativen Mengen. Eine Rechnung hat höchstens einen Storno-**Entwurf** zugleich; ein zweiter Versuch liefert ihn. Ein Storno gehört immer zum Kunden seiner Rechnung; der Kunde lässt sich nicht ändern.
+
+Ein Storno muss einen Betrag gutschreiben (seine Summe liegt unter 0), und höchstens so viel, wie von der Rechnung noch übrig ist: die Rechnungssumme abzüglich früher abgeschlossener Stornos. Sonst zeigt der Editor das als fehlende Angabe, und das Abschließen bricht ab (`cancellation_not_credit`, `cancellation_exceeds_invoice`). Um nur einen Teil einer Rechnung zu stornieren, verringerst du Positionen oder Mengen des Storno-Entwurfs vor dem Abschließen (**Teilstorno**):
+
+- Ein Storno, das den Rest abdeckt, macht die Rechnung **storniert**; eine stornierte Rechnung lässt sich nicht mehr auf bezahlt setzen oder erneut stornieren.
+- Ein Teilstorno lässt die Rechnung offen (oder bezahlt). Ab dann zählt sie mit dem, was von ihr übrig ist – in den Kennzahlen „offen“ und „überfällig“ der Übersicht, den offenen Beträgen der Kundenliste, der Dokumentliste („nach Storno …“) und ihrer Summe für offene oder überfällige Rechnungen –, und sie lässt sich weiter auf bezahlt setzen oder erneut stornieren, bis sie abgedeckt ist.
 
 Duplizieren legt einen neuen Entwurf mit heutigem Datum an, ohne Nummer und ohne Kette. Stornos lassen sich nicht duplizieren.
 

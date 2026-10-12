@@ -16,7 +16,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('get-overview')]
 #[Title('Overview')]
-#[Description('Key figures of the overview page – open and overdue invoices, open offers, paid this month and this year (gross amounts as strings, with counts) – plus the documents that need attention and the recently edited ones. Start here.')]
+#[Description('Key figures of the overview page – open and overdue invoices, open offers, paid this month and this year (gross amounts as strings, with counts; invoices count with what is left after partial cancellations) – plus the documents that need attention and the recently edited ones. Start here.')]
 #[IsReadOnly]
 #[IsOpenWorld(false)]
 final class GetOverviewTool extends OpenbillTool

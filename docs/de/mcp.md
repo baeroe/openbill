@@ -46,7 +46,7 @@ Ein `mcp`-Token darf alles, was die Tools anbieten, auch Dokumente abschließen 
 
 | Tool | Was es tut |
 |---|---|
-| `get-overview` | Kennzahlen (offen, überfällig, Angebote, bezahlt), Dokumente, die Aufmerksamkeit brauchen, zuletzt bearbeitete |
+| `get-overview` | Kennzahlen (offen, überfällig, Angebote, bezahlt; Rechnungen zählen mit dem, was nach Teilstornos übrig ist), Dokumente, die Aufmerksamkeit brauchen, zuletzt bearbeitete |
 | `list-customers`, `get-customer` | Kunden mit Ansprechpartnern; Suche und Seiten |
 | `create-customer`, `update-customer` | Kunden anlegen oder ändern; `contacts` ist die vollständige Liste |
 | `list-documents`, `get-document` | Dokumente in Kurzform mit Filtern; ein Dokument vollständig mit Summen und offenen Prüfpunkten |
@@ -55,7 +55,7 @@ Ein `mcp`-Token darf alles, was die Tools anbieten, auch Dokumente abschließen 
 | `finalize-document` | Prüfen, Nummer vergeben, PDF (und E-Rechnungs-XML) archivieren – nicht umkehrbar |
 | `set-document-status` | Angenommen, abgelehnt, erledigt, bezahlt, zurück auf offen |
 | `convert-document` | Angenommenes Angebot in Auftragsbestätigung oder Rechnung, Auftragsbestätigung in Rechnung |
-| `cancel-invoice` | Storno-Entwurf einer offenen oder bezahlten Rechnung |
+| `cancel-invoice` | Storno-Entwurf einer offenen oder bezahlten Rechnung (für ein Teilstorno Positionen verringern) |
 | `get-document-pdf-url` | Signierte Links zum PDF (und zum XML einer E-Rechnung), 15 Minuten, ohne Token |
 | `list-field-definitions`, `save-field-definition` | Eigene Felder auflisten, anlegen, ändern |
 | `list-templates`, `get-template`, `update-template` | Templates mit Liquid- und CSS-Quellen; mitgelieferte sind schreibgeschützt |

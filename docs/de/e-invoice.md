@@ -21,7 +21,7 @@ Dokumente mit Profil `basic` (sowie Angebote und Auftragsbestätigungen) bekomme
 
 ## Stornos sind Gutschriften
 
-Ein abgeschlossenes Storno wird eine Gutschrift (Typcode 381) mit positiven Beträgen, die auf die stornierte Rechnung verweist (Nummer und Datum). Sie trägt die Zahlungsbedingung „Der Betrag wird erstattet.“ in der Dokumentsprache.
+Ein abgeschlossenes Storno wird eine Gutschrift (Typcode 381) mit positiven Beträgen, die auf die stornierte Rechnung verweist (Nummer und Datum). Sie trägt die Zahlungsbedingung „Der Betrag wird erstattet.“ in der Dokumentsprache. Ihre Steuerkategorien und -sätze sind die der Rechnung (siehe [Steuern und Summen](/de/documents#steuern-und-summen)), auch wenn sich Organisation, Kunde oder Steuersatz seitdem geändert haben.
 
 ## Rabatte
 

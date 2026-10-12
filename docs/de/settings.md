@@ -38,6 +38,12 @@ Benutzer werden nie gelöscht, sondern **deaktiviert**: Das Konto bleibt, damit 
 
 Die Benutzerverwaltung gibt es nur in der App (nicht über API-Tokens oder MCP).
 
+## Dein Konto
+
+Zeigt, wer angemeldet ist, und ändert dein eigenes Passwort: das aktuelle eingeben und das neue zweimal (mindestens 8 Zeichen). Hier bleibst du angemeldet; alle anderen Sitzungen deines Kontos werden abgemeldet, und „Angemeldet bleiben“ wirkt auf anderen Geräten nicht mehr. API-Tokens bleiben gültig – widerrufe sie unter **API & MCP**, falls auch sie bekannt geworden sein könnten.
+
+Passwort vergessen: Owner sehen und setzen keine Passwörter. Wer den Server betreibt, setzt es mit `php artisan app:reset-password <E-Mail>` zurück (siehe [Einrichtung](/de/setup#passworter)).
+
 ## API & MCP
 
 ![API-Tokens und die MCP-Einrichtung](/screenshots/de/settings-api.png)

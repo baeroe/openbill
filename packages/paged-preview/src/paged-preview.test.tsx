@@ -39,4 +39,11 @@ describe('PagedPreview', () => {
         expect(html.match(/pp-guide pp-guide--on/g)).toHaveLength(1);
         expect(html.match(/class="pp-guide"/g)).toBeNull();
     });
+
+    it('fills the first page right away when lazy', () => {
+        const html = renderToStaticMarkup(<PagedPreview parts={parts} paper={paper} lazy />);
+
+        expect(html.match(/<iframe/g)).toHaveLength(4);
+        expect(html).not.toContain('pp-page--pending');
+    });
 });

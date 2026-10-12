@@ -66,3 +66,8 @@
 .pp-label--on {
     background: var(--pp-accent-soft-hover, #d5def8);
 }
+
+/* page whose frames are not loaded yet (lazy): a calm sheet instead of an empty hole */
+.pp-page--pending {
+    background: repeating-linear-gradient(180deg, transparent 0 40px, var(--pp-pending, rgba(127, 127, 127, 0.06)) 40px 52px);
+}

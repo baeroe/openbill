@@ -24,6 +24,8 @@ final class OpenbillServer extends Server
         Tools\GetCustomerTool::class,
         Tools\CreateCustomerTool::class,
         Tools\UpdateCustomerTool::class,
+        Tools\ListDocumentsTool::class,
+        Tools\GetDocumentTool::class,
     ];
 
     /** @var array<int, class-string<Server\Resource>> */

@@ -70,9 +70,9 @@ export default defineConfig({
         ...(site ? ([['meta', { property: 'og:image', content: `${site}/screenshots/en/editor.png` }]] satisfies HeadConfig[]) : []),
     ],
     vite: {
-        // agents get the English docs only
+        // agents get the English docs only, without the legal pages
         // the plugin puts the base after the domain itself: the origin only (https://openbill.dev)
-        plugins: [llmstxt({ workDir: 'en', ...(site ? { domain: new URL(site).origin } : {}) })],
+        plugins: [llmstxt({ workDir: 'en', ignoreFiles: ['imprint.md', 'privacy.md'], ...(site ? { domain: new URL(site).origin } : {}) })],
         // dev server behind DDEV (https://openbill.ddev.site:5174): Vite only answers known hosts
         server: { allowedHosts: ['.ddev.site'] },
     },
@@ -88,7 +88,8 @@ export default defineConfig({
                 nav: [{ text: 'Guide', link: '/en/setup' }, { text: 'Releases', link: 'https://github.com/baeroe/openbill/releases' }],
                 sidebar: sidebar('/en', en),
                 editLink: { pattern: 'https://github.com/baeroe/openbill/edit/main/docs/:path', text: 'Edit this page' },
-                footer: { message: 'Released under the MIT License.', copyright: '© 2026 Rafael Haußmann' },
+                // raw HTML: VitePress does not add the base to these links
+                footer: { message: `Released under the MIT License. <a href="${base}en/imprint">Imprint</a> · <a href="${base}en/privacy">Privacy policy</a>`, copyright: '© 2026 Rafael Haußmann' },
             },
         },
         de: {
@@ -100,7 +101,7 @@ export default defineConfig({
                 nav: [{ text: 'Anleitung', link: '/de/setup' }, { text: 'Releases', link: 'https://github.com/baeroe/openbill/releases' }],
                 sidebar: sidebar('/de', de),
                 editLink: { pattern: 'https://github.com/baeroe/openbill/edit/main/docs/:path', text: 'Seite bearbeiten' },
-                footer: { message: 'Veröffentlicht unter der MIT-Lizenz.', copyright: '© 2026 Rafael Haußmann' },
+                footer: { message: `Veröffentlicht unter der MIT-Lizenz. <a href="${base}de/imprint">Impressum</a> · <a href="${base}de/privacy">Datenschutz</a>`, copyright: '© 2026 Rafael Haußmann' },
                 outline: { label: 'Auf dieser Seite' },
                 docFooter: { prev: 'Zurück', next: 'Weiter' },
                 lastUpdated: { text: 'Zuletzt aktualisiert' },

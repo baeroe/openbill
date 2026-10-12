@@ -201,6 +201,7 @@ jobs:
       - name: Playwright
         run: |
           pnpm --dir e2e install --frozen-lockfile
+          pnpm --dir e2e typecheck
           pnpm --dir e2e exec playwright install --with-deps chromium
 
       - name: Tests

@@ -18,7 +18,9 @@ type Shot = { name: string; dark?: boolean; open(page: Page, locale: Locale): Pr
 /** The browser language of each project (playwright.config.ts: docs-screenshots-en/-de, date inputs follow --lang). */
 const BROWSER_LOCALE: Record<Locale, string> = { en: 'en-GB', de: 'de-DE' };
 
-const go = (page: Page, locale: Locale, to: string) => page.goto(to === '/' ? `/${locale}` : `/${locale}${to}`);
+const go = async (page: Page, locale: Locale, to: string): Promise<void> => {
+    await page.goto(to === '/' ? `/${locale}` : `/${locale}${to}`);
+};
 
 /** The draft invoice of Hafenkontor Lindqvist: groups, custom fields, live preview. */
 async function openEditor(page: Page, locale: Locale): Promise<void> {

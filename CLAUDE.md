@@ -54,6 +54,7 @@ ddev exec pnpm --filter @openbill/template-kit build   # Template-Kit → packag
 ddev exec pnpm --filter @openbill/template-kit test    # Vitest des Kits (Plugin mit echtem Vite + Fake-Instanz, CLI)
 pnpm --dir e2e install && pnpm --dir e2e exec playwright install chromium   # auf dem Mac (einmal)
 pnpm --dir e2e test                          # Playwright gegen https://openbill.ddev.site (seedet Demo-Daten)
+pnpm --dir e2e typecheck                     # tsc für e2e/ (eigene tsconfig; Playwright prüft keine Typen; CI-Job e2e)
 pnpm --dir e2e screenshots                   # Review-Screenshots 1440/390 hell/dunkel nach e2e/screenshots/ (CLICKDUMMY_URL für den Vergleich)
 pnpm --dir e2e docs:screenshots              # Doku-Screenshots (Demo-Daten, en/de, 1440×900) nach docs/public/screenshots/ – danach jedes Bild ansehen und committen
 ddev exec pnpm build

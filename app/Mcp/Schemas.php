@@ -95,4 +95,49 @@ final class Schemas
             ]))->description('All groups with their positions, in order. Replaces the existing ones: send their ids to keep them'),
         ];
     }
+
+    /**
+     * Organization (sender) as UpdateOrganization takes it; every key is optional.
+     *
+     * @return array<string, mixed>
+     */
+    public static function organization(JsonSchema $schema): array
+    {
+        $fields = [];
+        foreach (['name', 'street', 'zip', 'city', 'tax_number', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website'] as $key) {
+            $fields[$key] = $schema->string()->nullable();
+        }
+
+        return [
+            ...$fields,
+            'country' => $schema->string()->nullable()->description('ISO 3166-1 alpha-2 code, e.g. DE'),
+            'vat_id' => $schema->string()->nullable()->description('VAT ID; needed for e-invoices with reverse charge or to third countries'),
+            'registration_id' => $schema->string()->nullable()->description('Register number (BT-30), e.g. HRB 12345'),
+            'taxation_mode' => $schema->string()->enum(['regular', 'small_business'])->description('small_business: no VAT (§ 19 UStG)'),
+            'locale' => $schema->string()->enum(['en', 'de'])->description('Default document language'),
+            'custom' => $schema->object()->description('Custom field values by key (list-field-definitions, scope org)'),
+        ];
+    }
+
+    /**
+     * Custom field as SaveFieldDefinition takes it. Scope and key cannot change after creation.
+     *
+     * @return array<string, mixed>
+     */
+    public static function fieldDefinition(JsonSchema $schema): array
+    {
+        return [
+            'scope' => $schema->string()->enum(['org', 'customer', 'contact', 'document', 'position'])->description('Required when creating; fixed afterwards'),
+            'key' => $schema->string()->description('Key used in templates and in "custom"; left out: made from the label. Fixed after creation'),
+            'label' => $schema->string()->description('Required when creating'),
+            'type' => $schema->string()->enum(['text', 'textarea', 'number', 'money', 'date', 'select', 'boolean', 'image'])->description('Required when creating'),
+            'required' => $schema->boolean()->description('Documents need a value before finalize-document; customers when saved'),
+            'default_value' => $schema->union(['string', 'number', 'boolean', 'null'])->description('Value new documents or customers start with'),
+            'help' => $schema->string()->nullable(),
+            'options' => $schema->array()->items($schema->string())->description('Choices of a select field'),
+            'doc_types' => $schema->array()->items($schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation']))
+                ->description('Document types a document or position field applies to (at least one)'),
+            'sort' => $schema->integer(),
+        ];
+    }
 }

@@ -34,6 +34,12 @@ final class OpenbillServer extends Server
         Tools\ConvertDocumentTool::class,
         Tools\CancelInvoiceTool::class,
         Tools\GetDocumentPdfUrlTool::class,
+        Tools\ListFieldDefinitionsTool::class,
+        Tools\SaveFieldDefinitionTool::class,
+        Tools\GetSettingsTool::class,
+        Tools\UpdateOrganizationTool::class,
+        Tools\ListTaxRatesAndUnitsTool::class,
+        Tools\ListTextBlocksTool::class,
     ];
 
     /** @var array<int, class-string<Server\Resource>> */

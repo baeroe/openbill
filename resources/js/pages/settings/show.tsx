@@ -1,12 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { Page, PageHeader, Skeleton, cx } from '@/components/ui';
+import { Page, PageHeader, cx } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
 import { path, t } from '@/lib/i18n';
 import { DocumentTypeSettings } from '@/settings/document-types';
 import { OrganizationSettings } from '@/settings/organization';
 import { TaxesUnitsSettings } from '@/settings/taxes-units';
 import { TextBlockSettings } from '@/settings/text-blocks';
+import { UserSettings } from '@/settings/users';
 import { SECTION_ICONS, SETTINGS_SECTIONS, sectionKey, type SettingsSection } from '@/settings/sections';
 
 type Props = { section: SettingsSection; can_manage_users: boolean };
@@ -39,9 +40,7 @@ export default function SettingsPage({ section, can_manage_users: canManageUsers
     );
 }
 
-/** Tasks 9–13 replace the cases one by one. */
 function renderSection(section: SettingsSection, canManageUsers: boolean): ReactNode {
-    void canManageUsers;
     switch (section) {
         case 'organization':
             return <OrganizationSettings />;
@@ -51,8 +50,8 @@ function renderSection(section: SettingsSection, canManageUsers: boolean): React
             return <TaxesUnitsSettings />;
         case 'text-blocks':
             return <TextBlockSettings />;
-        default:
-            return <Skeleton h={320} r={18} />;
+        case 'users':
+            return <UserSettings canManage={canManageUsers} />;
     }
 }
 

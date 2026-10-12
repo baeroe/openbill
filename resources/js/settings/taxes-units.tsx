@@ -88,7 +88,7 @@ export function TaxesUnitsSettings() {
                             <span className="font-strong">{item.name}</span>
                             <span className="truncate text-sm text-muted">{t('settings.unit_summary', { symbol: item.symbol, decimals: item.decimals })}</span>
                         </button>
-                        <span className="hidden text-right sm:block">{item.code ? <code className="font-mono text-xs">{item.code}</code> : <Tag tone="bad">{t('settings.unit_no_code')}</Tag>}</span>
+                        <span className="hidden text-right sm:block">{item.code ? <code className="rounded-sm bg-surface-2 px-1 font-mono text-xs">{item.code}</code> : <Tag tone="bad">{t('settings.unit_no_code')}</Tag>}</span>
                         <span className="hidden sm:block" />
                     </>
                 )}

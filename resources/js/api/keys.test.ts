@@ -28,6 +28,7 @@ describe('keys', () => {
         expect(keys.documentTypes()).toBe('/api/document-types');
         expect(keys.allFieldDefinitions()).toBe('/api/field-definitions');
         expect(keys.organization()).toBe('/api/organization');
+        expect(keys.users()).toBe('/api/users');
     });
 
     it('builds the number preview URL', () => {

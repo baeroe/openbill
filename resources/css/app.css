@@ -2,6 +2,7 @@
 @import 'tailwindcss' source(none);
 @import './editor.css';
 @import './templates.css';
+@import './settings.css';
 @source '../js';
 @source '../views';
 

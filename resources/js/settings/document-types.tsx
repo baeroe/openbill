@@ -1,4 +1,3 @@
-import { Link } from '@inertiajs/react';
 import { ListPlus } from 'lucide-react';
 import { useState } from 'react';
 import { useFieldDefinitions } from '@/api/fields';
@@ -6,7 +5,7 @@ import { useTextBlocks } from '@/api/master-data';
 import { saveDocumentType, useDocumentTypes, useNumberPreview, type DocumentTypeInput, type DocumentTypeSetting } from '@/api/settings';
 import { useTemplates } from '@/api/templates';
 import { DOCUMENT_TYPES, type ComplianceProfile, type DocumentType } from '@/api/types';
-import { Badge, CardHead, Checkbox, ErrorState, Select, Skeleton, Tabs, TextInput, cx } from '@/components/ui';
+import { Badge, ButtonLink, CardHead, Checkbox, ErrorState, Select, Skeleton, Tabs, TextInput, cx } from '@/components/ui';
 import { SettingsCard } from './settings-card';
 import { ApiError, errorMessage } from '@/lib/api';
 import { useLeaveGuard } from '@/lib/hooks';
@@ -91,7 +90,7 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
             inputMode="numeric"
             value={form[key] ?? ''}
             error={errors[key]}
-            aside={<span className="text-xs">{t('settings.days')}</span>}
+            aside={<span className="rounded-full bg-surface-2 px-2 py-px text-xs">{t('settings.days')}</span>}
             onChange={(e) => set({ [key]: e.target.value === '' ? null : Math.max(0, Math.trunc(Number(e.target.value))) } as Partial<DocumentTypeInput>)}
         />
     );
@@ -209,9 +208,9 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                     </div>
                 </div>
                 <span className="flex-1" />
-                <Link href={path('/fields?scope=document')} className="text-sm">
+                <ButtonLink href={path('/fields?scope=document')} size="sm" variant="soft">
                     {t('settings.manage_fields')}
-                </Link>
+                </ButtonLink>
             </div>
 
             <SaveBar dirty={dirty} pending={pending} onReset={() => setForm(inputOf(saved))} />

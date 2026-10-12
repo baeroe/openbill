@@ -1,10 +1,9 @@
-import { Link } from '@inertiajs/react';
 import { ImagePlus, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useFieldDefinitions } from '@/api/fields';
 import { logoUrl, removeLogo, saveOrganization, uploadLogo, useOrganization, type Organization, type OrganizationInput } from '@/api/settings';
 import { CustomFieldInput } from '@/components/custom-field-input';
-import { Button, CardHead, ErrorState, Select, Skeleton, TextInput, cx } from '@/components/ui';
+import { Button, ButtonLink, CardHead, ErrorState, Select, Skeleton, TextInput, cx } from '@/components/ui';
 import { SettingsCard } from './settings-card';
 import { jumpTo } from '@/editor/jump';
 import { ApiError, errorMessage } from '@/lib/api';
@@ -173,9 +172,9 @@ function OrganizationForm({ saved }: { saved: Organization }) {
                     title={t('settings.custom_fields')}
                     description={t('settings.custom_fields_text')}
                     actions={
-                        <Link href={path('/fields?scope=org')} className="text-sm">
+                        <ButtonLink href={path('/fields?scope=org')} size="sm" variant="soft">
                             {t('settings.manage_fields')}
-                        </Link>
+                        </ButtonLink>
                     }
                 />
                 {(fields.data ?? []).length > 0 ? (

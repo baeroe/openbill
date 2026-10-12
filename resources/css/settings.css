@@ -1,0 +1,12 @@
+/*
+ * Settings: the cards are page-coloured (bg) on the surface; their fields are white like in the clickdummy.
+ * Outside @layer on purpose: it overrides the tinted control utilities (bg-surface-2) of the shared form components.
+ */
+.settings-card :is(input:not([type='radio'], [type='checkbox'], [type='file']), select, textarea):not(:read-only, :disabled),
+.settings-card select:not(:disabled) {
+    background-color: var(--surface);
+}
+.settings-card :is(input:not([type='radio'], [type='checkbox'], [type='file']), select, textarea):not(:read-only, :disabled):hover,
+.settings-card select:not(:disabled):hover {
+    background-color: var(--surface-2);
+}

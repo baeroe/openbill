@@ -40,6 +40,7 @@ export const keys = {
     renderSchema: () => '/api/render/schema',
     documentTypes: () => '/api/document-types',
     organization: () => '/api/organization',
+    users: () => '/api/users',
     numberPreview: (type: DocumentType, pattern: string, resetYearly: boolean, nextValue: number | null) =>
         apiUrl(`/api/document-types/${type}/number-preview`, { pattern, reset_yearly: resetYearly ? 1 : 0, next_value: nextValue }),
 };

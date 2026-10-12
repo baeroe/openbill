@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 import { AUTH_FILE } from './tests/helpers';
 
-// The app runs in DDEV, Playwright on the Mac. Phase 10 points it at the Compose stack via OPENBILL_URL.
+// The app runs in DDEV, Playwright on the Mac. OPENBILL_URL points it at another instance, e.g. the Compose stack
+// (http://localhost:7739 with E2E_ARTISAN, see e2e/compose.sh and the CI job e2e).
 const baseURL = process.env.OPENBILL_URL ?? 'https://openbill.ddev.site';
 
 export default defineConfig({

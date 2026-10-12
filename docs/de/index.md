@@ -7,7 +7,10 @@ hero:
   tagline: Open Source und selbst gehostet. Eigene Felder auf jeder Ebene, eigene PDF-Templates in Liquid und E-Rechnungen nach EN 16931.
   actions:
     - theme: brand
-      text: Entwicklungsumgebung
+      text: Selbst hosten
+      link: /de/setup
+    - theme: alt
+      text: Entwicklung
       link: /de/development
     - theme: alt
       text: GitHub

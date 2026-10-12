@@ -35,13 +35,7 @@ Open <https://openbill.ddev.site/en/login> and log in with `ADMIN_EMAIL` / `ADMI
 | Database | `ddev mysql`, user/password/database `db` |
 | These docs | `ddev exec pnpm --dir docs dev` → `https://openbill.ddev.site:5174/en/` |
 
-Gotenberg runs hardened, because templates may come from untrusted packages: Chromium runs no JavaScript and may load only Gotenberg's own working files and `data:` URLs (`.ddev/docker-compose.gotenberg.yaml`; CI starts it with the same flags). Run it the same way in production:
-
-```bash
-gotenberg --chromium-disable-javascript=true \
-  '--chromium-deny-list=^file:(?!//\/tmp/).*' '--chromium-deny-list=^(?!(file|data):).*' \
-  --chromium-deny-private-ips=true --chromium-deny-public-ips=true
-```
+Gotenberg runs hardened, because templates may come from untrusted packages: Chromium runs no JavaScript and may load only Gotenberg's own working files and `data:` URLs (`.ddev/docker-compose.gotenberg.yaml`; CI starts it with the same flags). `docker-compose.yml` runs it with the same switches, and all three places (DDEV, CI, Compose) use the same image pinned by digest; `tests/Feature/DockerSetupTest.php` fails when they drift apart.
 
 ## Everyday commands
 
@@ -78,6 +72,36 @@ pnpm --dir e2e test                          # seeds demo data, then runs the te
 
 The tests log in as `e2e@example.com` (created by `Database\Seeders\E2eUserSeeder`) and replace all business data with the demo data before they start (`E2E_SKIP_SEED=1` skips that). `OPENBILL_URL` points them at another instance. `toolkit.spec.ts` needs the built template kit (`ddev exec pnpm build`; `pnpm dev` alone does not build it), Node 24, pnpm and `unzip` on your machine; it unpacks a download into a temporary folder and starts it with `NODE_OPTIONS=--use-system-ca`, so Node trusts the DDEV certificate.
 
+Against the Docker image instead of DDEV (what the CI job `e2e` does):
+
+```bash
+docker build -t openbill:e2e .
+e2e/compose.sh up -d --wait --wait-timeout 300   # docker-compose.yml + e2e overrides, http://localhost:7739
+OPENBILL_URL=http://localhost:7739 E2E_ARTISAN="e2e/compose.sh exec -T openbill php artisan" pnpm --dir e2e test
+e2e/compose.sh down -v
+```
+
+`E2E_ARTISAN` is the command the global setup seeds with (default `ddev artisan`). The stack runs with `APP_ENV=e2e`, because the seeders refuse `production`; everything else is the production setup.
+
 ## Languages
 
 The interface is English and German. Texts live in `lang/en.json` and `lang/de.json` with the same keys; a test fails if a key is missing in one of them.
+
+## Docker image
+
+`Dockerfile` builds the image in two stages: `assets` (Node 24, pnpm from corepack, `pnpm build` for the app and the template kit) and `app` (`serversideup/php` 8.4 with nginx, extensions `intl`, `bcmath`, `gd`, `apcu`). `docker/entrypoint.d/99-openbill.sh` runs on every start: wait for the database, `APP_KEY`, migrations, built-in templates, owner account, caches.
+
+```bash
+docker build -t openbill:local .
+# try it like a user: docker-compose.yml + .env from .env.docker.example with OPENBILL_IMAGE=openbill:local
+```
+
+Base images are pinned by version and digest (Dockerfile, `docker-compose.yml`, `.ddev/docker-compose.gotenberg.yaml`, `.github/workflows/tests.yml`, `scripts/validate-einvoice.sh`). To update one, look up the new digest and change every place at once:
+
+::: v-pre
+```bash
+docker buildx imagetools inspect gotenberg/gotenberg:8.38.0 --format '{{json .Manifest.Digest}}'
+```
+:::
+
+Releases: a tag `vX.Y.Z` builds `linux/amd64` and `linux/arm64`, pushes `baeroe/openbill:X.Y.Z`, `:X.Y` and `:latest` and creates the GitHub release with the notes of `### X.Y.Z` from `docs/en/upgrading.md` (`scripts/release-notes.sh`; the tag fails without that section in English and German). Pull requests that change the image only build it.

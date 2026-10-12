@@ -5,6 +5,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   # required check: the name must stay `tests`
   tests:
@@ -12,7 +15,7 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:11.4
+        image: mariadb:11.4.13@sha256:1292844148b311e4ed4300022a996d39083f415a963e970cf47cad1b3b18e3a6
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: testing
@@ -39,10 +42,11 @@ jobs:
       - uses: actions/checkout@v4
 
       # not a service container: services can't take a command, and Gotenberg must run hardened
-      # (no JavaScript, no URLs but its own files and data:) – same flags as .ddev/docker-compose.gotenberg.yaml
+      # (no JavaScript, no URLs but its own files and data:) – same image and flags as docker-compose.yml and
+      # .ddev/docker-compose.gotenberg.yaml (DockerSetupTest)
       - name: Gotenberg
         run: >-
-          docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:8 gotenberg
+          docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769 gotenberg
           --chromium-disable-javascript=true
           '--chromium-deny-list=^file:(?!//\/tmp/).*'
           '--chromium-deny-list=^(?!(file|data):).*'
@@ -142,5 +146,71 @@ jobs:
           name: einvoice-samples
           path: einvoice-samples
 
+      # Schematron, Saxon-HE and xmlresolver: downloaded once per version of the script (it pins URLs and SHA-256),
+      # so a flaky download source only hurts the first run after a version bump
+      - uses: actions/cache@v4
+        with:
+          path: storage/framework/testing/einvoice-validator
+          key: einvoice-validator-${{ hashFiles('scripts/validate-einvoice.sh') }}
+
       - name: EN 16931 Schematron
         run: scripts/validate-einvoice.sh einvoice-samples
+
+  # Playwright against the Compose stack built from this commit: production image, MariaDB, hardened Gotenberg,
+  # APP_ENV=e2e only so the seeders run (e2e/docker-compose.e2e.yml). Not a required check.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OPENBILL_URL: http://localhost:7739
+      E2E_ARTISAN: e2e/compose.sh exec -T openbill php artisan
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          load: true
+          tags: openbill:e2e
+          cache-from: type=gha,scope=e2e
+          cache-to: type=gha,scope=e2e,mode=max
+
+      - name: Compose stack
+        run: e2e/compose.sh up -d --wait --wait-timeout 300
+
+      # version comes from "packageManager" in package.json (same as e2e/package.json)
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: e2e/pnpm-lock.yaml
+
+      - name: Playwright
+        run: |
+          pnpm --dir e2e install --frozen-lockfile
+          pnpm --dir e2e exec playwright install --with-deps chromium
+
+      - name: Tests
+        run: pnpm --dir e2e test
+
+      - name: Compose logs
+        if: failure()
+        run: e2e/compose.sh logs --no-color --timestamps > compose.log
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-results
+          path: |
+            compose.log
+            e2e/test-results
+          if-no-files-found: ignore
+
+      - name: Stop
+        if: always()
+        run: e2e/compose.sh down -v

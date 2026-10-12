@@ -10,6 +10,8 @@ use App\Http\Middleware\LimitApiBody;
 use App\Http\Middleware\RequireApiAbility;
 use App\Http\Middleware\SetApiLocale;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TrustProxies;
+use App\Support\TrustedRequests;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Contracts\Session\Middleware\AuthenticatesSessions;
@@ -20,6 +22,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Middleware\TrustProxies as FrameworkTrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -64,6 +67,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // auth runs before SetLocale (middleware priority), so resolve the language here as well
         $middleware->redirectGuestsTo(fn (Request $request) => route('login', ['locale' => SetLocale::fromRequest($request)]));
         $middleware->redirectUsersTo(fn (Request $request) => route('home', ['locale' => SetLocale::fromRequest($request)]));
+        // reverse proxy in front (docs: reverse-proxy): X-Forwarded-* only from TRUSTED_PROXIES (default: localhost and
+        // private networks); the Host header must be the host of APP_URL (outside local/tests)
+        $middleware->replace(FrameworkTrustProxies::class, TrustProxies::class);
+        $middleware->trustHosts(at: fn (): array => TrustedRequests::hostPatterns(config('app.url')), subdomains: false);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // expected refusals of the API, not server errors

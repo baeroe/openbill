@@ -13,7 +13,7 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 CACHE="$ROOT/storage/framework/testing/einvoice-validator"
-JAVA_IMAGE=eclipse-temurin:21-jre
+JAVA_IMAGE=eclipse-temurin:21-jre-noble@sha256:000fd431958bc81a24abe1e8e5f0f0fd3ae365a594bd50aadb20696805f9408c
 
 EN16931_VERSION=1.3.16
 EN16931_URL="https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-${EN16931_VERSION}/en16931-cii-${EN16931_VERSION}.zip"

@@ -1,0 +1,41 @@
+name: Docker Hub description
+
+on:
+  push:
+    branches: [main]
+    paths: ['README.md', '.github/workflows/dockerhub.yml']
+  # after a release: the repository on Docker Hub only exists once the first image is pushed
+  workflow_run:
+    workflows: ['Docker image']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Repository on Docker Hub
+        id: hub
+        run: |
+          if curl -fsS -o /dev/null https://hub.docker.com/v2/repositories/baeroe/openbill/; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::baeroe/openbill is not on Docker Hub yet (no release pushed), nothing to sync"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # needs a Docker Hub token with read/write/delete scope; pinned by commit because it sees that token
+      - if: steps.hub.outputs.exists == 'true'
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: baeroe/openbill
+          short-description: Self-hosted quotes and invoices with custom fields, Liquid templates and EN 16931 e-invoices.
+          enable-url-completion: true

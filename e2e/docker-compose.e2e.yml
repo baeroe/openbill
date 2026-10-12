@@ -1,0 +1,7 @@
+# Overrides for the Playwright run against the Compose stack (e2e/compose.sh, CI job e2e). The seeders (DemoSeeder,
+# E2eUserSeeder) refuse APP_ENV=production, so the stack runs as "e2e"; everything else – image, entrypoint,
+# MariaDB, hardened Gotenberg, trusted hosts – is the production setup from docker-compose.yml.
+services:
+  openbill:
+    environment:
+      APP_ENV: e2e

@@ -70,6 +70,10 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `openbill://docs/liquid-reference` | The [Templates](/en/templates) page as Markdown, including the Liquid reference (read from the docs at runtime) |
 | `openbill://schema/fields` | Every field a template can use, per level, with the custom fields, as JSON |
 
+## Designing templates
+
+An agent can design or change a template inside the instance: `list-templates`, then `get-template` for the sources, `render-template-preview` with the changed parts to check them without saving (errors with line, page count, fields the manifest expects but openbill doesn't know), and `update-template` to save. Built-in templates are read-only: duplicate one in the template editor first. To let a coding agent work on the files in your own editor with a live preview instead, see [Template toolkit → Working with an AI agent](/en/template-toolkit#working-with-an-ai-agent).
+
 ## Answers and errors
 
 - Answers are JSON in the format of the REST API with `Accept: application/json`: snake_case keys, amounts and quantities as strings (`"1130.50"`), `null` for empty values. Customers and documents come in pages: `page`, `per_page` (up to 100); the answer has `items`, `total` and `has_more`.

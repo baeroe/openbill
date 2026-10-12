@@ -23,6 +23,10 @@ Open, self-hosted quotes, order confirmations, invoices and cancellations. Your 
 
 You need Docker with Compose v2.
 
+**Paste and deploy:** [`docker-compose.standalone.yml`](docker-compose.standalone.yml) is one self-contained stack without `.env`. Paste it into Dockge or Portainer (or save it as `compose.yaml`), change the four values at the top (`APP_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DB_PASSWORD`) and deploy – see [Quick start](https://openbill.dev/en/setup#quick-start-paste-and-deploy).
+
+**With a separate `.env`:**
+
 ```bash
 mkdir openbill && cd openbill
 curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml

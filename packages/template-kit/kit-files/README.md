@@ -31,9 +31,14 @@ Use `pnpm run pack`, not `pnpm pack`: `pnpm pack` is pnpm's own command (it buil
 
 - `template/` – your template: `template.liquid` (content), `header.liquid`, `footer.liquid`, `styles.css`, `manifest.json`, `assets/`.
 - `.env.local` – `OPENBILL_URL`, `OPENBILL_TOKEN`, `OPENBILL_TEMPLATE_ID`. Listed in `.gitignore`.
+- `AGENTS.md` – instructions for coding agents.
 - `index.html`, `assets/`, `tooling/`, `vite.config.js` – the toolkit itself.
 
 Assets: the preview uses the assets saved in openbill. New or changed files in `template/assets/` appear after `pnpm push`.
+
+## With an AI agent
+
+Coding agents like Claude Code or Codex can design the template for you: start them in this folder while `pnpm dev` runs and describe what you want. `AGENTS.md` tells them which files to edit, how to read render errors and the Liquid rules that matter. Review the preview, then run `pnpm push` yourself (or let the agent do it). The agent sees this folder, so it can read `.env.local` with its token: only use agents you trust with read access to your documents.
 
 ## Keep the token private
 

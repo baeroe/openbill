@@ -29,4 +29,10 @@ describe('the kit the user unpacks', () => {
         const readme = read('kit-files/README.md');
         for (const text of ['pnpm install', 'pnpm dev', 'pnpm push', 'pnpm pull', 'pnpm run pack', '.env.local', '--use-system-ca']) expect(readme).toContain(text);
     });
+
+    it('tells coding agents what to edit, how to check a render and the Liquid rules that bite', () => {
+        const agents = read('kit-files/AGENTS.md');
+        for (const text of ['template/template.liquid', 'pnpm dev', 'pnpm push', 'pnpm pull', 'pnpm run pack', '/__openbill/state', '!= blank', '> 0', 'money', 'nl2br', '.env.local']) expect(agents).toContain(text);
+        expect(read('kit-files/README.md')).toContain('AGENTS.md');
+    });
 });

@@ -22,6 +22,7 @@ Open the template in the editor and choose **Toolkit → Download toolkit**. Uns
 | `.gitignore` | keeps `.env.local`, `node_modules/` and packed ZIPs out of git |
 | `package.json`, `pnpm-workspace.yaml`, `vite.config.js`, `index.html`, `assets/`, `tooling/` | the toolkit itself, prebuilt; it only installs Vite |
 | `README.md` | the short version of this page |
+| `AGENTS.md` | instructions for coding agents: which files to edit, how to read render errors, the Liquid rules that matter |
 
 ### The token
 
@@ -68,6 +69,16 @@ Example: a click on *document → number* copies `{{ document.number }}`, on *po
 | `pnpm run pack` | packs `template/` as template package (`<name>-<version>.zip`, or `--out file.zip`) for **Templates → Import ZIP**, e.g. on another instance. Same checks as `push`, and the ZIP may be at most 10 MB like the import. |
 
 Use `pnpm run pack`: `pnpm pack` without `run` is pnpm's own command (it builds npm tarballs) and fails in the toolkit folder.
+
+## Working with an AI agent
+
+An AI agent can design the template for you. There are two ways, and both end in the same template in openbill.
+
+**A coding agent in the toolkit folder** (Claude Code, Codex, …): start `pnpm dev`, open the agent in the `openbill-<template>` folder and describe the look you want. The agent edits `template/template.liquid`, `styles.css`, `header.liquid` and `footer.liquid`; every save renders again, and you watch the result in the preview. `AGENTS.md` in the folder tells the agent what to edit, the Liquid rules that bite (amounts are strings, empty texts are true, no scripts or external URLs) and how to read the newest render with its errors as JSON (`http://localhost:5180/__openbill/state`) while `pnpm dev` runs. When you like it, `pnpm push` saves it in openbill.
+
+The agent can read every file in the folder, `.env.local` with the toolkit token included: that token can render every document of the instance. Only use agents you would also show your documents.
+
+**An agent over MCP**, without a download: connect it as described in [MCP](/en/mcp). It reads the template with `get-template`, tries changes with `render-template-preview` (Liquid errors with line, page count, missing fields and a text excerpt, rendered with sample data or a real document, without saving) and saves them with `update-template`. The resource `openbill://docs/liquid-reference` gives it the [Liquid reference](/en/templates#liquid-reference). It works only on your own templates; duplicate a built-in one first. It cannot see the PDF itself, so check the result in the template editor.
 
 ## Local instance with its own certificate
 

@@ -5,7 +5,7 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ['docs/**', 'pnpm-lock.yaml', '.github/workflows/docs.yml']
+    paths: ['docs/**', 'docker-compose.yml', 'docker-compose.standalone.yml', 'pnpm-lock.yaml', '.github/workflows/docs.yml'] # the compose files are embedded in the docs
   workflow_dispatch:
 
 permissions:

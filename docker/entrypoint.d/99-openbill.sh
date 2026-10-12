@@ -8,6 +8,12 @@ cd /var/www/html
 
 log() { echo "openbill: $*"; }
 
+# 0. the placeholder of docker-compose.standalone.yml is no password (MariaDB would accept it)
+if [ "${DB_PASSWORD:-}" = "change-me" ]; then
+    log "DB_PASSWORD is still the placeholder change-me: set your own password before the first start" >&2
+    exit 1
+fi
+
 # 1. data volume (storage/app): folders of the disks local (private), public and archive
 mkdir -p storage/app/private storage/app/public storage/app/archive
 

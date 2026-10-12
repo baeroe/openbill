@@ -53,3 +53,11 @@ it('fails and creates nothing for invalid values', function (string $email, stri
     'invalid email' => ['not-an-email', 'secret-pass'],
     'short password' => ['owner@example.com', 'short'],
 ]);
+
+it('refuses the placeholder password of the standalone compose file', function () {
+    config(['openbill.admin.password' => 'change-me']);
+
+    $this->artisan('app:ensure-admin')->expectsOutputToContain('placeholder')->assertFailed();
+
+    expect(User::count())->toBe(0);
+});

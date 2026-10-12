@@ -1,6 +1,8 @@
 import '@fontsource-variable/schibsted-grotesk';
 import { inBrowser } from 'vitepress';
+import type { Theme } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
+import Landing from './landing/Landing.vue';
 import './style.css';
 
 // pages live under /en and /de below the base (/ locally and on openbill.dev, DOCS_BASE for a sub-path): paths without a language
@@ -13,4 +15,10 @@ if (inBrowser && location.pathname.startsWith(base)) {
     }
 }
 
-export default DefaultTheme;
+export default {
+    extends: DefaultTheme,
+    enhanceApp({ app }) {
+        // the landing pages (docs/{en,de}/index.md) render <Landing /> from their frontmatter
+        app.component('Landing', Landing);
+    },
+} satisfies Theme;

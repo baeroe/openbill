@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\EnsureAdminUser;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
@@ -261,4 +262,90 @@ it('reports openbill healthy only when Laravel answers for the host of APP_URL',
     $test = implode(' ', dockerCompose()['services']['openbill']['healthcheck']['test']);
 
     expect($test)->toContain('http://localhost:8080/up', 'Host: ', '${APP_URL#*://}');
+});
+
+it('stops the container before anything else while DB_PASSWORD is the placeholder', function () {
+    $dir = sys_get_temp_dir().'/openbill-entrypoint-'.bin2hex(random_bytes(4));
+    mkdir($dir);
+    $script = str_replace('cd /var/www/html', 'cd '.escapeshellarg($dir), dockerRepoFile('docker/entrypoint.d/99-openbill.sh'));
+    file_put_contents($dir.'/entrypoint.sh', $script);
+
+    $process = new Process(['sh', $dir.'/entrypoint.sh'], $dir, ['DB_PASSWORD' => 'change-me', 'APP_KEY' => 'unused']);
+    $process->run();
+
+    expect($process->getExitCode())->toBe(1)
+        ->and($process->getErrorOutput())->toContain('openbill: DB_PASSWORD is still the placeholder change-me')
+        ->and(is_dir($dir.'/storage'))->toBeFalse();
+
+    unlink($dir.'/entrypoint.sh');
+    rmdir($dir);
+});
+
+/** @return array<string, mixed> */
+function dockerStandalone(): array
+{
+    return Yaml::parse(dockerRepoFile('docker-compose.standalone.yml'), Yaml::PARSE_CUSTOM_TAGS);
+}
+
+it('keeps the standalone compose file free of .env references', function () {
+    $file = dockerRepoFile('docker-compose.standalone.yml');
+
+    // $${…} is an escaped dollar for the container's shell, ${…} would be a Compose variable
+    expect(preg_match('/(?<!\$)\$\{/', $file))->toBe(0)
+        ->and(preg_match('/(?<!\$)\$[A-Za-z_]/', $file))->toBe(0);
+});
+
+it('puts everything a user edits into one block at the top of the standalone file', function () {
+    $compose = dockerStandalone();
+    $file = dockerRepoFile('docker-compose.standalone.yml');
+
+    expect($compose['x-openbill'])->toBe([
+        'APP_URL' => 'https://invoices.example.com',
+        'ADMIN_EMAIL' => 'admin@example.com',
+        'ADMIN_PASSWORD' => 'change-me',
+        'DB_PASSWORD' => 'change-me',
+    ])
+        ->and(strpos($file, 'x-openbill:'))->toBeLessThan((int) strpos($file, 'services:'))
+        ->and($file)->toContain('<<: *openbill-env', 'MARIADB_PASSWORD: *db-password')
+        // the YAML parser resolves the anchors: openbill and MariaDB see the same values
+        ->and($compose['services']['openbill']['environment'])->toMatchArray($compose['x-openbill'])
+        ->and($compose['services']['mariadb']['environment']['MARIADB_PASSWORD'])->toBe($compose['x-openbill']['DB_PASSWORD'])
+        ->and(EnsureAdminUser::PLACEHOLDER)->toBe('change-me');
+});
+
+it('runs the standalone stack like docker-compose.yml', function () {
+    $standalone = dockerStandalone();
+    $compose = dockerCompose();
+    $a = $standalone['services'];
+    $b = $compose['services'];
+
+    expect(array_keys($a))->toEqualCanonicalizing(array_keys($b))
+        ->and($a['openbill']['image'])->toBe('baeroe/openbill:latest')
+        ->and($b['openbill']['image'])->toBe('${OPENBILL_IMAGE:-baeroe/openbill:latest}')
+        ->and($a['openbill']['ports'])->toBe(['127.0.0.1:7739:8080'])
+        ->and($standalone['networks'])->toBe($compose['networks'])
+        ->and($standalone['volumes'])->toBe($compose['volumes'])
+        ->and(array_diff_key($a['openbill']['environment'], ['APP_URL' => 1, 'ADMIN_EMAIL' => 1, 'ADMIN_PASSWORD' => 1, 'DB_PASSWORD' => 1]))
+        ->toBe(array_filter(
+            array_diff_key($b['openbill']['environment'], ['APP_URL' => 1, 'ADMIN_EMAIL' => 1, 'ADMIN_PASSWORD' => 1, 'DB_PASSWORD' => 1]),
+            fn (string $value): bool => ! str_contains($value, '${'),
+        ));
+
+    foreach (['openbill', 'mariadb', 'gotenberg'] as $service) {
+        foreach (['restart', 'healthcheck', 'networks', 'volumes', 'depends_on', 'command'] as $key) {
+            expect($a[$service][$key] ?? null)->toBe($b[$service][$key] ?? null, "{$service}.{$key} differs from docker-compose.yml");
+        }
+    }
+    foreach (['mariadb', 'gotenberg'] as $service) {
+        expect($a[$service]['image'])->toBe($b[$service]['image']);
+    }
+});
+
+it('gives MariaDB a random root password and refuses the placeholder in the standalone file', function () {
+    $mariadb = dockerStandalone()['services']['mariadb'];
+
+    expect($mariadb['environment'])->toHaveKey('MARIADB_RANDOM_ROOT_PASSWORD', '1')
+        ->not->toHaveKey('MARIADB_ROOT_PASSWORD')
+        ->and(dockerCompose()['services']['mariadb']['environment'])->toMatchArray(array_diff_key($mariadb['environment'], ['MARIADB_PASSWORD' => 1, 'MARIADB_RANDOM_ROOT_PASSWORD' => 1]))
+        ->and($mariadb['entrypoint'][2])->toContain('"$$MARIADB_PASSWORD" = change-me', 'exit 1', 'exec docker-entrypoint.sh "$$@"');
 });

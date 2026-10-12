@@ -63,46 +63,11 @@
     --vp-button-alt-hover-text: var(--ob-ink);
 
     --vp-code-block-bg: var(--ob-surface-2);
-    --vp-home-hero-name-color: var(--ob-ink);
 }
 
-/* pill buttons and 18 px cards like the app */
+/* pill buttons like the app (the landing page has its own layout: theme/landing/) */
 .VPButton {
     border-radius: 999px !important;
-}
-.VPFeature {
-    border: 0 !important;
-    border-radius: 18px !important;
-    background: var(--ob-surface) !important;
-    box-shadow: var(--ob-elev-paper);
-}
-
-.VPHero .name {
-    letter-spacing: -0.03em;
-}
-.VPHero .text {
-    letter-spacing: -0.02em;
-    max-width: 20ch;
-    text-wrap: balance;
-}
-
-/* the screenshot below the features on the landing pages */
-.showcase {
-    max-width: 1152px;
-    margin: 72px auto 96px;
-    padding: 0 48px;
-}
-.showcase img {
-    display: block;
-    width: 100%;
-    border-radius: 14px;
-    box-shadow: var(--ob-elev-paper);
-}
-@media (max-width: 640px) {
-    .showcase {
-        margin-top: 48px;
-        padding: 0 24px;
-    }
 }
 
 /* screenshots in the guide: framed like a sheet of the app */

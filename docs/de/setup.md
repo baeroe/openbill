@@ -1,6 +1,20 @@
-# Einrichtung
+# Einrichtung mit Docker Compose
 
 openbill läuft als Docker-Compose-Stack: die App (`baeroe/openbill`, für `linux/amd64` und `linux/arm64`), MariaDB 11.4 und Gotenberg 8, das die PDFs erzeugt. Du brauchst Docker mit Compose v2 und für HTTPS einen Reverse Proxy davor (siehe [Reverse Proxy](/de/reverse-proxy)).
+
+## Schnellstart: einfügen und starten
+
+Eine Compose-Datei mit allem drin, ohne `.env`:
+
+1. Füge den Block unten in Dockge oder Portainer als neuen Stack ein oder speichere ihn auf deinem Server als `compose.yaml`.
+2. Ändere die vier Werte ganz oben: `APP_URL` (die https-Adresse deines Reverse Proxys), `ADMIN_EMAIL`, `ADMIN_PASSWORD` und `DB_PASSWORD`. Solange ein Passwort noch `change-me` lautet, startet openbill nicht.
+3. Starte den Stack (Dockge/Portainer: Deploy) oder führe `docker compose up -d` aus. Warte im Log von `openbill` auf `openbill: ready` und öffne dann `APP_URL`. openbill lauscht für deinen Reverse Proxy auf `http://127.0.0.1:7739`.
+
+Das Owner-Konto entsteht beim ersten Start; danach kannst du die Zeile `ADMIN_PASSWORD` löschen. `DB_PASSWORD` bleibt, wie es ist: MariaDB speichert es beim ersten Start. Das Root-Passwort von MariaDB ist zufällig und wird nicht gebraucht (Backups nutzen den Benutzer `openbill`).
+
+<<< @/../docker-compose.standalone.yml{yaml}
+
+Wer die Einstellungen lieber in einer eigenen `.env` neben der Compose-Datei hat (etwa, um die Compose-Datei bei Updates unverändert zu lassen), nimmt stattdessen den Weg unten.
 
 ## Dateien
 
@@ -62,7 +76,7 @@ Ohne Terminal liest er stattdessen die erste Zeile seiner Eingabe, z. B. `docker
 |---|---|
 | Archivierte PDFs und E-Rechnungs-XMLs, Template-Assets, hochgeladene Bilder und Logos, der erzeugte `APP_KEY` (`.app-key`) | Volume `openbill-data` (`/var/www/html/storage/app` im Container) |
 | Datenbank | Volume `openbill-db` (MariaDB) |
-| Einstellungen | `.env` neben `docker-compose.yml` |
+| Einstellungen | `.env` neben `docker-compose.yml` oder der Block oben in der Standalone-Compose-Datei |
 
 Container kannst du jederzeit neu anlegen, die Volumes bleiben. `docker compose down -v` löscht sie und damit jedes Dokument. Sichere beide Volumes, siehe [Datensicherung](/de/backup).
 
@@ -83,3 +97,9 @@ Die App gibt es auf Englisch und Deutsch, Standard ist Englisch. Die Sprache ste
 ## Versionen
 
 `latest` folgt jedem Release. Eine Version festhalten mit `OPENBILL_IMAGE=baeroe/openbill:0.1.0` in `.env`. Aktualisieren: [Aktualisieren](/de/upgrading).
+
+## docker-compose.yml
+
+Die vollständige Compose-Datei, dieselbe, die `curl` oben aus dem main-Branch lädt. Meist bleibt sie, wie sie ist: Alles, was du einstellst, kommt in die `.env`.
+
+<<< @/../docker-compose.yml{yaml}

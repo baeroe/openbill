@@ -162,14 +162,14 @@ Eigene Felder stehen direkt an ihrem Objekt, unter ihrem Schlüssel: `{{ documen
 | `money` | `{{ document.gross_total \| money }}` | `1.130,50 €` / `€1,130.50` |
 | `money: Stellen` | `{{ p.unit_price \| money: 4 }}` | `12,3456 €` / `€12.3456` |
 | `number: Stellen` | `{{ p.quantity \| number: 2 }}` | `1,50` / `1.50` (Standard 2 Stellen) |
-| `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026` |
+| `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026`. Eine ganze Zahl gilt als Unix-Zeitstempel (Sekunden). |
 | `date: Format` | `{{ document.date \| date: "%d.%m.%Y" }}` | strftime-Muster wie beim Standardfilter `date` |
 | `nl2br` | `{{ document.intro \| nl2br }}` | Zeilenumbrüche werden zu `<br>` |
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formate folgen der Dokumentsprache. Beträge werden kaufmännisch gerundet. `money` und `number` geben bei Werten, die keine Zahl sind, nichts aus. Ein unbekannter Filter ist ein Fehler.
 
-Die Rechenfilter `plus`, `minus`, `times`, `divided_by` und `round` rechnen mit exakten Dezimalzahlen und liefern einen Dezimaltext (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rundet kaufmännisch); mit zwei ganzen Zahlen bleibt es bei Liquids Ganzzahl-Verhalten (`{{ 10 | divided_by: 4 }}` → `2`). Nutze lieber die Summen aus dem Kontext, als Beträge im Template zu rechnen.
+Die Rechenfilter `plus`, `minus`, `times`, `divided_by` und `round` rechnen mit exakten Dezimalzahlen und liefern einen Dezimaltext (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rundet kaufmännisch); mit zwei ganzen Zahlen bleibt es bei Liquids Ganzzahl-Verhalten (`{{ 10 | divided_by: 4 }}` → `2`). Zwei ganze Zahlen bleiben ganze Zahlen (`divided_by` rundet ab); Ergebnisse jenseits von ±9,2 × 10¹⁸ bleiben exakt. Nutze lieber die Summen aus dem Kontext, als Beträge im Template zu rechnen.
 
 ### Escaping
 

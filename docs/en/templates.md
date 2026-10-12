@@ -162,14 +162,14 @@ Custom fields sit directly on their object, with their key: `{{ document.project
 | `money` | `{{ document.gross_total \| money }}` | `1.130,50 €` / `€1,130.50` |
 | `money: decimals` | `{{ p.unit_price \| money: 4 }}` | `12,3456 €` / `€12.3456` |
 | `number: decimals` | `{{ p.quantity \| number: 2 }}` | `1,50` / `1.50` (default 2 decimals) |
-| `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026` |
+| `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026`. A whole number is read as Unix timestamp (seconds). |
 | `date: format` | `{{ document.date \| date: "%Y-%m-%d" }}` | strftime pattern like Liquid's standard `date` |
 | `nl2br` | `{{ document.intro \| nl2br }}` | line breaks become `<br>` |
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formats follow the document language. Amounts are rounded commercially. `money` and `number` print nothing for values that are not numbers. An unknown filter is an error.
 
-The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Prefer the totals of the context over computing amounts in the template.
+The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Two whole numbers stay whole numbers (`divided_by` rounds down); results beyond ±9.2 × 10¹⁸ stay exact. Prefer the totals of the context over computing amounts in the template.
 
 ### Escaping
 

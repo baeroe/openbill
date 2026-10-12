@@ -18,8 +18,9 @@ function floatUsages(string $code, string $file = 'code'): array
             continue;
         }
         [$id, $text, $line] = $token;
-        // the name of a declared method (a Liquid filter called "round") is no float usage
-        $declared = $previous === T_FUNCTION;
+        // the name of a declared method (a Liquid filter called "round") is no float usage, nor is a class member
+        // like the enum case RoundingMode::Floor (never PHP's global floor())
+        $declared = $previous === T_FUNCTION || $previous === T_DOUBLE_COLON;
         if ($id === T_DNUMBER || $id === T_DOUBLE_CAST || (! $declared && $id === T_STRING && in_array(strtolower($text), $banned, true))) {
             $hits[] = "{$file}:{$line} {$text}";
         }
@@ -39,7 +40,8 @@ it('detects floating point usage', function () {
 
 it('does not count a method that is only called round as float usage', function () {
     expect(floatUsages('<?php class F { public function round(string $v): string { return $v; } }'))->toBe([])
-        ->and(floatUsages('<?php $x = round($y);'))->toBe(['code:1 round']);
+        ->and(floatUsages('<?php $x = round($y);'))->toBe(['code:1 round'])
+        ->and(floatUsages('<?php $x = $a->dividedBy($b, RoundingMode::Floor);'))->toBe([]);
 });
 
 it('never uses floating point in app/Domain', function () {

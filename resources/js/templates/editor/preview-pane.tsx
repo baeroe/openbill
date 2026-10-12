@@ -1,10 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { PagedPreview } from '@openbill/paged-preview';
-import { AlertTriangle, Frame } from 'lucide-react';
+import { AlertTriangle, SquareDashed } from 'lucide-react';
 import { useState } from 'react';
 import type { ExpectedField, RenderSources } from '@/api/templates';
 import type { RenderErrorItem, RenderResponse } from '@/api/types';
-import { Notice, PillButton, Skeleton } from '@/components/ui';
+import { Button, Notice, Skeleton } from '@/components/ui';
 import { isAbort } from '@/editor/latest';
 import { path, t, tn } from '@/lib/i18n';
 import { useStoredFlag } from '@/lib/prefs';
@@ -34,13 +34,12 @@ export function PreviewPane({ data, error, highlight, sources, source, missing, 
                 <span className="pl-2 text-sm font-strong">{t('templates.preview')}</span>
                 <span className="num text-xs text-muted">{tn('editor.pages', pages)}</span>
                 <span className="flex-1" />
-                {sources && source && <SamplePicker sources={sources} value={source} onChange={onSource} />}
-                <PillButton pressed={guides} onClick={() => setGuides(!guides)} title={t('editor.guides_title')}>
-                    <Frame aria-hidden className="size-3.5" />
+                <Button size="sm" variant={guides ? 'soft' : 'ghost'} icon={<SquareDashed />} aria-pressed={guides} onClick={() => setGuides(!guides)} title={t('editor.guides_title')}>
                     {t('editor.guides')}
-                </PillButton>
+                </Button>
             </div>
             <div className="grid content-start gap-3 overflow-auto px-5 pb-5">
+                {sources && source && <SamplePicker sources={sources} value={source} onChange={onSource} />}
                 {missing.length > 0 && (
                     <Notice tone="warn" icon={<AlertTriangle />}>
                         <b>{t('templates.missing_fields')}</b> {missing.map((field) => `${field.scope}.${field.key}`).join(', ')}.{' '}

@@ -19,3 +19,19 @@
         text-underline-offset: 3px;
     }
 }
+
+/*
+ * Outside @layer: these override utilities of shared components (Tabs, SelectControl) inside the editor panes,
+ * like the clickdummy (tabs on surface-3 within the tinted pane, a white compact sample select).
+ */
+.tpl-tabs [role='tablist'] {
+    background-color: var(--surface-3);
+}
+.tpl-tabs [role='tab'][aria-selected='true'] {
+    background-color: var(--surface);
+}
+.tpl-sample select {
+    height: var(--spacing-control-sm);
+    background-color: var(--surface);
+    font-size: var(--text-sm);
+}

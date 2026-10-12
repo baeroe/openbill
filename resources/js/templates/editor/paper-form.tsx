@@ -13,7 +13,7 @@ export function PaperForm({ paper, readOnly, onChange }: { paper: Paper | undefi
             label={label}
             value={value[key]}
             disabled={readOnly}
-            className="font-mono text-sm"
+            className="font-mono"
             error={LENGTH.test(value[key]) ? undefined : t('templates.paper_length_hint')}
             onChange={(e) => onChange({ [key]: e.target.value.trim() })}
         />

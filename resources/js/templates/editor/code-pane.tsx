@@ -30,7 +30,7 @@ export function CodePane({ state, readOnly, errors, manifestViolations, fieldsOp
 
     return (
         <section aria-label={t('templates.source')} className="grid min-h-[34rem] min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-lg bg-surface-2 lg:min-h-0">
-            <div className="flex flex-wrap items-center gap-2 p-3">
+            <div className="tpl-tabs flex flex-wrap items-center gap-2 p-3">
                 {!fieldsOpen && (
                     <Button size="sm" variant="ghost" iconOnly icon={<PanelLeftOpen />} onClick={onOpenFields}>
                         {t('templates.fields_open')}

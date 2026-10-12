@@ -95,6 +95,7 @@ final class CiiBuilder
             $cii->addDocumentPaymentTerm(null, $document->due_date);
         }
 
+        // BT-152/BT-119: category O (not subject to VAT) carries no rate at all (BR-O-05, BR-O-09)
         $line = 0;
         foreach ($document->groups as $group) {
             foreach ($group->positions as $position) {
@@ -113,13 +114,13 @@ final class CiiBuilder
                     ->setDocumentPositionProductDetails($position->title, self::text($position->description))
                     ->setDocumentPositionNetPrice(CiiAmount::of($price, CiiAmount::UNIT))
                     ->setDocumentPositionQuantity($amount($quantity, CiiAmount::UNIT), $position->unit_id === null ? 'C62' : ($unitCodes[$position->unit_id] ?? 'C62'))
-                    ->addDocumentPositionTax($tax->category->value, 'VAT', self::rate($tax->category, $tax->percent))
+                    ->addDocumentPositionTax($tax->category->value, 'VAT', $tax->category === TaxCategory::O ? null : CiiAmount::of($tax->percent, CiiAmount::AMOUNT))
                     ->setDocumentPositionLineSummation($amount($total->net));
             }
         }
 
         foreach ($totals->taxBreakdown as $row) {
-            $cii->addDocumentTax($row->category->value, 'VAT', $amount($row->net), $amount($row->tax), self::rate($row->category, $row->percent), self::exemptionReason($row->category, $totals, $document->locale));
+            $cii->addDocumentTax($row->category->value, 'VAT', $amount($row->net), $amount($row->tax), $row->category === TaxCategory::O ? null : CiiAmount::of($row->percent, CiiAmount::AMOUNT), self::exemptionReason($row->category, $totals, $document->locale));
         }
         $cii->setDocumentSummation($amount($totals->gross), $amount($totals->gross), $amount($totals->net), null, null, $amount($totals->net), $amount($totals->tax));
 
@@ -176,12 +177,6 @@ final class CiiBuilder
         }
 
         return $totals->legalNotes[0] ?? Text::t('einvoice.exemption.'.strtolower($category->value), [], $locale);
-    }
-
-    /** BT-152/BT-119: category O (not subject to VAT) carries no rate at all (BR-O-05, BR-O-09). */
-    private static function rate(TaxCategory $category, BigDecimal $percent): ?float
-    {
-        return $category === TaxCategory::O ? null : CiiAmount::of($percent, CiiAmount::AMOUNT);
     }
 
     private static function text(mixed $value): ?string

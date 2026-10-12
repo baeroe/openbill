@@ -2,8 +2,10 @@
 
 use App\Actions\FinalizeDocument;
 use App\Actions\PruneUnusedImages;
+use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Document;
+use App\Models\FieldDefinition;
 use App\Models\Organization;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -48,6 +50,20 @@ it('deletes only images nothing refers to and keeps those of records, snapshots 
         ->and(Storage::disk('local')->exists($orphanLogo))->toBeFalse()
         ->and($prune->handle(systemActor(), minAgeHours: 0))->toBe([$fresh]);
 });
+
+it('keeps an image that only one source still refers to (review phase 11)', function (string $source) {
+    $image = pruneTestImage('uploads');
+    $orphan = pruneTestImage('uploads');
+    match ($source) {
+        'soft-deleted contact' => Contact::factory()->create(['custom' => ['badge' => $image]])->delete(),
+        'position' => draftDocument(positions: [[...itemRow(), 'custom' => ['photo' => $image]]]),
+        'field default' => FieldDefinition::factory()->create(['default_value' => $image]),
+        'organization' => Organization::current()->forceFill(['custom' => ['stamp' => $image]])->save(),
+    };
+
+    expect(app(PruneUnusedImages::class)->handle(systemActor()))->toBe([$orphan])
+        ->and(Storage::disk('local')->exists($image))->toBeTrue();
+})->with(['soft-deleted contact', 'position', 'field default', 'organization']);
 
 it('lists with --dry-run, deletes without it and refuses a min-age that is no number', function () {
     $orphan = pruneTestImage('uploads');

@@ -9,7 +9,7 @@ Die interaktive Referenz (Swagger UI) liegt unter `/api/docs`, das OpenAPI-Dokum
 Ein Token wird im Header `Authorization` mitgeschickt:
 
 ```bash
-export OPENBILL_URL=https://openbill.ddev.site   # Ihre Instanz
+export OPENBILL_URL=https://openbill.ddev.site   # deine Instanz
 export OPENBILL_TOKEN='01J…|openbill_…'
 
 curl -H "Authorization: Bearer $OPENBILL_TOKEN" -H 'Accept: application/json' "$OPENBILL_URL/api/documents"

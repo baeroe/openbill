@@ -7,7 +7,7 @@ Open, self-hosted quotes, order confirmations, invoices and cancellations. Your 
 
 **Docs: [baeroe.github.io/openbill](https://baeroe.github.io/openbill/)** (English and German)
 
-![The document editor: a draft invoice with groups of positions, custom fields, the compliance check and the live preview](docs/public/screenshots/en/editor.png)
+![The document editor: a draft invoice with groups of positions, custom fields, the compliance check and the live preview (the demo company writes its invoices in German)](https://baeroe.github.io/openbill/screenshots/en/editor.png)
 
 ## Features
 

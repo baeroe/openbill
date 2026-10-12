@@ -216,6 +216,28 @@ describe('edge cases of the review', () => {
     });
 });
 
+describe('late answers', () => {
+    it('never keeps a late answer of the previous data source as last good result', async () => {
+        let call = 0;
+        fake.on('POST', '/api/render', () =>
+            ++call === 1
+                ? { json: { ...SAMPLE_RESULT, body: '<p>previous document</p>' }, delayMs: 100 }
+                : { json: { ...SAMPLE_RESULT, body: '<p>broken</p>', errors: [{ part: 'body', file: 'template.liquid', line: 1, message: 'Unknown filter nope' }] }, delayMs: 250 },
+        );
+        // a transport that delivers the answer although the render was aborted meanwhile
+        const env = { url: fake.url, token: '1|openbill_test', templateId: '01kfjord' };
+        const late = createClient(env, (input, init) => fetch(input, { ...init, signal: undefined }));
+        const racing = createRuntime({ root, env, client: late, send: () => undefined, debounceMs: 10 });
+
+        void racing.render();
+        await vi.waitFor(() => expect(renders()).toHaveLength(1));
+        const event = await racing.setSource({ kind: 'scenario', key: 'long_invoice', locale: 'en' });
+        racing.dispose();
+
+        expect(event.result?.body).toBe('<p>broken</p>');
+    });
+});
+
 describe('defaultSource', () => {
     it('takes the newest document, else the long sample invoice', () => {
         expect(defaultSource(SAMPLE_SOURCES)).toEqual({ kind: 'document', id: SAMPLE_SOURCES.documents[0].id });

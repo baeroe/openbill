@@ -45,4 +45,11 @@ describe('readKitEnv', () => {
 
         expect(readKitEnv(dir, {}).url).toBe(url);
     });
+
+    it.each(['http://localhost:99999', 'http://[zz]', 'https://openbill.example:99999'])('explains an invalid URL %s instead of crashing', (url) => {
+        const dir = kit(`OPENBILL_URL="${url}"\nOPENBILL_TOKEN="3|x"\nOPENBILL_TEMPLATE_ID="01k"\n`);
+
+        expect(() => readKitEnv(dir, {})).toThrow(KitConfigError);
+        expect(() => readKitEnv(dir, {})).toThrow(/OPENBILL_URL is not a valid URL/);
+    });
 });

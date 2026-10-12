@@ -117,7 +117,8 @@ export function createRuntime({ root, env, client, send, debounceMs = 80, log = 
             try {
                 const result = await client.render(renderRequest(env.templateId, current, { ...local.parts, manifest: local.manifest }), controller.signal);
                 const errors = withExcerpts(result.errors, local);
-                if (errors.length === 0) lastGood = result;
+                // only the newest render may set it: a late answer could belong to the previous data source
+                if (errors.length === 0 && id === seq) lastGood = result;
                 return make({ manifest: local.manifest, result: errors.length === 0 ? result : (lastGood ?? result), errors, failure: null });
             } catch (error) {
                 return make({ manifest: local.manifest, result: lastGood, errors: [], failure: failureOf(error) });

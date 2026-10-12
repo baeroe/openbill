@@ -32,6 +32,8 @@ export function readKitEnv(root: string, environment: Record<string, string | un
     const url = value(KEYS.url).replace(/\/+$/, '');
     if (url !== '' && !/^https?:\/\/[^/\s]+/.test(url)) {
         problems.push(`${KEYS.url} must start with http:// or https:// (got "${url}").`);
+    } else if (url !== '' && !URL.canParse(url)) {
+        problems.push(`${KEYS.url} is not a valid URL (got "${url}").`);
     } else if (url.startsWith('http://') && !LOOPBACK.has(new URL(url).hostname)) {
         problems.push(`${KEYS.url} must use https:// – plain http:// would send the token unencrypted (allowed only for localhost, 127.0.0.1 and ::1; got "${url}"). Set APP_URL of openbill to its https address and download the toolkit again.`);
     }

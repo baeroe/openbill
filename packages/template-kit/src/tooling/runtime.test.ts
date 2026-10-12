@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -162,6 +162,57 @@ describe('recovery after a failed start', () => {
         const requestsBefore = fake.requests.length;
         expect(await runtime.state()).toMatchObject({ failure: null, sources: SAMPLE_SOURCES });
         expect(fake.requests.length).toBe(requestsBefore);
+    });
+});
+
+describe('edge cases of the review', () => {
+    it('reports an unreadable template file instead of ending the dev server', async () => {
+        const file = path.join(root, 'template', 'template.liquid');
+        rmSync(file);
+        mkdirSync(file);
+
+        runtime.fileChanged(file);
+
+        await vi.waitFor(() => expect(events).toHaveLength(1));
+        expect(events[0].failure?.kind).toBe('config');
+        expect(events[0].failure?.message).toContain('template/');
+    });
+
+    it('keeps the assets notice when a newer render overtakes the one that saw the change', async () => {
+        let call = 0;
+        fake.on('POST', '/api/render', () => (++call === 1 ? { json: SAMPLE_RESULT, delayMs: 300 } : { json: SAMPLE_RESULT }));
+        await runtime.setSource({ kind: 'scenario', key: 'long_invoice', locale: 'en' });
+        call = 0;
+        events.length = 0;
+
+        runtime.fileChanged(write('assets/logo.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>'));
+        await vi.waitFor(() => expect(renders().length).toBeGreaterThanOrEqual(2));
+        await runtime.render();
+
+        expect(events.map((event) => event.notice)).toEqual(['assets_changed']);
+    });
+
+    it('answers an overtaken source change with the newest event, not with an abort failure', async () => {
+        let call = 0;
+        fake.on('POST', '/api/render', () => (++call === 1 ? { json: SAMPLE_RESULT, delayMs: 300 } : { json: { ...SAMPLE_RESULT, body: '<p>new</p>' } }));
+
+        const switching = runtime.setSource({ kind: 'scenario', key: 'short_invoice', locale: 'de' });
+        await vi.waitFor(() => expect(renders()).toHaveLength(1));
+        const newest = await runtime.render();
+        const answer = await switching;
+
+        expect(answer.failure).toBeNull();
+        expect(answer.seq).toBe(newest.seq);
+        expect(answer.result?.body).toBe('<p>new</p>');
+    });
+
+    it('does not show the last good result of another data source', async () => {
+        await runtime.setSource({ kind: 'document', id: SAMPLE_SOURCES.documents[0].id });
+        fake.on('POST', '/api/render', () => ({ json: { ...SAMPLE_RESULT, body: '<p>broken</p>', errors: [{ part: 'body', file: 'template.liquid', line: 1, message: 'Unknown filter nope' }] } }));
+
+        const event = await runtime.setSource({ kind: 'scenario', key: 'long_invoice', locale: 'en' });
+
+        expect(event.result?.body).toBe('<p>broken</p>');
     });
 });
 

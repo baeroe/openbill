@@ -63,7 +63,8 @@ export function createRuntime({ root, env, client, send, debounceMs = 80, log = 
     let seq = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let running: AbortController | null = null;
-    let assetsChanged = false;
+    let assetChanges = 0;
+    let assetsAcknowledged = 0;
 
     const loadLookups = (): Promise<void> =>
         (lookups ??= Promise.all([client.sources(), client.schema()]).then(
@@ -78,7 +79,8 @@ export function createRuntime({ root, env, client, send, debounceMs = 80, log = 
             },
         ));
 
-    const render = async (): Promise<RenderEvent> => {
+    /** One render; null when a newer render started meanwhile (that one sends and answers). */
+    const renderOnce = async (): Promise<RenderEvent | null> => {
         clearTimeout(timer);
         running?.abort();
         const controller = new AbortController();
@@ -89,40 +91,64 @@ export function createRuntime({ root, env, client, send, debounceMs = 80, log = 
             source ??= defaultSource(sources);
         }
         const current = source;
-        const notice: RenderEvent['notice'] = assetsChanged ? 'assets_changed' : null;
-        assetsChanged = false;
-        const local = await readTemplate(templateDir);
+        // asset changes seen so far; acknowledged only when this render's event is the one that gets sent
+        const assetsSeen = assetChanges;
+        const notice: RenderEvent['notice'] = assetsSeen > assetsAcknowledged ? 'assets_changed' : null;
         const make = (fields: Pick<RenderEvent, 'manifest' | 'result' | 'errors' | 'failure'>): RenderEvent => ({ seq: id, at: new Date().toISOString(), source: current, notice, ...fields });
 
-        let event: RenderEvent;
-        if (local.manifest === null) {
-            const problem = local.manifestProblem;
-            event = make({
-                manifest: last?.manifest ?? null,
-                result: lastGood,
-                errors: [],
-                failure: { kind: 'manifest', status: null, message: problem?.message ?? 'manifest.json is broken.', details: problem?.line ? [`${MANIFEST_FILE}:${problem.line}`] : [] },
-            });
-        } else {
+        const build = async (): Promise<RenderEvent> => {
+            let local: LocalTemplate;
+            try {
+                local = await readTemplate(templateDir);
+            } catch (error) {
+                // EISDIR, EACCES, EMFILE …: a message for the author, never an unhandled rejection that ends pnpm dev
+                const message = error instanceof Error ? error.message : String(error);
+                return make({ manifest: last?.manifest ?? null, result: lastGood, errors: [], failure: { kind: 'config', status: null, message: `Cannot read template/: ${message}`, details: [] } });
+            }
+            if (local.manifest === null) {
+                const problem = local.manifestProblem;
+                return make({
+                    manifest: last?.manifest ?? null,
+                    result: lastGood,
+                    errors: [],
+                    failure: { kind: 'manifest', status: null, message: problem?.message ?? 'manifest.json is broken.', details: problem?.line ? [`${MANIFEST_FILE}:${problem.line}`] : [] },
+                });
+            }
             try {
                 const result = await client.render(renderRequest(env.templateId, current, { ...local.parts, manifest: local.manifest }), controller.signal);
                 const errors = withExcerpts(result.errors, local);
                 if (errors.length === 0) lastGood = result;
-                event = make({ manifest: local.manifest, result: errors.length === 0 ? result : (lastGood ?? result), errors, failure: null });
+                return make({ manifest: local.manifest, result: errors.length === 0 ? result : (lastGood ?? result), errors, failure: null });
             } catch (error) {
-                event = make({ manifest: local.manifest, result: lastGood, errors: [], failure: failureOf(error) });
+                return make({ manifest: local.manifest, result: lastGood, errors: [], failure: failureOf(error) });
             }
-        }
+        };
+        const event = await build();
 
         // a newer render started meanwhile: it sends its own event, this one must never overwrite it
-        if (id !== seq) return event;
+        if (id !== seq) return null;
         running = null;
         last = event;
+        assetsAcknowledged = Math.max(assetsAcknowledged, assetsSeen);
         send(event);
         log(event.failure ? event.failure.message : event.errors.length > 0 ? `${event.errors.length} template error(s)` : 'rendered');
         // the instance answers again after a failed start: fetch what the page is still missing (it asks /state again)
         if (event.failure === null && (sources === null || schema === null)) await loadLookups();
         return event;
+    };
+
+    let newest: Promise<RenderEvent | null> = Promise.resolve(null);
+    /** Renders and answers with the newest event: an overtaken render waits for the one that overtook it. */
+    const render = async (): Promise<RenderEvent> => {
+        const mine = renderOnce();
+        newest = mine;
+        let event = await mine;
+        while (event === null) {
+            const latest = newest;
+            event = await latest;
+            if (event === null && latest === newest) break;
+        }
+        return event ?? (last as RenderEvent);
     };
 
     return {
@@ -133,14 +159,16 @@ export function createRuntime({ root, env, client, send, debounceMs = 80, log = 
         },
         setSource: async (next) => {
             source = next;
+            // the last good result belongs to the previous data
+            lastGood = null;
             return render();
         },
         fileChanged: (file) => {
             const relative = path.relative(templateDir, path.resolve(file));
             if (relative === '' || relative.startsWith('..') || path.isAbsolute(relative)) return;
-            if (relative.split(path.sep)[0] === 'assets') assetsChanged = true;
+            if (relative.split(path.sep)[0] === 'assets') assetChanges++;
             clearTimeout(timer);
-            timer = setTimeout(() => void render(), debounceMs);
+            timer = setTimeout(() => render().catch((error: unknown) => log(`render failed: ${error instanceof Error ? error.message : String(error)}`)), debounceMs);
         },
         render,
         dispose: () => {

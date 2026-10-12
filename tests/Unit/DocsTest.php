@@ -20,7 +20,8 @@ it('lists every English page in the sidebar', function () {
     $config = (string) file_get_contents("{$root}/docs/.vitepress/config.ts");
     $pages = array_map(fn (string $f): string => basename($f, '.md'), glob("{$root}/docs/en/*.md") ?: []);
 
-    foreach (array_diff($pages, ['index']) as $page) {
+    // the legal pages are linked from the footer, not the sidebar
+    foreach (array_diff($pages, ['index', 'imprint', 'privacy']) as $page) {
         expect($config)->toContain("'{$page}'");
     }
 });
@@ -102,7 +103,8 @@ it('keeps English and German pages in step: same headings per level, links only 
     $root = dirname(__DIR__, 2);
     $levels = fn (string $file): array => array_map(fn (string $line): int => strspn($line, '#'), array_values(preg_grep('/^#{1,6} /m', explode("\n", docsProse($file))) ?: []));
     // on purpose: the MCP resource openbill://docs/liquid-reference is the English templates page
-    $crossLanguage = ['de/mcp.md -> /en/templates'];
+    // the English legal pages point to the binding German version
+    $crossLanguage = ['de/mcp.md -> /en/templates', 'en/imprint.md -> /de/imprint', 'en/privacy.md -> /de/privacy'];
 
     foreach (glob("{$root}/docs/en/*.md") ?: [] as $en) {
         $name = basename($en);
@@ -144,4 +146,16 @@ it('names the core features on both landing pages and says no more that the docs
         ->and((string) file_get_contents("{$root}/docs/de/index.md"))
         ->toContain('Eigene Felder', 'Gruppen', 'Liquid', 'Toolkit', 'EN 16931', 'REST-API', 'MCP', 'Docker', '/screenshots/de/editor.png')
         ->not->toContain('In Arbeit');
+});
+
+it('links the imprint and the privacy policy in the footer of both languages and keeps them out of llms.txt', function () {
+    $root = dirname(__DIR__, 2);
+    $config = (string) file_get_contents("{$root}/docs/.vitepress/config.ts");
+
+    expect($config)->toContain('href="${base}en/imprint"', 'href="${base}en/privacy"', 'href="${base}de/imprint"', 'href="${base}de/privacy"')
+        ->toContain("ignoreFiles: ['imprint.md', 'privacy.md']");
+    foreach (['en', 'de'] as $locale) {
+        expect(is_file("{$root}/docs/{$locale}/imprint.md"))->toBeTrue()
+            ->and(is_file("{$root}/docs/{$locale}/privacy.md"))->toBeTrue();
+    }
 });

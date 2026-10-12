@@ -16,11 +16,16 @@ const pages = ['documents', 'custom-fields', 'templates', 'template-toolkit', 'e
 const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.SidebarItem[] => [
     { text: t.hosting, items: hosting.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
     { text: t.guide, items: pages.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
+    // the footer only shows on pages without a sidebar: the legal pages stay one click away everywhere
+    { text: t.legal, collapsed: true, items: ['imprint', 'privacy'].map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
 ];
 
 const en: Record<string, string> = {
     guide: 'Guide',
     hosting: 'Self-hosting',
+    legal: 'Legal',
+    imprint: 'Imprint',
+    privacy: 'Privacy policy',
     setup: 'Setup with Docker Compose',
     'reverse-proxy': 'Reverse proxy',
     backup: 'Backup',
@@ -39,6 +44,9 @@ const en: Record<string, string> = {
 const de: Record<string, string> = {
     guide: 'Anleitung',
     hosting: 'Betrieb',
+    legal: 'Rechtliches',
+    imprint: 'Impressum',
+    privacy: 'Datenschutz',
     setup: 'Einrichtung mit Docker Compose',
     'reverse-proxy': 'Reverse Proxy',
     backup: 'Datensicherung',

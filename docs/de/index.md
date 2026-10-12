@@ -12,14 +12,14 @@ landing:
     replay: Noch einmal abspielen
   invoice:
     locale: de-DE
-    label: Eine Rechnung von Studio Nordlicht an die Hafenkontor Lindqvist GmbH über 9.650,90 Euro, abgeschlossen als INV-2026-0042 und archiviert als PDF/A-3 mit factur-x.xml
+    label: Eine Rechnung von Studio Nordlicht an die Hafenkontor Lindqvist GmbH über 9.650,90 Euro, abgeschlossen als RE-2026-0042 und archiviert als PDF/A-3 mit factur-x.xml
     sender: Studio Nordlicht
     senderLine: Studio Nordlicht, Speicherstraße 12, 20457 Hamburg
     recipient: [Hafenkontor Lindqvist GmbH, Frau Mira Albers, Am Sandtorkai 4, 20457 Hamburg]
     title: Rechnung
     subject: Relaunch Online-Shop
     draft: Entwurf
-    number: INV-2026-0042
+    number: RE-2026-0042
     date: 12.10.2026
     groups:
       - title: Konzept & UX
@@ -98,10 +98,10 @@ landing:
       - { kind: call, text: 'create-document {"type":"invoice","customer_id":"01K7…","groups":[…]}' }
       - { kind: result, text: '{"status":"draft","totals":{"gross":"9650.90"},"issues":[]}' }
       - { kind: call, text: 'finalize-document {"id":"01K9…"}' }
-      - { kind: result, text: '{"number":"INV-2026-0042","status":"open","is_locked":true}' }
+      - { kind: result, text: '{"number":"RE-2026-0042","status":"open","is_locked":true}' }
       - { kind: call, text: 'get-document-pdf-url {"id":"01K9…"}' }
       - { kind: result, text: '{"pdf":"https://…/downloads/…","xml":"https://…/downloads/…"}' }
-      - { kind: agent, text: 'INV-2026-0042 ist abgeschlossen. PDF und E-Rechnungs-XML sind archiviert, die Links gelten 15 Minuten.' }
+      - { kind: agent, text: 'RE-2026-0042 ist abgeschlossen. PDF und E-Rechnungs-XML sind archiviert, die Links gelten 15 Minuten.' }
   hosting:
     title: Läuft auf deinem Server, mit Docker Compose
     text: Ein Compose-Stack mit allem, was er braucht. Zwei Dateien laden, Passwörter und Adresse in .env eintragen, starten.

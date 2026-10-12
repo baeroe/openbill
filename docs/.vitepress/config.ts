@@ -1,5 +1,12 @@
-import { defineConfig, type DefaultTheme } from 'vitepress';
+import { defineConfig, type DefaultTheme, type HeadConfig } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
+
+// Published on GitHub Pages under /openbill/ until the docs get a domain of their own (.github/workflows/docs.yml sets
+// DOCS_BASE and DOCS_URL). Locally and in DDEV the site lives at /.
+const base = process.env.DOCS_BASE ?? '/';
+/** Absolute address of the published docs without trailing slash (llms.txt links, link previews); unset locally. */
+const site = process.env.DOCS_URL?.replace(/\/$/, '');
+const description = 'Open, self-hosted quotes and invoices with custom fields, Liquid templates and EN 16931 e-invoices.';
 
 // every page exists in docs/en and docs/de under the same file name (tests/Unit/DocsTest.php)
 const hosting = ['setup', 'reverse-proxy', 'backup', 'upgrading'];
@@ -47,19 +54,24 @@ const de: Record<string, string> = {
 };
 
 export default defineConfig({
+    base,
     title: 'openbill',
     cleanUrls: true,
     lastUpdated: true,
     // docs/history is the project's memory, docs/superpowers holds specs and plans: not part of the site
     srcExclude: ['history/**', 'superpowers/**', 'README.md'],
+    // head entries are not rewritten to the base by VitePress
     head: [
-        ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+        ['link', { rel: 'icon', href: `${base}favicon.svg`, type: 'image/svg+xml' }],
         ['meta', { name: 'theme-color', content: '#f4f4f2' }],
+        ['meta', { property: 'og:title', content: 'openbill' }],
+        ['meta', { property: 'og:description', content: description }],
+        ...(site ? ([['meta', { property: 'og:image', content: `${site}/screenshots/en/editor.png` }]] satisfies HeadConfig[]) : []),
     ],
-    appearance: false,
     vite: {
         // agents get the English docs only
-        plugins: [llmstxt({ workDir: 'en' })],
+        // the plugin puts the base after the domain itself: the origin only (https://baeroe.github.io)
+        plugins: [llmstxt({ workDir: 'en', ...(site ? { domain: new URL(site).origin } : {}) })],
         // dev server behind DDEV (https://openbill.ddev.site:5174): Vite only answers known hosts
         server: { allowedHosts: ['.ddev.site'] },
     },
@@ -70,9 +82,9 @@ export default defineConfig({
             lang: 'en',
             // English lives under /en like German under /de; links without a prefix are redirected in the theme
             link: '/en/',
-            description: 'Open, self-hosted quotes and invoices with custom fields, Liquid templates and e-invoices.',
+            description: description,
             themeConfig: {
-                nav: [{ text: 'Guide', link: '/en/setup' }],
+                nav: [{ text: 'Guide', link: '/en/setup' }, { text: 'Releases', link: 'https://github.com/baeroe/openbill/releases' }],
                 sidebar: sidebar('/en', en),
                 editLink: { pattern: 'https://github.com/baeroe/openbill/edit/main/docs/:path', text: 'Edit this page' },
                 footer: { message: 'Released under the MIT License.', copyright: '© 2026 Rafael Haußmann' },
@@ -84,7 +96,7 @@ export default defineConfig({
             link: '/de/',
             description: 'Offene, selbst gehostete Angebote und Rechnungen mit eigenen Feldern, Liquid-Templates und E-Rechnung.',
             themeConfig: {
-                nav: [{ text: 'Anleitung', link: '/de/setup' }],
+                nav: [{ text: 'Anleitung', link: '/de/setup' }, { text: 'Releases', link: 'https://github.com/baeroe/openbill/releases' }],
                 sidebar: sidebar('/de', de),
                 editLink: { pattern: 'https://github.com/baeroe/openbill/edit/main/docs/:path', text: 'Seite bearbeiten' },
                 footer: { message: 'Veröffentlicht unter der MIT-Lizenz.', copyright: '© 2026 Rafael Haußmann' },
@@ -92,6 +104,9 @@ export default defineConfig({
                 docFooter: { prev: 'Zurück', next: 'Weiter' },
                 lastUpdated: { text: 'Zuletzt aktualisiert' },
                 langMenuLabel: 'Sprache wechseln',
+                darkModeSwitchLabel: 'Darstellung',
+                lightModeSwitchTitle: 'Zu hell wechseln',
+                darkModeSwitchTitle: 'Zu dunkel wechseln',
                 returnToTopLabel: 'Nach oben',
                 sidebarMenuLabel: 'Menü',
                 skipToContentLabel: 'Zum Inhalt springen',

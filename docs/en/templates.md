@@ -4,6 +4,8 @@ openbill renders every document on the server from a template written in HTML, C
 
 ## Built-in templates
 
+![The template gallery with Klar, Kante and Leise](/screenshots/en/templates.png)
+
 | Template | Look |
 |---|---|
 | Klar | calm, classic layout with a clear table |
@@ -17,6 +19,8 @@ The built-in templates speak English and German (they follow the language of the
 A document uses its own template if it has one, else the default template of its document type, else Klar. When a document is finalized, the template is frozen together with the other master data and the PDF is archived. Changing or deleting the template later never changes a finalized document or its PDF.
 
 ## Template editor
+
+![The template editor: code on the left, preview on the right](/screenshots/en/template-editor.png)
 
 **Templates** shows every template with a preview of its first page (rendered on the server with sample data). **Import ZIP** adds a template package, **Duplicate** creates an editable copy (“Klar (copy)”), **Delete** removes your own templates (not while documents still use them).
 
@@ -162,14 +166,14 @@ Custom fields sit directly on their object, with their key: `{{ document.project
 | `money` | `{{ document.gross_total \| money }}` | `1.130,50 €` / `€1,130.50` |
 | `money: decimals` | `{{ p.unit_price \| money: 4 }}` | `12,3456 €` / `€12.3456` |
 | `number: decimals` | `{{ p.quantity \| number: 2 }}` | `1,50` / `1.50` (default 2 decimals) |
-| `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026` |
+| `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026`. A whole number is read as Unix timestamp (seconds). |
 | `date: format` | `{{ document.date \| date: "%Y-%m-%d" }}` | strftime pattern like Liquid's standard `date` |
 | `nl2br` | `{{ document.intro \| nl2br }}` | line breaks become `<br>` |
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formats follow the document language. Amounts are rounded commercially. `money` and `number` print nothing for values that are not numbers. An unknown filter is an error.
 
-The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Prefer the totals of the context over computing amounts in the template.
+The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Two whole numbers stay whole numbers (`divided_by` rounds down); a result beyond ±9.2 × 10¹⁸ comes back as exact text and is computed as a decimal from then on (a following `divided_by` no longer rounds down). Prefer the totals of the context over computing amounts in the template.
 
 ### Escaping
 

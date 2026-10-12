@@ -8,6 +8,7 @@ use App\Models\TaxRate;
 use App\Rules\DecimalString;
 use App\Support\Actor;
 use App\Support\Text;
+use App\Support\TrimmedInput;
 use Closure;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -22,6 +23,7 @@ final class SaveTaxRate
      */
     public function handle(Actor $actor, array $input, ?TaxRate $rate = null): TaxRate
     {
+        $input = TrimmedInput::strings($input, ['label', 'exemption_note']);
         $required = $rate === null ? 'required' : 'sometimes';
         $data = Validator::make($input, [
             'label' => [$required, 'string', 'max:64'],

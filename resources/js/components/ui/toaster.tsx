@@ -13,10 +13,13 @@ export function Toaster() {
 
     return (
         <div
-            onMouseEnter={pauseToasts}
-            onMouseLeave={resumeToasts}
-            onFocus={pauseToasts}
-            onBlur={resumeToasts}
+            onMouseEnter={() => pauseToasts('pointer')}
+            onMouseLeave={() => resumeToasts('pointer')}
+            onFocus={() => pauseToasts('focus')}
+            // only when the focus leaves the toasts, not when it moves from one toast button to the next
+            onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) resumeToasts('focus');
+            }}
             className="fixed bottom-5 left-1/2 z-60 grid w-[min(calc(100%-2rem),26rem)] -translate-x-1/2 gap-2 empty:hidden [body:has([data-savebar])_&]:bottom-20"
         >
             <div role="status" aria-live="polite" className="grid gap-2 empty:hidden">

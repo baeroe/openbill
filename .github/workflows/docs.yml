@@ -1,0 +1,58 @@
+name: Docs
+
+# GitHub Pages: https://baeroe.github.io/openbill/ – until the docs get a domain of their own (then drop DOCS_BASE,
+# point DOCS_URL at the domain and add docs/public/CNAME)
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', 'pnpm-lock.yaml', '.github/workflows/docs.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# one deployment at a time; a running one is not cancelled halfway
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOCS_BASE: /openbill/
+      DOCS_URL: https://baeroe.github.io/openbill
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # "last updated" needs the git history
+
+      # version comes from "packageManager" in package.json
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir docs build
+
+      # no actions/configure-pages: its outputs (base_url …) are not used, the base comes from DOCS_BASE, and it would
+      # need pages: read in this job
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

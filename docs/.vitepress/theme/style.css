@@ -1,23 +1,112 @@
-/* openbill tokens (prototypes/clickdummy-v2/DESIGN.md, "Graphit & Kobalt"), mapped onto VitePress variables */
+/* openbill tokens ("Graphit & Kobalt", prototypes/clickdummy-v2/DESIGN.md; values of resources/css/app.css), light and dark */
 :root {
+    --ob-bg: #f4f4f2;
+    --ob-surface: #ffffff;
+    --ob-surface-2: #ecece9;
+    --ob-surface-3: #e3e3df;
+    --ob-ink: #23252b;
+    --ob-muted: #5f626a;
+    --ob-faint: #a2a4aa;
+    --ob-accent: #2f55d4;
+    --ob-accent-hover: #2647b8;
+    --ob-accent-ink: #ffffff;
+    --ob-accent-soft: #e3e9fb;
+    --ob-elev-paper: 0 1px 2px rgb(20 22 30 / 0.06), 0 16px 36px -18px rgb(20 22 30 / 0.28);
+
     --vp-font-family-base: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --vp-font-family-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+}
 
-    --vp-c-bg: #f4f4f2;
-    --vp-c-bg-alt: #ffffff;
-    --vp-c-bg-elv: #ffffff;
-    --vp-c-bg-soft: #ecece9;
-    --vp-c-text-1: #23252b;
-    --vp-c-text-2: #73767e;
-    --vp-c-text-3: #a2a4aa;
-    --vp-c-divider: #e3e3df;
-    --vp-c-gutter: #e3e3df;
+.dark {
+    --ob-bg: #16171a;
+    --ob-surface: #1f2024;
+    --ob-surface-2: #292a2f;
+    --ob-surface-3: #33343a;
+    --ob-ink: #ececee;
+    --ob-muted: #9a9ca3;
+    --ob-faint: #686a71;
+    --ob-accent: #829bf3;
+    --ob-accent-hover: #9aaff6;
+    --ob-accent-ink: #0d1330;
+    --ob-accent-soft: #252e52;
+    --ob-elev-paper: 0 1px 2px rgb(0 0 0 / 0.4), 0 18px 40px -16px rgb(0 0 0 / 0.7);
+}
 
-    --vp-c-brand-1: #2f55d4;
-    --vp-c-brand-2: #2647b8;
-    --vp-c-brand-3: #2f55d4;
-    --vp-c-brand-soft: #e3e9fb;
+/* layers come from tone, not from borders (DESIGN.md) */
+:root,
+.dark {
+    --vp-c-bg: var(--ob-bg);
+    --vp-c-bg-alt: var(--ob-surface);
+    --vp-c-bg-elv: var(--ob-surface);
+    --vp-c-bg-soft: var(--ob-surface-2);
+    --vp-c-text-1: var(--ob-ink);
+    --vp-c-text-2: var(--ob-muted);
+    --vp-c-text-3: var(--ob-faint);
+    --vp-c-divider: var(--ob-surface-3);
+    --vp-c-gutter: var(--ob-surface-3);
+    --vp-c-border: var(--ob-surface-3);
 
-    --vp-button-brand-bg: #2f55d4;
-    --vp-button-brand-hover-bg: #2647b8;
-    --vp-button-brand-text: #ffffff;
+    --vp-c-brand-1: var(--ob-accent);
+    --vp-c-brand-2: var(--ob-accent-hover);
+    --vp-c-brand-3: var(--ob-accent);
+    --vp-c-brand-soft: var(--ob-accent-soft);
+
+    --vp-button-brand-bg: var(--ob-accent);
+    --vp-button-brand-hover-bg: var(--ob-accent-hover);
+    --vp-button-brand-active-bg: var(--ob-accent-hover);
+    --vp-button-brand-text: var(--ob-accent-ink);
+    --vp-button-brand-hover-text: var(--ob-accent-ink);
+    --vp-button-brand-active-text: var(--ob-accent-ink);
+    --vp-button-alt-bg: var(--ob-surface-2);
+    --vp-button-alt-text: var(--ob-ink);
+    --vp-button-alt-hover-bg: var(--ob-surface-3);
+    --vp-button-alt-hover-text: var(--ob-ink);
+
+    --vp-code-block-bg: var(--ob-surface-2);
+    --vp-home-hero-name-color: var(--ob-ink);
+}
+
+/* pill buttons and 18 px cards like the app */
+.VPButton {
+    border-radius: 999px !important;
+}
+.VPFeature {
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: var(--ob-surface) !important;
+    box-shadow: var(--ob-elev-paper);
+}
+
+.VPHero .name {
+    letter-spacing: -0.03em;
+}
+.VPHero .text {
+    letter-spacing: -0.02em;
+    max-width: 20ch;
+    text-wrap: balance;
+}
+
+/* the screenshot below the features on the landing pages */
+.showcase {
+    max-width: 1152px;
+    margin: 72px auto 96px;
+    padding: 0 48px;
+}
+.showcase img {
+    display: block;
+    width: 100%;
+    border-radius: 14px;
+    box-shadow: var(--ob-elev-paper);
+}
+@media (max-width: 640px) {
+    .showcase {
+        margin-top: 48px;
+        padding: 0 24px;
+    }
+}
+
+/* screenshots in the guide: framed like a sheet of the app */
+.vp-doc img {
+    border-radius: 12px;
+    box-shadow: var(--ob-elev-paper);
 }

@@ -71,8 +71,13 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
     const aliases = useEditor((state) => state.aliases);
     // React keys survive the id swap after a save (review focus: no focus loss while typing)
     const keyOf = (id: string) => aliases[id] ?? id;
-    const taxRates = useTaxRates().data ?? [];
-    const units = useUnits().data ?? [];
+    const taxRatesQuery = useTaxRates();
+    const unitsQuery = useUnits();
+    const taxRates = taxRatesQuery.data ?? [];
+    const units = unitsQuery.data ?? [];
+    // a position added before the tax rates and units arrived would get neither (e2e flake: finalize refused it);
+    // the add buttons wait for them – a failed request does not block adding
+    const defaultsLoading = (!taxRatesQuery.data && !taxRatesQuery.error) || (!unitsQuery.data && !unitsQuery.error);
     const fields = (useFieldDefinitions('position').data ?? []).filter((d) => d.doc_types.includes(draft.type));
     const [focusId, setFocusId] = useState<string | null>(null);
     const [dragging, setDragging] = useState<string | null>(null);
@@ -166,12 +171,14 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
     };
 
     const addPosition = (groupId: string, afterId?: string) => {
+        if (defaultsLoading) return;
         const position = ops.newPosition('item', defaults);
         update((d) => ops.addPosition(d, groupId, position, afterId));
         setFocusId(position.id);
     };
 
     const addGroup = () => {
+        if (defaultsLoading) return;
         const titled = draft.groups.filter((g) => g.title !== null).length;
         const before = new Set(draft.groups.map((g) => g.id));
         update((d) => ops.addGroup(d, t('editor.group_default', { n: titled + 1 }), ops.newPosition('item', defaults)));
@@ -180,6 +187,7 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
     };
 
     const addLoose = () => {
+        if (defaultsLoading) return;
         const position = ops.newPosition('item', defaults);
         update((d) => ops.addGroup(d, null, position, true));
         setFocusId(position.id);
@@ -277,6 +285,7 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
                             onRemove={() => removeGroup(group)}
                             onDissolve={() => update((d) => ops.dissolveGroup(d, group.id))}
                             onAdd={() => addPosition(group.id)}
+                            addDisabled={defaultsLoading}
                         >
                             <SortableContext items={group.positions.map((p) => pid(p.id))} strategy={verticalListSortingStrategy}>
                                 {group.positions.map((position, i) => (
@@ -318,11 +327,11 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
 
             {!readOnly && (
                 <div className="flex flex-wrap gap-2 pt-1">
-                    <Button variant="soft" size="sm" icon={<FolderPlus />} onClick={addGroup} data-add-group>
+                    <Button variant="soft" size="sm" icon={<FolderPlus />} onClick={addGroup} disabled={defaultsLoading} data-add-group>
                         {t('editor.add_group')}
                     </Button>
                     {!draft.groups.some((g) => g.title === null) && (
-                        <Button variant="ghost" size="sm" icon={<Plus />} onClick={addLoose}>
+                        <Button variant="ghost" size="sm" icon={<Plus />} onClick={addLoose} disabled={defaultsLoading}>
                             {t('editor.add_loose')}
                         </Button>
                     )}
@@ -345,10 +354,12 @@ type GroupProps = {
     onRemove(): void;
     onDissolve(): void;
     onAdd(): void;
+    /** Tax rates and units are still loading (the new position would get neither). */
+    addDisabled: boolean;
     children: ReactNode;
 };
 
-function SortableGroup({ group: g, readOnly, collapsed, canDrag, total, optionalTotal, error, onToggle, onRename, onRemove, onDissolve, onAdd, children }: GroupProps) {
+function SortableGroup({ group: g, readOnly, collapsed, canDrag, total, optionalTotal, error, onToggle, onRename, onRemove, onDissolve, onAdd, addDisabled, children }: GroupProps) {
     const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: gid(g.id), disabled: readOnly || !canDrag });
     const { setNodeRef: setBodyRef, isOver } = useDroppable({ id: bodyId(g.id), disabled: readOnly });
     const loose = g.title === null;
@@ -438,7 +449,13 @@ function SortableGroup({ group: g, readOnly, collapsed, canDrag, total, optional
                     {g.positions.length === 0 && !readOnly && <p className="px-4 py-3 text-sm text-faint">{t('editor.group_empty')}</p>}
                     {!readOnly && (
                         <div className="flex gap-2 pt-0.5 pr-2 pl-9">
-                            <button type="button" data-add-position onClick={onAdd} className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-sm font-medium text-accent hover:bg-accent-soft [&_svg]:size-[0.95rem]">
+                            <button
+                                type="button"
+                                data-add-position
+                                onClick={onAdd}
+                                disabled={addDisabled}
+                                className="inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-sm font-medium text-accent hover:bg-accent-soft disabled:cursor-wait disabled:opacity-60 [&_svg]:size-[0.95rem]"
+                            >
                                 <Plus aria-hidden />
                                 {t('editor.add_position')}
                             </button>

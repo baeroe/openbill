@@ -6,6 +6,7 @@ use App\Enums\TokenAbility;
 use App\Exceptions\ActionNotAllowedException;
 use App\Models\User;
 use App\Support\Actor;
+use App\Support\TrimmedInput;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -29,6 +30,7 @@ final class IssueApiToken
         if ($user->isDisabled()) {
             throw ActionNotAllowedException::userDisabled();
         }
+        $input = TrimmedInput::strings($input, ['name']);
         $abilities = is_array($input['abilities'] ?? null) ? $input['abilities'] : [];
         $writesTemplate = in_array(TokenAbility::TemplatesWrite->value, $abilities, true);
 

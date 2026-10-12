@@ -62,6 +62,8 @@ Text lines are not part of the XML; optional items only exist in offers.
 
 ## Downloads
 
+![The archived XML of a finalized invoice in the editor](/screenshots/en/einvoice.png)
+
 The archived PDF and the archived XML can be downloaded separately; both are always the files from the archive, never rendered again. Only finalized invoices and cancellations with the e-invoice profile have an XML.
 
 ## Archive
@@ -71,7 +73,7 @@ Archived files live in `storage/app/archive/<year>/<document id>.pdf` and `.xml`
 ## Requirements and limits
 
 - Gotenberg **8.34 or newer** (the Docker image `gotenberg/gotenberg:8` is). `GOTENBERG_TIMEOUT` (seconds, default 20) limits each PDF request; keep it well below the database lock wait timeout (50 s).
-- openbill checks every XML against the schema before archiving it. The business rules of EN 16931 (Schematron) are covered by the compliance profile; the official CEN Schematron runs in development and CI on the e-invoice cases of the test suite (`scripts/validate-einvoice.sh`).
+- openbill checks every XML against the schema before archiving it. The business rules of EN 16931 (Schematron) are covered by the compliance profile. In development and CI, the e-invoice cases of the test suite are checked twice (`scripts/validate-einvoice.sh`): with the official CEN Schematron and with the KoSIT validator in its scenario “EN16931 (CII)” (schema and EN 16931 rules; the German XRechnung rules BR-DE, for example the Leitweg-ID, are not part of it, because openbill does not produce XRechnung).
 - The seller needs a VAT ID or a register number; with regular taxation, reverse charge and customers outside the EU need the VAT ID (small businesses invoice with category `E`, where the tax number is enough).
-- Customers outside the EU are taxed with category `G` (export); a category for services to such customers (`O`) is planned.
+- Customers outside the EU: goods are taxed with category `G` (export), services to businesses with category `O` (not subject to VAT, without VAT IDs in the XML), services to private persons with the regular rate of the position.
 - Not supported yet: XRechnung with Leitweg-ID, currencies other than EUR, document-level allowances and charges.

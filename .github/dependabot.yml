@@ -1,0 +1,30 @@
+# Weekly update PRs, grouped. Docker images are left out on purpose: they are pinned by digest in several places that
+# must stay equal (tests/Feature/DockerSetupTest.php, docs/en/development.md "Base images").
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      composer-minor:
+        update-types: [minor, patch]
+
+  # pnpm: Dependabot reads pnpm-lock.yaml (workspace root; e2e/ is a project of its own)
+  - package-ecosystem: npm
+    directories: ['/', '/e2e']
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      npm-minor:
+        update-types: [minor, patch]

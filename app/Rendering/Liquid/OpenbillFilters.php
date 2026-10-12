@@ -5,6 +5,7 @@ namespace App\Rendering\Liquid;
 use App\Rendering\NumberText;
 use App\Support\Text;
 use Brick\Math\BigDecimal;
+use Brick\Math\BigInteger;
 use Brick\Math\RoundingMode;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -51,6 +52,14 @@ final class OpenbillFilters extends FiltersProvider
      */
     public function date(mixed $value, mixed $format = null): string
     {
+        // Liquid takes Unix timestamps too ({{ 1791115200 | date }}): seconds, shown in the app's time zone
+        if (is_int($value)) {
+            try {
+                $value = CarbonImmutable::createFromTimestamp($value, (string) config('app.timezone'))->format('Y-m-d H:i:s');
+            } catch (Throwable) {
+                return '';
+            }
+        }
         if (! is_string($value) || trim($value) === '') {
             return '';
         }
@@ -96,21 +105,21 @@ final class OpenbillFilters extends FiltersProvider
 
     /**
      * Liquid math without floats: amounts are decimal strings, so plus/minus/times/divided_by/round compute
-     * with BigDecimal and return a decimal string. Two integers keep Liquid's integer semantics.
+     * with BigDecimal and return a decimal string. Two integers keep Liquid's integer semantics, exactly: a result beyond PHP's int range comes back as a decimal string.
      */
     public function plus(mixed $input, mixed $operand): int|string
     {
-        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->plus($b), fn (int $a, int $b): int => $a + $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->plus($b), fn (BigInteger $a, BigInteger $b): BigInteger => $a->plus($b));
     }
 
     public function minus(mixed $input, mixed $operand): int|string
     {
-        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->minus($b), fn (int $a, int $b): int => $a - $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->minus($b), fn (BigInteger $a, BigInteger $b): BigInteger => $a->minus($b));
     }
 
     public function times(mixed $input, mixed $operand): int|string
     {
-        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->multipliedBy($b), fn (int $a, int $b): int => $a * $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->multipliedBy($b), fn (BigInteger $a, BigInteger $b): BigInteger => $a->multipliedBy($b));
     }
 
     /**
@@ -126,7 +135,7 @@ final class OpenbillFilters extends FiltersProvider
             $input,
             $operand,
             fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->dividedBy($b, 10, RoundingMode::HalfUp)->strippedOfTrailingZeros(),
-            fn (int $a, int $b): int => intdiv($a, $b) - (($a % $b !== 0 && ($a < 0) !== ($b < 0)) ? 1 : 0),
+            fn (BigInteger $a, BigInteger $b): BigInteger => $a->dividedBy($b, RoundingMode::Floor),
         );
     }
 
@@ -209,7 +218,7 @@ final class OpenbillFilters extends FiltersProvider
             throw new StandardException('divided by 0');
         }
 
-        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->remainder($b), fn (int $a, int $b): int => $a % $b);
+        return $this->math($input, $operand, fn (BigDecimal $a, BigDecimal $b): BigDecimal => $a->remainder($b), fn (BigInteger $a, BigInteger $b): BigInteger => $a->remainder($b));
     }
 
     public function join(mixed $input, mixed $glue = ' '): string
@@ -302,14 +311,18 @@ final class OpenbillFilters extends FiltersProvider
 
     /**
      * @param  Closure(BigDecimal, BigDecimal): BigDecimal  $decimal
-     * @param  Closure(int, int): int  $integer
+     * @param  Closure(BigInteger, BigInteger): BigInteger  $integer
      */
     private function math(mixed $input, mixed $operand, Closure $decimal, Closure $integer): int|string
     {
         $this->guardDigits($input);
         $this->guardDigits($operand);
         if (is_int($input) && is_int($operand)) {
-            return $integer($input, $operand);
+            // PHP would switch to float past PHP_INT_MAX: compute exactly, an int as long as it fits
+            /** @var BigInteger $result */
+            $result = $integer(BigInteger::of($input), BigInteger::of($operand));
+
+            return $result->isGreaterThan(PHP_INT_MAX) || $result->isLessThan(PHP_INT_MIN) ? (string) $result : $result->toInt();
         }
 
         return (string) $decimal(self::decimal($input) ?? BigDecimal::zero(), self::decimal($operand) ?? BigDecimal::zero());

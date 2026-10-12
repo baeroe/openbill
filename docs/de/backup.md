@@ -47,3 +47,4 @@ openbill findet den wiederhergestellten `APP_KEY` im Daten-Volume, bestehende Si
 - Behalte den Datenbank-Benutzer `openbill` (aus `docker-compose.yml`): Die Trigger im Dump sind für ihn definiert.
 - `docker compose down -v` löscht beide Volumes. Ohne `-v` behält `down` sie.
 - Umzug auf einen neuen Server = Sichern auf dem alten plus Wiederherstellen auf dem neuen, mit derselben `.env`.
+- `app:prune-images` löscht Bilder endgültig – nach einer Sicherung ausführen.

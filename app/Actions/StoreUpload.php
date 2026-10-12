@@ -12,7 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * POST /api/uploads: an image for an image field, stored as uploads/<ulid>.<ext> on the local disk. The returned path
- * is the field value. Files are never deleted (finalized documents point at them through their snapshot).
+ * is the field value. Files stay when the value changes (finalized documents point at them through their snapshot);
+ * app:prune-images removes the ones nothing refers to.
  */
 final class StoreUpload
 {

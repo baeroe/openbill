@@ -4,8 +4,11 @@ import type { DocumentDetail } from '@/api/types';
 import { acquireAutosave, resetAutosaves, showDocument } from '@/editor/autosave-registry';
 import { useEditor } from '@/editor/store';
 import type { DraftPayload } from '@/editor/types';
+import { setDraftOwner, stashDrafts } from '@/editor/unsaved-drafts';
+import { commitAllKeepalive, pendingDeleteIds, scheduleDelete } from '@/lib/pending-delete';
 import { currentToasts, dismissToast } from '@/lib/toast';
-import { LOGOUT_SAVE_WAIT, logout } from './logout';
+import { memoryStorage } from '@/test-utils/memory-storage';
+import { LOGOUT_POST_TIMEOUT, LOGOUT_SAVE_WAIT, logout } from './logout';
 
 const detail = (id: string, intro = ''): DocumentDetail =>
     ({
@@ -69,7 +72,11 @@ beforeEach(() => {
     for (const key of [...cache.keys()]) cache.delete(key);
     for (const toast of currentToasts()) dismissToast(toast.id);
 });
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+    commitAllKeepalive();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+});
 
 describe('logout', () => {
     it('saves what is open, ends the session, then forgets autosaves, the draft and every cached answer', async () => {
@@ -129,5 +136,85 @@ describe('logout', () => {
         expect(await done).toBe(true);
         expect(post).toHaveBeenCalledOnce();
         expect(LOGOUT_SAVE_WAIT).toBe(3000);
+    });
+
+    it('says that it is logging out while it waits (ledger phase 6)', async () => {
+        editing();
+        const done = logout({ post: async () => undefined, leave: () => undefined });
+        expect(currentToasts().map((toast) => [toast.tone, toast.message])).toEqual([['neutral', 'user_menu.logging_out']]);
+        calls[0].resolve(detail('a', 'Hallo'));
+        expect(await done).toBe(true);
+    });
+
+    it('sends deletes still waiting for their undo toast before it ends the session (ledger phase 6)', async () => {
+        const order: string[] = [];
+        scheduleDelete('d1', async ({ keepalive }) => void order.push(`delete d1, keepalive: ${keepalive}`));
+
+        expect(await logout({ post: async () => void order.push('post'), leave: () => undefined })).toBe(true);
+        expect(order).toEqual(['delete d1, keepalive: false', 'post']);
+        expect(pendingDeleteIds().size).toBe(0);
+    });
+
+    it.each([
+        [[401], 1],
+        [[419, 204, 401], 3], // CSRF token changed: fresh token, then the session turns out to be over
+        [[419, 204, 204], 3], // CSRF token changed, session still valid: logged out on the second try (review phase 11)
+    ])('counts the answers %j on logout as logged out: cleans up and leaves (ledger phase 6)', async (statuses, fetches) => {
+        const answers = [...statuses];
+        const fetch = vi.fn(async () => new Response(null, { status: answers.shift() }));
+        vi.stubGlobal('fetch', fetch);
+        const { entry } = editing();
+        const leave = vi.fn();
+        const done = logout({ leave });
+        calls[0].resolve(detail('a', 'Hallo'));
+
+        expect(await done).toBe(true);
+        expect(fetch).toHaveBeenCalledTimes(fetches);
+        expect(leave).toHaveBeenCalledOnce();
+        expect(entry.autosave.stopped).toBe(true);
+    });
+
+    it('fails when the CSRF token is refused even after renewing it (review phase 11)', async () => {
+        const answers = [419, 204, 419];
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: answers.shift() })));
+        const leave = vi.fn();
+
+        expect(await logout({ leave })).toBe(false);
+        expect(leave).not.toHaveBeenCalled();
+    });
+
+    it('still fails on a server error of the logout', async () => {
+        vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 500 })));
+        const leave = vi.fn();
+
+        expect(await logout({ leave })).toBe(false);
+        expect(leave).not.toHaveBeenCalled();
+    });
+
+    it('gives up on a logout request that hangs for 10 s and says so (ledger phase 6)', async () => {
+        const post = vi.fn((signal: AbortSignal) => new Promise<void>((_, reject) => signal.addEventListener('abort', () => reject(new Error('aborted')))));
+        const leave = vi.fn();
+        const done = logout({ post, leave });
+        let settled = false;
+        void done.then(() => (settled = true));
+
+        await vi.advanceTimersByTimeAsync(LOGOUT_POST_TIMEOUT - 1);
+        expect(post).toHaveBeenCalledOnce();
+        expect(settled).toBe(false);
+        await vi.advanceTimersByTimeAsync(1);
+
+        expect(await done).toBe(false);
+        expect(leave).not.toHaveBeenCalled();
+        expect(currentToasts().map((toast) => [toast.tone, toast.message])).toEqual([['error', 'user_menu.logout_failed']]);
+        expect(LOGOUT_POST_TIMEOUT).toBe(10000);
+    });
+
+    it('forgets input kept from an expired session (the next person in this tab must not get it)', async () => {
+        vi.stubGlobal('sessionStorage', memoryStorage());
+        setDraftOwner('u1');
+        stashDrafts([{ id: 'a', payload: { intro: 'Hallo' } as unknown as DraftPayload }]);
+
+        expect(await logout({ post: async () => undefined, leave: () => undefined })).toBe(true);
+        expect(sessionStorage.length).toBe(0);
     });
 });

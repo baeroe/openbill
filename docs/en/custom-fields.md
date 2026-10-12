@@ -26,9 +26,11 @@ Text, long text, number, amount, date, selection (with options), yes/no and imag
 ```
 :::
 
-Uploaded files are kept even when the value changes, because finalized documents still refer to them.
+Uploaded files are kept even when the value changes, because finalized documents still refer to them. Images nothing refers to anymore (no record, no finalized document) are listed by `docker compose exec openbill php artisan app:prune-images --dry-run`; without `--dry-run` they are deleted. Files younger than 24 hours stay (`--min-age=<hours>`), because an upload is stored before its form is saved.
 
 ## Adding and editing
+
+![Custom fields of documents](/screenshots/en/fields.png)
 
 **Custom fields → Add field** opens a drawer with a live preview of the input. The **key** is built from the label (`Project code` → `project_code`) and can be changed until the field is created; afterwards it is fixed so that templates and stored values stay valid. Core keys of a level (`number`, `date`, `name`, …) are reserved. **Required** fields must be filled before a document can be finalized. A **default value** is pre-filled in new entries.
 

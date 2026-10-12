@@ -99,11 +99,15 @@ Every change to a document is logged with who made it (user, API token or the sy
 
 ### Overview
 
+![The overview with open amounts, what needs attention and recently edited documents](/screenshots/en/overview.png)
+
 After logging in you land on the overview. Four figures sum up the money side: open invoices, how much of that is overdue, open quotes, and what was paid this month (with the total since the start of the year). The figures of open invoices and quotes open the matching filtered list. **Needs your attention** lists overdue invoices first, then open quotes whose validity ends within seven days or has ended, then drafts. **Recently edited** shows the six documents changed last.
 
 ### Document list
 
-**Documents** shows all documents, newest first and grouped by month. Filter by type (each pill shows how many documents that type has under the other filters), by status, by customer, and search number and customer name. The status filter also offers **Overdue**: open invoices past their due date. Every filter is part of the address, for example `/en/documents?type=invoice&status=overdue`, so a filtered list can be bookmarked, shared and reached again with the browser's back button. The list loads 50 documents at a time (**Load more**); the line below it counts all matching documents and sums their gross amounts.
+![The document list, filtered by type, status, customer and date](/screenshots/en/documents.png)
+
+**Documents** shows all documents, newest first and grouped by month. Filter by type (each pill shows how many documents that type has under the other filters), by status, by customer and by document date (from/to), and search number and customer name. The status filter also offers **Overdue**: open invoices past their due date. Every filter is part of the address, for example `/en/documents?type=invoice&status=overdue` or `/en/documents?date_from=2026-01-01&date_to=2026-03-31`, so a filtered list can be bookmarked, shared and reached again with the browser's back button. The list loads 50 documents at a time (**Load more**); the line below it counts all matching documents and sums their gross amounts.
 
 ### New document
 
@@ -111,17 +115,21 @@ After logging in you land on the overview. Four figures sum up the money side: o
 
 ### Document editor
 
+![The editor of a draft invoice with position groups and the live preview (a German invoice of the demo company)](/screenshots/en/editor.png)
+
 Every document opens in the editor: the form on the left, a live preview on the right (below the form on narrow screens). The preview shows the pages exactly as the PDF will look – openbill renders header, content and footer on the server with the document's template and only splits them into pages in the browser. **Areas** outlines header, content and footer on every page. The preview can be hidden and shown again; the choice is remembered in this browser.
 
 - **Header fields:** customer, contact (the customer's default contact is preselected), date, valid until (quotes), service period (invoices and cancellations), due date (invoices), document language and template, plus the document's custom fields. A cancellation always keeps the customer of its invoice.
 - **Positions:** organize positions in groups, each with its subtotal. Drag groups and positions by their handle – also with the keyboard: focus the handle, press Space, move with the arrow keys, press Space again. A position is a service, a text line or, in quotes, an optional service that is shown but not added to the total. While you type a title, openbill suggests positions from earlier documents with their price, unit and tax rate. Numbers can be typed with a comma or a dot (`12,5` or `12.5`); invalid input is marked and not saved. Removing a group or a position can be undone from the message that appears.
 - **Texts:** introduction and closing text, typed or inserted from text blocks.
 - **Totals and check:** net, VAT per rate, total, optional positions and legal notes come from the server, as do the line and group totals. The check panel lists what the document's compliance profile still requires; click an entry to jump to the field. Entries about the customer link to the customer; entries about your organization open the organization settings at the right field.
-- **Saving:** changes are saved automatically shortly after you stop typing; the header shows *Unsaved*, *Saving …* and *Saved*. Leaving the page or closing the tab saves first. Logging out saves too, waiting at most three seconds for it; if logging out fails (for example without a connection), you stay signed in, editing and saving go on, and a message says so. If saving fails because of the connection, openbill tries again on its own (or right away with **Try again**); invalid input is marked at its field. If the document was finalized or deleted elsewhere in the meantime (another tab, the API or MCP), the editor stops saving and says so. Two people editing the same draft at the same time overwrite each other's changes – the last save wins. Known limits: if the tab is closed while a save is still on its way, in rare cases the older save can arrive last; very large drafts (several hundred positions) cannot be sent at all while the tab closes; and if your session has expired, the changes since the last save are lost when openbill sends you to the login page.
+- **Saving:** changes are saved automatically shortly after you stop typing; the header shows *Unsaved*, *Saving …* and *Saved*. Leaving the page or closing the tab saves first. Logging out saves too and sends deletions still waiting for their undo message, waiting at most three seconds for both; a message says that you are being logged out. If your session had ended already, logging out simply takes you to the login. If logging out fails (for example without a connection, or without an answer within ten seconds), you stay signed in, editing and saving go on, and a message says so. If saving fails because of the connection, openbill tries again on its own (or right away with **Try again**); invalid input is marked at its field. If the document was finalized or deleted elsewhere in the meantime (another tab, the API or MCP), the editor stops saving and says so. Two people editing the same draft at the same time overwrite each other's changes – the last save wins. If your session has expired, openbill keeps the changes since the last save in this tab and sends you to the login; open the document again after logging in (as the same person, within a day) and they are back and get saved. If the draft was changed in the meantime (for example over the API), the newer state stays and a message says that your changes were not restored. Known limits: if the tab is closed while a save is still on its way, in rare cases the older save can arrive last; very large drafts (several hundred positions) cannot be sent at all while the tab closes.
 - **Actions:** **Finalize** asks for confirmation and names the number the document will get; with missing required details it jumps to the first one instead. Finalized documents are read-only. Depending on the status you can change it (for example *Mark as accepted*, *Mark as paid*), convert a document along the chain, cancel an invoice, duplicate a document, download the PDF (drafts with a watermark) and delete a draft – with **Undo** while the message is visible.
 - **Chain and e-invoice:** above the form, the chain links the quote, order confirmation, invoice and cancellation that belong together. With the e-invoice profile, the tab **E-invoice** shows the XML of a finalized invoice or cancellation (copy or download); for drafts it explains that the XML is created when finalizing.
 
 ### Customers
+
+![A customer with contacts and custom fields](/screenshots/en/customer.png)
 
 **Customers** lists all customers with their default contact and what is open: the sum of their open invoices, overdue ones marked. The search looks through name, number and email.
 
@@ -139,6 +147,8 @@ A customer's page holds the master data, the **tax treatment** (domestic; EU wit
 Templates, custom fields and settings have their own pages: see [Templates](/en/templates#template-editor), [Custom fields](/en/custom-fields) and [Settings](/en/settings).
 
 ### Appearance and language
+
+![The editor in dark mode](/screenshots/en/editor-dark.png)
 
 The account menu at the bottom of the sidebar switches between light, dark and the system setting (remembered per browser) and between English and German. The sidebar can be collapsed to icons; on small screens it opens from the menu button.
 

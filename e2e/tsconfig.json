@@ -1,0 +1,16 @@
+{
+    // type check only (pnpm typecheck): Playwright strips types when it runs the tests
+    "compilerOptions": {
+        "target": "ES2023",
+        "lib": ["ES2023", "DOM"],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "allowImportingTsExtensions": true,
+        "types": ["node"]
+    },
+    "include": ["**/*.ts"],
+    "exclude": ["node_modules", "test-results", "screenshots"]
+}

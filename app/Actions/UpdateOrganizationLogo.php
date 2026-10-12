@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * POST /api/organization/logo: a new logo file (logos/<ulid>.<ext>). The previous file stays: snapshots of finalized
- * documents keep pointing at it.
+ * documents keep pointing at it (app:prune-images removes it once nothing does).
  */
 final class UpdateOrganizationLogo
 {

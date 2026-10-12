@@ -9,7 +9,7 @@ Die interaktive Referenz (Swagger UI) liegt unter `/api/docs`, das OpenAPI-Dokum
 Ein Token wird im Header `Authorization` mitgeschickt:
 
 ```bash
-export OPENBILL_URL=https://openbill.ddev.site   # Ihre Instanz
+export OPENBILL_URL=https://openbill.ddev.site   # deine Instanz
 export OPENBILL_TOKEN='01J…|openbill_…'
 
 curl -H "Authorization: Bearer $OPENBILL_TOKEN" -H 'Accept: application/json' "$OPENBILL_URL/api/documents"
@@ -96,7 +96,7 @@ Pfade gibt es in zwei Formen. Die **Validierung** nutzt die Stelle in der Anfrag
 | Templates | `GET /api/templates`, `POST /api/templates` (Paket-ZIP als Multipart-Feld `package`), `GET/DELETE /api/templates/{id}`, `PUT /api/templates/{id}/files`, `GET /api/templates/{id}/package` |
 | Vorschau | `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
 
-Zusätzliche Endpunkte (Phase 7):
+Zusätzliche Endpunkte:
 
 | Endpunkt | Was er tut |
 |---|---|

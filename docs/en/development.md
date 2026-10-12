@@ -104,4 +104,8 @@ docker buildx imagetools inspect gotenberg/gotenberg:8.38.0 --format '{{json .Ma
 ```
 :::
 
+The validators in `scripts/validate-einvoice.sh` (CEN Schematron, Saxon-HE, KoSIT validator and its configuration) are pinned by version and SHA-256 the same way; update URL and checksum together.
+
+Dependabot (`.github/dependabot.yml`) opens weekly, grouped PRs for GitHub Actions, Composer and pnpm (root and `e2e/`). It leaves Docker images alone on purpose: update those by hand as described above.
+
 Releases: a tag `vX.Y.Z` builds `linux/amd64` and `linux/arm64`, pushes `baeroe/openbill:X.Y.Z`, `:X.Y` and `:latest` and creates the GitHub release with the notes of `### X.Y.Z` from `docs/en/upgrading.md` (`scripts/release-notes.sh`; the tag fails without that section in English and German). Pull requests that change the image only build it.

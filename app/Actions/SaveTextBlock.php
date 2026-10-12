@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Enums\TextBlockKind;
 use App\Models\TextBlock;
 use App\Support\Actor;
+use App\Support\TrimmedInput;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +20,7 @@ final class SaveTextBlock
      */
     public function handle(Actor $actor, array $input, ?TextBlock $block = null): TextBlock
     {
+        $input = TrimmedInput::strings($input, ['name']);
         $required = $block === null ? 'required' : 'sometimes';
         $data = Validator::make($input, [
             'name' => [$required, 'string', 'max:255'],

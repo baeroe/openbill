@@ -21,7 +21,7 @@ it('renders the list with normalized filters, counts per type and the sum', func
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('documents/index')
-            ->where('filters', ['type' => 'invoice', 'status' => null, 'customer_id' => $fjord->id, 'q' => null])
+            ->where('filters', ['type' => 'invoice', 'status' => null, 'customer_id' => $fjord->id, 'q' => null, 'date_from' => null, 'date_to' => null])
             ->where('counts', ['all' => 3, 'offer' => 1, 'confirmation' => 0, 'invoice' => 2, 'cancellation' => 0])
             ->where('summary', ['count' => 2, 'gross_total' => '129.00'])
             ->where('customers', [['id' => $fjord->id, 'name' => 'Fjord Analytics AB']]));
@@ -39,6 +39,33 @@ it('filters overdue invoices', function () {
             ->where('summary.count', 1));
 });
 
+it('filters by document date and ignores dates of a typed URL that are no dates (review focus)', function () {
+    Document::factory()->create(['date' => '2026-09-30']);
+    Document::factory()->create(['date' => '2026-10-05']);
+    Document::factory()->create(['date' => '2026-10-11']);
+    $this->actingAs(User::factory()->create());
+
+    $this->get('/en/documents?date_from=2026-10-01&date_to=2026-10-10')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.date_from', '2026-10-01')
+            ->where('filters.date_to', '2026-10-10')
+            ->where('counts.all', 1)
+            ->where('summary.count', 1));
+
+    $this->get('/en/documents?date_from=2026-13-01&date_to=yesterday')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.date_from', null)
+            ->where('filters.date_to', null)
+            ->where('summary.count', 3));
+
+    // from after to: an empty list, not an error
+    $this->get('/en/documents?date_from=2026-10-10&date_to=2026-10-01')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('summary.count', 0));
+});
+
 it('ignores invalid filters of a typed URL (review focus)', function () {
     Document::factory()->create();
 
@@ -46,7 +73,7 @@ it('ignores invalid filters of a typed URL (review focus)', function () {
         ->get('/en/documents?type=bogus&status[]=x&q=%20%20&customer_id='.str_repeat('x', 40))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('filters', ['type' => null, 'status' => null, 'customer_id' => null, 'q' => null])
+            ->where('filters', ['type' => null, 'status' => null, 'customer_id' => null, 'q' => null, 'date_from' => null, 'date_to' => null])
             ->where('counts.all', 1)
             ->where('summary.count', 1));
 });

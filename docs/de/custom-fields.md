@@ -26,9 +26,11 @@ Text, langer Text, Zahl, Betrag, Datum, Auswahl (mit Optionen), Ja/Nein und Bild
 ```
 :::
 
-Hochgeladene Dateien bleiben erhalten, auch wenn sich der Wert ändert, weil abgeschlossene Dokumente noch auf sie verweisen.
+Hochgeladene Dateien bleiben erhalten, auch wenn sich der Wert ändert, weil abgeschlossene Dokumente noch auf sie verweisen. Bilder, auf die nichts mehr verweist (kein Datensatz, kein abgeschlossenes Dokument), listet `docker compose exec openbill php artisan app:prune-images --dry-run` auf; ohne `--dry-run` werden sie gelöscht. Dateien, die jünger als 24 Stunden sind, bleiben (`--min-age=<Stunden>`), weil ein Upload gespeichert wird, bevor sein Formular gespeichert ist.
 
 ## Anlegen und bearbeiten
+
+![Eigene Felder der Dokumente](/screenshots/de/fields.png)
 
 **Eigene Felder → Feld hinzufügen** öffnet einen Drawer mit Live-Vorschau des Eingabefelds. Der **Schlüssel** entsteht aus der Bezeichnung (`Projektcode` → `projektcode`) und lässt sich bis zum Anlegen ändern; danach ist er fest, damit Templates und gespeicherte Werte gültig bleiben. Kernschlüssel einer Ebene (`number`, `date`, `name`, …) sind reserviert. **Pflichtfelder** müssen vor dem Abschließen ausgefüllt sein. Ein **Standardwert** wird bei neuen Einträgen vorausgefüllt.
 

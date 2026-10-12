@@ -73,9 +73,12 @@ export function cookie(name: string): string | null {
     return entry ? decodeURIComponent(entry.slice(name.length + 1)) : null;
 }
 
-let onUnauthenticated = (): void => {
+/** The login page of the current language (full page load). */
+export function goToLogin(): void {
     window.location.assign(`/${getLocale()}/login`);
-};
+}
+
+let onUnauthenticated = goToLogin;
 
 /** What happens when the session is gone (401). Default: the login page of the current language. */
 export function setUnauthenticatedHandler(handler: () => void): void {

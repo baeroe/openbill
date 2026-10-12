@@ -99,11 +99,15 @@ Jede Änderung an einem Dokument wird mit Urheber (Benutzer, API-Token oder Syst
 
 ### Übersicht
 
+![Die Übersicht mit offenen Beträgen, was Aufmerksamkeit braucht, und zuletzt bearbeiteten Dokumenten](/screenshots/de/overview.png)
+
 Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld zusammen: offene Rechnungen, wie viel davon überfällig ist, offene Angebote und was in diesem Monat bezahlt wurde (mit der Summe seit Jahresbeginn). Die Kennzahlen zu offenen Rechnungen und Angeboten öffnen die passend gefilterte Liste. **Braucht deine Aufmerksamkeit** zeigt zuerst überfällige Rechnungen, dann offene Angebote, deren Gültigkeit in den nächsten sieben Tagen endet oder schon abgelaufen ist, dann Entwürfe. **Zuletzt bearbeitet** zeigt die sechs zuletzt geänderten Dokumente.
 
 ### Dokumentliste
 
-**Dokumente** zeigt alle Dokumente, die neuesten zuerst und nach Monaten gruppiert. Filtern lässt sich nach Art (jede Pille zeigt, wie viele Dokumente dieser Art unter den übrigen Filtern dazukommen), nach Status und Kunde, dazu eine Suche über Nummer und Kundennamen. Der Statusfilter kennt zusätzlich **Überfällig**: offene Rechnungen, deren Fälligkeit überschritten ist. Jeder Filter steht in der Adresse, zum Beispiel `/de/documents?type=invoice&status=overdue`; eine gefilterte Liste lässt sich also als Lesezeichen speichern, weitergeben und mit dem Zurück-Knopf des Browsers wieder aufrufen. Die Liste lädt 50 Dokumente auf einmal (**Mehr laden**); die Zeile darunter zählt alle passenden Dokumente und summiert ihre Bruttobeträge.
+![Die Dokumentliste mit Filtern nach Art, Status, Kunde und Datum](/screenshots/de/documents.png)
+
+**Dokumente** zeigt alle Dokumente, die neuesten zuerst und nach Monaten gruppiert. Filtern lässt sich nach Art (jede Pille zeigt, wie viele Dokumente dieser Art unter den übrigen Filtern dazukommen), nach Status, Kunde und Dokumentdatum (von/bis), dazu eine Suche über Nummer und Kundennamen. Der Statusfilter kennt zusätzlich **Überfällig**: offene Rechnungen, deren Fälligkeit überschritten ist. Jeder Filter steht in der Adresse, zum Beispiel `/de/documents?type=invoice&status=overdue` oder `/de/documents?date_from=2026-01-01&date_to=2026-03-31`; eine gefilterte Liste lässt sich also als Lesezeichen speichern, weitergeben und mit dem Zurück-Knopf des Browsers wieder aufrufen. Die Liste lädt 50 Dokumente auf einmal (**Mehr laden**); die Zeile darunter zählt alle passenden Dokumente und summiert ihre Bruttobeträge.
 
 ### Neues Dokument
 
@@ -111,17 +115,21 @@ Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld
 
 ### Dokument-Editor
 
+![Der Editor eines Rechnungsentwurfs mit Positionsgruppen und Live-Vorschau](/screenshots/de/editor.png)
+
 Jedes Dokument öffnet sich im Editor: links das Formular, rechts eine Live-Vorschau (auf schmalen Bildschirmen unter dem Formular). Die Vorschau zeigt die Seiten genau so, wie das PDF aussehen wird – openbill rendert Kopfzeile, Inhalt und Fußzeile auf dem Server mit dem Template des Dokuments und teilt sie im Browser nur in Seiten auf. **Bereiche** umrandet Kopfzeile, Inhalt und Fußzeile auf jeder Seite. Die Vorschau lässt sich aus- und wieder einblenden; die Wahl merkt sich dieser Browser.
 
 - **Kopfdaten:** Kunde, Ansprechpartner (der Standard-Ansprechpartner des Kunden ist vorausgewählt), Datum, Gültig bis (Angebote), Leistungszeitraum (Rechnungen und Stornos), Fälligkeit (Rechnungen), Dokumentsprache und Template, dazu die eigenen Felder des Dokuments. Ein Storno behält immer den Kunden seiner Rechnung.
 - **Positionen:** Positionen lassen sich in Gruppen ordnen, jede mit Zwischensumme. Gruppen und Positionen ziehst du am Griff – auch per Tastatur: Griff fokussieren, Leertaste, mit den Pfeiltasten bewegen, Leertaste. Eine Position ist eine Leistung, eine Textzeile oder in Angeboten eine optionale Leistung, die angezeigt, aber nicht mitgerechnet wird. Beim Tippen der Bezeichnung schlägt openbill Positionen aus früheren Dokumenten mit Preis, Einheit und Steuersatz vor. Zahlen gehen mit Komma oder Punkt (`12,5` oder `12.5`); ungültige Eingaben werden markiert und nicht gespeichert. Das Entfernen einer Gruppe oder Position lässt sich in der eingeblendeten Meldung rückgängig machen.
 - **Texte:** Einleitung und Schlusstext, frei getippt oder aus Textbausteinen eingefügt.
 - **Summen und Prüfung:** Netto, Umsatzsteuer je Satz, Gesamt, optionale Positionen und rechtliche Hinweise kommen vom Server, ebenso die Zeilen- und Gruppensummen. Die Prüfanzeige listet, was das Prüfprofil des Dokuments noch verlangt; ein Klick springt ins Feld. Punkte zum Kunden verlinken auf den Kunden, Punkte zur eigenen Organisation öffnen die Einstellungen der Organisation am richtigen Feld.
-- **Speichern:** Änderungen speichert openbill kurz nach dem letzten Tastendruck von selbst; der Kopf zeigt *Ungespeichert*, *Speichert …* und *Gespeichert*. Beim Verlassen der Seite oder Schließen des Tabs wird vorher gespeichert. Auch Abmelden speichert vorher und wartet darauf höchstens drei Sekunden; scheitert das Abmelden (etwa ohne Verbindung), bleibst du angemeldet, Bearbeiten und Speichern laufen weiter, und eine Meldung sagt das. Scheitert das Speichern an der Verbindung, versucht openbill es selbst erneut (oder sofort mit **Erneut versuchen**); ungültige Eingaben werden am Feld markiert. Wurde das Dokument inzwischen woanders abgeschlossen oder gelöscht (anderer Tab, API oder MCP), hört der Editor auf zu speichern und sagt das. Bearbeiten zwei Personen gleichzeitig denselben Entwurf, überschreiben sie sich gegenseitig – der letzte Stand gewinnt. Bekannte Grenzen: Wird der Tab geschlossen, während noch gespeichert wird, kann in seltenen Fällen das ältere Speichern zuletzt ankommen; sehr große Entwürfe (mehrere hundert Positionen) gehen beim Schließen des Tabs gar nicht mehr raus; und ist deine Sitzung abgelaufen, gehen die Änderungen seit dem letzten Speichern verloren, wenn openbill dich zur Anmeldung schickt.
+- **Speichern:** Änderungen speichert openbill kurz nach dem letzten Tastendruck von selbst; der Kopf zeigt *Ungespeichert*, *Speichert …* und *Gespeichert*. Beim Verlassen der Seite oder Schließen des Tabs wird vorher gespeichert. Auch Abmelden speichert vorher und schickt Löschungen ab, die noch auf ihre Rückgängig-Meldung warten, und wartet darauf zusammen höchstens drei Sekunden; eine Meldung sagt, dass du abgemeldet wirst. War deine Sitzung schon beendet, landest du einfach bei der Anmeldung. Scheitert das Abmelden (etwa ohne Verbindung oder ohne Antwort binnen zehn Sekunden), bleibst du angemeldet, Bearbeiten und Speichern laufen weiter, und eine Meldung sagt das. Scheitert das Speichern an der Verbindung, versucht openbill es selbst erneut (oder sofort mit **Erneut versuchen**); ungültige Eingaben werden am Feld markiert. Wurde das Dokument inzwischen woanders abgeschlossen oder gelöscht (anderer Tab, API oder MCP), hört der Editor auf zu speichern und sagt das. Bearbeiten zwei Personen gleichzeitig denselben Entwurf, überschreiben sie sich gegenseitig – der letzte Stand gewinnt. Ist deine Sitzung abgelaufen, behält openbill die Änderungen seit dem letzten Speichern in diesem Tab und schickt dich zur Anmeldung; öffnest du das Dokument danach wieder (als dieselbe Person, innerhalb eines Tages), sind sie wieder da und werden gespeichert. Wurde der Entwurf inzwischen geändert (etwa über die API), bleibt der neuere Stand, und eine Meldung sagt, dass deine Änderungen nicht übernommen wurden. Bekannte Grenzen: Wird der Tab geschlossen, während noch gespeichert wird, kann in seltenen Fällen das ältere Speichern zuletzt ankommen; sehr große Entwürfe (mehrere hundert Positionen) gehen beim Schließen des Tabs gar nicht mehr raus.
 - **Aktionen:** **Abschließen** fragt nach und nennt die Nummer, die das Dokument bekommt; fehlen noch Pflichtangaben, springt es stattdessen zur ersten. Abgeschlossene Dokumente sind schreibgeschützt. Je nach Status kannst du ihn ändern (z. B. *Als angenommen markieren*, *Als bezahlt markieren*), ein Dokument entlang der Kette umwandeln, eine Rechnung stornieren, ein Dokument duplizieren, das PDF herunterladen (Entwürfe mit Wasserzeichen) und einen Entwurf löschen – mit **Rückgängig**, solange die Meldung zu sehen ist.
 - **Kette und E-Rechnung:** Über dem Formular verbindet die Kette Angebot, Auftragsbestätigung, Rechnung und Storno, die zusammengehören. Mit dem E-Rechnungs-Profil zeigt der Tab **E-Rechnung** die XML einer abgeschlossenen Rechnung oder eines Stornos (kopieren oder herunterladen); bei Entwürfen erklärt er, dass die XML beim Abschließen entsteht.
 
 ### Kunden
+
+![Ein Kunde mit Ansprechpartnern und eigenen Feldern](/screenshots/de/customer.png)
 
 **Kunden** listet alle Kunden mit ihrem Standard-Ansprechpartner und dem, was offen ist: die Summe ihrer offenen Rechnungen, überfällige markiert. Die Suche geht über Name, Nummer und E-Mail.
 
@@ -139,6 +147,8 @@ Die **Kundenart** sagt, ob der Kunde ein Unternehmen (Standard) oder eine Privat
 Templates, eigene Felder und Einstellungen haben eigene Seiten: siehe [Templates](/de/templates#template-editor), [Eigene Felder](/de/custom-fields) und [Einstellungen](/de/settings).
 
 ### Darstellung und Sprache
+
+![Der Editor im dunklen Modus](/screenshots/de/editor-dark.png)
 
 Das Kontomenü unten in der Seitenleiste schaltet zwischen hell, dunkel und der Systemeinstellung um (gemerkt pro Browser) und zwischen Englisch und Deutsch. Die Seitenleiste lässt sich auf Symbole einklappen; auf kleinen Bildschirmen öffnet sie der Menü-Knopf.
 

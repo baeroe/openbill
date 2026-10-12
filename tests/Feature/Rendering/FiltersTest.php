@@ -127,3 +127,27 @@ it('estimates a date format by its worst case, "r" with 31 bytes (re-review 3)',
     expect(fn () => liquid('{{ d | date: f | size }}', ['d' => '2026-10-11', 'f' => str_repeat('r', 400)]))->toThrow(ResourceLimitException::class)
         ->and(liquid('{{ d | date: f | size }}', ['d' => '2026-10-11', 'f' => str_repeat('r', 300)]))->toBe((string) (300 * 31));
 });
+
+it('keeps integer math exact past PHP_INT_MAX instead of turning into a float (ledger phase 3, M5)', function () {
+    $max = (string) PHP_INT_MAX; // 9223372036854775807
+
+    expect(liquid("{{ {$max} | plus: 1 }}"))->toBe('9223372036854775808')
+        ->and(liquid("{{ {$max} | times: 2 }}"))->toBe('18446744073709551614')
+        ->and(liquid('{{ -9223372036854775807 | minus: 2 }}'))->toBe('-9223372036854775809')
+        // PHP_INT_MIN / -1 throws in intdiv()
+        ->and(liquid('{{ -9223372036854775807 | minus: 1 | divided_by: -1 }}'))->toBe('9223372036854775808')
+        ->and(liquid("{{ {$max} | plus: 1 | minus: 1 }}"))->toBe($max)
+        // Liquid's integer division rounds down, also below zero
+        ->and(liquid('{{ -7 | divided_by: 2 }}'))->toBe('-4')
+        // modulo goes the same way and keeps the sign of the dividend as before
+        ->and(liquid('{{ 7 | modulo: 3 }} {{ -7 | modulo: 3 }}'))->toBe('1 -1');
+});
+
+it('formats an integer as Unix timestamp like Liquid does (ledger phase 3)', function () {
+    // 2026-10-04 12:00:00 UTC
+    expect(liquid('{{ 1791115200 | date }}'))->toBe('04.10.2026')
+        ->and(liquid('{{ 1791115200 | date }}', [], 'en'))->toBe('Oct 4, 2026')
+        ->and(liquid('{{ 1791115200 | date: "%Y-%m-%d %H:%M" }}'))->toBe('2026-10-04 12:00')
+        ->and(liquid('{{ t | date: "%d.%m.%Y" }}', ['t' => 1791115200]))->toBe('04.10.2026')
+        ->and(fn () => liquid('[{{ t | date }}]', ['t' => PHP_INT_MAX]))->not->toThrow(Throwable::class);
+});

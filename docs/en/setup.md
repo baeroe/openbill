@@ -20,11 +20,13 @@ Fill in `.env` before the first start. The passwords are empty in the template o
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | yes | Owner account (the template leaves the password empty), created on the first start only (password at least 8 characters). Changing them later doesn't touch the existing account. |
 | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | yes | MariaDB passwords (empty in the template). MariaDB stores them on the first start; changing them in `.env` afterwards breaks the connection. |
 | `OPENBILL_BIND`, `OPENBILL_PORT` | no | Host address and port, default `127.0.0.1` and `7739` (the container listens on `8080`): only a reverse proxy on the same host reaches openbill. For a proxy on another host see [Reverse proxy](/en/reverse-proxy). |
-| `TRUSTED_PROXIES` | no | Addresses or networks whose `X-Forwarded-*` headers openbill believes, comma-separated. Default: localhost and the private networks. Narrow it to your proxy as soon as `OPENBILL_BIND` isn't `127.0.0.1`. |
+| `TRUSTED_PROXIES` | no | IP addresses or CIDR networks (no host names) whose `X-Forwarded-*` headers openbill believes, comma-separated. Default: localhost and the private networks. Narrow it to your proxy as soon as `OPENBILL_BIND` isn't `127.0.0.1`. |
 | `OPENBILL_IMAGE` | no | Default `baeroe/openbill:latest`. Pin a version with `baeroe/openbill:0.1.0`. |
 | `APP_KEY` | no | Encryption key of sessions and cookies. Without it, openbill generates one on the first start and keeps it in the data volume. |
 
 ## Start
+
+![The login of a fresh instance](/screenshots/en/login.png)
 
 ```bash
 docker compose up -d

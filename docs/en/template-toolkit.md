@@ -11,6 +11,8 @@ The template toolkit lets you write a template in your own editor with a live pr
 
 ## Download
 
+![The toolkit dialog of a template](/screenshots/en/toolkit.png)
+
 Open the template in the editor and choose **Toolkit → Download toolkit**. Unsaved changes are saved first (**Save and download**). The ZIP contains one folder `openbill-<template>`:
 
 | Path | Content |

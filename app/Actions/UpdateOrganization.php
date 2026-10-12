@@ -10,6 +10,7 @@ use App\Models\Organization;
 use App\Support\Actor;
 use App\Support\DomainMapper;
 use App\Support\FieldErrors;
+use App\Support\TrimmedInput;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +26,7 @@ final class UpdateOrganization
      */
     public function handle(Actor $actor, array $input): Organization
     {
+        $input = TrimmedInput::strings($input, self::STRINGS);
         $data = Validator::make($input, [
             'name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'street' => ['sometimes', 'nullable', 'string', 'max:255'],

@@ -23,6 +23,22 @@ export function commitAllKeepalive(): void {
     emit();
 }
 
+/**
+ * Logout: every delete still waiting for its toast goes out now – without keepalive, the page waits for the answers
+ * (the logout caps that wait). The toasts' own commit() finds nothing left to do afterwards.
+ */
+export function flushPendingDeletes(): Promise<void> {
+    const runs: Promise<void>[] = [];
+    for (const [id, entry] of entries) {
+        if (entry.committing) continue;
+        entry.committing = true;
+        entries.delete(id);
+        runs.push(entry.run({ keepalive: false }).catch(() => undefined));
+    }
+    emit();
+    return Promise.all(runs).then(() => undefined);
+}
+
 let listening = false;
 
 function listen(): void {

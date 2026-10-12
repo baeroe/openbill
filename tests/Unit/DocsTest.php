@@ -2,6 +2,12 @@
 
 use App\Support\TrustedRequests;
 
+/** Page text without fenced code blocks (comments in code are no headings). */
+function docsProse(string $file): string
+{
+    return (string) preg_replace('/^```.*?^```/ms', '', (string) file_get_contents($file));
+}
+
 it('has every docs page in English and German', function () {
     $pages = fn (string $locale): array => array_map('basename', glob(dirname(__DIR__, 2)."/docs/{$locale}/*.md") ?: []);
 
@@ -71,4 +77,70 @@ it('has upgrade notes for the first release in both languages', function () {
     foreach (['en', 'de'] as $locale) {
         expect((string) file_get_contents("{$root}/docs/{$locale}/upgrading.md"))->toContain("\n### 0.1.0\n");
     }
+});
+
+it('builds the docs for GitHub Pages under /openbill/ and redirects relative to the base', function () {
+    $root = dirname(__DIR__, 2);
+    $workflow = (string) file_get_contents("{$root}/.github/workflows/docs.yml");
+
+    expect((string) file_get_contents("{$root}/docs/.vitepress/config.ts"))->toContain('process.env.DOCS_BASE', 'process.env.DOCS_URL')
+        ->and((string) file_get_contents("{$root}/docs/.vitepress/theme/index.ts"))->toContain('import.meta.env.BASE_URL')
+        ->and($workflow)->toContain('DOCS_BASE: /openbill/', 'DOCS_URL: https://baeroe.github.io/openbill', 'actions/deploy-pages', 'fetch-depth: 0')
+        ->and((string) file_get_contents("{$root}/.github/workflows/tests.yml"))->toContain('DOCS_BASE: /openbill/');
+});
+
+it('has the same documentation screenshots in English and German, the editor among them', function () {
+    $root = dirname(__DIR__, 2);
+    $shots = fn (string $locale): array => array_map('basename', glob("{$root}/docs/public/screenshots/{$locale}/*.png") ?: []);
+
+    expect($shots('en'))->toContain('editor.png', 'editor-dark.png')
+        ->toEqualCanonicalizing($shots('de'));
+});
+
+it('keeps English and German pages in step: same headings per level, links only within their language to pages that exist', function () {
+    $root = dirname(__DIR__, 2);
+    $levels = fn (string $file): array => array_map(fn (string $line): int => strspn($line, '#'), array_values(preg_grep('/^#{1,6} /m', explode("\n", docsProse($file))) ?: []));
+    // on purpose: the MCP resource openbill://docs/liquid-reference is the English templates page
+    $crossLanguage = ['de/mcp.md -> /en/templates'];
+
+    foreach (glob("{$root}/docs/en/*.md") ?: [] as $en) {
+        $name = basename($en);
+        expect($levels("{$root}/docs/de/{$name}"))->toBe($levels($en), "headings of {$name}");
+
+        foreach (['en' => $en, 'de' => "{$root}/docs/de/{$name}"] as $locale => $file) {
+            preg_match_all('#(?:\]\(|link: )/(en|de)/([a-z0-9-]*)#', docsProse($file), $links, PREG_SET_ORDER);
+            foreach ($links as [, $language, $page]) {
+                $link = "{$locale}/{$name} -> /{$language}/{$page}";
+                expect($language === $locale || in_array($link, $crossLanguage, true))->toBeTrue($link)
+                    ->and(is_file("{$root}/docs/{$language}/".($page === '' ? 'index' : $page).'.md'))->toBeTrue($link);
+            }
+        }
+    }
+});
+
+it('shows only screenshots that exist, in the language of the page', function () {
+    $root = dirname(__DIR__, 2);
+    $count = 0;
+    foreach (['en', 'de'] as $locale) {
+        foreach (glob("{$root}/docs/{$locale}/*.md") ?: [] as $file) {
+            preg_match_all('#/screenshots/([a-z]{2})/([a-z0-9-]+\.png)#', (string) file_get_contents($file), $shots, PREG_SET_ORDER);
+            foreach ($shots as [, $language, $image]) {
+                $count++;
+                expect($language)->toBe($locale, basename($file))
+                    ->and(is_file("{$root}/docs/public/screenshots/{$language}/{$image}"))->toBeTrue("{$language}/{$image}");
+            }
+        }
+    }
+    expect($count)->toBeGreaterThanOrEqual(2 * 12);
+});
+
+it('names the core features on both landing pages and says no more that the docs are work in progress', function () {
+    $root = dirname(__DIR__, 2);
+
+    expect((string) file_get_contents("{$root}/docs/en/index.md"))
+        ->toContain('Your own fields', 'groups', 'Liquid', 'toolkit', 'EN 16931', 'REST API', 'MCP', 'Docker', '/screenshots/en/editor.png')
+        ->not->toContain('Work in progress')
+        ->and((string) file_get_contents("{$root}/docs/de/index.md"))
+        ->toContain('Eigene Felder', 'Gruppen', 'Liquid', 'Toolkit', 'EN 16931', 'REST-API', 'MCP', 'Docker', '/screenshots/de/editor.png')
+        ->not->toContain('In Arbeit');
 });

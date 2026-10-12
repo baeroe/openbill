@@ -208,6 +208,22 @@ it('pins the Java image of the e-invoice validator', function () {
     expect($m[1] ?? '')->toMatch('/^eclipse-temurin:21[\w.-]*@sha256:[0-9a-f]{64}$/');
 });
 
+it('pins the PNG optimizer of the docs screenshots by digest', function () {
+    preg_match('/^OXIPNG_IMAGE=(\S+)$/m', dockerRepoFile('e2e/optimize-screenshots.sh'), $m);
+
+    expect($m[1] ?? '')->toMatch('/^ghcr\.io\/shssoichiro\/oxipng:v[\d.]+@sha256:[0-9a-f]{64}$/');
+});
+
+it('pins the KoSIT validator and its configuration by version and SHA-256', function () {
+    $script = dockerRepoFile('scripts/validate-einvoice.sh');
+
+    expect($script)->toMatch('/^KOSIT_VERSION=\d+\.\d+\.\d+$/m')
+        ->toMatch('/^KOSIT_SHA256=[0-9a-f]{64}$/m')
+        ->toMatch('/^KOSIT_CONFIG_VERSION=\d{4}-\d{2}-\d{2}$/m')
+        ->toMatch('/^KOSIT_CONFIG_SHA256=[0-9a-f]{64}$/m')
+        ->toContain('/releases/download/v${KOSIT_VERSION}/', '/releases/download/v${KOSIT_CONFIG_VERSION}/', "KOSIT_SCENARIO='EN16931 (CII)'");
+});
+
 it('keeps the code read-only for PHP and only storage and bootstrap/cache writable', function () {
     $dockerfile = dockerRepoFile('Dockerfile');
     $app = substr($dockerfile, (int) strpos($dockerfile, ' AS app'));

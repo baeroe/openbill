@@ -28,6 +28,15 @@ it('ignores X-Forwarded-* sent straight from the internet', function () {
         ->assertExactJson(['secure' => false, 'ip' => '198.51.100.9']);
 });
 
+it('ignores X-Forwarded-Prefix even from a trusted proxy: openbill runs at the root of its host (ledger phase 10)', function () {
+    Route::get('/_prefix-check', fn (Request $request): array => ['base' => $request->getBaseUrl(), 'secure' => $request->isSecure()]);
+
+    $this->withServerVariables(['REMOTE_ADDR' => '10.1.2.3'])
+        ->get('http://localhost/_prefix-check', ['X-Forwarded-Prefix' => '/elsewhere', 'X-Forwarded-Proto' => 'https'])
+        ->assertOk()
+        ->assertExactJson(['base' => '', 'secure' => true]);
+});
+
 it('trusts only the proxies of TRUSTED_PROXIES once they are set', function () {
     config(['openbill.trusted_proxies' => '192.0.2.10, 2001:db8::10']);
 

@@ -20,7 +20,7 @@ Fülle `.env` vor dem ersten Start aus. Die Passwörter sind in der Vorlage absi
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | ja | Owner-Konto (das Passwort ist in der Vorlage leer), nur beim ersten Start angelegt (Passwort mindestens 8 Zeichen). Spätere Änderungen fassen das bestehende Konto nicht an. |
 | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | ja | MariaDB-Passwörter (in der Vorlage leer). MariaDB speichert sie beim ersten Start; änderst du sie danach in `.env`, klappt die Verbindung nicht mehr. |
 | `OPENBILL_BIND`, `OPENBILL_PORT` | nein | Adresse und Port auf dem Host, Standard `127.0.0.1` und `7739` (der Container lauscht auf `8080`): Nur ein Reverse Proxy auf demselben Host erreicht openbill. Für einen Proxy auf einem anderen Host siehe [Reverse Proxy](/de/reverse-proxy). |
-| `TRUSTED_PROXIES` | nein | Adressen oder Netze, deren `X-Forwarded-*`-Headern openbill glaubt, kommagetrennt. Standard: localhost und die privaten Netze. Schränke es auf deinen Proxy ein, sobald `OPENBILL_BIND` nicht `127.0.0.1` ist. |
+| `TRUSTED_PROXIES` | nein | IP-Adressen oder CIDR-Netze (keine Hostnamen), deren `X-Forwarded-*`-Headern openbill glaubt, kommagetrennt. Standard: localhost und die privaten Netze. Schränke es auf deinen Proxy ein, sobald `OPENBILL_BIND` nicht `127.0.0.1` ist. |
 | `OPENBILL_IMAGE` | nein | Standard `baeroe/openbill:latest`. Eine Version festhalten mit `baeroe/openbill:0.1.0`. |
 | `APP_KEY` | nein | Schlüssel für Sitzungen und Cookies. Ohne ihn erzeugt openbill beim ersten Start einen und legt ihn im Daten-Volume ab. |
 

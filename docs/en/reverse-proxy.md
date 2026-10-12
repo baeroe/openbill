@@ -4,7 +4,7 @@ openbill speaks plain HTTP on port `7739`, by default on `127.0.0.1` only (`OPEN
 
 ## What openbill trusts
 
-- **Forwarded headers** (`X-Forwarded-For`, `-Proto`, `-Host`, `-Port`) only from the addresses in `TRUSTED_PROXIES`. Default: `127.0.0.1`, `::1`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7` – a proxy on the same host, in the same Docker network or in your LAN is covered.
+- **Forwarded headers** (`X-Forwarded-For`, `-Proto`, `-Host`, `-Port`) only from the addresses in `TRUSTED_PROXIES`: IP addresses or networks in CIDR notation, comma-separated – no host names (a Docker service name like `traefik` matches nothing, and the headers are silently ignored). Default: `127.0.0.1`, `::1`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7` – a proxy on the same host, in the same Docker network or in your LAN is covered. `X-Forwarded-Prefix` is never believed: openbill runs at the root of its own host name, not under a path like `/openbill`.
 - **Host**: only the host of `APP_URL`. Any other `Host` header answers `400 Bad Request`. Your proxy must pass the original host (all examples below do).
 
 Anyone who reaches port `7739` from a trusted address can set these headers themselves: fake `https`, or a new IP address on every login attempt (the login lock counts per IP). Depending on the Docker setup, even requests from outside arrive with the address of the Docker gateway (`172.x.0.1`), which is in the default list. So:

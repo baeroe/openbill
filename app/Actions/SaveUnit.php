@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Unit;
 use App\Support\Actor;
+use App\Support\TrimmedInput;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -16,6 +17,7 @@ final class SaveUnit
      */
     public function handle(Actor $actor, array $input, ?Unit $unit = null): Unit
     {
+        $input = TrimmedInput::strings($input, ['name', 'symbol', 'code']);
         $data = Validator::make($input, [
             'name' => [$unit === null ? 'required' : 'sometimes', 'string', 'max:64'],
             'symbol' => ['sometimes', 'nullable', 'string', 'max:16'],

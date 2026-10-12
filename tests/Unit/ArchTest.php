@@ -111,6 +111,18 @@ it('never queries documents, positions, groups, snapshots or files through DB::t
     expect($hits)->toBe([]);
 });
 
+it('never switches the lock triggers off in app/ (only DemoSeeder::wipe may, ledger phase 2 M-C)', function () {
+    $root = dirname(__DIR__, 2).'/app';
+    $hits = [];
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)) as $file) {
+        if ($file->getExtension() === 'php' && str_contains((string) file_get_contents($file->getPathname()), 'openbill_unlock')) {
+            $hits[] = substr($file->getPathname(), strlen($root) + 1);
+        }
+    }
+
+    expect($hits)->toBe([]);
+});
+
 arch('api resources and the api layer are final')
     ->expect(['App\ApiResource', 'App\State', 'App\Http\Api', 'App\Http\Controllers\Api', 'App\OpenApi'])
     ->classes()

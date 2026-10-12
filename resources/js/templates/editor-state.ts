@@ -7,7 +7,8 @@ export const PARTS: Part[] = ['header', 'body', 'footer', 'css', 'manifest'];
 /** Same as App\Rendering\Paper::DEFAULT. */
 export const DEFAULT_PAPER: Paper = { format: 'A4', marginX: '20mm', headerHeight: '30mm', footerHeight: '20mm' };
 
-export type ManifestProblem = { code: 'invalid_json' | 'not_object'; detail?: string };
+/** line: 1-based line of a JSON syntax error when the engine reports it (marked in the manifest tab). */
+export type ManifestProblem = { code: 'invalid_json' | 'not_object'; detail?: string; line?: number };
 
 /** files.manifest is always the last valid manifest; manifestText is what the user typed. */
 export type EditorState = { saved: TemplateFiles; files: TemplateFiles; manifestText: string; manifestProblem: ManifestProblem | null; part: Part };
@@ -31,12 +32,22 @@ const filesOf = (template: TemplateDetail): TemplateFiles => ({
     manifest: template.manifest,
 });
 
+/** Line of a JSON.parse error: "line 3 column 7" (Chromium, Firefox) or "position 42" (older engines). */
+export function jsonErrorLine(text: string, message: string): number | null {
+    const line = /line (\d+)/.exec(message);
+    if (line) return Number(line[1]);
+    const position = /position (\d+)/.exec(message);
+    return position ? text.slice(0, Number(position[1])).split('\n').length : null;
+}
+
 export function parseManifest(text: string): { manifest: TemplateManifest } | { problem: ManifestProblem } {
     let parsed: unknown;
     try {
         parsed = JSON.parse(text);
     } catch (error) {
-        return { problem: { code: 'invalid_json', detail: error instanceof Error ? error.message : String(error) } };
+        const detail = error instanceof Error ? error.message : String(error);
+        const line = jsonErrorLine(text, detail);
+        return { problem: { code: 'invalid_json', detail, ...(line ? { line } : {}) } };
     }
     if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return { problem: { code: 'not_object' } };
     return { manifest: parsed as TemplateManifest };

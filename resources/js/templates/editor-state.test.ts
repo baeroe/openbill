@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { TemplateDetail } from '@/api/templates';
-import { editorReducer, initEditor, isDirty, parseManifest, savePayload, zoneOf } from './editor-state';
+import { editorReducer, initEditor, isDirty, jsonErrorLine, parseManifest, savePayload, zoneOf } from './editor-state';
 
 const template: TemplateDetail = {
     id: 't1',
@@ -107,5 +107,15 @@ describe('editor state', () => {
 
         expect(saved.manifestText).toBe('{ "name": "Fj');
         expect(saved.manifestProblem?.code).toBe('invalid_json');
+    });
+
+    it('knows the line of broken manifest JSON (review #6)', function () {
+        const text = '{\n  "name": "Fjord",\n  "version" "1.0.0"\n}';
+        const result = parseManifest(text);
+
+        expect('problem' in result && result.problem.line).toBe(3);
+        expect(jsonErrorLine(text, 'Unexpected string in JSON at position 30')).toBe(3);
+        expect(jsonErrorLine(text, "JSON.parse: expected ':' at line 3 column 13 of the JSON data")).toBe(3);
+        expect(jsonErrorLine(text, 'The string did not match the expected pattern.')).toBeNull();
     });
 });

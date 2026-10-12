@@ -35,7 +35,13 @@ export function TemplateEditor({ template }: { template: TemplateDetail }) {
     const [picked, setPicked] = useState<SampleSource | null>(null);
     const source = picked ?? (sources.data ? defaultSource(sources.data) : null);
     const preview = useTemplatePreview(template.id, state.files, source);
-    const errors = useMemo(() => errorsByPart(preview.data?.errors ?? []), [preview.data?.errors]);
+    const manifestProblem = state.manifestProblem;
+    const errors = useMemo(() => {
+        const byPart = errorsByPart(preview.data?.errors ?? []);
+        // broken manifest JSON never reaches the server: mark it at its line from here
+        if (manifestProblem?.line) byPart.manifest = [{ line: manifestProblem.line, message: `${t('templates.manifest_invalid')} ${manifestProblem.detail ?? ''}`.trim() }, ...byPart.manifest];
+        return byPart;
+    }, [preview.data?.errors, manifestProblem]);
     const missing = useMemo(() => (schema.data ? missingExpectedFields(state.files.manifest, schema.data) : []), [schema.data, state.files.manifest]);
     const liquidPart = state.part === 'header' || state.part === 'body' || state.part === 'footer';
     const insertDisabled = readOnly ? t('templates.insert_read_only') : !liquidPart ? t('templates.insert_liquid_only') : null;

@@ -116,6 +116,16 @@ describe('openbillRender', () => {
         expect(env.body).not.toContain('openbill_secret_in_file');
     });
 
+    it('refuses requests of other origins, also other servers on localhost', async () => {
+        const source = JSON.stringify({ kind: 'scenario', key: 'short_invoice', locale: 'de' });
+        const json = { 'Content-Type': 'application/json' };
+
+        expect((await raw({ path: '/__openbill/source', method: 'POST', headers: { ...json, Origin: 'http://localhost:3000' }, body: source })).status).toBe(403);
+        expect((await raw({ path: '/__openbill/state', headers: { 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403);
+        expect((await raw({ path: '/__openbill/state', headers: { 'Sec-Fetch-Site': 'same-site' } })).status).toBe(403);
+        expect((await raw({ path: '/__openbill/source', method: 'POST', headers: { ...json, Origin: `http://127.0.0.1:${port}`, 'Sec-Fetch-Site': 'same-origin' }, body: source })).status).toBe(200);
+    });
+
     it('injects the bridge module, and Vite gives it a hot context', async () => {
         const html = await server.transformIndexHtml('/', '<!doctype html><html><head></head><body></body></html>');
         expect(html).toContain(`src="${BRIDGE_ID}"`);

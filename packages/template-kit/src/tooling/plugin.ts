@@ -39,6 +39,17 @@ export function isLocalHost(host: string | undefined, allowed: true | string[] |
     return (allowed ?? []).some((entry) => (entry.startsWith('.') ? name === entry.slice(1) || name.endsWith(entry) : name === entry));
 }
 
+/**
+ * Only the preview page itself: a request with an Origin of another server (also one on localhost, e.g. :3000) or a
+ * cross-site/same-site fetch gets 403. Same-origin GETs carry no Origin; POSTs carry the page's own one.
+ */
+export function isSameOrigin(headers: { host?: string; origin?: string; 'sec-fetch-site'?: string }): boolean {
+    const site = headers['sec-fetch-site'];
+    if (site === 'cross-site' || site === 'same-site') return false;
+    if (headers.origin === undefined) return true;
+    return headers.origin.toLowerCase() === `http://${(headers.host ?? '').toLowerCase()}`;
+}
+
 export function isSource(value: unknown): value is Source {
     if (typeof value !== 'object' || value === null) return false;
     const source = value as Record<string, unknown>;
@@ -73,6 +84,9 @@ function kitMiddleware(server: ViteDevServer, runtime: KitRuntime | KitConfigErr
         void (async () => {
             if (!isLocalHost(req.headers.host, server.config.server.allowedHosts)) {
                 return sendJson(res, 403, { message: 'Only this computer (localhost) may use the openbill preview.' });
+            }
+            if (!isSameOrigin({ host: req.headers.host, origin: req.headers.origin, 'sec-fetch-site': req.headers['sec-fetch-site'] as string | undefined })) {
+                return sendJson(res, 403, { message: 'Only the preview page itself may use these endpoints.' });
             }
             const route = `${req.method} ${(req.url ?? '').split('?')[0]}`;
             if (route === 'GET /state') {

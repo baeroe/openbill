@@ -173,7 +173,7 @@ Eigene Felder stehen direkt an ihrem Objekt, unter ihrem Schlüssel: `{{ documen
 
 Formate folgen der Dokumentsprache. Beträge werden kaufmännisch gerundet. `money` und `number` geben bei Werten, die keine Zahl sind, nichts aus. Ein unbekannter Filter ist ein Fehler.
 
-Die Rechenfilter `plus`, `minus`, `times`, `divided_by` und `round` rechnen mit exakten Dezimalzahlen und liefern einen Dezimaltext (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rundet kaufmännisch); mit zwei ganzen Zahlen bleibt es bei Liquids Ganzzahl-Verhalten (`{{ 10 | divided_by: 4 }}` → `2`). Zwei ganze Zahlen bleiben ganze Zahlen (`divided_by` rundet ab); Ergebnisse jenseits von ±9,2 × 10¹⁸ bleiben exakt. Nutze lieber die Summen aus dem Kontext, als Beträge im Template zu rechnen.
+Die Rechenfilter `plus`, `minus`, `times`, `divided_by` und `round` rechnen mit exakten Dezimalzahlen und liefern einen Dezimaltext (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rundet kaufmännisch); mit zwei ganzen Zahlen bleibt es bei Liquids Ganzzahl-Verhalten (`{{ 10 | divided_by: 4 }}` → `2`). Zwei ganze Zahlen bleiben ganze Zahlen (`divided_by` rundet ab); ein Ergebnis jenseits von ±9,2 × 10¹⁸ kommt als exakter Text zurück und rechnet danach dezimal weiter (ein folgendes `divided_by` rundet nicht mehr ab). Nutze lieber die Summen aus dem Kontext, als Beträge im Template zu rechnen.
 
 ### Escaping
 

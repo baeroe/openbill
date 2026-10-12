@@ -173,7 +173,7 @@ Custom fields sit directly on their object, with their key: `{{ document.project
 
 Formats follow the document language. Amounts are rounded commercially. `money` and `number` print nothing for values that are not numbers. An unknown filter is an error.
 
-The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Two whole numbers stay whole numbers (`divided_by` rounds down); results beyond ±9.2 × 10¹⁸ stay exact. Prefer the totals of the context over computing amounts in the template.
+The math filters `plus`, `minus`, `times`, `divided_by` and `round` compute with exact decimals and return a decimal text (`{{ document.net_total | times: 1.19 }}` → `"1345.2950"`, `round` rounds half up); with two integers they keep Liquid's integer behaviour (`{{ 10 | divided_by: 4 }}` → `2`). Two whole numbers stay whole numbers (`divided_by` rounds down); a result beyond ±9.2 × 10¹⁸ comes back as exact text and is computed as a decimal from then on (a following `divided_by` no longer rounds down). Prefer the totals of the context over computing amounts in the template.
 
 ### Escaping
 

@@ -83,7 +83,8 @@ return Application::configure(basePath: dirname(__DIR__))
             return ProblemResponse::from($e);
         });
 
+        // /mcp: agents do not always send Accept: application/json, and a 302 to the login page helps nobody
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*', 'mcp') || $request->expectsJson(),
         );
     })->create();

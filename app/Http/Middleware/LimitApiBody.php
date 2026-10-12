@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Refuses /api request bodies above config('openbill.api.*') with 413 (Problem Details). Runs as the first
+ * Refuses /api and /mcp request bodies above config('openbill.api.*') with 413 (Problem Details). Runs as the first
  * global middleware – before ValidatePostSize and TrimStrings, which would decode a JSON body completely;
  * the request itself is created without decoding JSON (App\Http\IncomingRequest, public/index.php) and
  * decoded here once the size is fine. It never parses the body itself: it checks Content-Length, then reads the raw body as a stream up to
@@ -27,7 +27,7 @@ final class LimitApiBody
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->is('api', 'api/*')) {
+        if ($request->is('api', 'api/*', 'mcp')) {
             self::check($request, self::limit($request));
         }
 

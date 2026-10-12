@@ -16,7 +16,16 @@ final class CurrentActor
      */
     public static function from(Request $request): Actor
     {
-        $user = $request->user();
+        return self::forUser($request->user());
+    }
+
+    /**
+     * The actor behind an authenticated user (also the MCP server, which has no Laravel request at hand).
+     *
+     * @throws AuthenticationException
+     */
+    public static function forUser(mixed $user): Actor
+    {
         if (! $user instanceof User) {
             throw new AuthenticationException;
         }

@@ -3,6 +3,7 @@
 use App\Actions\CreateDocument;
 use App\Actions\IssueApiToken;
 use App\Enums\DocumentType;
+use App\Mcp\Servers\OpenbillServer;
 use App\Models\Customer;
 use App\Models\Document;
 use App\Models\Organization;
@@ -14,6 +15,8 @@ use App\Support\GroupWriter;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Laravel\Mcp\Server\Testing\TestResponse;
+use Laravel\Mcp\Server\Tool;
 use Tests\FeatureTestCase;
 use Tests\TestCase;
 
@@ -141,4 +144,52 @@ function validationErrors(Closure $run): array
         return $e->errors();
     }
     throw new RuntimeException('Expected a ValidationException.');
+}
+
+/**
+ * One JSON-RPC call against POST /mcp with $token (legacy request without _meta, like most clients send).
+ *
+ * @param  array<string, mixed>  $params
+ * @return array<string, mixed>
+ */
+function mcpRpc(string $token, string $method, array $params = []): array
+{
+    forgetApiAuth();
+    $response = test()->withToken($token)->postJson('/mcp', ['jsonrpc' => '2.0', 'id' => 1, 'method' => $method, 'params' => (object) $params]);
+    $response->assertOk();
+
+    return $response->json();
+}
+
+/**
+ * tools/call over HTTP: the tool's text and, when it is JSON, the decoded data.
+ *
+ * @param  array<string, mixed>  $arguments
+ * @return array{error: bool, text: string, data: mixed}
+ */
+function mcpCall(string $token, string $tool, array $arguments = []): array
+{
+    $result = mcpRpc($token, 'tools/call', ['name' => $tool, 'arguments' => (object) $arguments])['result'] ?? [];
+    $text = (string) ($result['content'][0]['text'] ?? '');
+
+    return ['error' => (bool) ($result['isError'] ?? false), 'text' => $text, 'data' => json_decode($text, true)];
+}
+
+/**
+ * A tool of the openbill server, called in-process as a (new) user of the session guard.
+ *
+ * @param  class-string<Tool>  $tool
+ * @param  array<string, mixed>  $arguments
+ */
+function mcpTool(string $tool, array $arguments = [], ?User $user = null): TestResponse
+{
+    return OpenbillServer::actingAs($user ?? User::factory()->create())->tool($tool, $arguments);
+}
+
+/** Decoded JSON of a tool's first text content. */
+function mcpJson(TestResponse $response): mixed
+{
+    $text = (fn (): string => $this->content()[0] ?? '')->call($response);
+
+    return json_decode($text, true, flags: JSON_THROW_ON_ERROR);
 }

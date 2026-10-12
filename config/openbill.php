@@ -45,4 +45,12 @@ return [
         // per valid token, otherwise per IP (editor autosave 600 ms + preview 250 ms ≈ 240/min)
         'requests_per_minute' => 600,
     ],
+
+    /*
+    | MCP server (/mcp, routes/ai.php): requests per minute per valid token, otherwise per IP. Bodies use
+    | api.max_body_bytes (App\Http\Middleware\LimitApiBody).
+    */
+    'mcp' => [
+        'requests_per_minute' => 300,
+    ],
 ];

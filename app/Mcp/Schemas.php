@@ -140,4 +140,20 @@ final class Schemas
             'sort' => $schema->integer(),
         ];
     }
+
+    /**
+     * The text parts of a template (as in the template package; no assets over MCP).
+     *
+     * @return array<string, mixed>
+     */
+    public static function templateParts(JsonSchema $schema): array
+    {
+        return [
+            'header' => $schema->string()->description('header.liquid: the page header, repeated on every page'),
+            'body' => $schema->string()->description('template.liquid: the document content'),
+            'footer' => $schema->string()->description('footer.liquid: the page footer, repeated on every page'),
+            'css' => $schema->string()->description('styles.css, shared by all parts'),
+            'manifest' => $schema->object()->description('manifest.json: name and version (x.y.z) required; paper, documentTypes, expectedFields, translations'),
+        ];
+    }
 }

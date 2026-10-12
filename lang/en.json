@@ -953,6 +953,7 @@
     "text_block.kind.intro": "Intro",
     "text_block.kind.note": "Note",
     "text_block.kind.payment": "Payment terms",
+    "tokens.toolkit_elsewhere": "Template tokens are created in the template editor (toolkit download).",
     "unit_code.ANN": "Year",
     "unit_code.C62": "Unit",
     "unit_code.DAY": "Day",

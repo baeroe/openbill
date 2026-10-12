@@ -13,7 +13,7 @@ use Inertia\Response;
 class SettingsController extends Controller
 {
     /** @var list<string> */
-    public const SECTIONS = ['organization', 'document-types', 'taxes-units', 'text-blocks', 'users'];
+    public const SECTIONS = ['organization', 'document-types', 'taxes-units', 'text-blocks', 'users', 'api'];
 
     public function index(): RedirectResponse
     {
@@ -27,6 +27,9 @@ class SettingsController extends Controller
         return Inertia::render('settings/show', [
             'section' => $section,
             'can_manage_users' => $user instanceof User && $user->role === UserRole::Owner,
+            // section "api": the setup snippets and the link to the API reference
+            'mcp_url' => url('/mcp'),
+            'api_docs_url' => url('/api/docs'),
         ]);
     }
 }

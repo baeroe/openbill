@@ -953,6 +953,7 @@
     "text_block.kind.intro": "Einleitung",
     "text_block.kind.note": "Hinweis",
     "text_block.kind.payment": "Zahlungsbedingungen",
+    "tokens.toolkit_elsewhere": "Template-Tokens entstehen im Template-Editor (Toolkit herunterladen).",
     "unit_code.ANN": "Jahr",
     "unit_code.C62": "Einheit",
     "unit_code.DAY": "Tag",

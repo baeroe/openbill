@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { strToU8, zipSync } from 'fflate';
@@ -77,5 +77,45 @@ describe('pull', () => {
         expect((error as TemplateProblemError).problems).toEqual(['../evil.liquid: not written (unsafe or unknown path).', 'notes.txt: not written (unsafe or unknown path).']);
         expect(existsSync(path.join(root, 'template'))).toBe(false);
         expect(existsSync(path.join(root, 'evil.liquid'))).toBe(false);
+    });
+
+    describe.each([false, true])('never writes outside template/ through symbolic links (force: %s)', (force) => {
+        const outside = () => path.join(root, 'outside');
+        const failureOf = async () => run(force).then(() => null, (e: unknown) => e);
+
+        it('refuses a symlinked template/ folder', async () => {
+            mkdirSync(outside());
+            writeFileSync(path.join(outside(), 'template.liquid'), 'outside');
+            symlinkSync(outside(), path.join(root, 'template'));
+
+            const error = await failureOf();
+
+            expect(error).toBeInstanceOf(TemplateProblemError);
+            expect(readFileSync(path.join(outside(), 'template.liquid'), 'utf8')).toBe('outside');
+            expect(existsSync(path.join(outside(), 'manifest.json'))).toBe(false);
+        });
+
+        it('refuses a symlinked template/assets folder', async () => {
+            mkdirSync(outside());
+            write('manifest.json', PACKAGE['manifest.json']);
+            symlinkSync(outside(), path.join(root, 'template', 'assets'));
+
+            const error = await failureOf();
+
+            expect(error).toBeInstanceOf(TemplateProblemError);
+            expect((error as TemplateProblemError).problems).toContain('assets: symbolic links are not allowed.');
+            expect(existsSync(path.join(outside(), 'logo.svg'))).toBe(false);
+        });
+
+        it('refuses a symlinked part', async () => {
+            writeFileSync(outside(), 'outside');
+            write('manifest.json', PACKAGE['manifest.json']);
+            symlinkSync(outside(), local('template.liquid'));
+
+            const error = await failureOf();
+
+            expect(error).toBeInstanceOf(TemplateProblemError);
+            expect(readFileSync(outside(), 'utf8')).toBe('outside');
+        });
     });
 });

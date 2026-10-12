@@ -1,6 +1,7 @@
 import { PagedPreview } from '@openbill/paged-preview';
 import { useEffect, useMemo, useState } from 'react';
 import type { KitError } from '../shared/protocol';
+import { currentFailure } from './describe';
 import { ErrorOverlay } from './error-overlay';
 import { FieldList } from './field-list';
 import { missingExpectedFields } from './missing';
@@ -17,7 +18,7 @@ export function App() {
     const schema = state?.schema ?? null;
     const missing = useMemo(() => missingExpectedFields(manifest, schema), [manifest, schema]);
     const unreachable: KitError | null = loadError ? { kind: 'network', status: null, message: `The page lost the dev server (${loadError}). Is pnpm dev still running?`, details: [] } : null;
-    const failure = event?.failure ?? state?.failure ?? unreachable;
+    const failure = currentFailure(state, event, unreachable);
 
     useEffect(() => {
         if (status === null) return;

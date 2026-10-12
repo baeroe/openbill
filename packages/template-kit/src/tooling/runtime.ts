@@ -120,6 +120,8 @@ export function createRuntime({ root, env, client, send, debounceMs = 80, log = 
         last = event;
         send(event);
         log(event.failure ? event.failure.message : event.errors.length > 0 ? `${event.errors.length} template error(s)` : 'rendered');
+        // the instance answers again after a failed start: fetch what the page is still missing (it asks /state again)
+        if (event.failure === null && (sources === null || schema === null)) await loadLookups();
         return event;
     };
 

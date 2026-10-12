@@ -1,4 +1,4 @@
-import type { RenderErrorItem, RenderSources, Source } from '../shared/protocol';
+import type { KitError, KitState, RenderErrorItem, RenderEvent, RenderSources, Source } from '../shared/protocol';
 
 export const SCENARIO_LABELS: Record<string, string> = {
     short_invoice: 'Short invoice',
@@ -36,3 +36,14 @@ export function newer<T extends { seq: number }>(current: T | null, next: T): T 
 }
 
 export const pagesLabel = (n: number): string => (n === 1 ? '1 page' : `${n} pages`);
+
+/** The newest render event decides; the failure of the first state only counts until an event arrives. */
+export function currentFailure(state: KitState | null, event: RenderEvent | null, unreachable: KitError | null): KitError | null {
+    if (event) return event.failure ?? unreachable;
+    return state?.failure ?? unreachable;
+}
+
+/** A render works again while the page still lacks sources/schema (failed start): fetch /state again. */
+export function needsState(state: KitState | null, event: RenderEvent): boolean {
+    return event.failure === null && state !== null && (state.failure !== null || state.sources === null || state.schema === null);
+}

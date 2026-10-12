@@ -143,6 +143,28 @@ describe('createRuntime', () => {
     });
 });
 
+describe('recovery after a failed start', () => {
+    it('loads sources and schema again after the first successful render that follows a failure', async () => {
+        let up = false;
+        fake.on('GET', '/api/render/sources', () => (up ? { json: SAMPLE_SOURCES } : { status: 503, json: { status: 503, detail: 'Starting.' } }));
+        fake.on('POST', '/api/render', () => (up ? { json: SAMPLE_RESULT } : { status: 503, json: { status: 503, detail: 'Starting.' } }));
+
+        const first = await runtime.state();
+        expect(first.failure?.kind).toBe('server');
+        expect(first.sources).toBeNull();
+        const lookupsBefore = fake.requests.filter((request) => request.path === '/api/render/sources').length;
+
+        up = true;
+        const event = await runtime.render();
+
+        expect(event.failure).toBeNull();
+        expect(fake.requests.filter((request) => request.path === '/api/render/sources').length).toBe(lookupsBefore + 1);
+        const requestsBefore = fake.requests.length;
+        expect(await runtime.state()).toMatchObject({ failure: null, sources: SAMPLE_SOURCES });
+        expect(fake.requests.length).toBe(requestsBefore);
+    });
+});
+
 describe('defaultSource', () => {
     it('takes the newest document, else the long sample invoice', () => {
         expect(defaultSource(SAMPLE_SOURCES)).toEqual({ kind: 'document', id: SAMPLE_SOURCES.documents[0].id });

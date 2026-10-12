@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { KitState, RenderEvent, Source } from '../shared/protocol';
-import { newer } from './describe';
+import { needsState, newer } from './describe';
 import { isLive, onRenderEvent } from './hot';
 import { chooseSource, fetchState } from './kit-api';
 
@@ -12,6 +12,17 @@ export function useKit() {
     const [event, setEvent] = useState<RenderEvent | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
     const connected = useMemo(() => isLive(), []);
+
+    // after a failed start: once a render works again, load sources, schema and the cleared failure
+    const refreshedFor = useRef(0);
+    useEffect(() => {
+        // at most once per event: a state that still lacks the lookups must not cause a loop of requests
+        if (event === null || refreshedFor.current >= event.seq || !needsState(state, event)) return;
+        refreshedFor.current = event.seq;
+        fetchState()
+            .then(setState)
+            .catch(() => undefined);
+    }, [event, state]);
 
     useEffect(() => {
         let alive = true;

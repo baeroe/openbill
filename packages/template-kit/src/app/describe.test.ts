@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { documentLabel, errorLabel, newer, pagesLabel, parseSource, sourceValue } from './describe';
+import type { KitError, KitState, RenderEvent } from '../shared/protocol';
+import { currentFailure, documentLabel, errorLabel, needsState, newer, pagesLabel, parseSource, sourceValue } from './describe';
 
 describe('sources', () => {
     it('round-trips select values', () => {
@@ -32,5 +33,23 @@ describe('errors and events', () => {
     it('counts pages', () => {
         expect(pagesLabel(1)).toBe('1 page');
         expect(pagesLabel(3)).toBe('3 pages');
+    });
+});
+
+describe('failure shown after a recovery', () => {
+    const down: KitError = { kind: 'network', status: null, message: 'Cannot reach https://openbill.example', details: [] };
+    const brokenState = { instance: 'https://openbill.example', templateId: '01k', event: null, sources: null, schema: null, failure: down } as KitState;
+    const goodEvent = { seq: 2, failure: null } as RenderEvent;
+
+    it('lets the newest event win over the failure of the first state', () => {
+        expect(currentFailure(brokenState, goodEvent, null)).toBeNull();
+        expect(currentFailure(brokenState, null, null)).toBe(down);
+        expect(currentFailure(null, null, down)).toBe(down);
+    });
+
+    it('asks for the state again once a render works while sources or schema are missing', () => {
+        expect(needsState(brokenState, goodEvent)).toBe(true);
+        expect(needsState(brokenState, { ...goodEvent, failure: down })).toBe(false);
+        expect(needsState({ ...brokenState, failure: null, sources: { scenarios: [], documents: [] }, schema: { levels: {} } as KitState['schema'] }, goodEvent)).toBe(false);
     });
 });

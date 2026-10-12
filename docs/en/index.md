@@ -60,6 +60,32 @@ landing:
         image: /screenshots/en/einvoice.png
         alt: A finalized invoice with the embedded e-invoice XML next to it
         more: { text: E-invoices, link: /en/e-invoice }
+  studio:
+    title: An agent can design your template
+    intro: Templates are HTML, CSS and Liquid. Work on them in your own editor with a live preview, or describe the look and let an AI agent write it – it sees render errors with line numbers and checks the result before anything is saved.
+    demo:
+      label: An agent changes styles.css of a template as asked, and the invoice preview takes on a serif heading, a cobalt rule under the address and the total in a box
+      prompt: 'Calmer, please: a serif heading, a cobalt rule under the address and the total in a box.'
+      file: template/styles.css
+      edits:
+        - { op: '-', text: 'h1 { font: 700 22px/1.2 sans-serif; }' }
+        - { op: '+', text: 'h1 { font: 600 26px/1.15 ui-serif, Georgia, serif; }', effect: serif }
+        - { op: '+', text: '.address { border-bottom: 2px solid #2f55d4; }', effect: rule }
+        - { op: '+', text: '.totals { background: #f4f4f2; border-radius: 6px; }', effect: box }
+      status: 'Rendered: 1 page, no errors'
+    paths:
+      - title: In your editor, with a coding agent
+        text: Download the template toolkit and open Claude Code, Codex or another coding agent in its folder. The agent edits template.liquid and styles.css, the preview in your browser renders every save on your instance, and AGENTS.md tells it the rules. Happy with it? pnpm push saves it in openbill.
+        commands: [pnpm dev, pnpm push, pnpm pull]
+        image: /screenshots/en/toolkit.png
+        alt: The toolkit dialog of a template in openbill
+        more: { text: Template toolkit, link: /en/template-toolkit }
+      - title: Inside openbill, over MCP
+        text: Connect an agent to the MCP server and it works on the template in place. It tries changes with sample data or a real document, reads errors with line numbers, the page count and missing fields, and saves once everything renders. The Liquid reference comes along as an MCP resource.
+        commands: [get-template, render-template-preview, update-template]
+        image: /screenshots/en/template-editor.png
+        alt: The template editor with code and a preview of the page
+        more: { text: Templates over MCP, link: /en/mcp#designing-templates }
   agents:
     title: Let an agent do the paperwork
     text: Everything the app does works through a REST API with scoped tokens and an MCP server. An agent can draft an invoice, read the open issues and finalize it, with the same checks as you.
@@ -77,8 +103,8 @@ landing:
       - { kind: result, text: '{"pdf":"https://…/downloads/…","xml":"https://…/downloads/…"}' }
       - { kind: agent, text: 'INV-2026-0042 is finalized. PDF and e-invoice XML are archived; the links work for 15 minutes.' }
   hosting:
-    title: Runs on your server
-    text: One Docker Compose stack. Download two files, set the passwords and the address in .env, start it.
+    title: Runs on your server, with Docker Compose
+    text: One Compose stack with everything it needs. Download two files, set the passwords and the address in .env, start it.
     code: |
       mkdir openbill && cd openbill
       curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml
@@ -91,7 +117,7 @@ landing:
       - { title: amd64 and arm64, text: 'Images for both, from a home server to the cloud.' }
       - { title: MariaDB and Gotenberg, text: 'The database and the PDF service come with the stack, on an internal network.' }
       - { title: Your data stays with you, text: 'Documents, archive and templates live on your server and in your backups.' }
-    more: { text: Setup guide, link: /en/setup }
+    more: { text: Full Docker Compose guide, link: /en/setup }
   features:
     title: What is in the box
     items:

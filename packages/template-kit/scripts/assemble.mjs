@@ -1,4 +1,4 @@
-// Copies the files of the end user's kit (package.json, README, vite.config.js, pnpm-workspace.yaml) next to the built
+// Copies the files of the end user's kit (package.json, README, AGENTS.md, vite.config.js, pnpm-workspace.yaml) next to the built
 // preview page and tooling. Runs last in `pnpm build`.
 import { cpSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';

@@ -21,7 +21,7 @@ const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.Sideba
 const en: Record<string, string> = {
     guide: 'Guide',
     hosting: 'Self-hosting',
-    setup: 'Setup',
+    setup: 'Setup with Docker Compose',
     'reverse-proxy': 'Reverse proxy',
     backup: 'Backup',
     upgrading: 'Upgrading',
@@ -39,7 +39,7 @@ const en: Record<string, string> = {
 const de: Record<string, string> = {
     guide: 'Anleitung',
     hosting: 'Betrieb',
-    setup: 'Einrichtung',
+    setup: 'Einrichtung mit Docker Compose',
     'reverse-proxy': 'Reverse Proxy',
     backup: 'Datensicherung',
     upgrading: 'Aktualisieren',

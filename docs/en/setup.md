@@ -1,4 +1,4 @@
-# Setup
+# Setup with Docker Compose
 
 openbill runs as a Docker Compose stack: the app (`baeroe/openbill`, for `linux/amd64` and `linux/arm64`), MariaDB 11.4 and Gotenberg 8, which renders the PDFs. You need Docker with Compose v2 and, for HTTPS, a reverse proxy in front (see [Reverse proxy](/en/reverse-proxy)).
 
@@ -71,3 +71,9 @@ The app is in English and German, English by default. The language is part of th
 ## Versions
 
 `latest` follows every release. Pin a version with `OPENBILL_IMAGE=baeroe/openbill:0.1.0` in `.env`. How to update: [Upgrading](/en/upgrading).
+
+## docker-compose.yml
+
+The complete compose file, the same one `curl` downloads above from the main branch. Usually you leave it as it is: everything you set goes into `.env`.
+
+<<< @/../docker-compose.yml{yaml}

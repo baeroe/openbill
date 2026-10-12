@@ -22,6 +22,7 @@ Mit dem Template-Toolkit schreibst du ein Template in deinem eigenen Editor mit 
 | `.gitignore` | hält `.env.local`, `node_modules/` und gepackte ZIPs aus Git heraus |
 | `package.json`, `pnpm-workspace.yaml`, `vite.config.js`, `index.html`, `assets/`, `tooling/` | das Toolkit selbst, vorgebaut; es installiert nur Vite |
 | `README.md` | die Kurzfassung dieser Seite (Englisch) |
+| `AGENTS.md` | Anweisungen für Coding-Agenten: welche Dateien sie bearbeiten, wie sie Render-Fehler lesen, welche Liquid-Regeln wichtig sind (Englisch) |
 
 ### Der Token
 
@@ -70,6 +71,16 @@ Beispiel: Ein Klick auf *document → number* kopiert `{{ document.number }}`, a
 | `pnpm run pack` | packt `template/` als Template-Paket (`<name>-<version>.zip`, oder `--out datei.zip`) für **Templates → ZIP importieren**, z. B. auf einer anderen Instanz. Gleiche Prüfungen wie `push`, und das ZIP darf wie beim Import höchstens 10 MB groß sein. |
 
 Nutze `pnpm run pack`: `pnpm pack` ohne `run` ist ein eigener Befehl von pnpm (er baut npm-Tarballs) und schlägt im Toolkit-Ordner fehl.
+
+## Mit einem KI-Agenten arbeiten
+
+Ein KI-Agent kann das Template für dich gestalten. Dafür gibt es zwei Wege, und beide enden im selben Template in openbill.
+
+**Ein Coding-Agent im Toolkit-Ordner** (Claude Code, Codex, …): Starte `pnpm dev`, öffne den Agenten im Ordner `openbill-<template>` und beschreibe, wie es aussehen soll. Der Agent bearbeitet `template/template.liquid`, `styles.css`, `header.liquid` und `footer.liquid`; jedes Speichern rendert neu, und du siehst das Ergebnis in der Vorschau. `AGENTS.md` im Ordner sagt dem Agenten, was er bearbeiten soll, welche Liquid-Regeln stolpern lassen (Beträge sind Strings, leere Texte sind wahr, keine Skripte oder externen URLs) und wie er das neueste Rendering samt Fehlern als JSON liest (`http://localhost:5180/__openbill/state`), solange `pnpm dev` läuft. Gefällt es dir, speichert `pnpm push` es in openbill.
+
+Der Agent kann jede Datei im Ordner lesen, auch `.env.local` mit dem Toolkit-Token: Dieser Token kann jedes Dokument der Instanz rendern. Nutze nur Agenten, denen du auch deine Dokumente zeigen würdest.
+
+**Ein Agent über MCP**, ohne Download: Verbinde ihn wie unter [MCP](/de/mcp) beschrieben. Er liest das Template mit `get-template`, probiert Änderungen mit `render-template-preview` aus (Liquid-Fehler mit Zeile, Seitenzahl, fehlende Felder und ein Text-Auszug, gerendert mit Beispieldaten oder einem echten Dokument, ohne zu speichern) und speichert sie mit `update-template`. Die Resource `openbill://docs/liquid-reference` gibt ihm die Liquid-Referenz (englische Fassung der Seite [Templates](/de/templates#liquid-referenz)). Er arbeitet nur an eigenen Templates; ein mitgeliefertes vorher duplizieren. Das PDF selbst sieht er nicht, prüfe das Ergebnis also im Template-Editor.
 
 ## Lokale Instanz mit eigenem Zertifikat
 

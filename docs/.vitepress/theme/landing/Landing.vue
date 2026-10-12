@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useData } from 'vitepress';
+import { useData, withBase } from 'vitepress';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import AgentTerminal, { type Line } from './AgentTerminal.vue';
 import HeroInvoice, { type InvoiceCopy } from './HeroInvoice.vue';
 import { href, isExternal } from './links';
 import ScrollStory, { type Step } from './ScrollStory.vue';
+import TemplateStudio, { type StudioDemo } from './TemplateStudio.vue';
 import './landing.css';
 
 interface Action {
@@ -15,6 +16,12 @@ interface Copy {
     hero: { title: string; tagline: string; primary: Action; secondary: Action; replay: string };
     invoice: InvoiceCopy;
     story: { title: string; intro: string; steps: Step[] };
+    studio: {
+        title: string;
+        intro: string;
+        demo: StudioDemo;
+        paths: { title: string; text: string; commands: string[]; image: string; alt: string; more: Action }[];
+    };
     agents: { title: string; text: string; links: Action[]; terminalLabel: string; lines: Line[] };
     hosting: {
         title: string;
@@ -80,6 +87,25 @@ onBeforeUnmount(() => window.clearTimeout(copiedTimer));
             <ScrollStory :steps="c.story.steps" />
         </section>
 
+        <section class="ob-section ob-wrap" aria-labelledby="ob-studio">
+            <header class="ob-section-head">
+                <h2 id="ob-studio">{{ c.studio.title }}</h2>
+                <p>{{ c.studio.intro }}</p>
+            </header>
+            <TemplateStudio :demo="c.studio.demo" :invoice="c.invoice" />
+            <div class="ob-paths">
+                <article v-for="path in c.studio.paths" :key="path.title" class="ob-path">
+                    <img :src="withBase(path.image)" :alt="path.alt" width="1440" height="900" loading="lazy" decoding="async" />
+                    <h3>{{ path.title }}</h3>
+                    <p>{{ path.text }}</p>
+                    <p class="ob-chips">
+                        <code v-for="cmd in path.commands" :key="cmd">{{ cmd }}</code>
+                    </p>
+                    <a class="ob-link" :href="href(path.more.link)">{{ path.more.text }}</a>
+                </article>
+            </div>
+        </section>
+
         <section class="ob-band" aria-labelledby="ob-agents">
             <div class="ob-wrap ob-agents">
                 <div class="ob-agents-copy">
@@ -117,7 +143,7 @@ onBeforeUnmount(() => window.clearTimeout(copiedTimer));
                         <dd>{{ f.text }}</dd>
                     </div>
                 </dl>
-                <a class="ob-link" :href="href(c.hosting.more.link)">{{ c.hosting.more.text }}</a>
+                <a class="ob-button is-primary ob-guide" :href="href(c.hosting.more.link)">{{ c.hosting.more.text }}</a>
             </div>
         </section>
 

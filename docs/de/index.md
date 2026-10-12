@@ -60,6 +60,32 @@ landing:
         image: /screenshots/de/einvoice.png
         alt: Eine abgeschlossene Rechnung mit der eingebetteten E-Rechnungs-XML daneben
         more: { text: E-Rechnung, link: /de/e-invoice }
+  studio:
+    title: Ein Agent gestaltet dein Template
+    intro: Templates sind HTML, CSS und Liquid. Bearbeite sie in deinem eigenen Editor mit Live-Vorschau, oder beschreibe das Aussehen und lass einen KI-Agenten schreiben – er sieht Render-Fehler mit Zeilennummer und prüft das Ergebnis, bevor etwas gespeichert wird.
+    demo:
+      label: Ein Agent ändert auf Wunsch die styles.css eines Templates, und die Vorschau der Rechnung bekommt eine Serifen-Überschrift, eine Kobaltlinie unter der Adresse und die Summe in einem Kasten
+      prompt: 'Bitte ruhiger: Überschrift mit Serifen, eine Kobaltlinie unter der Adresse und die Summe in einem Kasten.'
+      file: template/styles.css
+      edits:
+        - { op: '-', text: 'h1 { font: 700 22px/1.2 sans-serif; }' }
+        - { op: '+', text: 'h1 { font: 600 26px/1.15 ui-serif, Georgia, serif; }', effect: serif }
+        - { op: '+', text: '.address { border-bottom: 2px solid #2f55d4; }', effect: rule }
+        - { op: '+', text: '.totals { background: #f4f4f2; border-radius: 6px; }', effect: box }
+      status: 'Gerendert: 1 Seite, keine Fehler'
+    paths:
+      - title: In deinem Editor, mit einem Coding-Agenten
+        text: Lade das Template-Toolkit herunter und öffne Claude Code, Codex oder einen anderen Coding-Agenten in seinem Ordner. Der Agent bearbeitet template.liquid und styles.css, die Vorschau im Browser rendert jedes Speichern auf deiner Instanz, und AGENTS.md erklärt ihm die Regeln. Gefällt es dir, speichert pnpm push es in openbill.
+        commands: [pnpm dev, pnpm push, pnpm pull]
+        image: /screenshots/de/toolkit.png
+        alt: Der Toolkit-Dialog eines Templates in openbill
+        more: { text: Template-Toolkit, link: /de/template-toolkit }
+      - title: In openbill, über MCP
+        text: Verbinde einen Agenten mit dem MCP-Server, und er arbeitet direkt am Template. Er probiert Änderungen mit Beispieldaten oder einem echten Dokument aus, liest Fehler mit Zeilennummer, Seitenzahl und fehlende Felder und speichert, sobald alles rendert. Die Liquid-Referenz bekommt er als MCP-Resource.
+        commands: [get-template, render-template-preview, update-template]
+        image: /screenshots/de/template-editor.png
+        alt: Der Template-Editor mit Code und einer Vorschau der Seite
+        more: { text: Templates über MCP, link: /de/mcp#templates-gestalten }
   agents:
     title: Lass einen Agenten den Papierkram machen
     text: Alles, was die App kann, geht auch über eine REST-API mit eingeschränkten Tokens und einen MCP-Server. Ein Agent entwirft eine Rechnung, liest die offenen Punkte und schließt sie ab, mit denselben Prüfungen wie du.
@@ -77,8 +103,8 @@ landing:
       - { kind: result, text: '{"pdf":"https://…/downloads/…","xml":"https://…/downloads/…"}' }
       - { kind: agent, text: 'INV-2026-0042 ist abgeschlossen. PDF und E-Rechnungs-XML sind archiviert, die Links gelten 15 Minuten.' }
   hosting:
-    title: Läuft auf deinem Server
-    text: Ein Docker-Compose-Stack. Zwei Dateien laden, Passwörter und Adresse in .env eintragen, starten.
+    title: Läuft auf deinem Server, mit Docker Compose
+    text: Ein Compose-Stack mit allem, was er braucht. Zwei Dateien laden, Passwörter und Adresse in .env eintragen, starten.
     code: |
       mkdir openbill && cd openbill
       curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml
@@ -91,7 +117,7 @@ landing:
       - { title: amd64 und arm64, text: 'Images für beide, vom Heimserver bis in die Cloud.' }
       - { title: MariaDB und Gotenberg, text: 'Datenbank und PDF-Dienst gehören zum Stack, in einem internen Netz.' }
       - { title: Deine Daten bleiben bei dir, text: 'Dokumente, Archiv und Templates liegen auf deinem Server und in deinen Backups.' }
-    more: { text: Zur Einrichtung, link: /de/setup }
+    more: { text: Komplette Anleitung für Docker Compose, link: /de/setup }
   features:
     title: Was drin ist
     items:

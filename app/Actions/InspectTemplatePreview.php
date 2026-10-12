@@ -8,13 +8,17 @@ use App\Rendering\PdfPageCount;
 use App\Rendering\RenderResult;
 use App\Support\Actor;
 use App\Support\DomainMapper;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
 /**
  * MCP render-template-preview: what an agent needs to judge a template, without the HTML. Same input as
  * POST /api/render (RenderPreview); adds the page count of the real PDF (one Gotenberg call, only when the
  * template rendered without errors), the expectedFields of the manifest that are missing as custom fields and
- * a short plain-text excerpt of the content.
+ * a short plain-text excerpt of the content. The PDF render has its own tight limit per token or user
+ * (openbill.mcp.preview_pdfs_per_minute): an agent iterating on a template must not keep the single Gotenberg
+ * busy, which finalizing needs. Over the limit the page count stays null, like when Gotenberg is down;
+ * page_count_skipped says why (template_errors, pdf_unavailable, rate_limited).
  */
 final class InspectTemplatePreview
 {
@@ -27,7 +31,7 @@ final class InspectTemplatePreview
 
     /**
      * @param  array<string, mixed>  $input  template_id?, template?, document_id | scenario, locale?
-     * @return array{errors: list<array<string, mixed>>, page_count: int|null, missing_fields: list<array{scope: string, key: string, type: string, label: string, problem: string}>, issues: list<array<string, mixed>>, totals: array<string, mixed>, paper: array<string, string>, text_excerpt: string}
+     * @return array{errors: list<array<string, mixed>>, page_count: int|null, page_count_skipped: string|null, missing_fields: list<array{scope: string, key: string, type: string, label: string, problem: string}>, issues: list<array<string, mixed>>, totals: array<string, mixed>, paper: array<string, string>, text_excerpt: string}
      *
      * @throws ValidationException
      */
@@ -35,10 +39,12 @@ final class InspectTemplatePreview
     {
         $result = $this->preview->handle($actor, $input);
         $data = $result->toArray();
+        [$pages, $skipped] = $result->render->ok() ? $this->pageCount($actor, $result->render) : [null, 'template_errors'];
 
         return [
             'errors' => $data['errors'],
-            'page_count' => $result->render->ok() ? $this->pageCount($result->render) : null,
+            'page_count' => $pages,
+            'page_count_skipped' => $skipped,
             'missing_fields' => self::missingFields($result->manifest),
             'issues' => $data['issues'],
             'totals' => $data['totals'],
@@ -47,14 +53,25 @@ final class InspectTemplatePreview
         ];
     }
 
-    private function pageCount(RenderResult $render): ?int
+    /**
+     * @return array{0: int|null, 1: string|null} page count and why it is missing
+     */
+    private function pageCount(Actor $actor, RenderResult $render): array
     {
+        $key = 'mcp-preview-pdf:'.$actor->type->value.':'.($actor->id ?? 'system');
+        if (RateLimiter::tooManyAttempts($key, (int) config('openbill.mcp.preview_pdfs_per_minute'))) {
+            return [null, 'rate_limited'];
+        }
+        RateLimiter::hit($key, 60);
+
         try {
-            return PdfPageCount::of($this->gotenberg->pdf($render));
+            $pages = PdfPageCount::of($this->gotenberg->pdf($render));
         } catch (PdfRenderFailedException) {
             // the preview itself is fine; only the page count stays unknown
-            return null;
+            return [null, 'pdf_unavailable'];
         }
+
+        return [$pages, $pages === null ? 'pdf_unavailable' : null];
     }
 
     /**

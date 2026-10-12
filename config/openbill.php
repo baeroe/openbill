@@ -52,5 +52,8 @@ return [
     */
     'mcp' => [
         'requests_per_minute' => 300,
+        // render-template-preview renders a PDF (Gotenberg) to count the pages; per token or user. Above it the
+        // page count stays null (page_count_skipped: rate_limited) so finalizing keeps its Gotenberg
+        'preview_pdfs_per_minute' => 20,
     ],
 ];

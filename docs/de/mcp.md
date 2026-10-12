@@ -86,6 +86,7 @@ Invalid input:
 ## Grenzen
 
 - 300 Anfragen pro Minute und Token, Anfragen bis 2 MB.
+- `render-template-preview` rendert höchstens 20-mal pro Minute und Token ein PDF, um die Seiten zu zählen; darüber ist `page_count` `null` und `page_count_skipped` `rate_limited` (der Rest der Vorschau kommt trotzdem). Das Abschließen braucht denselben PDF-Dienst, eine Agenten-Schleife kann ihn so nicht blockieren.
 - Download-Links laufen nach 15 Minuten ab; ein Link zu einem Entwurf funktioniert nicht mehr, sobald sich der Entwurf ändert.
 - Keine Dateien über MCP: PDFs und XML kommen als Links, Template-Assets und das Logo werden in der App oder über die REST-API hochgeladen.
 - Kein OAuth: Connectoren, die OAuth verlangen (zum Beispiel in claude.ai), können sich nicht verbinden; nimm einen Client, der den Token als Header schickt.

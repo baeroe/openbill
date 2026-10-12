@@ -21,6 +21,7 @@ use App\State\Processor\DocumentActionProcessor;
 use App\State\Processor\DocumentProcessor;
 use App\State\Provider\DocumentProvider;
 use App\Support\DocumentInspector;
+use App\Support\InvoiceBalance;
 use App\Support\IssueList;
 use ArrayObject;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -199,6 +200,9 @@ final class DocumentResource
         #[ApiProperty(writable: false)]
         #[Groups([self::LIST, self::ITEM])]
         public string $gross_total,
+        #[ApiProperty(writable: false, description: 'finalized invoices: gross total minus finalized (partial) cancellations, i.e. what is still owed while the invoice is open; null for other documents and drafts')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $open_amount,
         #[Groups([self::ITEM])]
         public array $groups,
         #[ApiProperty(writable: false)]
@@ -253,6 +257,7 @@ final class DocumentResource
             net_total: (string) $document->net_total,
             tax_total: (string) $document->tax_total,
             gross_total: (string) $document->gross_total,
+            open_amount: InvoiceBalance::of($document),
             groups: $inspector === null ? [] : self::groups($document),
             // keyed maps stay JSON objects even when empty
             totals: $totals === null ? null : [...$totals, 'lines' => new ArrayObject($totals['lines']), 'groups' => new ArrayObject($totals['groups'])],

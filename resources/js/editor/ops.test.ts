@@ -200,6 +200,7 @@ describe('server state', () => {
         net_total: '100.00',
         tax_total: '19.00',
         gross_total: '119.00',
+        open_amount: null,
         created_at: null,
         updated_at: null,
         totals: null,

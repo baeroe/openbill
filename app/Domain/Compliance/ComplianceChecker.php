@@ -52,6 +52,8 @@ final class ComplianceChecker
             }
         }
 
+        array_push($issues, ...self::cancellationAmount($in));
+
         $defs = $in->fieldDefinitions;
         array_push($issues, ...self::requiredCustom(FieldRegistry::forScope($defs, FieldScope::Org), $in->org->custom, 'org.', ComplianceRule::OrgFieldMissing));
         if ($in->customer !== null) {
@@ -149,5 +151,27 @@ final class ComplianceChecker
     private static function title(PositionInput $position): string
     {
         return trim($position->title) !== '' ? $position->title : '–';
+    }
+
+    /**
+     * A cancellation credits money (negative gross) and at most what is left of its invoice; partial cancellations
+     * are allowed, several of them until the invoice is covered.
+     *
+     * @return list<ComplianceIssue>
+     */
+    public static function cancellationAmount(ComplianceInput $in): array
+    {
+        if ($in->type !== DocumentType::Cancellation || $in->gross === null || $in->cancellable === null) {
+            return [];
+        }
+        $credit = $in->gross->negated();
+        if ($credit->isLessThanOrEqualTo(0)) {
+            return [new ComplianceIssue('positions', ComplianceRule::CancellationNotCredit)];
+        }
+        if ($credit->isGreaterThan($in->cancellable)) {
+            return [new ComplianceIssue('positions', ComplianceRule::CancellationExceedsInvoice, ['open' => (string) $in->cancellable])];
+        }
+
+        return [];
     }
 }

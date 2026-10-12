@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { FilePlus, FileText } from 'lucide-react';
 import { useDocumentList } from '@/api/documents';
+import { DocumentAmount } from '@/components/document-amount';
 import { useNewDocument } from '@/components/new-document/new-document-context';
 import { Button, Card, CardHead, EmptyState, ErrorState, Skeleton, StatusBadge } from '@/components/ui';
-import { formatDate, formatMoney } from '@/lib/format';
+import { formatDate } from '@/lib/format';
 import { path, t, tn } from '@/lib/i18n';
 
 const SHOWN = 10;
@@ -45,7 +46,9 @@ export function CustomerDocuments({ customerId, disabled = false }: { customerId
                             <span className="truncate font-semibold">
                                 {t(`document_type.${document.type}`)} {document.number ?? t('overview.draft_label')}
                             </span>
-                            <span className="num text-right font-semibold">{formatMoney(document.gross_total)}</span>
+                            <span className="num text-right font-semibold">
+                                <DocumentAmount gross={document.gross_total} open={document.open_amount} />
+                            </span>
                             <span className="num truncate text-sm text-muted">{formatDate(document.date)}</span>
                             <span className="justify-self-end">
                                 <StatusBadge status={document.status} overdue={document.is_overdue} />

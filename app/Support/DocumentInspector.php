@@ -7,8 +7,10 @@ use App\Domain\Compliance\ComplianceIssue;
 use App\Domain\Totals\Totals;
 use App\Domain\Totals\TotalsCalculator;
 use App\Domain\Totals\TotalsLimits;
+use App\Enums\DocumentType;
 use App\Models\Document;
 use App\Models\DocumentTypeSetting;
+use Brick\Math\BigDecimal;
 use Illuminate\Validation\ValidationException;
 use LogicException;
 
@@ -50,11 +52,13 @@ final class DocumentInspector
 
     /**
      * Issues that block finalizing. A finalized document has none (unless $sources is given).
+     * A cancellation is also checked against what is left of its invoice ($cancellable: FinalizeDocument passes the
+     * locked balance, otherwise it is read here).
      *
      * @param  array<string, mixed>|null  $sources
      * @return list<ComplianceIssue>
      */
-    public function issues(Document $document, ?array $sources = null): array
+    public function issues(Document $document, ?array $sources = null, ?BigDecimal $cancellable = null): array
     {
         if ($sources === null && $document->isFinalized()) {
             return [];
@@ -63,7 +67,15 @@ final class DocumentInspector
         $document->loadMissing('groups.positions');
         $profile = DocumentTypeSetting::query()->findOrFail($document->type->value)->profile;
 
-        return ComplianceChecker::check(DomainMapper::complianceInput($document, $sources, $profile));
+        $gross = null;
+        if ($document->type === DocumentType::Cancellation) {
+            $invoice = $document->source_id === null ? null : Document::query()->find($document->source_id);
+            $balance = $invoice === null ? null : InvoiceBalance::of($invoice);
+            $cancellable ??= $balance === null ? null : BigDecimal::of($balance);
+            $gross = $this->totals($document, $sources)->gross;
+        }
+
+        return ComplianceChecker::check(DomainMapper::complianceInput($document, $sources, $profile, $gross, $cancellable));
     }
 
     /**

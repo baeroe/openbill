@@ -29,6 +29,7 @@ const detail = (overrides: Partial<DocumentDetail> = {}): DocumentDetail => ({
     net_total: '0.00',
     tax_total: '0.00',
     gross_total: '0.00',
+    open_amount: null,
     created_at: null,
     updated_at: null,
     groups: [{ id: 'g1', title: 'Konzept', positions: [] }],

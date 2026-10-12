@@ -33,6 +33,7 @@ const detail = (id: string): DocumentDetail =>
         net_total: '0.00',
         tax_total: '0.00',
         gross_total: '0.00',
+        open_amount: null,
         created_at: null,
         updated_at: null,
         groups: [],

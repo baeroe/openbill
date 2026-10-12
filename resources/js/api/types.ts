@@ -77,6 +77,8 @@ export type DocumentSummary = {
     net_total: string;
     tax_total: string;
     gross_total: string;
+    /** Finalized invoices: gross total minus finalized (partial) cancellations; null otherwise. */
+    open_amount: string | null;
     created_at: string | null;
     updated_at: string | null;
 };

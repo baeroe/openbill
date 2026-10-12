@@ -68,15 +68,16 @@ final class ApiAccess
     }
 
     /**
-     * POST /api/render with a template_id: a token bound to one template (toolkit) renders only with that one, so it
-     * never sees the output of foreign template sources. Unbound tokens and the session may use any template.
+     * POST /api/render: a token bound to one template (toolkit) must name exactly that template as template_id –
+     * without it, the document's or the fallback template would render, i.e. the output of foreign template sources.
+     * Unbound tokens and the session may render with any template or none.
      */
     public static function rendersWith(?HasAbilities $token, ?string $templateId): bool
     {
-        if ($templateId === null || ! $token instanceof PersonalAccessToken || $token->template_id === null) {
+        if (! $token instanceof PersonalAccessToken || $token->template_id === null || $token->can('api:read') || $token->can('api:write')) {
             return true;
         }
 
-        return $token->template_id === $templateId || $token->can('api:read') || $token->can('api:write');
+        return $token->template_id === $templateId;
     }
 }

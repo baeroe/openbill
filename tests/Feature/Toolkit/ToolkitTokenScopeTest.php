@@ -67,6 +67,10 @@ it('refuses everything else with 403 and changes nothing', function () {
         ['PUT', "/api/templates/{$other}/files", ['body' => '<p>taken over</p>']],
         ['POST', '/api/render', ['scenario' => 'long_invoice', 'template_id' => $other]],
         ['POST', '/api/render', ['document_id' => $doc, 'template_id' => $other]],
+        // without template_id the document's or the fallback template would render: a bound token must name its own
+        ['POST', '/api/render', ['document_id' => $doc]],
+        ['POST', '/api/render', ['scenario' => 'long_invoice']],
+        ['POST', '/api/render', ['document_id' => $doc, 'template' => ['body' => '<p>Fjord</p>']]],
         ['GET', "/api/templates/{$other}"],
         ['GET', "/api/templates/{$other}/package"],
         ['GET', '/api/templates'],
@@ -95,6 +99,13 @@ it('refuses everything else with 403 and changes nothing', function () {
         ->and(Template::query()->count())->toBe($templatesBefore)
         ->and($this->draft->fresh()->toArray())->toBe($draftBefore)
         ->and(PersonalAccessToken::query()->count())->toBe(1);
+});
+
+it('renders real documents with its own template', function () {
+    $response = test()->withToken($this->token)->postJson('/api/render', ['document_id' => $this->draft->id, 'template_id' => $this->own->id, 'template' => ['body' => '<p id="fjord">Fjord {{ document.type_label }}</p>']]);
+
+    $response->assertOk();
+    expect((string) $response->json('body'))->toContain('id="fjord"');
 });
 
 it('cannot get more tokens: the download route only knows the session', function () {

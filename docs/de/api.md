@@ -27,7 +27,7 @@ php artisan app:create-token admin@example.com --name=agent --ability=api:read -
 | `api:read` | alle Ressourcen lesen, PDF/XML herunterladen, Positionsvorschläge, Vorschau |
 | `api:write` | alles aus `api:read` und zusätzlich anlegen, ändern, löschen |
 | `templates:render` | Vorschau: `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema`. **Das ist lesender Zugriff auf alle Dokumente:** Der Token kann jedes Dokument gerendert sehen (Kunde, Adresse, Positionen, Beträge), und `render/sources` listet die letzten Dokumente mit Nummer und Kundenname. Das Toolkit braucht das, um Templates mit echten Dokumenten anzusehen. |
-| `templates:write` | **ein** Template lesen und schreiben (`--template=<id>`): `GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`. Der Download des [Template-Toolkits](/de/template-toolkit) legt so einen Token zusammen mit `templates:render` an; so ein gebundener Token rendert (`POST /api/render` mit `template_id`) nur mit seinem eigenen Template. |
+| `templates:write` | **ein** Template lesen und schreiben (`--template=<id>`): `GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files`. Der Download des [Template-Toolkits](/de/template-toolkit) legt so einen Token zusammen mit `templates:render` an; so ein gebundener Token rendert (`POST /api/render`) nur mit seinem eigenen Template, das er als `template_id` nennt (fehlend oder fremd → 403). |
 | `mcp` | nur der [MCP-Server](/de/mcp) (kein REST-Endpunkt) |
 
 Ohne gültigen Token antwortet die API mit `401`, mit einem Token ohne passende Fähigkeit mit `403`. Ein widerrufener oder abgelaufener Token bekommt `401`.

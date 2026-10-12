@@ -56,4 +56,43 @@ final class Schemas
             ]))->description('The complete list of contacts: contacts left out are removed'),
         ];
     }
+
+    /**
+     * Fields of a draft as CreateDocument and UpdateDraft take them (the shape get-document returns).
+     *
+     * @return array<string, mixed>
+     */
+    public static function draft(JsonSchema $schema): array
+    {
+        return [
+            'date' => $schema->string()->description('Document date (YYYY-MM-DD); default today'),
+            'customer_id' => $schema->string()->nullable()->description('Customer ID (list-customers)'),
+            'contact_id' => $schema->string()->nullable()->description('Contact of that customer; left out: the default contact'),
+            'service_date' => $schema->string()->nullable()->description('Service date or start of the service period (YYYY-MM-DD)'),
+            'service_date_end' => $schema->string()->nullable()->description('End of the service period (YYYY-MM-DD)'),
+            'due_date' => $schema->string()->nullable()->description('Due date of an invoice (YYYY-MM-DD)'),
+            'valid_until' => $schema->string()->nullable()->description('Offer valid until (YYYY-MM-DD)'),
+            'intro' => $schema->string()->nullable()->description('Text above the positions'),
+            'closing' => $schema->string()->nullable()->description('Text below the positions'),
+            'template_id' => $schema->string()->nullable()->description('Template (list-templates); null: the default of the document type'),
+            'locale' => $schema->string()->enum(['en', 'de'])->description('Document language'),
+            'custom' => $schema->object()->description('Custom field values by key (list-field-definitions, scope document)'),
+            'groups' => $schema->array()->items($schema->object([
+                'id' => $schema->string()->description('Keeps an existing group'),
+                'title' => $schema->string()->nullable()->description('Group heading; null: positions without a heading'),
+                'positions' => $schema->array()->items($schema->object([
+                    'id' => $schema->string()->description('Keeps an existing position'),
+                    'kind' => $schema->string()->enum(['item', 'optional', 'text'])->required()
+                        ->description('item; optional (offers only, not in the total); text (a line without amount)'),
+                    'title' => $schema->string(),
+                    'description' => $schema->string(),
+                    'quantity' => $schema->string()->description('Decimal as string, e.g. "8" or "1.5"'),
+                    'unit_price' => $schema->string()->description('Net price as string, e.g. "120" or "49.90"'),
+                    'unit_id' => $schema->string()->nullable()->description('Unit (list-tax-rates-and-units)'),
+                    'tax_rate_id' => $schema->string()->nullable()->description('Tax rate (list-tax-rates-and-units)'),
+                    'custom' => $schema->object()->description('Custom field values (scope position)'),
+                ])),
+            ]))->description('All groups with their positions, in order. Replaces the existing ones: send their ids to keep them'),
+        ];
+    }
 }

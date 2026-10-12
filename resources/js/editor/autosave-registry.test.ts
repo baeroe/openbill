@@ -4,6 +4,14 @@ import { acquireAutosave, flushAllKeepalive, releaseAutosave, resetAutosaves, sh
 import { useEditor } from './store';
 import type { DraftPayload } from './types';
 
+const invalidated = vi.hoisted(() => [] as [string, string[]][]);
+vi.mock('@/api/paged', () => ({
+    invalidate: (prefix: string, except: string[] = []) => {
+        invalidated.push([prefix, except]);
+        return Promise.resolve();
+    },
+}));
+
 const detail = (id: string, intro = ''): DocumentDetail =>
     ({
         id,
@@ -60,6 +68,7 @@ function open(id: string, cached: DocumentDetail) {
 beforeEach(() => {
     vi.useFakeTimers();
     calls = [];
+    invalidated.length = 0;
     resetAutosaves();
     useEditor.getState().reset();
 });
@@ -184,5 +193,19 @@ describe('autosave registry', () => {
         calls[2].resolve(detail('a', 'Hallo'));
         await vi.advanceTimersByTimeAsync(0);
         expect(a.entry.disposed).toBe(true);
+    });
+
+    it('a save that lands after going from the editor to the list reloads the lists, although the store still holds the document (rereview 3)', async () => {
+        const a = open('a', detail('a'));
+        a.type('Hallo');
+        await vi.advanceTimersByTimeAsync(600); // the save is on its way …
+        const left = a.leave(); // … the user goes to the document list; nobody resets the store, it still holds A
+        expect(useEditor.getState().draft?.id).toBe('a');
+        expect(invalidated).toEqual([]);
+
+        calls[0].resolve(detail('a', 'Hallo')); // the list already loaded the older state
+        await left;
+
+        expect(invalidated).toEqual([['/api/documents', ['/api/documents/a']]]);
     });
 });

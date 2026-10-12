@@ -41,8 +41,9 @@ function create(id: string, save: Save): AutosaveEntry {
         save: (payload) => save(id, payload),
         onSaved: (sent, saved) => {
             if (mine()) useEditor.getState().applySaved(sent, saved);
-            // saves go on after leaving: lists that loaded meanwhile must not keep the older title, customer and totals
-            else void invalidate('/api/documents', [keys.document(id)]);
+            // every save, also while the store still holds this document after leaving it (nobody resets the store on
+            // the way to the list): a list that loaded meanwhile must not keep the older title, customer and totals
+            void invalidate('/api/documents', [keys.document(id)]);
         },
         onState: (state, error, sent) => {
             // nobody holds the entry anymore and it is done (saved, or blocked for good): drop it
@@ -128,10 +129,9 @@ export function showDocument(entry: AutosaveEntry, document: DocumentDetail): vo
     }
 }
 
-/** Logout: one last attempt for every open document, then forget them all (another person may sign in in this tab). */
-export async function closeAutosaves(): Promise<void> {
-    await Promise.all([...entries.values()].map((entry) => entry.autosave.flush().catch(() => undefined)));
-    resetAutosaves();
+/** Logout: one last attempt for every open document. Nothing is stopped – that happens only once the logout worked. */
+export function flushAutosaves(): Promise<void> {
+    return Promise.all([...entries.values()].map((entry) => entry.autosave.flush().catch(() => undefined))).then(() => undefined);
 }
 
 /** Logout (another person may sign in in this tab) and tests: stop and forget every entry, nothing is sent anymore. */

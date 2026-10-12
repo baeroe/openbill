@@ -567,6 +567,7 @@
     "template_package.version": "version must look like 1.0.0.",
     "user_menu.appearance": "Appearance",
     "user_menu.language": "Language",
+    "user_menu.logout_failed": "Logging out did not work. Please try again.",
     "user_menu.open": "Account menu",
     "user_menu.theme_dark": "Dark",
     "user_menu.theme_light": "Light",

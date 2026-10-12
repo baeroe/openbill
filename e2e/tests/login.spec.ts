@@ -13,6 +13,23 @@ test('logs in, shows the overview and logs out', async ({ page }) => {
     await page.getByRole('button', { name: 'Account menu' }).click();
     await page.getByRole('menuitem', { name: 'Log out' }).click();
     await expect(page).toHaveURL(/\/en\/login$/);
+    // the session is really gone
+    await page.goto('/en/documents');
+    await expect(page).toHaveURL(/\/en\/login$/);
+});
+
+test('stays signed in and says so when logging out fails', async ({ page }) => {
+    await login(page);
+    await page.route('**/en/logout', (route) => route.abort('internetdisconnected'));
+
+    await page.getByRole('button', { name: 'Account menu' }).click();
+    await page.getByRole('menuitem', { name: 'Log out' }).click();
+
+    await expect(page.getByText('Logging out did not work. Please try again.')).toBeVisible();
+    await expect(page).not.toHaveURL(/\/login$/);
+    await page.unroute('**/en/logout');
+    await page.reload();
+    await expect(page.getByRole('region', { name: 'Key figures' })).toBeVisible();
 });
 
 test('refuses a wrong password with a message at the field', async ({ page }) => {

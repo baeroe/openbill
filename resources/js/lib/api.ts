@@ -65,7 +65,7 @@ export function apiUrl(path: string, params: Record<string, string | number | bo
     return qs ? `${path}?${qs}` : path;
 }
 
-function cookie(name: string): string | null {
+export function cookie(name: string): string | null {
     if (typeof document === 'undefined') return null;
     const entry = document.cookie.split('; ').find((part) => part.startsWith(`${name}=`));
     return entry ? decodeURIComponent(entry.slice(name.length + 1)) : null;

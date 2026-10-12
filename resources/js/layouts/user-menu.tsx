@@ -1,21 +1,12 @@
-import { router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Languages, LogOut, Monitor, Moon, Sun } from 'lucide-react';
 import { Avatar, cx, Menu, MenuItem, MenuLabel, MenuRadioGroup, MenuRadioItem, MenuSeparator } from '@/components/ui';
-import { localeHref, path, t } from '@/lib/i18n';
+import { localeHref, t } from '@/lib/i18n';
 import { isThemePref, setThemePref, useThemePref } from '@/lib/theme';
-import { mutate } from 'swr';
-import { closeAutosaves } from '@/editor/autosave-registry';
-import { useEditor } from '@/editor/store';
 import type { SharedProps } from '@/types';
+import { logout } from './logout';
 
 /** Account chip at the bottom of the sidebar; the menu opens upwards. */
-/** Saves what is open, then forgets drafts, autosaves and cached API data: the next person in this tab sees none of it. */
-async function logout(): Promise<void> {
-    await closeAutosaves();
-    useEditor.getState().reset();
-    await mutate(() => true, undefined, { revalidate: false });
-    router.post(path('/logout'));
-}
 
 export function UserMenu({ collapsed }: { collapsed: boolean }) {
     const { auth, org, locale } = usePage<SharedProps>().props;

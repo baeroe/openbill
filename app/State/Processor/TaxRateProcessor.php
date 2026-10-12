@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Actions\ArchiveTaxRate;
+use App\Actions\RestoreTaxRate;
 use App\Actions\SaveTaxRate;
 use App\ApiResource\TaxRateResource;
 use App\Models\TaxRate;
@@ -17,6 +18,7 @@ final class TaxRateProcessor implements ProcessorInterface
     public function __construct(
         private readonly SaveTaxRate $save,
         private readonly ArchiveTaxRate $archive,
+        private readonly RestoreTaxRate $restore,
     ) {}
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?TaxRateResource
@@ -28,6 +30,9 @@ final class TaxRateProcessor implements ProcessorInterface
             $this->archive->handle($actor, $rate);
 
             return null;
+        }
+        if ($operation->getName() === 'tax_rate_restore' && $rate !== null) {
+            return TaxRateResource::fromModel($this->restore->handle($actor, $rate));
         }
 
         return TaxRateResource::fromModel($this->save->handle($actor, ApiContext::body($context), $rate));

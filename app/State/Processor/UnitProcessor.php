@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Actions\ArchiveUnit;
+use App\Actions\RestoreUnit;
 use App\Actions\SaveUnit;
 use App\ApiResource\UnitResource;
 use App\Models\Unit;
@@ -17,6 +18,7 @@ final class UnitProcessor implements ProcessorInterface
     public function __construct(
         private readonly SaveUnit $save,
         private readonly ArchiveUnit $archive,
+        private readonly RestoreUnit $restore,
     ) {}
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?UnitResource
@@ -28,6 +30,9 @@ final class UnitProcessor implements ProcessorInterface
             $this->archive->handle($actor, $unit);
 
             return null;
+        }
+        if ($operation->getName() === 'unit_restore' && $unit !== null) {
+            return UnitResource::fromModel($this->restore->handle($actor, $unit));
         }
 
         return UnitResource::fromModel($this->save->handle($actor, ApiContext::body($context), $unit));

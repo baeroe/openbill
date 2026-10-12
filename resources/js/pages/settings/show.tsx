@@ -5,6 +5,8 @@ import { appLayout } from '@/layouts/app-shell';
 import { path, t } from '@/lib/i18n';
 import { DocumentTypeSettings } from '@/settings/document-types';
 import { OrganizationSettings } from '@/settings/organization';
+import { TaxesUnitsSettings } from '@/settings/taxes-units';
+import { TextBlockSettings } from '@/settings/text-blocks';
 import { SECTION_ICONS, SETTINGS_SECTIONS, sectionKey, type SettingsSection } from '@/settings/sections';
 
 type Props = { section: SettingsSection; can_manage_users: boolean };
@@ -45,6 +47,10 @@ function renderSection(section: SettingsSection, canManageUsers: boolean): React
             return <OrganizationSettings />;
         case 'document-types':
             return <DocumentTypeSettings />;
+        case 'taxes-units':
+            return <TaxesUnitsSettings />;
+        case 'text-blocks':
+            return <TextBlockSettings />;
         default:
             return <Skeleton h={320} r={18} />;
     }

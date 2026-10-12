@@ -31,6 +31,17 @@ use App\State\Provider\TaxRateProvider;
         new Post(uriTemplate: '/tax-rates', middleware: ApiMiddleware::WRITE, read: false, deserialize: false, processor: TaxRateProcessor::class),
         new Patch(uriTemplate: '/tax-rates/{id}', middleware: ApiMiddleware::WRITE, read: false, deserialize: false, processor: TaxRateProcessor::class),
         new Delete(uriTemplate: '/tax-rates/{id}', middleware: ApiMiddleware::WRITE, read: false, processor: TaxRateProcessor::class, description: 'Archives the rate.'),
+        new Post(
+            uriTemplate: '/tax-rates/{id}/restore',
+            name: 'tax_rate_restore',
+            status: 200,
+            input: false,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: TaxRateProcessor::class,
+            description: 'Restores an archived rate.',
+        ),
     ],
 )]
 final class TaxRateResource

@@ -2,7 +2,8 @@ import useSWR, { mutate } from 'swr';
 import { api, apiUpload } from '@/lib/api';
 import { useDebounced } from '@/lib/hooks';
 import { keys } from './keys';
-import type { ComplianceProfile, CustomValues, DocumentType } from './types';
+import { invalidate } from './paged';
+import type { ComplianceProfile, CustomValues, DocumentType, TaxRate, TextBlock, TextBlockKind, Unit } from './types';
 
 /** GET /api/document-types (DocumentTypeResource). */
 export type DocumentTypeSetting = {
@@ -94,3 +95,22 @@ export function useNumberPreview(type: DocumentType, pattern: string, resetYearl
     const key = useDebounced(keys.numberPreview(type, pattern, resetYearly, nextValue), 250);
     return useSWR<NumberPreview>(pattern.trim() ? key : null, { keepPreviousData: true, revalidateOnFocus: false });
 }
+
+export type TaxRateInput = Pick<TaxRate, 'label' | 'percent' | 'category' | 'exemption_note'>;
+export type UnitInput = Pick<Unit, 'name' | 'symbol' | 'decimals' | 'code'>;
+export type TextBlockInput = { name: string; kind: TextBlockKind; body: string };
+
+const write = async <T>(url: string, method: 'POST' | 'PATCH' | 'DELETE', prefix: string, body?: unknown, keepalive = false): Promise<T> => {
+    const result = await api<T>(url, { method, body, keepalive });
+    void invalidate(prefix);
+    return result;
+};
+
+export const saveTaxRate = (input: TaxRateInput, id?: string) => write<TaxRate>(id ? `/api/tax-rates/${id}` : '/api/tax-rates', id ? 'PATCH' : 'POST', '/api/tax-rates', input);
+export const archiveTaxRate = (id: string) => write<void>(`/api/tax-rates/${id}`, 'DELETE', '/api/tax-rates');
+export const restoreTaxRate = (id: string) => write<TaxRate>(`/api/tax-rates/${id}/restore`, 'POST', '/api/tax-rates', {});
+export const saveUnit = (input: UnitInput, id?: string) => write<Unit>(id ? `/api/units/${id}` : '/api/units', id ? 'PATCH' : 'POST', '/api/units', input);
+export const archiveUnit = (id: string) => write<void>(`/api/units/${id}`, 'DELETE', '/api/units');
+export const restoreUnit = (id: string) => write<Unit>(`/api/units/${id}/restore`, 'POST', '/api/units', {});
+export const saveTextBlock = (input: TextBlockInput, id?: string) => write<TextBlock>(id ? `/api/text-blocks/${id}` : '/api/text-blocks', id ? 'PATCH' : 'POST', '/api/text-blocks', input);
+export const deleteTextBlock = (id: string, options: { keepalive: boolean } = { keepalive: false }) => write<void>(`/api/text-blocks/${id}`, 'DELETE', '/api/text-blocks', undefined, options.keepalive);

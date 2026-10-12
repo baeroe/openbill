@@ -8,9 +8,10 @@ import type { SharedProps } from '@/types';
 
 createInertiaApp({
     title: (title) => (title ? `${title} – openbill` : 'openbill'),
+    // every page is its own chunk: the login does not load the editors (CodeMirror only comes with templates/show)
     resolve: (name) => {
-        const pages = import.meta.glob('./pages/**/*.tsx', { eager: true });
-        return pages[`./pages/${name}.tsx`] as never;
+        const pages = import.meta.glob('./pages/**/*.tsx');
+        return pages[`./pages/${name}.tsx`]() as never;
     },
     setup({ el, App, props }) {
         initI18n(props.initialPage.props as unknown as SharedProps);

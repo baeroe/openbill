@@ -1,7 +1,10 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LogIn } from 'lucide-react';
 import { LocaleSwitch } from '@/components/locale-switch';
-import { Badge, Button, Checkbox, TextInput } from '@/components/ui';
+// direct imports, not the ui barrel: the barrel re-exports Radix dialogs and menus the login does not need
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox, TextInput } from '@/components/ui/form';
 import { LogoMark } from '@/layouts/logo';
 import { formatMoney } from '@/lib/format';
 import { path, t } from '@/lib/i18n';

@@ -194,6 +194,21 @@ final readonly class TemplatePackage
         return new self($manifest, (string) $template->header, (string) $template->body, (string) $template->footer, (string) $template->css, $assets);
     }
 
+    /**
+     * Package path => contents in the order of the ZIP: manifest.json, the four parts, assets/… (toZip(), toolkit).
+     *
+     * @return array<string, string>
+     */
+    public function files(): array
+    {
+        $files = ['manifest.json' => json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)."\n"];
+        foreach (self::FILES as $column => $file) {
+            $files[$file] = $this->{$column};
+        }
+
+        return [...$files, ...$this->assets];
+    }
+
     public function toZip(): string
     {
         // random name instead of tempnam() (forbidden by the security arch preset)
@@ -203,11 +218,7 @@ final readonly class TemplatePackage
             if ($zip->open($path, ZipArchive::CREATE | ZipArchive::EXCL) !== true) {
                 throw new RuntimeException('Could not create a temporary file for the template package.');
             }
-            $zip->addFromString('manifest.json', json_encode($this->manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)."\n");
-            foreach (self::FILES as $column => $file) {
-                $zip->addFromString($file, $this->{$column});
-            }
-            foreach ($this->assets as $name => $contents) {
+            foreach ($this->files() as $name => $contents) {
                 $zip->addFromString($name, $contents);
             }
             $zip->close();

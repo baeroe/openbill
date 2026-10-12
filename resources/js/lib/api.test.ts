@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api, ApiError, apiPage, apiUpload, apiText, apiUrl, errorMessage, setUnauthenticatedHandler } from './api';
+import { api, apiBlob, ApiError, apiPage, apiUpload, apiText, apiUrl, errorMessage, filenameOf, setUnauthenticatedHandler } from './api';
 
 const json = (status: number, body: unknown, type = 'application/json') =>
     new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { 'Content-Type': type } });
@@ -183,5 +183,29 @@ describe('keepalive and text answers', () => {
 
         fetchMock.mockResolvedValueOnce(problem(409, 'no_e_invoice'));
         await expect(apiText('/api/documents/d1/xml')).rejects.toMatchObject({ status: 409, reason: 'no_e_invoice' });
+    });
+});
+
+describe('file answers', () => {
+    it('returns the blob and the file name of a download', async () => {
+        fetchMock.mockResolvedValueOnce(new Response(new Uint8Array([80, 75, 3, 4]), { status: 200, headers: { 'Content-Type': 'application/zip', 'Content-Disposition': 'attachment; filename=openbill-toolkit-fjord-brief.zip' } }));
+
+        const file = await apiBlob('/en/templates/01kfjord/toolkit', { method: 'POST' });
+
+        expect(file.filename).toBe('openbill-toolkit-fjord-brief.zip');
+        expect([...new Uint8Array(await file.blob.arrayBuffer())]).toEqual([80, 75, 3, 4]);
+        expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'POST', credentials: 'same-origin' });
+    });
+
+    it('throws Problem Details as ApiError', async () => {
+        fetchMock.mockResolvedValueOnce(problem(409, 'template_built_in'));
+
+        await expect(apiBlob('/en/templates/01kklar/toolkit', { method: 'POST' })).rejects.toMatchObject({ status: 409, reason: 'template_built_in' });
+    });
+
+    it('reads plain, quoted and RFC 5987 file names', () => {
+        expect(filenameOf('attachment; filename="openbill-toolkit-hotel.zip"')).toBe('openbill-toolkit-hotel.zip');
+        expect(filenameOf("attachment; filename*=UTF-8''openbill-toolkit-alpengl%C3%BCck.zip")).toBe('openbill-toolkit-alpenglück.zip');
+        expect(filenameOf(null)).toBeNull();
     });
 });

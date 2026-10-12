@@ -53,14 +53,17 @@ ddev exec vendor/bin/phpstan analyse --memory-limit=1G # Larastan, level 6
 ddev exec pnpm typecheck                               # TypeScript
 ddev exec pnpm test                                    # Vitest (resources/js)
 ddev exec 'pnpm --filter "./packages/*" test'          # workspace packages (paged-preview)
+ddev exec pnpm --filter @openbill/template-kit build   # template kit only → packages/template-kit/dist/kit (pnpm build does it, too)
 pnpm --dir e2e test                                    # Playwright on the Mac against DDEV (incl. the editor flow)
-ddev exec pnpm build                                   # production assets
+ddev exec pnpm build                                   # production assets and the template kit
 ddev exec 'pnpm --filter "./prototypes/*" test'        # clickable prototypes
 ```
 
 JavaScript dependencies are installed inside the DDEV container, so always run `pnpm` through `ddev exec`. `ddev exec` passes its arguments through a shell inside the container: wrap commands with glob patterns in single quotes, as above. Tests use their own database `testing`, which DDEV creates on start.
 
 `packages/paged-preview` splits the server-rendered parts of a document into pages. The app, the template editor and the template toolkit use it; it has no dependency on the app (no Tailwind, texts come in as props).
+
+`packages/template-kit` is the [template toolkit](/en/template-toolkit): a prebuilt preview page (React, `paged-preview`), the Vite plugin `openbill-render` and the CLI `push`/`pull`/`pack` (`src/tooling`), and the end user's files (`kit-files/`). `pnpm build` assembles it in `packages/template-kit/dist/kit`; the toolkit download zips that folder (`OPENBILL_TOOLKIT_PATH` points elsewhere, the download answers 503 without it). To try a change like a template author: build, unzip a download outside the repository and run `pnpm install && pnpm dev` there.
 
 ## Browser tests
 
@@ -73,7 +76,7 @@ ddev exec pnpm build                         # or keep `ddev exec pnpm dev` runn
 pnpm --dir e2e test                          # seeds demo data, then runs the tests
 ```
 
-The tests log in as `e2e@example.com` (created by `Database\Seeders\E2eUserSeeder`) and replace all business data with the demo data before they start (`E2E_SKIP_SEED=1` skips that). `OPENBILL_URL` points them at another instance.
+The tests log in as `e2e@example.com` (created by `Database\Seeders\E2eUserSeeder`) and replace all business data with the demo data before they start (`E2E_SKIP_SEED=1` skips that). `OPENBILL_URL` points them at another instance. `toolkit.spec.ts` needs the built template kit (`ddev exec pnpm build`; `pnpm dev` alone does not build it), Node 24, pnpm and `unzip` on your machine; it unpacks a download into a temporary folder and starts it with `NODE_OPTIONS=--use-system-ca`, so Node trusts the DDEV certificate.
 
 ## Languages
 

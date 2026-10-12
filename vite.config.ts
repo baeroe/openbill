@@ -31,7 +31,7 @@ export default defineConfig({
               }
             : {}),
         watch: {
-            ignored: ['**/storage/framework/views/**', '**/vendor/**', '**/prototypes/**', '**/docs/**', '**/.pnpm-store/**', '**/e2e/**'],
+            ignored: ['**/storage/framework/views/**', '**/vendor/**', '**/prototypes/**', '**/docs/**', '**/.pnpm-store/**', '**/e2e/**', '**/packages/template-kit/dist/**', '**/packages/template-kit/template/**'],
         },
     },
 });

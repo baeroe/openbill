@@ -1,0 +1,9 @@
+# This folder is its own pnpm project – also when you unpack it inside another workspace.
+packages: []
+
+# The toolkit needs Node.js 24 or newer.
+engineStrict: true
+
+# Packages that may run install scripts (Vite may pull esbuild in).
+allowBuilds:
+  esbuild: true

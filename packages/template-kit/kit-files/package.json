@@ -1,0 +1,19 @@
+{
+    "name": "openbill-template",
+    "private": true,
+    "type": "module",
+    "description": "Local development of an openbill template: live preview, push, pull and pack.",
+    "packageManager": "pnpm@12.8.1",
+    "engines": {
+        "node": ">=24"
+    },
+    "scripts": {
+        "dev": "vite",
+        "push": "node tooling/cli.js push",
+        "pull": "node tooling/cli.js pull",
+        "pack": "node tooling/cli.js pack"
+    },
+    "devDependencies": {
+        "vite": "^8.3.4"
+    }
+}

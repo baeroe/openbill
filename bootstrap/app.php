@@ -74,9 +74,10 @@ return Application::configure(basePath: dirname(__DIR__))
             TemplateRenderFailedException::class,
         ]);
 
-        // every /api route answers with Problem Details (API Platform's own error handler is off, config/api-platform.php)
+        // every /api route answers with Problem Details (API Platform's own error handler is off, config/api-platform.php),
+        // and so does the toolkit download, which the template editor fetches
         $exceptions->render(function (Throwable $e, Request $request) {
-            if (! $request->is('api', 'api/*') || $e instanceof HttpResponseException) {
+            if (! ($request->is('api', 'api/*') || $request->routeIs('templates.toolkit')) || $e instanceof HttpResponseException) {
                 return null;
             }
 

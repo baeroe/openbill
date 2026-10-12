@@ -1,6 +1,7 @@
 <?php
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Yaml\Yaml;
 
 /*
  * Keeps the self-hosting files consistent with the app and with each other: Dockerfile, .dockerignore, entrypoint,
@@ -116,4 +117,67 @@ it('has an entrypoint script a POSIX shell accepts', function () {
     $process->run();
 
     expect($process->getExitCode())->toBe(0, $process->getErrorOutput());
+});
+
+/** @return array<string, mixed> */
+function dockerCompose(): array
+{
+    return Yaml::parse(dockerRepoFile('docker-compose.yml'));
+}
+
+it('runs openbill, MariaDB 11.4 and Gotenberg 8 with two persistent volumes', function () {
+    $compose = dockerCompose();
+    $services = $compose['services'];
+
+    expect(array_keys($services))->toEqualCanonicalizing(['openbill', 'mariadb', 'gotenberg'])
+        ->and($services['openbill']['image'])->toBe('${OPENBILL_IMAGE:-baeroe/openbill:latest}')
+        ->and($services['openbill']['ports'])->toBe(['${OPENBILL_PORT:-7739}:8080'])
+        ->and($services['openbill']['volumes'])->toBe(['openbill-data:/var/www/html/storage/app'])
+        ->and($services['mariadb']['volumes'])->toBe(['openbill-db:/var/lib/mysql'])
+        ->and(array_keys($compose['volumes']))->toEqualCanonicalizing(['openbill-data', 'openbill-db'])
+        ->and($services['mariadb']['image'])->toMatch('/^mariadb:11\.4\.\d+@sha256:[0-9a-f]{64}$/')
+        ->and($services['gotenberg']['image'])->toMatch('/^gotenberg\/gotenberg:8\.\d+\.\d+@sha256:[0-9a-f]{64}$/');
+});
+
+it('starts openbill only after MariaDB and Gotenberg report healthy', function () {
+    $services = dockerCompose()['services'];
+
+    expect($services['openbill']['depends_on'])->toBe([
+        'mariadb' => ['condition' => 'service_healthy'],
+        'gotenberg' => ['condition' => 'service_healthy'],
+    ])
+        ->and($services['mariadb']['healthcheck']['test'])->toContain('healthcheck.sh')
+        ->and($services['gotenberg']['healthcheck']['test'])->toContain('http://localhost:3000/health');
+});
+
+it('lets MariaDB create the document lock triggers even with binary logging on', function () {
+    expect(dockerCompose()['services']['mariadb']['command'])->toContain('--log-bin-trust-function-creators=1');
+});
+
+it('keeps MariaDB and Gotenberg off the host and the internet', function () {
+    $compose = dockerCompose();
+
+    foreach (['mariadb', 'gotenberg'] as $service) {
+        expect($compose['services'][$service])->not->toHaveKey('ports')
+            ->and($compose['services'][$service]['networks'])->toBe(['backend']);
+    }
+    expect($compose['networks']['backend']['internal'])->toBeTrue()
+        ->and($compose['services']['openbill']['networks'])->toEqualCanonicalizing(['default', 'backend']);
+});
+
+it('runs Gotenberg with the same hardening flags as DDEV', function () {
+    $ddev = Yaml::parse(dockerRepoFile('.ddev/docker-compose.gotenberg.yaml'));
+
+    expect(dockerCompose()['services']['gotenberg']['command'])->toBe($ddev['services']['gotenberg']['command']);
+});
+
+it('documents every variable of the compose file in .env.docker.example', function () {
+    preg_match_all('/\$\{([A-Z_]+)/', dockerRepoFile('docker-compose.yml'), $m);
+    $example = dockerRepoFile('.env.docker.example');
+    $names = array_values(array_unique($m[1]));
+
+    expect($names)->toEqualCanonicalizing(['OPENBILL_IMAGE', 'OPENBILL_PORT', 'APP_KEY', 'APP_URL', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DB_PASSWORD', 'DB_ROOT_PASSWORD']);
+    foreach ($names as $name) {
+        expect($example)->toMatch('/^#?\s*'.$name.'=/m');
+    }
 });

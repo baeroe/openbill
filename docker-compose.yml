@@ -1,0 +1,86 @@
+# openbill, self-hosted: docs/en/setup.md. Put a .env next to this file (template: .env.docker.example).
+# Data lives in the volumes openbill-data (documents' PDFs/XMLs, templates, uploads, the generated APP_KEY) and
+# openbill-db (MariaDB). `docker compose down` keeps them, `docker compose down -v` deletes them.
+services:
+  openbill:
+    image: ${OPENBILL_IMAGE:-baeroe/openbill:latest}
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+    ports:
+      - "${OPENBILL_PORT:-7739}:8080"
+    environment:
+      APP_URL: "${APP_URL:?APP_URL missing (public https address, see .env.docker.example)}"
+      # optional: without it, a key is generated once and kept in the data volume
+      APP_KEY: "${APP_KEY:-}"
+      ADMIN_EMAIL: "${ADMIN_EMAIL:?ADMIN_EMAIL missing}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?ADMIN_PASSWORD missing}"
+      DB_HOST: mariadb
+      DB_DATABASE: openbill
+      DB_USERNAME: openbill
+      DB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD missing}"
+      GOTENBERG_URL: http://gotenberg:3000
+    volumes:
+      - openbill-data:/var/www/html/storage/app
+    networks:
+      - default
+      - backend
+
+  mariadb:
+    image: mariadb:11.4.13@sha256:1292844148b311e4ed4300022a996d39083f415a963e970cf47cad1b3b18e3a6
+    restart: unless-stopped
+    # Binary logging is off in this image. The document lock triggers need SUPER or this switch as soon as someone
+    # turns it on (replication, point-in-time backups), so it is set either way.
+    command:
+      - --log-bin-trust-function-creators=1
+    environment:
+      MARIADB_DATABASE: openbill
+      MARIADB_USER: openbill
+      MARIADB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD missing}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD missing}"
+      # runs mariadb-upgrade after a new MariaDB patch version
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - openbill-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - backend
+
+  # PDF rendering. Hardened like in development (.ddev/docker-compose.gotenberg.yaml): templates may come from untrusted
+  # packages, so Chromium runs no JavaScript and loads nothing but Gotenberg's own files and data: URLs.
+  gotenberg:
+    image: gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-deny-list=^file:(?!//\/tmp/).*
+      - --chromium-deny-list=^(?!(file|data):).*
+      - --chromium-deny-private-ips=true
+      - --chromium-deny-public-ips=true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - backend
+
+networks:
+  default:
+  # MariaDB and Gotenberg: reachable from openbill only, no published ports, no internet access
+  backend:
+    internal: true
+
+volumes:
+  openbill-data:
+  openbill-db:

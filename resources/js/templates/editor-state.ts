@@ -17,7 +17,8 @@ export type EditorAction =
     | { type: 'edit'; part: Exclude<Part, 'manifest'>; value: string }
     | { type: 'manifest_text'; text: string }
     | { type: 'paper'; patch: Partial<Paper> }
-    | { type: 'saved'; template: TemplateDetail }
+    /** sent/sentText: what went out with the PUT (files and the manifest text at that moment). */
+    | { type: 'saved'; template: TemplateDetail; sent: TemplateFiles; sentText: string }
     | { type: 'discard' };
 
 const pretty = (manifest: TemplateManifest): string => JSON.stringify(manifest, null, 2);
@@ -64,7 +65,9 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         }
         case 'saved': {
             const files = filesOf(action.template);
-            return { ...state, saved: files, files, manifestText: pretty(files.manifest), manifestProblem: null };
+            // typed on while the PUT was running: keep those newer edits (still dirty against the new base)
+            const unchanged = JSON.stringify(state.files) === JSON.stringify(action.sent) && state.manifestText === action.sentText;
+            return unchanged ? { ...state, saved: files, files, manifestText: pretty(files.manifest), manifestProblem: null } : { ...state, saved: files };
         }
         case 'discard':
             return { ...state, files: state.saved, manifestText: pretty(state.saved.manifest), manifestProblem: null };

@@ -70,7 +70,7 @@ describe('editor state', () => {
 
     it('is clean again after saving and takes the server state', () => {
         const edited = editorReducer(initEditor(template), { type: 'edit', part: 'css', value: 'h1 { color: red; }' });
-        const saved = editorReducer(edited, { type: 'saved', template: { ...template, css: 'h1 { color: red; }' } });
+        const saved = editorReducer(edited, { type: 'saved', template: { ...template, css: 'h1 { color: red; }' }, sent: edited.files, sentText: edited.manifestText });
 
         expect(isDirty(saved)).toBe(false);
         expect(saved.part).toBe(edited.part);
@@ -84,5 +84,28 @@ describe('editor state', () => {
         expect(parseManifest('{"name":"A","version":"1.0.0"}')).toEqual({ manifest: { name: 'A', version: '1.0.0' } });
         expect(parseManifest('nope')).toMatchObject({ problem: { code: 'invalid_json' } });
         expect(parseManifest('null')).toEqual({ problem: { code: 'not_object' } });
+    });
+
+    it('keeps what was typed while saving and stays dirty against the new base (review #2)', function () {
+        const sending = editorReducer(initEditor(template), { type: 'edit', part: 'css', value: 'h1 { color: red; }' });
+        const sent = savePayload(sending)!;
+        const typedOn = editorReducer(sending, { type: 'edit', part: 'body', value: '<h1>{{ document.number }}!</h1>' });
+
+        const saved = editorReducer(typedOn, { type: 'saved', template: { ...template, css: 'h1 { color: red; }' }, sent, sentText: sending.manifestText });
+
+        expect(saved.files.body).toBe('<h1>{{ document.number }}!</h1>');
+        expect(saved.saved.css).toBe('h1 { color: red; }');
+        expect(saved.saved.body).toBe(template.body);
+        expect(isDirty(saved)).toBe(true);
+    });
+
+    it('keeps a manifest text typed while saving', function () {
+        const sending = initEditor(template);
+        const typedOn = editorReducer(sending, { type: 'manifest_text', text: '{ "name": "Fj' });
+
+        const saved = editorReducer(typedOn, { type: 'saved', template, sent: sending.files, sentText: sending.manifestText });
+
+        expect(saved.manifestText).toBe('{ "name": "Fj');
+        expect(saved.manifestProblem?.code).toBe('invalid_json');
     });
 });

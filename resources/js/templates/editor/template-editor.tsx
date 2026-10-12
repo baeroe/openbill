@@ -56,8 +56,9 @@ export function TemplateEditor({ template }: { template: TemplateDetail }) {
         }
         setSaving(true);
         try {
+            const sentText = state.manifestText;
             const saved = await saveTemplateFiles(template.id, payload);
-            dispatch({ type: 'saved', template: saved });
+            dispatch({ type: 'saved', template: saved, sent: payload, sentText });
             setManifestViolations([]);
             void mutate(keys.template(template.id), saved, { revalidate: false });
             toast.success(t('templates.saved'));

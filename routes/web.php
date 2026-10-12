@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\TemplateToolkitController;
 use Illuminate\Support\Facades\Route;
 
 // admin: the language is part of the URL (/en/…, /de/…)
@@ -31,6 +32,9 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
         Route::get('/customers/{id}', [CustomerController::class, 'show'])->whereUlid('id')->name('customers.show');
         Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
         Route::get('/templates/{id}', [TemplateController::class, 'show'])->whereUlid('id')->name('templates.show');
+        // toolkit download: creates a token, so only the session (never an API token) and rarely
+        Route::post('/templates/{id}/toolkit', TemplateToolkitController::class)
+            ->whereUlid('id')->middleware('throttle:10,1')->name('templates.toolkit');
         Route::get('/fields', [FieldController::class, 'index'])->name('fields.index');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::get('/settings/{section}', [SettingsController::class, 'show'])

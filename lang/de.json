@@ -1007,6 +1007,7 @@
     "tokens.token": "Token",
     "tokens.toolkit": "Toolkit · :template",
     "tokens.toolkit_elsewhere": "Template-Tokens entstehen im Template-Editor (Toolkit herunterladen).",
+    "toolkit.token_name": "Toolkit: :template (:date)",
     "unit_code.ANN": "Jahr",
     "unit_code.C62": "Einheit",
     "unit_code.DAY": "Tag",

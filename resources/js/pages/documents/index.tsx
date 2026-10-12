@@ -3,6 +3,7 @@ import { FileText, Plus, SearchX } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useDocumentList } from '@/api/documents';
 import type { DocumentFilters, DocumentStatus, DocumentSummary, DocumentType } from '@/api/types';
+import { DocumentAmount } from '@/components/document-amount';
 import { useNewDocument } from '@/components/new-document/new-document-context';
 import { Button, Card, controlClass, cx, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, PillButton, SearchInput, SelectControl, StatusBadge } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
@@ -278,7 +279,9 @@ function DocumentRow({ document }: { document: DocumentSummary }) {
             <span className="col-start-2 row-start-2 justify-self-end sm:col-auto sm:row-auto sm:justify-self-start">
                 <StatusBadge status={document.status} overdue={document.is_overdue} />
             </span>
-            <span className="num col-start-2 row-start-1 text-right font-semibold sm:col-auto sm:row-auto">{formatMoney(document.gross_total)}</span>
+            <span className="num col-start-2 row-start-1 text-right font-semibold sm:col-auto sm:row-auto">
+                <DocumentAmount gross={document.gross_total} open={document.open_amount} />
+            </span>
         </Link>
     );
 }

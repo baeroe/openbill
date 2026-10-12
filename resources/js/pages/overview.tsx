@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { AlarmClock, ArrowUpRight, CircleCheck, FilePen, FilePlus2, FileText, Hourglass, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { DocumentStatus, DocumentType } from '@/api/types';
+import { DocumentAmount } from '@/components/document-amount';
 import { useNewDocument } from '@/components/new-document/new-document-context';
 import { Badge, Button, Card, CardHead, cx, EmptyState, Page, StatusBadge } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
@@ -20,6 +21,7 @@ export type OverviewDocument = {
     number: string | null;
     customer_name: string | null;
     gross_total: string;
+    open_amount: string | null;
     is_overdue: boolean;
     reason: Reason | null;
     reason_date: string | null;
@@ -217,7 +219,9 @@ function AttentionRow({ document, today }: { document: OverviewDocument; today: 
                 </span>
                 <span className="truncate text-sm text-muted">{attentionText(document, today)}</span>
             </span>
-            <span className="num text-right font-semibold whitespace-nowrap">{formatMoney(document.gross_total)}</span>
+            <span className="num text-right font-semibold whitespace-nowrap">
+                <DocumentAmount gross={document.gross_total} open={document.open_amount} />
+            </span>
         </Link>
     );
 }
@@ -234,7 +238,9 @@ function RecentRow({ document }: { document: OverviewDocument }) {
             <span className="hidden xs:block">
                 <StatusBadge status={document.status} overdue={document.is_overdue} />
             </span>
-            <span className="num text-right font-semibold whitespace-nowrap">{formatMoney(document.gross_total)}</span>
+            <span className="num text-right font-semibold whitespace-nowrap">
+                <DocumentAmount gross={document.gross_total} open={document.open_amount} />
+            </span>
         </Link>
     );
 }

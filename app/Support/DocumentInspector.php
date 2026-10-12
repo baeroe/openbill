@@ -6,8 +6,12 @@ use App\Domain\Compliance\ComplianceChecker;
 use App\Domain\Compliance\ComplianceIssue;
 use App\Domain\Totals\Totals;
 use App\Domain\Totals\TotalsCalculator;
+use App\Domain\Totals\TotalsLimits;
+use App\Enums\DocumentType;
 use App\Models\Document;
 use App\Models\DocumentTypeSetting;
+use Brick\Math\BigDecimal;
+use Illuminate\Validation\ValidationException;
 use LogicException;
 
 /** Totals and compliance of a document: drafts with live master data, finalized ones with their snapshot. */
@@ -48,11 +52,13 @@ final class DocumentInspector
 
     /**
      * Issues that block finalizing. A finalized document has none (unless $sources is given).
+     * A cancellation is also checked against what is left of its invoice ($cancellable: FinalizeDocument passes the
+     * locked balance, otherwise it is read here).
      *
      * @param  array<string, mixed>|null  $sources
      * @return list<ComplianceIssue>
      */
-    public function issues(Document $document, ?array $sources = null): array
+    public function issues(Document $document, ?array $sources = null, ?BigDecimal $cancellable = null): array
     {
         if ($sources === null && $document->isFinalized()) {
             return [];
@@ -61,16 +67,64 @@ final class DocumentInspector
         $document->loadMissing('groups.positions');
         $profile = DocumentTypeSetting::query()->findOrFail($document->type->value)->profile;
 
-        return ComplianceChecker::check(DomainMapper::complianceInput($document, $sources, $profile));
+        $gross = null;
+        if ($document->type === DocumentType::Cancellation) {
+            $invoice = $document->source_id === null ? null : Document::query()->find($document->source_id);
+            $balance = $invoice === null ? null : InvoiceBalance::of($invoice);
+            $cancellable ??= $balance === null ? null : BigDecimal::of($balance);
+            $gross = $this->totals($document, $sources)->gross;
+        }
+
+        return ComplianceChecker::check(DomainMapper::complianceInput($document, $sources, $profile, $gross, $cancellable));
     }
 
-    /** Copies the totals into the model's stored columns (not saved). */
+    /**
+     * Copies the totals into the model's stored columns (not saved). Amounts the columns cannot hold are a
+     * validation error (422) at the field that causes them, never a database error (review M2).
+     *
+     * @throws ValidationException
+     */
     public function applyTotals(Document $document, Totals $totals): void
     {
+        self::assertStorable($document, $totals);
         $document->forceFill([
             'net_total' => (string) $totals->net,
             'tax_total' => (string) $totals->tax,
             'gross_total' => (string) $totals->gross,
         ]);
+    }
+
+    /**
+     * Paths in the shape of UpdateDraft's input (groups.<index>.positions.<index>.<field>).
+     *
+     * @throws ValidationException
+     */
+    public static function assertStorable(Document $document, Totals $totals): void
+    {
+        $exceeded = TotalsLimits::exceeded($totals);
+        if ($exceeded['lines'] === [] && $exceeded['groups'] === [] && ! $exceeded['document']) {
+            return;
+        }
+
+        $message = Text::t('errors.amount_too_large', ['max' => TotalsLimits::MAX]);
+        $messages = [];
+        $document->loadMissing('groups.positions');
+        foreach ($document->groups->values() as $g => $group) {
+            $lineFound = false;
+            foreach ($group->positions->values() as $p => $position) {
+                if (in_array($position->id, $exceeded['lines'], true)) {
+                    $messages["groups.{$g}.positions.{$p}.unit_price"] = [$message];
+                    $lineFound = true;
+                }
+            }
+            if (! $lineFound && in_array($group->id, $exceeded['groups'], true)) {
+                $messages["groups.{$g}"] = [$message];
+            }
+        }
+        if ($messages === []) {
+            $messages['groups'] = [$message];
+        }
+
+        throw ValidationException::withMessages($messages);
     }
 }

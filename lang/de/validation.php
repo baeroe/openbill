@@ -171,6 +171,7 @@ return [
         'country' => 'Land',
         'email' => 'E-Mail',
         'password' => 'Passwort',
+        'current_password' => 'aktuelles Passwort',
         'vat_id' => 'USt-ID',
         'tax_number' => 'Steuernummer',
         'registration_id' => 'Registernummer',

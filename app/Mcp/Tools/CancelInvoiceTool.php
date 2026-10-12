@@ -21,7 +21,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('cancel-invoice')]
 #[Title('Cancel invoice')]
-#[Description('Start the cancellation of an open or paid invoice: creates the cancellation draft (or returns the existing one). Finalizing that draft with finalize-document marks the invoice as cancelled – ask the user before you do.')]
+#[Description('Start the cancellation of an open or paid invoice: creates the cancellation draft with all positions negated (or returns the existing draft). For a partial cancellation reduce its positions with update-document: it must credit more than 0 and at most the open_amount of the invoice. Finalizing that draft with finalize-document cancels the invoice once nothing is left of it – ask the user before you do.')]
 #[IsDestructive]
 #[IsIdempotent]
 #[IsOpenWorld(false)]

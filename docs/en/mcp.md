@@ -46,7 +46,7 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 
 | Tool | What it does |
 |---|---|
-| `get-overview` | Key figures (open, overdue, offers, paid), documents that need attention, recently edited ones |
+| `get-overview` | Key figures (open, overdue, offers, paid; invoices count with what is left after partial cancellations), documents that need attention, recently edited ones |
 | `list-customers`, `get-customer` | Customers with contacts; search and pages |
 | `create-customer`, `update-customer` | Create or change a customer; `contacts` is the complete list |
 | `list-documents`, `get-document` | Documents in short form with filters; one document completely, with totals and open issues |
@@ -55,7 +55,7 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `finalize-document` | Check, assign the number, archive the PDF (and the e-invoice XML) – cannot be undone |
 | `set-document-status` | Accepted, rejected, done, paid, back to open |
 | `convert-document` | Accepted offer into a confirmation or invoice, confirmation into an invoice |
-| `cancel-invoice` | Cancellation draft of an open or paid invoice |
+| `cancel-invoice` | Cancellation draft of an open or paid invoice (reduce its positions for a partial cancellation) |
 | `get-document-pdf-url` | Signed links to the PDF (and the XML of an e-invoice), 15 minutes, no token needed |
 | `list-field-definitions`, `save-field-definition` | Custom fields: list, create, change |
 | `list-templates`, `get-template`, `update-template` | Templates with their Liquid and CSS sources; built-in ones are read-only |

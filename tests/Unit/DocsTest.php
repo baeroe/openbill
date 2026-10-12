@@ -68,7 +68,7 @@ it('explains binary logging for external databases and the data volume on the se
 
     foreach (['en', 'de'] as $locale) {
         expect((string) file_get_contents("{$root}/docs/{$locale}/setup.md"))
-            ->toContain('log_bin_trust_function_creators', 'openbill-data', 'openbill-db', '7739', 'DB_WAIT_TIMEOUT', 'OPENBILL_BIND', 'TRUSTED_PROXIES', 'ADMIN_PASSWORD missing');
+            ->toContain('log_bin_trust_function_creators', 'openbill-data', 'openbill-db', '7739', 'DB_WAIT_TIMEOUT', 'OPENBILL_BIND', 'TRUSTED_PROXIES', 'DB_PASSWORD missing', 'app:reset-password', 'nobody can log in');
     }
 });
 

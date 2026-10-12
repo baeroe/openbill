@@ -12,6 +12,7 @@ use App\State\ApiContext;
 use App\State\Paginate;
 use App\Support\DocumentInspector;
 use App\Support\DocumentQuery;
+use App\Support\InvoiceBalance;
 
 /** @implements ProviderInterface<DocumentResource> */
 final class DocumentProvider implements ProviderInterface
@@ -29,7 +30,7 @@ final class DocumentProvider implements ProviderInterface
 
         $request = ApiContext::request($context);
         $filters = DocumentQuery::validate($request->query());
-        $query = DocumentQuery::sorted(DocumentQuery::filtered($filters, now()->toDateString()), (string) ($filters['sort'] ?? '-date'))
+        $query = InvoiceBalance::withCancelled(DocumentQuery::sorted(DocumentQuery::filtered($filters, now()->toDateString()), (string) ($filters['sort'] ?? '-date')))
             ->with(['customer' => fn ($customer) => $customer->withTrashed()]);
 
         return Paginate::query($query, $request, fn (Document $document): DocumentResource => DocumentResource::fromModel($document));

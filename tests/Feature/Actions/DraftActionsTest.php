@@ -174,3 +174,17 @@ it('deletes a draft and keeps the event', function () {
     expect(Document::query()->count())->toBe(0)
         ->and(DocumentEvent::query()->where('action', EventAction::Deleted)->value('payload'))->toMatchArray(['type' => 'invoice']);
 });
+
+it('rejects amounts the columns cannot hold with a field error instead of a database error (review M2)', function () {
+    $document = draft();
+    $update = fn (array $positions) => validationErrors(fn () => app(UpdateDraft::class)->handle(systemActor(), $document, [
+        'groups' => [['title' => null, 'positions' => $positions]],
+    ]));
+
+    expect($update([itemRow('Huge', '99999999999', '99999999999')]))->toHaveKey('groups.0.positions.0.unit_price')
+        ->and($update([itemRow('A', '60', '99999999999'), itemRow('B', '60', '99999999999')]))->toHaveKey('groups.0')
+        ->and(validationErrors(fn () => app(UpdateDraft::class)->handle(systemActor(), $document, [
+            'groups' => [['title' => null, 'positions' => [[...itemRow(), 'quantity' => 123456789012]]]],
+        ])))->toHaveKey('groups.0.positions.0.quantity')
+        ->and($document->fresh()->gross_total)->toBe('119.00');
+});

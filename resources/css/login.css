@@ -1,0 +1,115 @@
+/*
+ * Login illustration (resources/js/components/login-art.tsx): one sequence on load, ~2 s, never again.
+ * The final state is the elements' own style; the animations only fill backwards (from their first keyframe until
+ * they start), so without animations (reduced motion) the final state shows at once.
+ */
+.login-paper {
+    background: var(--paper);
+    color: var(--paper-ink);
+}
+
+.login-step {
+    display: inline-flex;
+    min-width: 0;
+    height: 1.75rem;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 999px;
+    padding-inline: 0.7rem;
+    background: var(--surface);
+    color: var(--muted);
+    animation: login-step 320ms var(--ease-soft) calc(150ms + var(--step) * 300ms) backwards;
+}
+
+.login-step-current {
+    background: var(--accent);
+    color: var(--accent-ink);
+}
+
+.login-check {
+    flex-shrink: 0;
+    animation: login-fade 240ms var(--ease-soft) calc(300ms + var(--step) * 300ms) backwards;
+}
+
+.login-link {
+    transform-origin: left;
+    animation: login-grow 260ms var(--ease-soft) calc(var(--step) * 300ms) backwards;
+}
+
+/* the invoice gets its number once it is reached in the chain */
+.login-draft {
+    opacity: 0;
+    animation: login-out 220ms var(--ease-soft) 1000ms backwards;
+}
+
+.login-number {
+    animation: login-in 300ms var(--ease-soft) 1080ms backwards;
+}
+
+.login-stamp {
+    opacity: 0.88;
+    transform: rotate(-9deg);
+    animation: login-stamp 420ms var(--ease-soft) 1300ms backwards;
+}
+
+.login-file {
+    display: inline-flex;
+    height: 2.25rem;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    padding-inline: 0.75rem 0.9rem;
+    background: var(--surface);
+    box-shadow: var(--elev-float);
+    font-size: 0.75rem;
+    font-weight: 550;
+    white-space: nowrap;
+    animation: login-in 320ms var(--ease-soft) calc(1700ms + var(--step) * 150ms) backwards;
+}
+
+@keyframes login-step {
+    from {
+        background: transparent;
+        color: var(--faint);
+    }
+}
+
+@keyframes login-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes login-grow {
+    from {
+        transform: scaleX(0);
+    }
+}
+
+@keyframes login-out {
+    from {
+        opacity: 1;
+    }
+}
+
+@keyframes login-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@keyframes login-stamp {
+    from {
+        opacity: 0;
+        transform: rotate(-3deg) scale(1.6);
+    }
+}
+
+/* final state immediately (the global rule only shortens durations, the delays would still hide the stamp) */
+@media (prefers-reduced-motion: reduce) {
+    .login-art,
+    .login-art * {
+        animation: none !important;
+    }
+}

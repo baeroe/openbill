@@ -1,12 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LogIn } from 'lucide-react';
 import { LocaleSwitch } from '@/components/locale-switch';
+import { LoginArt } from '@/components/login-art';
 // direct imports, not the ui barrel: the barrel re-exports Radix dialogs and menus the login does not need
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox, TextInput } from '@/components/ui/form';
 import { LogoMark } from '@/layouts/logo';
-import { formatMoney } from '@/lib/format';
 import { path, t } from '@/lib/i18n';
 
 export default function Login() {
@@ -62,48 +61,9 @@ export default function Login() {
                     </Button>
                 </form>
             </div>
-            <div aria-hidden className="relative hidden place-items-center overflow-hidden rounded-xl bg-surface-2 p-10 md:grid">
+            <div className="relative hidden place-items-center overflow-hidden rounded-xl bg-surface-2 p-10 md:grid">
                 <LoginArt />
             </div>
         </main>
-    );
-}
-
-/** Two sheets of paper, a total and a "paid" chip. Decorative; paper stays white in dark mode as well. */
-function LoginArt() {
-    const line = (width: string) => <span className="block h-2 rounded-full bg-[#ecece9]" style={{ width }} />;
-    const row = (left: string, right: string, group = false) => (
-        <div className={group ? 'flex justify-between border-t border-[#ecece9] pt-2.5' : 'flex justify-between'}>
-            {line(left)}
-            {line(right)}
-        </div>
-    );
-
-    return (
-        <div className="relative aspect-[210/260] w-full max-w-[26rem]">
-            <div className="absolute inset-0 grid -translate-x-[8%] translate-y-[3%] -rotate-5 content-start gap-2.5 rounded-[6px] bg-white p-[9%] opacity-70 shadow-paper">
-                {line('40%')}
-                {line('70%')}
-                {line('55%')}
-            </div>
-            <div className="absolute inset-0 grid content-start gap-2.5 rounded-[6px] bg-white p-[9%] text-[13px] text-[#23252b] shadow-paper">
-                <div className="mb-4 flex items-baseline justify-between">
-                    <span className="block h-3 w-[38%] rounded-full bg-[#23252b]" />
-                    {line('28%')}
-                </div>
-                {row('36%', '18%', true)}
-                {row('52%', '16%')}
-                {row('44%', '16%')}
-                {row('30%', '18%', true)}
-                {row('48%', '16%')}
-                <div className="num mt-4 flex justify-between rounded-[10px] bg-[#e3e9fb] px-3 py-2.5 font-bold text-[#2f55d4]">
-                    <span>{t('template.total')}</span>
-                    <span>{formatMoney('9650.90')}</span>
-                </div>
-            </div>
-            <div className="absolute right-[-6%] bottom-[10%] flex items-center gap-2 rounded-full bg-surface py-2 pr-3.5 pl-2 shadow-float">
-                <Badge tone="ok">{t('status.paid')}</Badge>
-            </div>
-        </div>
     );
 }

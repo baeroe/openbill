@@ -39,17 +39,22 @@ final class FinalizeDocument
     public function handle(Actor $actor, Document $document): Document
     {
         return DB::transaction(function () use ($actor, $document): Document {
+            // lock order invoice → cancellation (like ConvertDocument): two cancellations of one invoice finalize one
+            // after the other, and the second one sees what the first one left (InvoiceBalance::locked). Type and
+            // source never change, so the given model names the invoice without a read: a plain read here would fix
+            // the transaction's read view before the draft is locked (stale positions)
+            $invoice = $document->type === DocumentType::Cancellation && $document->source_id !== null
+                ? Document::query()->lockForUpdate()->find($document->source_id)
+                : null;
             $draft = Document::query()->lockForUpdate()->findOrFail($document->id);
             if ($draft->isFinalized()) {
                 throw DocumentLockedException::for($draft);
             }
-            // a cancellation locks its invoice first: two cancellations of one invoice finalize one after the other,
-            // and the second one sees what the first one left (InvoiceBalance::locked)
-            $invoice = null;
+
             $cancellable = null;
             if ($draft->type === DocumentType::Cancellation) {
-                $invoice = $draft->source_id === null ? null : Document::query()->lockForUpdate()->find($draft->source_id);
                 if ($invoice === null
+                    || $invoice->id !== $draft->source_id
                     || $invoice->type !== DocumentType::Invoice
                     || ! in_array($invoice->status, [DocumentStatus::Open, DocumentStatus::Paid], true)
                     || $invoice->cancelled_by_id !== null) {

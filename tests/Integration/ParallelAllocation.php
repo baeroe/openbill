@@ -6,6 +6,7 @@ use App\Actions\AllocateDocumentNumber;
 use App\Actions\FinalizeDocument;
 use App\Contracts\DocumentArchiver;
 use App\Enums\DocumentType;
+use App\Exceptions\ComplianceFailedException;
 use App\Exceptions\DocumentLockedException;
 use App\Models\Document;
 use App\Support\Actor;
@@ -36,8 +37,8 @@ final class ParallelAllocation
     }
 
     /**
-     * Tries to finalize every draft in $ids; returns per id the number, or "locked" when another
-     * process finalized it first.
+     * Tries to finalize every draft in $ids; returns per id the number, "locked" when another
+     * process finalized it first, or the codes of the compliance issues that stopped it.
      *
      * @param  list<string>  $ids
      * @return Closure(): array<string, string>
@@ -54,6 +55,8 @@ final class ParallelAllocation
                     $results[$id] = (string) $document->number;
                 } catch (DocumentLockedException) {
                     $results[$id] = 'locked';
+                } catch (ComplianceFailedException $e) {
+                    $results[$id] = implode(',', array_column($e->toArray(), 'code'));
                 }
             }
 

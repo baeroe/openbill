@@ -7,7 +7,10 @@ hero:
   tagline: Open source and self-hosted. Your own fields on every level, your own PDF templates in Liquid, and EN 16931 e-invoices out of the box.
   actions:
     - theme: brand
-      text: Development setup
+      text: Self-host it
+      link: /en/setup
+    - theme: alt
+      text: Development
       link: /en/development
     - theme: alt
       text: GitHub

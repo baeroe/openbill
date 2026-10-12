@@ -2,14 +2,21 @@ import { defineConfig, type DefaultTheme } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 
 // every page exists in docs/en and docs/de under the same file name (tests/Unit/DocsTest.php)
+const hosting = ['setup', 'reverse-proxy', 'backup', 'upgrading'];
 const pages = ['documents', 'custom-fields', 'templates', 'template-toolkit', 'e-invoice', 'settings', 'api', 'mcp', 'development'];
 
 const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.SidebarItem[] => [
+    { text: t.hosting, items: hosting.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
     { text: t.guide, items: pages.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
 ];
 
 const en: Record<string, string> = {
     guide: 'Guide',
+    hosting: 'Self-hosting',
+    setup: 'Setup',
+    'reverse-proxy': 'Reverse proxy',
+    backup: 'Backup',
+    upgrading: 'Upgrading',
     documents: 'Documents',
     'custom-fields': 'Custom fields',
     settings: 'Settings',
@@ -23,6 +30,11 @@ const en: Record<string, string> = {
 
 const de: Record<string, string> = {
     guide: 'Anleitung',
+    hosting: 'Betrieb',
+    setup: 'Einrichtung',
+    'reverse-proxy': 'Reverse Proxy',
+    backup: 'Datensicherung',
+    upgrading: 'Aktualisieren',
     documents: 'Dokumente',
     'custom-fields': 'Eigene Felder',
     settings: 'Einstellungen',
@@ -60,7 +72,7 @@ export default defineConfig({
             link: '/en/',
             description: 'Open, self-hosted quotes and invoices with custom fields, Liquid templates and e-invoices.',
             themeConfig: {
-                nav: [{ text: 'Guide', link: '/en/development' }],
+                nav: [{ text: 'Guide', link: '/en/setup' }],
                 sidebar: sidebar('/en', en),
                 editLink: { pattern: 'https://github.com/baeroe/openbill/edit/main/docs/:path', text: 'Edit this page' },
                 footer: { message: 'Released under the MIT License.', copyright: '© 2026 Rafael Haußmann' },
@@ -72,7 +84,7 @@ export default defineConfig({
             link: '/de/',
             description: 'Offene, selbst gehostete Angebote und Rechnungen mit eigenen Feldern, Liquid-Templates und E-Rechnung.',
             themeConfig: {
-                nav: [{ text: 'Anleitung', link: '/de/development' }],
+                nav: [{ text: 'Anleitung', link: '/de/setup' }],
                 sidebar: sidebar('/de', de),
                 editLink: { pattern: 'https://github.com/baeroe/openbill/edit/main/docs/:path', text: 'Seite bearbeiten' },
                 footer: { message: 'Veröffentlicht unter der MIT-Lizenz.', copyright: '© 2026 Rafael Haußmann' },

@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\TrustedRequests;
+
 it('has every docs page in English and German', function () {
     $pages = fn (string $locale): array => array_map('basename', glob(dirname(__DIR__, 2)."/docs/{$locale}/*.md") ?: []);
 
@@ -31,4 +33,42 @@ it('explains the toolkit token, pnpm run pack and local certificates on the tool
         ->toContain('read access to all documents', '.env.local', 'pnpm run pack', '--use-system-ca', 'pnpm pull --force')
         ->and((string) file_get_contents("{$root}/docs/de/template-toolkit.md"))
         ->toContain('lesender Zugriff auf alle Dokumente', '.env.local', 'pnpm run pack', '--use-system-ca', 'pnpm pull --force');
+});
+
+it('lists the trusted proxy networks, the APP_URL host rule and the body size on the reverse proxy page', function () {
+    $root = dirname(__DIR__, 2);
+
+    foreach (['en', 'de'] as $locale) {
+        $page = (string) file_get_contents("{$root}/docs/{$locale}/reverse-proxy.md");
+        foreach (TrustedRequests::PROXIES as $network) {
+            expect($page)->toContain("`{$network}`");
+        }
+        expect($page)->toContain('APP_URL', 'client_max_body_size 32m', '127.0.0.1:7739');
+    }
+});
+
+it('documents backup and restore of the database and the data volume', function () {
+    $root = dirname(__DIR__, 2);
+
+    foreach (['en', 'de'] as $locale) {
+        expect((string) file_get_contents("{$root}/docs/{$locale}/backup.md"))
+            ->toContain('mariadb-dump', '--single-transaction', '--triggers', '/var/www/html/storage/app', '.app-key', 'down -v');
+    }
+});
+
+it('explains binary logging for external databases and the data volume on the setup page', function () {
+    $root = dirname(__DIR__, 2);
+
+    foreach (['en', 'de'] as $locale) {
+        expect((string) file_get_contents("{$root}/docs/{$locale}/setup.md"))
+            ->toContain('log_bin_trust_function_creators', 'openbill-data', 'openbill-db', '7739', 'DB_WAIT_TIMEOUT');
+    }
+});
+
+it('has upgrade notes for the first release in both languages', function () {
+    $root = dirname(__DIR__, 2);
+
+    foreach (['en', 'de'] as $locale) {
+        expect((string) file_get_contents("{$root}/docs/{$locale}/upgrading.md"))->toContain("\n### 0.1.0\n");
+    }
 });

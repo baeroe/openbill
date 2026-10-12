@@ -284,5 +284,5 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l√
 - [x] Phase 7: Templates, eigene Felder, Einstellungen
 - [x] Phase 8: MCP
 - [x] Phase 9: Template-Toolkit
-- [ ] Phase 10: Docker & Release
+- [x] Phase 10: Docker & Release
 - [ ] Phase 11: Feinschliff

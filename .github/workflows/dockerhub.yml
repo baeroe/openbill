@@ -37,5 +37,5 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: baeroe/openbill
-          short-description: Self-hosted quotes and invoices with custom fields, Liquid templates and EN 16931 e-invoices.
+          short-description: 'Self-hosted quotes and invoices: custom fields, Liquid templates, EN 16931 e-invoices, REST API, MCP'
           enable-url-completion: true

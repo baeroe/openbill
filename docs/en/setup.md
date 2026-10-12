@@ -2,6 +2,20 @@
 
 openbill runs as a Docker Compose stack: the app (`baeroe/openbill`, for `linux/amd64` and `linux/arm64`), MariaDB 11.4 and Gotenberg 8, which renders the PDFs. You need Docker with Compose v2 and, for HTTPS, a reverse proxy in front (see [Reverse proxy](/en/reverse-proxy)).
 
+## Quick start: paste and deploy
+
+One compose file with everything in it, no `.env`:
+
+1. Paste the block below into a new stack in Dockge or Portainer, or save it as `compose.yaml` on your server.
+2. Change the four values at the top: `APP_URL` (the https address of your reverse proxy), `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `DB_PASSWORD`. openbill refuses to start while a password is still `change-me`.
+3. Deploy (Dockge/Portainer) or run `docker compose up -d`. Wait for `openbill: ready` in the logs of `openbill`, then open `APP_URL`. openbill listens on `http://127.0.0.1:7739` for your reverse proxy.
+
+The owner account is created on the first start; afterwards you can delete the `ADMIN_PASSWORD` line. Keep `DB_PASSWORD` as it is: MariaDB stores it on the first start. MariaDB's root password is random and not needed (backups use the `openbill` user).
+
+<<< @/../docker-compose.standalone.yml{yaml}
+
+If you prefer the settings in a separate `.env` next to the compose file (for example to keep the compose file unchanged on updates), use the way below instead.
+
 ## Files
 
 ```bash
@@ -50,7 +64,7 @@ On every start the container:
 |---|---|
 | Archived PDFs and e-invoice XMLs, template assets, uploaded images and logos, the generated `APP_KEY` (`.app-key`) | volume `openbill-data` (`/var/www/html/storage/app` in the container) |
 | Database | volume `openbill-db` (MariaDB) |
-| Settings | `.env` next to `docker-compose.yml` |
+| Settings | `.env` next to `docker-compose.yml`, or the block at the top of the standalone compose file |
 
 Containers can be recreated at any time, the volumes stay. `docker compose down -v` deletes them, and with them every document. Back up both volumes, see [Backup](/en/backup).
 

@@ -104,14 +104,9 @@ landing:
       - { kind: agent, text: 'RE-2026-0042 ist abgeschlossen. PDF und E-Rechnungs-XML sind archiviert, die Links gelten 15 Minuten.' }
   hosting:
     title: Läuft auf deinem Server, mit Docker Compose
-    text: Ein Compose-Stack mit allem, was er braucht. Zwei Dateien laden, Passwörter und Adresse in .env eintragen, starten.
-    code: |
-      mkdir openbill && cd openbill
-      curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml
-      curl -fsSL -o .env https://raw.githubusercontent.com/baeroe/openbill/main/.env.docker.example
-      nano .env    # APP_URL, ADMIN_*, DB_* Passwörter
-      docker compose up -d
-    copy: Kopieren
+    text: Eine Compose-Datei mit allem, was sie braucht. In Dockge oder Portainer einfügen (oder als compose.yaml speichern), die vier Werte oben ändern, starten.
+    rest: '# … und die Dienste openbill, MariaDB und Gotenberg. Kopieren nimmt die ganze Datei.'
+    copy: Compose-Datei kopieren
     copied: Kopiert
     facts:
       - { title: amd64 und arm64, text: 'Images für beide, vom Heimserver bis in die Cloud.' }

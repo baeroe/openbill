@@ -686,13 +686,15 @@
 }
 .ob-code pre {
     margin: 0;
-    padding: 22px 22px 22px;
-    padding-right: 110px;
+    padding: 60px 22px 22px;
     overflow-x: auto;
     font-family: var(--vp-font-family-mono);
-    font-size: 13px;
-    line-height: 1.75;
+    font-size: 12px;
+    line-height: 1.7;
     color: var(--ob-ink);
+}
+.ob-code .is-comment {
+    color: var(--ob-muted);
 }
 .ob-copy {
     position: absolute;
@@ -712,12 +714,6 @@
 }
 .ob-copy:hover {
     background: var(--ob-surface-3);
-}
-@media (max-width: 640px) {
-    .ob-code pre {
-        padding-top: 60px;
-        padding-right: 22px;
-    }
 }
 .ob-facts dl {
     margin: 0;

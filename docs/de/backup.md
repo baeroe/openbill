@@ -2,7 +2,7 @@
 
 Eine Sicherung hat drei Teile: die Datenbank (Volume `openbill-db`), die Dateien (Volume `openbill-data`: archivierte PDFs und XMLs, Template-Assets, Uploads, der erzeugte `APP_KEY` in `.app-key`) und deine `.env`. Datenbank und Dateien gehören zusammen: openbill prüft beim Ausliefern den SHA-256 jedes archivierten PDFs gegen die Datenbank.
 
-Führe die Befehle neben `docker-compose.yml` aus, der Stack läuft dabei weiter.
+Führe die Befehle neben `docker-compose.yml` aus, der Stack läuft dabei weiter. Mit der [Standalone-Compose-Datei](/de/setup#schnellstart-einfugen-und-starten) im Ordner des Stacks (Dockge: `/opt/stacks/<name>/`); dort ersetzt die Compose-Datei selbst die `.env` in der Sicherung.
 
 ## Sichern
 
@@ -10,7 +10,7 @@ Erst die Datenbank, dann die Dateien – so hat jedes Dokument im Dump seine Dat
 
 ```bash
 # 1. Datenbank: konsistenter Stand inklusive der Trigger, die abgeschlossene Dokumente schützen
-docker compose exec -T mariadb sh -c 'exec mariadb-dump -uroot -p"$MARIADB_ROOT_PASSWORD" --single-transaction --routines --triggers openbill' > openbill-db-$(date +%F).sql
+docker compose exec -T mariadb sh -c 'exec mariadb-dump -uopenbill -p"$MARIADB_PASSWORD" --single-transaction --routines --triggers openbill' > openbill-db-$(date +%F).sql
 
 # 2. Dateien des Daten-Volumes
 docker compose exec -T openbill tar czf - -C /var/www/html/storage/app . > openbill-data-$(date +%F).tar.gz
@@ -31,7 +31,7 @@ Dann:
 ```bash
 # 1. leere Datenbank (MariaDB legt die Datenbank "openbill" und ihren Benutzer aus .env an)
 docker compose up -d --wait mariadb
-docker compose exec -T mariadb sh -c 'exec mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" openbill' < openbill-db-2026-10-12.sql
+docker compose exec -T mariadb sh -c 'exec mariadb -uopenbill -p"$MARIADB_PASSWORD" openbill' < openbill-db-2026-10-12.sql
 
 # 2. Dateien ins Daten-Volume
 docker compose run --rm --no-deps -T --entrypoint tar openbill xzf - -C /var/www/html/storage/app < openbill-data-2026-10-12.tar.gz

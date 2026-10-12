@@ -7,11 +7,14 @@ docker compose pull
 docker compose up -d
 ```
 
+With the [standalone compose file](/en/setup#quick-start-paste-and-deploy) in Dockge or Portainer: update the stack (Dockge: Update) or pull the image again and redeploy it (Portainer).
+
 On start openbill migrates the database, installs the built-in templates of the new version and rebuilds its caches. Data in the volumes stays. `docker compose restart` alone keeps the old image.
 
-- **Pinned version:** change `OPENBILL_IMAGE` in `.env` first (e.g. `baeroe/openbill:0.2.0`).
+- **Pinned version:** change `OPENBILL_IMAGE` in `.env` first (e.g. `baeroe/openbill:0.2.0`), or the `image:` line of the standalone compose file.
 - **Compose file:** the notes below say when `docker-compose.yml` changed (for example new MariaDB or Gotenberg versions). Download it again and keep your own changes:
   `curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml`
+  With the standalone compose file, paste the new [docker-compose.standalone.yml](https://github.com/baeroe/openbill/blob/main/docker-compose.standalone.yml) and copy your values from the block at the top into it.
 - **MariaDB:** patch versions upgrade themselves on start (`MARIADB_AUTO_UPGRADE`). A new major version only comes with a note here.
 - **Going back:** migrations are not rolled back. Restore the backup and pin the old version.
 

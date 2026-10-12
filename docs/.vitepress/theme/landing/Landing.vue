@@ -7,6 +7,8 @@ import { href, isExternal } from './links';
 import ScrollStory, { type Step } from './ScrollStory.vue';
 import TemplateStudio, { type StudioDemo } from './TemplateStudio.vue';
 import './landing.css';
+// the stack users paste into Dockge/Portainer, read from the repository at build time (docs/en/setup.md embeds it too)
+import standalone from '../../../../docker-compose.standalone.yml?raw';
 
 interface Action {
     text: string;
@@ -26,7 +28,8 @@ interface Copy {
     hosting: {
         title: string;
         text: string;
-        code: string;
+        /** comment line after the head of the compose file, which stands for the rest of it */
+        rest: string;
         copy: string;
         copied: string;
         facts: { title: string; text: string }[];
@@ -43,11 +46,20 @@ const c = computed(() => frontmatter.value.landing as Copy);
 const target = (link: string) => (isExternal(link) ? '_blank' : undefined);
 const rel = (link: string) => (isExternal(link) ? 'noopener' : undefined);
 
+// shown: the header comment and the block of values to change (up to the first blank line after x-openbill);
+// copied: the whole file
+const composeHead = (() => {
+    const lines = standalone.split('\n');
+    const start = lines.findIndex((line) => line.startsWith('x-openbill:'));
+    const end = lines.findIndex((line, i) => i > start && line.trim() === '');
+    return lines.slice(0, end === -1 ? undefined : end).map((text) => ({ text, comment: text.trimStart().startsWith('#') }));
+})();
+
 const copied = ref(false);
 let copiedTimer = 0;
 async function copyCode() {
     try {
-        await navigator.clipboard.writeText(c.value.hosting.code.trimEnd() + '\n');
+        await navigator.clipboard.writeText(standalone.trimEnd() + '\n');
         copied.value = true;
         window.clearTimeout(copiedTimer);
         copiedTimer = window.setTimeout(() => (copied.value = false), 2000);
@@ -124,7 +136,7 @@ onBeforeUnmount(() => window.clearTimeout(copiedTimer));
                 <h2 id="ob-hosting">{{ c.hosting.title }}</h2>
                 <p>{{ c.hosting.text }}</p>
                 <div class="ob-code">
-                    <pre><code>{{ c.hosting.code.trimEnd() }}</code></pre>
+                    <pre><code><span v-for="(line, i) in composeHead" :key="i" :class="{ 'is-comment': line.comment }">{{ line.text + '\n' }}</span>{{ '\n' }}<span class="is-comment">{{ c.hosting.rest }}</span></code></pre>
                     <button type="button" class="ob-copy" @click="copyCode">
                         <svg v-if="!copied" viewBox="0 0 24 24" aria-hidden="true">
                             <rect x="9" y="9" width="12" height="12" rx="2.5" />

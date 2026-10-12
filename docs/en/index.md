@@ -104,14 +104,9 @@ landing:
       - { kind: agent, text: 'INV-2026-0042 is finalized. PDF and e-invoice XML are archived; the links work for 15 minutes.' }
   hosting:
     title: Runs on your server, with Docker Compose
-    text: One Compose stack with everything it needs. Download two files, set the passwords and the address in .env, start it.
-    code: |
-      mkdir openbill && cd openbill
-      curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml
-      curl -fsSL -o .env https://raw.githubusercontent.com/baeroe/openbill/main/.env.docker.example
-      nano .env    # APP_URL, ADMIN_*, DB_* passwords
-      docker compose up -d
-    copy: Copy
+    text: One compose file with everything it needs. Paste it into Dockge or Portainer (or save it as compose.yaml), change the four values at the top, deploy.
+    rest: '# … and the services openbill, MariaDB and Gotenberg. Copy takes the whole file.'
+    copy: Copy compose file
     copied: Copied
     facts:
       - { title: amd64 and arm64, text: 'Images for both, from a home server to the cloud.' }

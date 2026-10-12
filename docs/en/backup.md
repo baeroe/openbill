@@ -2,7 +2,7 @@
 
 A backup has three parts: the database (volume `openbill-db`), the files (volume `openbill-data`: archived PDFs and XMLs, template assets, uploads, the generated `APP_KEY` in `.app-key`) and your `.env`. Database and files belong together: openbill checks the SHA-256 of every archived PDF against the database when it delivers it.
 
-Run the commands next to `docker-compose.yml`, the stack keeps running.
+Run the commands next to `docker-compose.yml`, the stack keeps running. With the [standalone compose file](/en/setup#quick-start-paste-and-deploy) run them in the stack's folder (Dockge: `/opt/stacks/<name>/`); the compose file itself takes the place of `.env` in the backup.
 
 ## Back up
 
@@ -10,7 +10,7 @@ Database first, then the files – so every document in the dump has its file:
 
 ```bash
 # 1. database: consistent snapshot including the triggers that protect finalized documents
-docker compose exec -T mariadb sh -c 'exec mariadb-dump -uroot -p"$MARIADB_ROOT_PASSWORD" --single-transaction --routines --triggers openbill' > openbill-db-$(date +%F).sql
+docker compose exec -T mariadb sh -c 'exec mariadb-dump -uopenbill -p"$MARIADB_PASSWORD" --single-transaction --routines --triggers openbill' > openbill-db-$(date +%F).sql
 
 # 2. files of the data volume
 docker compose exec -T openbill tar czf - -C /var/www/html/storage/app . > openbill-data-$(date +%F).tar.gz
@@ -31,7 +31,7 @@ Then:
 ```bash
 # 1. empty database (MariaDB creates the database "openbill" and its user from .env)
 docker compose up -d --wait mariadb
-docker compose exec -T mariadb sh -c 'exec mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" openbill' < openbill-db-2026-10-12.sql
+docker compose exec -T mariadb sh -c 'exec mariadb -uopenbill -p"$MARIADB_PASSWORD" openbill' < openbill-db-2026-10-12.sql
 
 # 2. files into the data volume
 docker compose run --rm --no-deps -T --entrypoint tar openbill xzf - -C /var/www/html/storage/app < openbill-data-2026-10-12.tar.gz

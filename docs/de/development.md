@@ -96,7 +96,7 @@ docker build -t openbill:local .
 # wie ein Nutzer ausprobieren: docker-compose.yml + .env aus .env.docker.example mit OPENBILL_IMAGE=openbill:local
 ```
 
-Basis-Images sind per Version und Digest gepinnt (Dockerfile, `docker-compose.yml`, `.ddev/docker-compose.gotenberg.yaml`, `.github/workflows/tests.yml`, `scripts/validate-einvoice.sh`). Zum Aktualisieren den neuen Digest nachschlagen und alle Stellen auf einmal ändern:
+Basis-Images sind per Version und Digest gepinnt (Dockerfile, `docker-compose.yml`, `docker-compose.standalone.yml`, `.ddev/docker-compose.gotenberg.yaml`, `.github/workflows/tests.yml`, `scripts/validate-einvoice.sh`). Zum Aktualisieren den neuen Digest nachschlagen und alle Stellen auf einmal ändern:
 
 ::: v-pre
 ```bash

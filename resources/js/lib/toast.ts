@@ -10,7 +10,9 @@ const DURATION = { short: 3500, long: 6000 };
 
 let toasts: Toast[] = [];
 let sequence = 0;
-let paused = false;
+/** Who holds the toasts open: the pointer over them or the keyboard focus in them (WCAG 2.2.1). */
+export type ToastHold = 'pointer' | 'focus';
+const holds = new Set<ToastHold>();
 const listeners = new Set<() => void>();
 /** Remaining time per toast; the timer runs only while the toasts are not paused. */
 const timers = new Map<number, { remaining: number; started: number; handle: ReturnType<typeof setTimeout> | null }>();
@@ -28,6 +30,8 @@ export function dismissToast(id: number, used = false): void {
     const item = toasts.find((entry) => entry.id === id);
     toasts = toasts.filter((entry) => entry.id !== id);
     emit();
+    // the action's button had the focus and is gone with its toast: browsers send no blur for a removed element
+    if (used) resumeToasts('focus');
     if (item && !used) item.action?.onExpire?.();
 }
 
@@ -48,16 +52,17 @@ function push(message: string, tone: ToastTone, action?: ToastAction): number {
         timers.delete(item.id);
     });
     timers.set(id, { remaining: action || tone === 'error' ? DURATION.long : DURATION.short, started: 0, handle: null });
-    if (!paused) start(id);
+    if (holds.size === 0) start(id);
     emit();
     dropped.forEach((item) => item.action?.onExpire?.());
     return id;
 }
 
 /** While the pointer or the keyboard focus is on the toasts, none of them closes (WCAG 2.2.1). */
-export function pauseToasts(): void {
-    if (paused) return;
-    paused = true;
+export function pauseToasts(hold: ToastHold = 'pointer'): void {
+    const running = holds.size === 0;
+    holds.add(hold);
+    if (!running) return;
     for (const timer of timers.values()) {
         if (!timer.handle) continue;
         clearTimeout(timer.handle);
@@ -66,9 +71,8 @@ export function pauseToasts(): void {
     }
 }
 
-export function resumeToasts(): void {
-    if (!paused) return;
-    paused = false;
+export function resumeToasts(hold: ToastHold = 'pointer'): void {
+    if (!holds.delete(hold) || holds.size > 0) return;
     for (const id of timers.keys()) start(id);
 }
 

@@ -3,7 +3,8 @@ import { currentToasts, dismissToast, pauseToasts, resumeToasts, toast } from '.
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
-    resumeToasts();
+    resumeToasts('pointer');
+    resumeToasts('focus');
     currentToasts().forEach((item) => dismissToast(item.id));
     vi.useRealTimers();
 });
@@ -85,5 +86,31 @@ describe('onExpire', () => {
         ['one', 'two', 'three'].forEach((message) => toast.info(message));
 
         expect(expired).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs again after an undo used with the keyboard: its focused button is gone and no blur ever comes (ledger phase 5)', () => {
+        const first = toast.success('Draft deleted', { label: 'Undo', run: () => undefined });
+        toast.info('Customer saved');
+        pauseToasts('focus'); // Tab onto the undo button
+        vi.advanceTimersByTime(10_000);
+        expect(currentToasts()).toHaveLength(2);
+
+        dismissToast(first, true); // Enter on undo: the toast and its button disappear
+        vi.advanceTimersByTime(3_500);
+        expect(currentToasts()).toEqual([]);
+    });
+
+    it('stays paused while the pointer is still over the toasts', () => {
+        const first = toast.success('Draft deleted', { label: 'Undo', run: () => undefined });
+        toast.info('Customer saved');
+        pauseToasts('pointer');
+        pauseToasts('focus');
+
+        dismissToast(first, true);
+        vi.advanceTimersByTime(10_000);
+        expect(currentToasts()).toHaveLength(1);
+        resumeToasts('pointer');
+        vi.advanceTimersByTime(3_500);
+        expect(currentToasts()).toEqual([]);
     });
 });

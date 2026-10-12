@@ -74,11 +74,11 @@ function Shell({ children }: { children: ReactNode }) {
 
                 {/* phones: the same sidebar as a modal drawer from the left (Radix: focus trap, Escape, scroll lock, focus return) */}
                 <RadixDialog.Portal>
-                    <RadixDialog.Overlay className="fixed inset-0 z-[44] animate-overlay-in bg-overlay md:hidden" />
+                    <RadixDialog.Overlay className="fixed inset-0 z-[44] animate-overlay-in bg-overlay data-[state=closed]:animate-overlay-out md:hidden" />
                     <RadixDialog.Content
                         aria-modal="true"
                         aria-describedby={undefined}
-                        className="fixed inset-y-0 left-0 z-[45] flex w-68 max-w-[calc(100%-3rem)] animate-slide-in-left flex-col gap-1 overflow-y-auto bg-bg px-3 py-5 shadow-float focus:outline-none md:hidden"
+                        className="fixed inset-y-0 left-0 z-[45] flex w-68 max-w-[calc(100%-3rem)] animate-slide-in-left data-[state=closed]:animate-slide-out-left flex-col gap-1 overflow-y-auto bg-bg px-3 py-5 shadow-float focus:outline-none md:hidden"
                     >
                         <RadixDialog.Title className="sr-only">{t('shell.sidebar')}</RadixDialog.Title>
                         <SidebarContent

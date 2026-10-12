@@ -8,6 +8,7 @@
         "screenshots": "SCREENSHOTS=1 playwright test --project=screenshots"
     },
     "devDependencies": {
-        "@playwright/test": "^1.64.0"
+        "@playwright/test": "^1.64.0",
+        "unpdf": "^1.8.1"
     }
 }

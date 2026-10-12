@@ -8,6 +8,7 @@ use App\Domain\Tax\TaxRateData;
 use App\Domain\Totals\GroupInput;
 use App\Domain\Totals\PositionInput;
 use App\Domain\Totals\TotalsCalculator;
+use App\Domain\Totals\TotalsLimits;
 use App\Enums\CustomerKind;
 use App\Enums\PositionKind;
 use App\Enums\SupplyType;
@@ -153,7 +154,25 @@ describe('Decimal', function () {
         ['', 4, false],
         [null, 4, false],
         ['123456789012', 4, false],
+        [99999999999, 4, true],
+        [-99999999999, 4, true],
+        [123456789012, 4, false],
+        [PHP_INT_MAX, 4, false],
+        [PHP_INT_MIN, 4, false],
     ]);
+
+    it('flags line, group and document totals the DECIMAL(15,2) columns cannot hold', function () {
+        $fits = TotalsCalculator::calculate(totalsLoose(totalsPos('a', '1', '9999999999999.99')), totalsCtx(TaxationMode::SmallBusiness));
+        $line = TotalsCalculator::calculate(totalsLoose(totalsPos('a', '99999999999', '99999999999'), totalsPos('b', '1', '1')), totalsCtx());
+        $sum = TotalsCalculator::calculate(totalsLoose(totalsPos('a', '1', '9000000000000'), totalsPos('b', '1', '9000000000000')), totalsCtx(TaxationMode::SmallBusiness));
+        $tax = TotalsCalculator::calculate(totalsLoose(totalsPos('a', '1', '9000000000000')), totalsCtx());
+
+        expect(TotalsLimits::exceeded($fits))->toBe(['lines' => [], 'groups' => [], 'document' => false])
+            ->and(TotalsLimits::exceeded($line)['lines'])->toBe(['a'])
+            ->and(TotalsLimits::exceeded($sum))->toMatchArray(['lines' => [], 'document' => true])
+            ->and(TotalsLimits::exceeded($sum)['groups'])->toHaveCount(1)
+            ->and(TotalsLimits::exceeded($tax)['document'])->toBeTrue();
+    });
 
     it('uses O with its own note for services to third-country customers, G for goods', function () {
         $services = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Services));

@@ -32,7 +32,7 @@ final class Decimal
     public static function isValid(mixed $value, int $scale = 4): bool
     {
         if (is_int($value)) {
-            return true;
+            $value = (string) $value;
         }
 
         return is_string($value) && preg_match('/^-?\d{1,11}(\.\d{1,'.$scale.'})?$/', $value) === 1;

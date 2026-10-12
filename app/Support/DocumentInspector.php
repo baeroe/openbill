@@ -6,8 +6,10 @@ use App\Domain\Compliance\ComplianceChecker;
 use App\Domain\Compliance\ComplianceIssue;
 use App\Domain\Totals\Totals;
 use App\Domain\Totals\TotalsCalculator;
+use App\Domain\Totals\TotalsLimits;
 use App\Models\Document;
 use App\Models\DocumentTypeSetting;
+use Illuminate\Validation\ValidationException;
 use LogicException;
 
 /** Totals and compliance of a document: drafts with live master data, finalized ones with their snapshot. */
@@ -64,13 +66,53 @@ final class DocumentInspector
         return ComplianceChecker::check(DomainMapper::complianceInput($document, $sources, $profile));
     }
 
-    /** Copies the totals into the model's stored columns (not saved). */
+    /**
+     * Copies the totals into the model's stored columns (not saved). Amounts the columns cannot hold are a
+     * validation error (422) at the field that causes them, never a database error (review M2).
+     *
+     * @throws ValidationException
+     */
     public function applyTotals(Document $document, Totals $totals): void
     {
+        self::assertStorable($document, $totals);
         $document->forceFill([
             'net_total' => (string) $totals->net,
             'tax_total' => (string) $totals->tax,
             'gross_total' => (string) $totals->gross,
         ]);
+    }
+
+    /**
+     * Paths in the shape of UpdateDraft's input (groups.<index>.positions.<index>.<field>).
+     *
+     * @throws ValidationException
+     */
+    public static function assertStorable(Document $document, Totals $totals): void
+    {
+        $exceeded = TotalsLimits::exceeded($totals);
+        if ($exceeded['lines'] === [] && $exceeded['groups'] === [] && ! $exceeded['document']) {
+            return;
+        }
+
+        $message = Text::t('errors.amount_too_large', ['max' => TotalsLimits::MAX]);
+        $messages = [];
+        $document->loadMissing('groups.positions');
+        foreach ($document->groups->values() as $g => $group) {
+            $lineFound = false;
+            foreach ($group->positions->values() as $p => $position) {
+                if (in_array($position->id, $exceeded['lines'], true)) {
+                    $messages["groups.{$g}.positions.{$p}.unit_price"] = [$message];
+                    $lineFound = true;
+                }
+            }
+            if (! $lineFound && in_array($group->id, $exceeded['groups'], true)) {
+                $messages["groups.{$g}"] = [$message];
+            }
+        }
+        if ($messages === []) {
+            $messages['groups'] = [$message];
+        }
+
+        throw ValidationException::withMessages($messages);
     }
 }

@@ -84,8 +84,8 @@ it('reports the release version from config/openbill.php as serverInfo.version',
         'clientInfo' => ['name' => 'test', 'version' => '1'],
     ])['result'];
 
-    expect(config('openbill.version'))->toBe('0.1.0')
-        ->and($result['serverInfo'])->toMatchArray(['name' => 'openbill', 'version' => '0.1.0']);
+    expect(config('openbill.version'))->toBe('0.1.1')
+        ->and($result['serverInfo'])->toMatchArray(['name' => 'openbill', 'version' => '0.1.1']);
 });
 
 it('annotates read-only, additive and destructive tools', function () {

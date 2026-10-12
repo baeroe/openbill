@@ -12,7 +12,7 @@ One compose file with everything in it, no `.env`:
 
 1. Paste the block below into a new stack in Dockge or Portainer, or save it as `compose.yaml` on your server.
 2. Change the four values at the top: `APP_URL` (the https address of your reverse proxy), `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `DB_PASSWORD`. openbill refuses to start while a password is still `change-me`.
-3. Deploy (Dockge/Portainer) or run `docker compose up -d`. Wait for `openbill: ready` in the logs of `openbill`, then open `APP_URL`. openbill listens on `http://127.0.0.1:7739` for your reverse proxy.
+3. Deploy (Dockge/Portainer) or run `docker compose up -d`. Wait for `openbill: ready` in the logs of `openbill`, then open `APP_URL`. openbill listens on port `7739` of the server: point your reverse proxy at `http://<server>:7739` (see [Reverse proxy](/en/reverse-proxy)).
 
 The owner account is created on the first start; afterwards you can delete the `ADMIN_PASSWORD` line. Keep `DB_PASSWORD` as it is: MariaDB stores it on the first start. MariaDB's root password is random and not needed (backups use the `openbill` user).
 
@@ -37,8 +37,8 @@ Fill in `.env` before the first start. The passwords are empty in the template o
 | `APP_URL` | yes | Public address including `https://`, e.g. `https://invoices.example.com`. Links, the toolkit download and the allowed `Host` header come from it: requests for any other host get `400`. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | first start | Owner account (the template leaves the password empty), created on the first start only (password at least 8 characters). Changing them later doesn't touch the existing account. Remove `ADMIN_PASSWORD` from `.env` once you have logged in, see [Passwords](#passwords). |
 | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | yes | MariaDB passwords (empty in the template). MariaDB stores them on the first start; changing them in `.env` afterwards breaks the connection. |
-| `OPENBILL_BIND`, `OPENBILL_PORT` | no | Host address and port, default `127.0.0.1` and `7739` (the container listens on `8080`): only a reverse proxy on the same host reaches openbill. For a proxy on another host see [Reverse proxy](/en/reverse-proxy). |
-| `TRUSTED_PROXIES` | no | IP addresses or CIDR networks (no host names) whose `X-Forwarded-*` headers openbill believes, comma-separated. Default: localhost and the private networks. Narrow it to your proxy as soon as `OPENBILL_BIND` isn't `127.0.0.1`. |
+| `OPENBILL_BIND`, `OPENBILL_PORT` | no | Host address and port, default `0.0.0.0` and `7739` (the container listens on `8080`). `OPENBILL_BIND=127.0.0.1` keeps the port local, for a proxy on the same host (not in a container), see [Reverse proxy](/en/reverse-proxy). |
+| `TRUSTED_PROXIES` | no | IP addresses or CIDR networks (no host names) whose `X-Forwarded-*` headers openbill believes, comma-separated. Default: localhost and the private networks. Optionally narrow it to your proxy, see [Reverse proxy](/en/reverse-proxy). |
 | `OPENBILL_IMAGE` | no | Default `baeroe/openbill:latest`. Pin a version with `baeroe/openbill:0.1.0`. |
 | `APP_KEY` | no | Encryption key of sessions and cookies. Without it, openbill generates one on the first start and keeps it in the data volume. |
 

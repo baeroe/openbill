@@ -24,6 +24,11 @@ Alle Versionen und ihre Änderungen: https://github.com/baeroe/openbill/releases
 
 <!-- nur absolute Links: jeder Abschnitt wird zu den Notizen des GitHub-Release (scripts/release-notes.sh) -->
 
+### 0.1.1
+
+- **Compose-Datei geändert:** Port `7739` von openbill ist jetzt auf allen Adressen des Hosts veröffentlicht (als `7739:8080`), nicht mehr nur auf `127.0.0.1`. Ein Reverse Proxy im Container, etwa Nginx Proxy Manager in Dockge, kann jetzt an `<server>:7739` weiterleiten (vorher kam `502 Bad Gateway`). `docker-compose.yml` neu laden bzw. die neue `docker-compose.standalone.yml` einfügen. Mit `OPENBILL_BIND=127.0.0.1` in deiner `.env` bleibt der Port lokal. Möglichkeiten zum Absichern: https://openbill.dev/de/reverse-proxy
+- Dokumentation: Haftungshinweis (keine Steuer- oder Rechtsberatung, keine Gewährleistung) in README, Einrichtung und E-Rechnung.
+
 ### 0.1.0
 
 - Erstes Release: Angebote, Auftragsbestätigungen, Rechnungen und Stornos mit eigenen Feldern auf jeder Ebene, Positionen in Gruppen, Liquid-Templates (Klar, Kante, Leise und eigene, mit dem Template-Toolkit), E-Rechnungen nach EN 16931 als PDF/A-3 mit eingebetteter XML, REST-API und MCP-Server, auf Englisch und Deutsch.

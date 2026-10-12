@@ -7,8 +7,8 @@ namespace App\Support;
  *
  * - Proxies: X-Forwarded-For/-Proto/-Host/-Port only from the addresses in config('openbill.trusted_proxies')
  *   (env TRUSTED_PROXIES), by default localhost and the private networks, where a reverse proxy (Caddy, Traefik,
- *   nginx, Docker's own network) sits. Anyone who reaches the port from a trusted address can set these headers,
- *   so the port is published on 127.0.0.1 by default and operators narrow the list to their proxy.
+ *   nginx, Docker's own network) sits. Anyone who reaches the port from a trusted address can set these headers;
+ *   operators who need more narrow the list to their proxy or publish the port on 127.0.0.1 (OPENBILL_BIND).
  * - Hosts: only the host of APP_URL (no subdomains). Laravel applies it outside `local` and tests; any other Host
  *   header answers 400, so no link or redirect is ever built from a foreign host.
  */

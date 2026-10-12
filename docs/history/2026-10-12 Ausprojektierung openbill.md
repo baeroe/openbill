@@ -53,7 +53,7 @@ openbill soll wie prevju laufen: ein Image auf Docker Hub, `docker compose up -d
 - Playwright läuft in den Login-Throttle: einmal anmelden, Sitzung als `storageState` teilen. `browser.newContext()` im Test übernimmt die `storageState` des Projekts – für einen abgemeldeten Screenshot ausdrücklich leeren.
 - Chromium formatiert `<input type="date">` nach der Browsersprache (`--lang`), nicht nach der Locale des Kontexts – unter macOS aber nur die Reihenfolge: die Platzhalterbuchstaben bleiben englisch (`dd.mm.yyyy` statt `TT.MM.JJJJ`), weil Chromium dort die Systemsprache nimmt. So akzeptiert.
 - serversideups Entrypoint läuft in einer Subshell: `APP_KEY` erreicht PHP-FPM nur über den Config-Cache.
-- Je nach Docker-Setup kommen Anfragen von außen mit der Gateway-IP `172.x.0.1` an, die in den privaten Netzen liegt – deshalb Bind auf `127.0.0.1` als Standard.
+- Je nach Docker-Setup kommen Anfragen von außen mit der Gateway-IP `172.x.0.1` an, die in den privaten Netzen liegt – deshalb Bind auf `127.0.0.1` als Standard. Mit 0.1.1 zurückgenommen: Standard `0.0.0.0` wie prevju, weil Nginx Proxy Manager im Container `127.0.0.1` des Hosts nicht erreicht (502); Absichern ist optional und dokumentiert.
 - Laravel vertraut `X-Forwarded-Prefix` standardmäßig; openbill läuft nur an der Wurzel und ignoriert ihn seit Phase 11.
 - `pnpm pack` ist ein eingebauter Befehl (`pnpm run pack`), Node vertraut der mkcert-CA nicht (`--use-system-ca`), DDEV/Mutagen zeigt Container-Dateien mit Verzögerung.
 - Externe Schematron-/Saxon-Downloads lieferten einmal 404 → im CI gecacht, Skript prüft SHA-256.

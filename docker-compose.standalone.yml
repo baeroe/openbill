@@ -26,10 +26,10 @@ services:
         condition: service_healthy
       gotenberg:
         condition: service_healthy
-    # localhost only: a reverse proxy on this host forwards to it. For a proxy on another host, drop "127.0.0.1:" and
-    # set TRUSTED_PROXIES above to that proxy (anyone who reaches the port could otherwise set X-Forwarded-* headers).
+    # your reverse proxy forwards to port 7739 of this host (also from a container, like Nginx Proxy Manager).
+    # Only a proxy on this host? "127.0.0.1:7739:8080" keeps the port local.
     ports:
-      - "127.0.0.1:7739:8080"
+      - "7739:8080"
     environment:
       <<: *openbill-env
       DB_HOST: mariadb

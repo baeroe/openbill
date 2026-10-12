@@ -37,7 +37,7 @@ docker compose up -d                              # start
 docker compose pull && docker compose up -d       # update
 ```
 
-openbill listens on `127.0.0.1:7739`. Put a reverse proxy with HTTPS in front, set `APP_URL` to its address and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` (then remove `ADMIN_PASSWORD` from `.env`; passwords are changed in the app).
+openbill listens on port `7739` of the host. Put a reverse proxy with HTTPS in front, set `APP_URL` to its address and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` (then remove `ADMIN_PASSWORD` from `.env`; passwords are changed in the app).
 
 - [Setup](https://openbill.dev/en/setup) and [Reverse proxy](https://openbill.dev/en/reverse-proxy)
 - [Backup](https://openbill.dev/en/backup) and [Upgrading](https://openbill.dev/en/upgrading)

@@ -132,7 +132,7 @@ it('runs openbill, MariaDB 11.4 and Gotenberg 8 with two persistent volumes', fu
 
     expect(array_keys($services))->toEqualCanonicalizing(['openbill', 'mariadb', 'gotenberg'])
         ->and($services['openbill']['image'])->toBe('${OPENBILL_IMAGE:-baeroe/openbill:latest}')
-        ->and($services['openbill']['ports'])->toBe(['${OPENBILL_BIND:-127.0.0.1}:${OPENBILL_PORT:-7739}:8080'])
+        ->and($services['openbill']['ports'])->toBe(['${OPENBILL_BIND:-0.0.0.0}:${OPENBILL_PORT:-7739}:8080'])
         ->and($services['openbill']['volumes'])->toBe(['openbill-data:/var/www/html/storage/app'])
         ->and($services['mariadb']['volumes'])->toBe(['openbill-db:/var/lib/mysql'])
         ->and(array_keys($compose['volumes']))->toEqualCanonicalizing(['openbill-data', 'openbill-db'])
@@ -234,9 +234,9 @@ it('keeps the code read-only for PHP and only storage and bootstrap/cache writab
         ->and(strrpos($app, 'USER www-data'))->toBeGreaterThan((int) strrpos($app, 'chown -R www-data:www-data storage bootstrap/cache'));
 });
 
-it('publishes openbill on localhost only unless OPENBILL_BIND says otherwise', function () {
-    expect(dockerCompose()['services']['openbill']['ports'][0])->toStartWith('${OPENBILL_BIND:-127.0.0.1}:')
-        ->and(dockerRepoFile('.env.docker.example'))->toMatch('/^OPENBILL_BIND=127\.0\.0\.1$/m')
+it('publishes openbill on all host addresses, so a proxy in a container reaches it, unless OPENBILL_BIND says otherwise', function () {
+    expect(dockerCompose()['services']['openbill']['ports'][0])->toStartWith('${OPENBILL_BIND:-0.0.0.0}:')
+        ->and(dockerRepoFile('.env.docker.example'))->toMatch('/^OPENBILL_BIND=0\.0\.0\.0$/m')
         ->and(dockerCompose()['services']['openbill']['environment']['TRUSTED_PROXIES'])->toBe('${TRUSTED_PROXIES:-}');
 });
 
@@ -322,7 +322,7 @@ it('runs the standalone stack like docker-compose.yml', function () {
     expect(array_keys($a))->toEqualCanonicalizing(array_keys($b))
         ->and($a['openbill']['image'])->toBe('baeroe/openbill:latest')
         ->and($b['openbill']['image'])->toBe('${OPENBILL_IMAGE:-baeroe/openbill:latest}')
-        ->and($a['openbill']['ports'])->toBe(['127.0.0.1:7739:8080'])
+        ->and($a['openbill']['ports'])->toBe(['7739:8080'])
         ->and($standalone['networks'])->toBe($compose['networks'])
         ->and($standalone['volumes'])->toBe($compose['volumes'])
         ->and(array_diff_key($a['openbill']['environment'], ['APP_URL' => 1, 'ADMIN_EMAIL' => 1, 'ADMIN_PASSWORD' => 1, 'DB_PASSWORD' => 1]))

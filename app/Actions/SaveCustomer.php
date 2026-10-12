@@ -16,6 +16,7 @@ use App\Support\Actor;
 use App\Support\DomainMapper;
 use App\Support\EventLog;
 use App\Support\FieldErrors;
+use App\Support\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -66,6 +67,21 @@ final class SaveCustomer
             'contacts.*.is_default' => ['sometimes', 'boolean'],
             'contacts.*.custom' => ['sometimes', 'array'],
         ])->validate();
+
+        // reverse charge (§ 13b UStG) shifts the VAT to a business; a private person always pays it. Checked only
+        // when the combination is new: customers stored before this rule stay editable (the form always sends both
+        // keys and shows a hint to correct them) as long as kind and treatment stay as they are
+        // a model without loaded defaults (e.g. not refreshed after create) has null here: the columns' defaults apply
+        $storedKind = $customer?->getAttribute('customer_kind');
+        $storedKind = $storedKind instanceof CustomerKind ? $storedKind->value : CustomerKind::Business->value;
+        $storedTreatment = $customer?->getAttribute('tax_treatment');
+        $storedTreatment = $storedTreatment instanceof TaxTreatment ? $storedTreatment->value : TaxTreatment::Domestic->value;
+        $kind = $data['customer_kind'] ?? $storedKind;
+        $treatment = $data['tax_treatment'] ?? $storedTreatment;
+        $changed = $customer === null || $kind !== $storedKind || $treatment !== $storedTreatment;
+        if ($changed && $kind === CustomerKind::Consumer->value && $treatment === TaxTreatment::EuReverseCharge->value) {
+            throw ValidationException::withMessages(['customer_kind' => Text::t('customer.consumer_reverse_charge')]);
+        }
 
         $definitions = DomainMapper::currentFieldDefinitions();
         $customerFields = FieldRegistry::forScope($definitions, FieldScope::Customer);

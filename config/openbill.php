@@ -45,4 +45,15 @@ return [
         // per valid token, otherwise per IP (editor autosave 600 ms + preview 250 ms ≈ 240/min)
         'requests_per_minute' => 600,
     ],
+
+    /*
+    | MCP server (/mcp, routes/ai.php): requests per minute per valid token, otherwise per IP. Bodies use
+    | api.max_body_bytes (App\Http\Middleware\LimitApiBody).
+    */
+    'mcp' => [
+        'requests_per_minute' => 300,
+        // render-template-preview renders a PDF (Gotenberg) to count the pages; per token or user. Above it the
+        // page count stays null (page_count_skipped: rate_limited) so finalizing keeps its Gotenberg
+        'preview_pdfs_per_minute' => 20,
+    ],
 ];

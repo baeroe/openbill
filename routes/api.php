@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Api\ApiMiddleware;
+use App\Http\Controllers\Api\ApiTokensController;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
 use App\Http\Controllers\Api\FieldOrderController;
@@ -47,8 +48,8 @@ Route::middleware(ApiMiddleware::RENDER)->group(function (): void {
     Route::get('/render/schema', RenderSchemaController::class)->name('api.render.schema');
 });
 
-// user management: only the session of the own UI, never API tokens (not in the OpenAPI document). Accounts are
-// disabled, never deleted (documents and their events keep their author)
+// user management and the own API tokens: only the session of the own UI, never API tokens (not in the OpenAPI
+// document). Accounts are disabled, never deleted (documents and their events keep their author)
 Route::middleware(ApiMiddleware::SESSION)->group(function (): void {
     Route::get('/users', [UsersController::class, 'index'])->name('api.users');
     Route::patch('/users/{id}', [UsersController::class, 'update'])->whereUlid('id')->name('api.users.update');
@@ -56,6 +57,10 @@ Route::middleware(ApiMiddleware::SESSION)->group(function (): void {
     Route::post('/users/{id}/enable', [UsersController::class, 'enable'])->whereUlid('id')->name('api.users.enable');
     Route::post('/invitations', [InvitationsController::class, 'store'])->name('api.invitations.store');
     Route::delete('/invitations/{id}', [InvitationsController::class, 'destroy'])->whereUlid('id')->name('api.invitations.destroy');
+    // tokens of the signed-in user (settings "API & MCP"); a token can never mint or revoke tokens
+    Route::get('/tokens', [ApiTokensController::class, 'index'])->name('api.tokens');
+    Route::post('/tokens', [ApiTokensController::class, 'store'])->name('api.tokens.store');
+    Route::delete('/tokens/{id}', [ApiTokensController::class, 'destroy'])->whereUlid('id')->name('api.tokens.destroy');
 });
 
 // signed links (MCP get-document-pdf-url, 15 minutes): no token, the signature is the permission

@@ -12,6 +12,7 @@ use Laravel\Sanctum\TransientToken;
  * Which token may use which endpoint. The session of the own UI (Sanctum TransientToken) may do everything.
  * A toolkit token (templates:write with template_id) reads and writes only its own template.
  * SESSION: only the own UI (user management), never a token.
+ * MCP: only a token with the ability "mcp", never the session of the UI.
  */
 final class ApiAccess
 {
@@ -50,7 +51,8 @@ final class ApiAccess
             return false;
         }
         if ($token instanceof TransientToken) {
-            return true;
+            // the own UI may use every API endpoint, but the MCP server answers tokens only (spec 6)
+            return $rule !== self::MCP;
         }
         foreach (self::OPEN[$rule] as $ability) {
             if ($token->can($ability)) {

@@ -116,13 +116,23 @@ arch('api resources and the api layer are final')
     ->classes()
     ->toBeFinal();
 
+arch('mcp classes are final, the tool base is abstract')
+    ->expect('App\Mcp')
+    ->classes()
+    ->toBeFinal()
+    ->ignoring('App\Mcp\Tools\OpenbillTool');
+
+arch('the mcp layer neither computes nor talks to the database facade')
+    ->expect('App\Mcp')
+    ->not->toUse(['App\Domain', 'Illuminate\Support\Facades\DB']);
+
 arch('the api layer neither computes nor talks to the database facade')
     ->expect(['App\State', 'App\Http\Api', 'App\Http\Controllers\Api'])
     ->not->toUse(['App\Domain', 'Illuminate\Support\Facades\DB']);
 
 arch('actions never depend on the api layer')
     ->expect('App\Actions')
-    ->not->toUse(['App\ApiResource', 'App\State', 'App\Http', 'ApiPlatform']);
+    ->not->toUse(['App\ApiResource', 'App\State', 'App\Http', 'ApiPlatform', 'App\Mcp', 'Laravel\Mcp']);
 
 /**
  * Model writes in the API layer: processors, providers and controllers hand writes to app/Actions.
@@ -141,10 +151,10 @@ it('detects model writes in code', function () {
         ->toBe(['code:2 ->save(', 'code:4 ::create(']);
 });
 
-it('never writes models in api resources, state providers/processors or api controllers', function () {
+it('never writes models in api resources, state providers/processors, api controllers or mcp tools', function () {
     $root = dirname(__DIR__, 2).'/app';
     $hits = [];
-    foreach (['ApiResource', 'State', 'Http/Api', 'Http/Controllers/Api'] as $dir) {
+    foreach (['ApiResource', 'State', 'Http/Api', 'Http/Controllers/Api', 'Mcp'] as $dir) {
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("{$root}/{$dir}", FilesystemIterator::SKIP_DOTS));
         foreach ($files as $file) {
             if ($file->getExtension() === 'php') {

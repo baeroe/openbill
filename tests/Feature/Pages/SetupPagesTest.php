@@ -32,12 +32,12 @@ it('sends /settings to the organization and renders every section', function () 
     $this->actingAs(User::factory()->owner()->create());
 
     $this->get('/de/settings')->assertRedirect('/de/settings/organization');
-    foreach (['organization', 'document-types', 'taxes-units', 'text-blocks', 'users'] as $section) {
+    foreach (['organization', 'document-types', 'taxes-units', 'text-blocks', 'users', 'api'] as $section) {
         $this->get("/en/settings/{$section}")
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('settings/show')->where('section', $section)->where('can_manage_users', true));
+            ->assertInertia(fn (Assert $page) => $page->component('settings/show')->where('section', $section)->where('can_manage_users', true)
+                ->where('mcp_url', url('/mcp'))->where('api_docs_url', url('/api/docs')));
     }
-    $this->get('/en/settings/api')->assertNotFound();
 });
 
 it('tells the page whether the user may manage users', function () {

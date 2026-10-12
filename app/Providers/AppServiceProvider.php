@@ -53,13 +53,17 @@ class AppServiceProvider extends ServiceProvider
 
         // editor autosave (600 ms) and preview (250 ms) stay well below this per open editor
         // only a valid token gets its own bucket; anything else (no token, made-up tokens) shares the IP's
-        RateLimiter::for('api', function (Request $request): Limit {
-            $bearer = $request->bearerToken();
-            $token = $bearer !== null ? PersonalAccessToken::findToken($bearer) : null;
-            $valid = $token !== null && ($token->expires_at === null || $token->expires_at->isFuture());
+        RateLimiter::for('api', fn (Request $request): Limit => self::perToken($request, (int) config('openbill.api.requests_per_minute')));
+        // agents get their own bucket (the limiter name is part of the key), so they never slow down the UI
+        RateLimiter::for('mcp', fn (Request $request): Limit => self::perToken($request, (int) config('openbill.mcp.requests_per_minute')));
+    }
 
-            return Limit::perMinute((int) config('openbill.api.requests_per_minute'))
-                ->by($valid ? 'token:'.$token->getKey() : 'ip:'.$request->ip());
-        });
+    private static function perToken(Request $request, int $perMinute): Limit
+    {
+        $bearer = $request->bearerToken();
+        $token = $bearer !== null ? PersonalAccessToken::findToken($bearer) : null;
+        $valid = $token !== null && ($token->expires_at === null || $token->expires_at->isFuture());
+
+        return Limit::perMinute($perMinute)->by($valid ? 'token:'.$token->getKey() : 'ip:'.$request->ip());
     }
 }

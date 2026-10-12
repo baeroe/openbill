@@ -34,7 +34,8 @@ final class GotenbergFake
 
     public static function pdfFor(string $requestBody): string
     {
-        return "%PDF-1.7\n% fake ".md5($requestBody)."\n%%EOF\n";
+        // a one-page tree, so App\Rendering\PdfPageCount reads it like a Chromium PDF
+        return "%PDF-1.7\n% fake ".md5($requestBody)."\n1 0 obj\n<< /Type /Pages /Kids [] /Count 1 >>\nendobj\n%%EOF\n";
     }
 
     public static function failWithError(): void

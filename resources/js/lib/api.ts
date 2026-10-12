@@ -155,6 +155,21 @@ export async function apiText(path: string, options: Omit<ApiOptions, 'format'> 
     return (await request(path, options, 'text')).text();
 }
 
+/** attachment; filename=openbill-toolkit-fjord.zip – also quoted, or RFC 5987 filename*=UTF-8''… */
+export function filenameOf(disposition: string | null): string | null {
+    if (!disposition) return null;
+    const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition);
+    if (encoded) return decodeURIComponent(encoded[1]);
+    const plain = /filename="?([^";]+)"?/i.exec(disposition);
+    return plain ? plain[1] : null;
+}
+
+/** A file answer (toolkit ZIP) with its name; CSRF, 419 retry and 401 like api(), errors as ApiError. */
+export async function apiBlob(path: string, options: Omit<ApiOptions, 'format'> = {}): Promise<{ blob: Blob; filename: string | null }> {
+    const response = await request(path, options, 'json');
+    return { blob: await response.blob(), filename: filenameOf(response.headers.get('Content-Disposition')) };
+}
+
 export type Page<T> = { items: T[]; total: number; page: number; hasMore: boolean };
 
 type Collection<T> = { member: T[]; totalItems: number; view?: { next?: string } };

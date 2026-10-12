@@ -1,0 +1,40 @@
+# Build context of the Dockerfile. The image copies only what it needs (explicit COPYs in the Dockerfile);
+# this list keeps secrets, dependencies, caches and everything not needed for the build out of the context.
+.git
+.github
+.ddev
+.superpowers
+.idea
+.vscode
+.env
+.env.*
+**/node_modules
+.pnpm-store
+vendor
+storage
+bootstrap/cache/*.php
+public/build
+public/hot
+public/storage
+public/vendor
+e2e
+tests
+*.log
+**/.DS_Store
+
+# docs: the workspace manifest (frozen lockfile) and the Liquid reference the MCP server reads at runtime
+# (resource openbill://docs/liquid-reference) – never drop docs/en/templates.md
+docs/*
+!docs/package.json
+!docs/en
+docs/en/*
+!docs/en/templates.md
+
+# prototypes: only the manifests, so pnpm's frozen lockfile matches the workspace
+prototypes/*/*
+!prototypes/*/package.json
+
+# built or local files of the template kit (the image builds the kit itself)
+packages/template-kit/dist
+packages/template-kit/template
+packages/template-kit/.env.local

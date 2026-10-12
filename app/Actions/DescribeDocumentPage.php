@@ -59,7 +59,8 @@ final class DescribeDocumentPage
 
     private function smallBusiness(Document $document, bool $draft): bool
     {
-        if ($draft) {
+        // a cancellation draft follows its invoice's snapshot (SnapshotBuilder::withInvoiceTax)
+        if ($draft && $document->type !== DocumentType::Cancellation) {
             return Organization::current()->taxation_mode === TaxationMode::SmallBusiness;
         }
         $org = $this->inspector->sources($document)['org'] ?? [];

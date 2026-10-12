@@ -398,6 +398,7 @@
     "errors.template_built_in": "Mitgelieferte Templates lassen sich nicht ändern oder löschen. Zum Ändern erst duplizieren.",
     "errors.template_in_use": "Dokumente benutzen dieses Template, deshalb lässt es sich nicht löschen.",
     "errors.title": "Das hat nicht geklappt",
+    "errors.toolkit_unavailable": "Das Template-Toolkit fehlt in dieser Installation. Führe `pnpm build` aus oder nutze das offizielle Docker-Image.",
     "errors.unknown": "Unbekannter Fehler.",
     "errors.user_disabled": "Dieses Konto ist deaktiviert und bekommt keine API-Tokens.",
     "fields.add": "Feld hinzufügen",

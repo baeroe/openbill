@@ -398,6 +398,7 @@
     "errors.template_built_in": "Built-in templates cannot be changed or deleted. Duplicate it to change it.",
     "errors.template_in_use": "Documents use this template, so it cannot be deleted.",
     "errors.title": "That did not work",
+    "errors.toolkit_unavailable": "The template toolkit is missing in this installation. Run `pnpm build`, or use the official Docker image.",
     "errors.unknown": "Unknown error.",
     "errors.user_disabled": "This account is disabled and cannot get API tokens.",
     "fields.add": "Add field",

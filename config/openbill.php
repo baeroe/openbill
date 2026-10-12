@@ -34,6 +34,14 @@ return [
     ],
 
     /*
+    | Template toolkit (POST /{locale}/templates/{id}/toolkit): the built kit that goes into the ZIP.
+    | `pnpm build` writes it to packages/template-kit/dist/kit – in DDEV and in the Docker image (phase 10).
+    */
+    'toolkit' => [
+        'path' => env('OPENBILL_TOOLKIT_PATH', base_path('packages/template-kit/dist/kit')),
+    ],
+
+    /*
     | Request bodies under /api (App\Http\Middleware\LimitApiBody, 413 above). Template uploads
     | (POST /api/templates, PUT /api/templates/{id}/files) carry the package or base64 assets:
     | 20 MB unpacked assets as base64 (× 4/3) plus four sources. Phase 10: nginx client_max_body_size

@@ -14,6 +14,7 @@ use App\Support\Actor;
 use App\Support\GroupWriter;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Server\Testing\TestResponse;
 use Laravel\Mcp\Server\Tool;
@@ -192,4 +193,63 @@ function mcpJson(TestResponse $response): mixed
     $text = (fn (): string => $this->content()[0] ?? '')->call($response);
 
     return json_decode($text, true, flags: JSON_THROW_ON_ERROR);
+}
+
+/**
+ * A built template kit as `pnpm build` leaves it in packages/template-kit/dist/kit (only a few files), plus what
+ * must never reach the toolkit ZIP: template/, node_modules/, .env.local and a symbolic link. Points
+ * config('openbill.toolkit.path') at it; the test deletes the folder afterwards (File::deleteDirectory).
+ */
+function fakeToolkit(): string
+{
+    $dir = sys_get_temp_dir().'/openbill-kit-'.bin2hex(random_bytes(6));
+    foreach (['tooling', 'assets', 'template', 'node_modules/vite'] as $folder) {
+        File::ensureDirectoryExists("{$dir}/{$folder}");
+    }
+    file_put_contents("{$dir}/package.json", '{"name":"openbill-template","scripts":{"dev":"vite"}}');
+    file_put_contents("{$dir}/README.md", "# openbill template toolkit\n");
+    file_put_contents("{$dir}/index.html", '<div id="root"></div>');
+    file_put_contents("{$dir}/assets/index.js", 'console.log("preview")');
+    file_put_contents("{$dir}/tooling/cli.js", '// cli');
+    file_put_contents("{$dir}/template/template.liquid", 'stale template');
+    file_put_contents("{$dir}/node_modules/vite/index.js", '// vite');
+    file_put_contents("{$dir}/.env.local", 'OPENBILL_TOKEN="leaked"');
+    symlink('/etc/hostname', "{$dir}/assets/link.txt");
+    config(['openbill.toolkit.path' => $dir]);
+
+    return $dir;
+}
+
+/**
+ * Entries of a ZIP (toolkit download, template package), sorted by name.
+ *
+ * @return array<string, string>
+ */
+function zipEntries(string $zip): array
+{
+    $path = sys_get_temp_dir().'/openbill-test-'.bin2hex(random_bytes(6)).'.zip';
+    file_put_contents($path, $zip);
+    $archive = new ZipArchive;
+    $archive->open($path);
+    $entries = [];
+    for ($i = 0; $i < $archive->numFiles; $i++) {
+        $entries[(string) $archive->getNameIndex($i)] = (string) $archive->getFromIndex($i);
+    }
+    $archive->close();
+    unlink($path);
+    ksort($entries);
+
+    return $entries;
+}
+
+/**
+ * KEY => value of an .env.local written by App\Rendering\ToolkitPackage.
+ *
+ * @return array<string, string>
+ */
+function envLocal(string $contents): array
+{
+    preg_match_all('/^([A-Z_]+)="([^"]*)"$/m', $contents, $matches);
+
+    return array_combine($matches[1], $matches[2]);
 }

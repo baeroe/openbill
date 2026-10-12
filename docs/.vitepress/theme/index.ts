@@ -1,10 +1,16 @@
+import '@fontsource-variable/schibsted-grotesk';
 import { inBrowser } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
 import './style.css';
 
-// pages live under /en and /de: links without a prefix (/, /development) land in English
-if (inBrowser && !/^\/(en|de)(\/|$)/.test(location.pathname)) {
-    location.replace(`/en${location.pathname}${location.search}${location.hash}`);
+// pages live under /en and /de below the base (/ locally, /openbill/ on GitHub Pages): paths without a language
+// (/, /development) land in English. Runs on GitHub Pages' 404 page too.
+const base = import.meta.env.BASE_URL;
+if (inBrowser && location.pathname.startsWith(base)) {
+    const rest = location.pathname.slice(base.length);
+    if (!/^(en|de)(\/|$)/.test(rest)) {
+        location.replace(`${base}en/${rest}${location.search}${location.hash}`);
+    }
 }
 
 export default DefaultTheme;

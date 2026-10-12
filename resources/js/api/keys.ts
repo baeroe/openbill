@@ -22,6 +22,7 @@ export const keys = {
             itemsPerPage: PAGE_SIZE,
         }),
     document: (id: string) => `/api/documents/${id}`,
+    allFieldDefinitions: () => '/api/field-definitions',
     fieldDefinitions: (scope: FieldScope) => apiUrl('/api/field-definitions', { scope }),
     // archived rates and units stay readable in old drafts and finalized documents; pickers offer only active ones
     taxRates: () => apiUrl('/api/tax-rates', { include_archived: true }),

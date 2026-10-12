@@ -92,3 +92,10 @@ it('adds the XML link for a finalized e-invoice', function () {
     $this->get($links['pdf']['url'])->assertOk()->assertHeader('Content-Type', 'application/pdf');
     expect($this->get($links['xml']['url'])->assertOk()->getContent())->toContain($invoice->number);
 });
+
+it('names an unknown document instead of handing out a link (review #8)', function () {
+    $response = mcpTool(GetDocumentPdfUrlTool::class, ['id' => '01jaaaaaaaaaaaaaaaaaaaaaaa'])
+        ->assertHasErrors(["Invalid input:\n- id: There is no document with the ID 01jaaaaaaaaaaaaaaaaaaaaaaa."]);
+
+    $response->assertDontSee('/api/downloads/');
+});

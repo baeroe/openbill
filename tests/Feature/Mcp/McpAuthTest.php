@@ -89,3 +89,15 @@ it('answers in German with Accept-Language de', function () {
         ->assertForbidden()
         ->assertJsonPath('message', __('api.problem.missing_ability', ['rule' => 'mcp'], 'de'));
 });
+
+it('shuts out the mcp token of a disabled user with 401 (review #8)', function () {
+    $user = User::factory()->create();
+    $token = apiToken(['mcp'], user: $user);
+    $this->withToken($token)->postJson('/mcp', MCP_TOOLS_LIST)->assertOk();
+
+    // set directly: DisableUser would also revoke the token, this checks the guard on its own
+    $user->forceFill(['disabled_at' => now()])->save();
+    forgetApiAuth();
+
+    $this->withToken($token)->postJson('/mcp', MCP_TOOLS_LIST)->assertUnauthorized();
+});

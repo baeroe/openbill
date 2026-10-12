@@ -6,8 +6,11 @@ import { toDecimalString } from '@/lib/format';
 import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 
-/** EN 16931 VAT categories (App\Enums\TaxCategory); labels tax_category.<code>. */
-export const TAX_CATEGORIES = ['S', 'Z', 'E', 'AE', 'K', 'G', 'O'];
+/**
+ * EN 16931 VAT categories a rate may carry (App\Enums\TaxCategory without O: "not subject to VAT" is assigned per
+ * customer by the server, never chosen as a rate); labels tax_category.<code>.
+ */
+export const TAX_CATEGORIES = ['S', 'Z', 'E', 'AE', 'K', 'G'];
 
 export function TaxRateDrawer({ initial, id, onClose }: { initial: TaxRateInput; id?: string; onClose(): void }) {
     const [rate, setRate] = useState(initial);

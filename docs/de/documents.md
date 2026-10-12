@@ -77,7 +77,7 @@ Ein Storno übernimmt die Positionen seiner Rechnung mit negativen Mengen. Eine 
 Ein Storno muss einen Betrag gutschreiben (seine Summe liegt unter 0), und höchstens so viel, wie von der Rechnung noch übrig ist: die Rechnungssumme abzüglich früher abgeschlossener Stornos. Sonst zeigt der Editor das als fehlende Angabe, und das Abschließen bricht ab (`cancellation_not_credit`, `cancellation_exceeds_invoice`). Um nur einen Teil einer Rechnung zu stornieren, verringerst du Positionen oder Mengen des Storno-Entwurfs vor dem Abschließen (**Teilstorno**):
 
 - Ein Storno, das den Rest abdeckt, macht die Rechnung **storniert**; eine stornierte Rechnung lässt sich nicht mehr auf bezahlt setzen oder erneut stornieren.
-- Ein Teilstorno lässt die Rechnung offen (oder bezahlt). Ab dann zählt sie mit dem, was von ihr übrig ist – in den Kennzahlen „offen“ und „überfällig“ der Übersicht, den offenen Beträgen der Kundenliste, der Dokumentliste („nach Storno …“) und ihrer Summe für offene oder überfällige Rechnungen –, und sie lässt sich weiter auf bezahlt setzen oder erneut stornieren, bis sie abgedeckt ist.
+- Ein Teilstorno lässt die Rechnung offen (oder bezahlt). Ab dann zählt sie mit dem, was von ihr übrig ist – in den Kennzahlen „offen“, „überfällig“ und „bezahlt“ (Monat/Jahr) der Übersicht, den offenen Beträgen der Kundenliste, der Dokumentliste („nach Storno …“) und ihrer Summe für offene oder überfällige Rechnungen –, und sie lässt sich weiter auf bezahlt setzen oder erneut stornieren, bis sie abgedeckt ist.
 
 Duplizieren legt einen neuen Entwurf mit heutigem Datum an, ohne Nummer und ohne Kette. Stornos lassen sich nicht duplizieren.
 

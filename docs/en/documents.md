@@ -77,7 +77,7 @@ A cancellation copies the positions of its invoice with negative quantities. An 
 A cancellation must credit an amount (its total is below 0) and at most what is left of the invoice: the invoice total minus its earlier finalized cancellations. Otherwise the editor shows it as missing information and finalizing stops (`cancellation_not_credit`, `cancellation_exceeds_invoice`). To cancel only part of an invoice, reduce the positions or quantities of the cancellation draft before finalizing it (**partial cancellation**):
 
 - A cancellation that covers the rest makes the invoice **cancelled**; a cancelled invoice can no longer be marked as paid or cancelled again.
-- A partial cancellation leaves the invoice open (or paid). From then on it counts with what is left of it – in the open and overdue figures of the overview, the open amounts of the customer list, the document list (“after cancellations …”) and its sum for open or overdue invoices – and it can still be marked as paid or cancelled again, until it is covered.
+- A partial cancellation leaves the invoice open (or paid). From then on it counts with what is left of it – in the open, overdue and paid (this month/year) figures of the overview, the open amounts of the customer list, the document list (“after cancellations …”) and its sum for open or overdue invoices – and it can still be marked as paid or cancelled again, until it is covered.
 
 Duplicating creates a new draft dated today without number and without chain. Cancellations cannot be duplicated.
 

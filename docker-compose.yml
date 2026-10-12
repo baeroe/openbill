@@ -10,21 +10,33 @@ services:
         condition: service_healthy
       gotenberg:
         condition: service_healthy
+    # localhost only by default: a reverse proxy on this host forwards to it (docs/en/reverse-proxy.md).
+    # Anyone who reaches the port from a trusted network can set X-Forwarded-* headers: before publishing it with
+    # OPENBILL_BIND for a proxy on another host, narrow TRUSTED_PROXIES to that proxy.
     ports:
-      - "${OPENBILL_PORT:-7739}:8080"
+      - "${OPENBILL_BIND:-127.0.0.1}:${OPENBILL_PORT:-7739}:8080"
     environment:
       APP_URL: "${APP_URL:?APP_URL missing (public https address, see .env.docker.example)}"
       # optional: without it, a key is generated once and kept in the data volume
       APP_KEY: "${APP_KEY:-}"
       ADMIN_EMAIL: "${ADMIN_EMAIL:?ADMIN_EMAIL missing}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?ADMIN_PASSWORD missing}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:?ADMIN_PASSWORD missing (set it in .env before the first start)}"
       DB_HOST: mariadb
       DB_DATABASE: openbill
       DB_USERNAME: openbill
-      DB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD missing}"
+      DB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD missing (set it in .env before the first start)}"
       GOTENBERG_URL: http://gotenberg:3000
+      # optional: addresses whose X-Forwarded-* headers are believed (comma-separated); default the private networks
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-}"
     volumes:
       - openbill-data:/var/www/html/storage/app
+    # Laravel answers (/up) with the host of APP_URL – the image's own check only pings nginx and PHP-FPM
+    healthcheck:
+      test: ["CMD", "sh", "-c", "h=$${APP_URL#*://}; h=$${h%%/*}; curl -fsS -o /dev/null -H \"Host: $${h%%:*}\" http://localhost:8080/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
     networks:
       - default
       - backend
@@ -39,8 +51,8 @@ services:
     environment:
       MARIADB_DATABASE: openbill
       MARIADB_USER: openbill
-      MARIADB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD missing}"
-      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD missing}"
+      MARIADB_PASSWORD: "${DB_PASSWORD:?DB_PASSWORD missing (set it in .env before the first start)}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD missing (set it in .env before the first start)}"
       # runs mariadb-upgrade after a new MariaDB patch version
       MARIADB_AUTO_UPGRADE: "1"
     volumes:

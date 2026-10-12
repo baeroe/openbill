@@ -43,7 +43,7 @@ it('lists the trusted proxy networks, the APP_URL host rule and the body size on
         foreach (TrustedRequests::PROXIES as $network) {
             expect($page)->toContain("`{$network}`");
         }
-        expect($page)->toContain('APP_URL', 'client_max_body_size 32m', '127.0.0.1:7739');
+        expect($page)->toContain('APP_URL', 'client_max_body_size 32m', '127.0.0.1:7739', 'OPENBILL_BIND', 'TRUSTED_PROXIES', 'traefik.docker.network=proxy');
     }
 });
 
@@ -61,7 +61,7 @@ it('explains binary logging for external databases and the data volume on the se
 
     foreach (['en', 'de'] as $locale) {
         expect((string) file_get_contents("{$root}/docs/{$locale}/setup.md"))
-            ->toContain('log_bin_trust_function_creators', 'openbill-data', 'openbill-db', '7739', 'DB_WAIT_TIMEOUT');
+            ->toContain('log_bin_trust_function_creators', 'openbill-data', 'openbill-db', '7739', 'DB_WAIT_TIMEOUT', 'OPENBILL_BIND', 'TRUSTED_PROXIES', 'ADMIN_PASSWORD missing');
     }
 });
 

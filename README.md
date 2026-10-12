@@ -23,11 +23,12 @@ You need Docker with Compose v2.
 mkdir openbill && cd openbill
 curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml
 curl -fsSL -o .env https://raw.githubusercontent.com/baeroe/openbill/main/.env.docker.example
-# edit .env: APP_URL, ADMIN_EMAIL, ADMIN_PASSWORD, DB_PASSWORD, DB_ROOT_PASSWORD
+# edit .env: APP_URL, ADMIN_EMAIL and the passwords ADMIN_PASSWORD, DB_PASSWORD, DB_ROOT_PASSWORD
+# (empty in the template: docker compose refuses to start until they are set)
 docker compose up -d
 ```
 
-openbill listens on port `7739`; put a reverse proxy with HTTPS in front and set `APP_URL` to its address. Then log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+openbill listens on `127.0.0.1:7739`; put a reverse proxy with HTTPS in front on the same host and set `APP_URL` to its address (proxy on another host: `OPENBILL_BIND` and `TRUSTED_PROXIES`, see the reverse proxy guide). Then log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
 - Setup: [`docs/en/setup.md`](docs/en/setup.md)
 - Reverse proxy: [`docs/en/reverse-proxy.md`](docs/en/reverse-proxy.md)

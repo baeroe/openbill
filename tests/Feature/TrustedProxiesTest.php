@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Middleware\TrustProxies;
 use App\Support\TrustedRequests;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Middleware\TrustHosts;
+use Illuminate\Http\Middleware\TrustProxies as FrameworkTrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
@@ -24,6 +26,35 @@ it('ignores X-Forwarded-* sent straight from the internet', function () {
         ->get('http://localhost/_proxy-check', ['X-Forwarded-Proto' => 'https', 'X-Forwarded-For' => '203.0.113.7'])
         ->assertOk()
         ->assertExactJson(['secure' => false, 'ip' => '198.51.100.9']);
+});
+
+it('trusts only the proxies of TRUSTED_PROXIES once they are set', function () {
+    config(['openbill.trusted_proxies' => '192.0.2.10, 2001:db8::10']);
+
+    foreach (['192.0.2.10', '2001:db8::10'] as $proxy) {
+        $this->withServerVariables(['REMOTE_ADDR' => $proxy])
+            ->get('http://localhost/_proxy-check', ['X-Forwarded-Proto' => 'https', 'X-Forwarded-For' => '203.0.113.7'])
+            ->assertExactJson(['secure' => true, 'ip' => '203.0.113.7']);
+    }
+    // a machine in a private network (e.g. the Docker gateway) is no proxy any more
+    $this->withServerVariables(['REMOTE_ADDR' => '172.18.0.1'])
+        ->get('http://localhost/_proxy-check', ['X-Forwarded-Proto' => 'https', 'X-Forwarded-For' => '203.0.113.7'])
+        ->assertExactJson(['secure' => false, 'ip' => '172.18.0.1']);
+});
+
+it('parses TRUSTED_PROXIES and falls back to the private networks', function () {
+    expect(TrustedRequests::parseProxies('192.0.2.10, 198.51.100.0/24 ,'))->toBe(['192.0.2.10', '198.51.100.0/24'])
+        ->and(TrustedRequests::parseProxies(['192.0.2.10']))->toBe(['192.0.2.10'])
+        ->and(TrustedRequests::parseProxies(''))->toBe(TrustedRequests::PROXIES)
+        ->and(TrustedRequests::parseProxies(' , '))->toBe(TrustedRequests::PROXIES)
+        ->and(TrustedRequests::parseProxies(null))->toBe(TrustedRequests::PROXIES);
+});
+
+it('replaces the framework TrustProxies with the configurable one', function () {
+    $kernel = app(Kernel::class);
+
+    expect($kernel->hasMiddleware(TrustProxies::class))->toBeTrue()
+        ->and($kernel->hasMiddleware(FrameworkTrustProxies::class))->toBeFalse();
 });
 
 it('derives exactly one host pattern from APP_URL, without subdomains or port', function () {

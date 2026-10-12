@@ -75,7 +75,7 @@ it('ships the Liquid reference the MCP server reads at runtime', function () {
     $ignore = array_map('trim', explode("\n", dockerRepoFile('.dockerignore')));
 
     expect($ignore)->toContain('!docs/en/templates.md')
-        ->and(dockerRepoFile('Dockerfile'))->toContain('COPY --chown=www-data:www-data docs/en/templates.md ./docs/en/templates.md');
+        ->and(dockerRepoFile('Dockerfile'))->toContain('COPY docs/en/templates.md ./docs/en/templates.md');
 });
 
 it('puts the built template kit where config(openbill.toolkit.path) looks for it', function () {
@@ -131,7 +131,7 @@ it('runs openbill, MariaDB 11.4 and Gotenberg 8 with two persistent volumes', fu
 
     expect(array_keys($services))->toEqualCanonicalizing(['openbill', 'mariadb', 'gotenberg'])
         ->and($services['openbill']['image'])->toBe('${OPENBILL_IMAGE:-baeroe/openbill:latest}')
-        ->and($services['openbill']['ports'])->toBe(['${OPENBILL_PORT:-7739}:8080'])
+        ->and($services['openbill']['ports'])->toBe(['${OPENBILL_BIND:-127.0.0.1}:${OPENBILL_PORT:-7739}:8080'])
         ->and($services['openbill']['volumes'])->toBe(['openbill-data:/var/www/html/storage/app'])
         ->and($services['mariadb']['volumes'])->toBe(['openbill-db:/var/lib/mysql'])
         ->and(array_keys($compose['volumes']))->toEqualCanonicalizing(['openbill-data', 'openbill-db'])
@@ -176,7 +176,7 @@ it('documents every variable of the compose file in .env.docker.example', functi
     $example = dockerRepoFile('.env.docker.example');
     $names = array_values(array_unique($m[1]));
 
-    expect($names)->toEqualCanonicalizing(['OPENBILL_IMAGE', 'OPENBILL_PORT', 'APP_KEY', 'APP_URL', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DB_PASSWORD', 'DB_ROOT_PASSWORD']);
+    expect($names)->toEqualCanonicalizing(['OPENBILL_IMAGE', 'OPENBILL_BIND', 'OPENBILL_PORT', 'TRUSTED_PROXIES', 'APP_KEY', 'APP_URL', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DB_PASSWORD', 'DB_ROOT_PASSWORD']);
     foreach ($names as $name) {
         expect($example)->toMatch('/^#?\s*'.$name.'=/m');
     }
@@ -206,4 +206,35 @@ it('pins the Java image of the e-invoice validator', function () {
     preg_match('/^JAVA_IMAGE=(\S+)$/m', dockerRepoFile('scripts/validate-einvoice.sh'), $m);
 
     expect($m[1] ?? '')->toMatch('/^eclipse-temurin:21[\w.-]*@sha256:[0-9a-f]{64}$/');
+});
+
+it('keeps the code read-only for PHP and only storage and bootstrap/cache writable', function () {
+    $dockerfile = dockerRepoFile('Dockerfile');
+    $app = substr($dockerfile, (int) strpos($dockerfile, ' AS app'));
+
+    expect($app)->not->toContain('--chown')
+        ->toContain('chown -R www-data:www-data storage bootstrap/cache')
+        ->and(strrpos($app, 'USER www-data'))->toBeGreaterThan((int) strrpos($app, 'chown -R www-data:www-data storage bootstrap/cache'));
+});
+
+it('publishes openbill on localhost only unless OPENBILL_BIND says otherwise', function () {
+    expect(dockerCompose()['services']['openbill']['ports'][0])->toStartWith('${OPENBILL_BIND:-127.0.0.1}:')
+        ->and(dockerRepoFile('.env.docker.example'))->toMatch('/^OPENBILL_BIND=127\.0\.0\.1$/m')
+        ->and(dockerCompose()['services']['openbill']['environment']['TRUSTED_PROXIES'])->toBe('${TRUSTED_PROXIES:-}');
+});
+
+it('ships no usable passwords, so Compose refuses to start until they are set', function () {
+    $example = dockerRepoFile('.env.docker.example');
+    $compose = dockerRepoFile('docker-compose.yml');
+
+    foreach (['ADMIN_PASSWORD', 'DB_PASSWORD', 'DB_ROOT_PASSWORD'] as $name) {
+        expect($example)->toMatch('/^'.$name.'=$/m')
+            ->and($compose)->toContain('${'.$name.':?');
+    }
+});
+
+it('reports openbill healthy only when Laravel answers for the host of APP_URL', function () {
+    $test = implode(' ', dockerCompose()['services']['openbill']['healthcheck']['test']);
+
+    expect($test)->toContain('http://localhost:8080/up', 'Host: ', '${APP_URL#*://}');
 });

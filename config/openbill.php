@@ -11,6 +11,13 @@ return [
     ],
 
     /*
+    | Reverse proxy (docs: reverse-proxy): addresses or CIDR ranges whose X-Forwarded-* headers are believed,
+    | comma-separated (TRUSTED_PROXIES). Empty: localhost and the private networks (App\Support\TrustedRequests::PROXIES).
+    | Restrict it to the proxy's address when other machines in those networks can reach the port.
+    */
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     | Limits for Liquid templates (see docs/en/templates.md, "Limits and errors").
     */
     'rendering' => [

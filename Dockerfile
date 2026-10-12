@@ -69,28 +69,34 @@ USER root
 RUN install-php-extensions intl bcmath gd apcu
 # start-up: wait for the database, APP_KEY, migrations, built-in templates, owner, caches
 COPY --chmod=755 docker/entrypoint.d/ /etc/entrypoint.d/
-USER www-data
 WORKDIR /var/www/html
 
+# The code belongs to root and is read-only for PHP (www-data): a write bug in the app can't turn into code
+# execution. Only storage/ (the data volume is storage/app) and bootstrap/cache (config, routes, events) are writable.
+# Modes are set explicitly, so a local checkout with restrictive modes (e.g. 600 from composer) builds the same image.
 # dependencies first (cached while composer.lock is unchanged), the autoloader after the code is in place
-COPY --chown=www-data:www-data composer.json composer.lock ./
+COPY --chmod=644 composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --no-scripts --no-autoloader
 
-COPY --chown=www-data:www-data artisan ./
-COPY --chown=www-data:www-data app ./app
-COPY --chown=www-data:www-data bootstrap ./bootstrap
-COPY --chown=www-data:www-data config ./config
-COPY --chown=www-data:www-data database ./database
-COPY --chown=www-data:www-data lang ./lang
-COPY --chown=www-data:www-data public ./public
-COPY --chown=www-data:www-data resources ./resources
-COPY --chown=www-data:www-data routes ./routes
+COPY artisan ./
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY database ./database
+COPY lang ./lang
+COPY public ./public
+COPY resources ./resources
+COPY routes ./routes
 # read at runtime by the MCP resource openbill://docs/liquid-reference
-COPY --chown=www-data:www-data docs/en/templates.md ./docs/en/templates.md
-COPY --chown=www-data:www-data --from=assets /app/public/build ./public/build
-COPY --chown=www-data:www-data --from=assets /app/packages/template-kit/dist/kit ./packages/template-kit/dist/kit
+COPY docs/en/templates.md ./docs/en/templates.md
+COPY --from=assets /app/public/build ./public/build
+COPY --from=assets /app/packages/template-kit/dist/kit ./packages/template-kit/dist/kit
 
-# storage/app is the data volume: created here, so a new named volume starts out owned by www-data.
+# storage/app is the data volume: created here and owned by www-data, so a new named volume starts out that way.
 # dump-autoload runs the post-autoload-dump scripts (package discovery, Swagger UI assets in public/vendor).
 RUN mkdir -p storage/app storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
-    && composer dump-autoload --no-dev --optimize --no-interaction
+    && composer dump-autoload --no-dev --optimize --no-interaction \
+    && chown root:root . \
+    && chmod -R a+rX,go-w artisan app bootstrap config database lang public resources routes docs packages \
+    && chown -R www-data:www-data storage bootstrap/cache
+USER www-data

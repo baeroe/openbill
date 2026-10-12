@@ -281,7 +281,7 @@ Dieser Master-Plan legt Phasen, Schnittstellen und Abnahme fest. **Je Phase** l√
 - [x] Phase 4: REST-API
 - [x] Phase 5: UI-Basis
 - [x] Phase 6: Dokument-Editor
-- [ ] Phase 7: Templates, eigene Felder, Einstellungen
+- [x] Phase 7: Templates, eigene Felder, Einstellungen
 - [ ] Phase 8: MCP
 - [ ] Phase 9: Template-Toolkit
 - [ ] Phase 10: Docker & Release

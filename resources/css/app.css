@@ -3,7 +3,6 @@
 @import './editor.css';
 @import './templates.css';
 @import './settings.css';
-@import './login.css';
 @source '../js';
 @source '../views';
 
@@ -38,14 +37,6 @@
     --elev-paper: 0 1px 2px rgb(20 22 30 / 0.06), 0 16px 36px -18px rgb(20 22 30 / 0.28);
     --elev-float: 0 1px 2px rgb(20 22 30 / 0.06), 0 18px 48px -12px rgb(20 22 30 / 0.22);
     --elev-tab: 0 1px 2px rgb(20 22 30 / 0.08);
-    /* printed paper (login illustration): stays white in dark mode as well, so dark mode does not assign these */
-    --paper: #ffffff;
-    --paper-ink: #23252b;
-    --paper-muted: #5f626a;
-    --paper-line: #ecece9;
-    --paper-accent: #2f55d4;
-    --paper-accent-soft: #e3e9fb;
-    --paper-ok: #2e7d4f;
     --font: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-code: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
     color-scheme: light;

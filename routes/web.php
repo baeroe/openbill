@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\FieldController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OverviewController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 // admin: the language is part of the URL (/en/…, /de/…)
@@ -21,6 +24,13 @@ Route::prefix('{locale}')->where(['locale' => 'en|de'])->group(function (): void
         Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('/customers/new', [CustomerController::class, 'create'])->name('customers.create');
         Route::get('/customers/{id}', [CustomerController::class, 'show'])->whereUlid('id')->name('customers.show');
+        Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
+        Route::get('/templates/{id}', [TemplateController::class, 'show'])->whereUlid('id')->name('templates.show');
+        Route::get('/fields', [FieldController::class, 'index'])->name('fields.index');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::get('/settings/{section}', [SettingsController::class, 'show'])
+            ->whereIn('section', SettingsController::SECTIONS)
+            ->name('settings.show');
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     });
 });

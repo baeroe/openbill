@@ -45,6 +45,6 @@ features:
 
 <div class="showcase">
 
-![The document editor: a draft invoice with groups of positions, custom fields, the compliance check and the live preview](/screenshots/en/editor.png)
+![The document editor: a draft invoice with groups of positions, custom fields, the compliance check and the live preview (the demo company writes its invoices in German)](/screenshots/en/editor.png)
 
 </div>

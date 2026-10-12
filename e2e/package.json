@@ -7,7 +7,7 @@
         "test": "playwright test",
         "typecheck": "tsc --noEmit",
         "screenshots": "SCREENSHOTS=1 playwright test --project=screenshots",
-        "docs:screenshots": "DOCS_SCREENSHOTS=1 playwright test --project=docs-screenshots-en --project=docs-screenshots-de"
+        "docs:screenshots": "DOCS_SCREENSHOTS=1 playwright test --project=docs-screenshots-en --project=docs-screenshots-de && ./optimize-screenshots.sh"
     },
     "devDependencies": {
         "@playwright/test": "^1.64.0",

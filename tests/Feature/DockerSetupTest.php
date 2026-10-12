@@ -208,6 +208,12 @@ it('pins the Java image of the e-invoice validator', function () {
     expect($m[1] ?? '')->toMatch('/^eclipse-temurin:21[\w.-]*@sha256:[0-9a-f]{64}$/');
 });
 
+it('pins the PNG optimizer of the docs screenshots by digest', function () {
+    preg_match('/^OXIPNG_IMAGE=(\S+)$/m', dockerRepoFile('e2e/optimize-screenshots.sh'), $m);
+
+    expect($m[1] ?? '')->toMatch('/^ghcr\.io\/shssoichiro\/oxipng:v[\d.]+@sha256:[0-9a-f]{64}$/');
+});
+
 it('pins the KoSIT validator and its configuration by version and SHA-256', function () {
     $script = dockerRepoFile('scripts/validate-einvoice.sh');
 

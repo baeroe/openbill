@@ -7,7 +7,9 @@ import { apiDelete, apiGet } from './helpers';
  * Screenshots of the documentation, committed under docs/public/screenshots/{en,de}/<name>.png: the demo data of
  * DemoSeeder (global-setup seeds it before the run), 1440×900, light; shots with `dark` also as <name>-dark.png.
  * English pages show the English UI, German pages the German one. Run: pnpm --dir e2e docs:screenshots – then look at
- * every image before committing. Fictional data only (DemoSeeder, E2eUserSeeder).
+ * every image before committing, and commit only the images whose page changed visibly (the demo data move with the
+ * date). The script compresses them losslessly afterwards (e2e/optimize-screenshots.sh). Fictional data only
+ * (DemoSeeder, E2eUserSeeder).
  */
 const OUT = path.resolve(import.meta.dirname, '../../docs/public/screenshots');
 const LOCALES = ['en', 'de'] as const;
@@ -81,6 +83,12 @@ for (const locale of LOCALES) {
     // project docs-screenshots-<locale> runs the group docs-<locale> (grep in playwright.config.ts)
     test.describe(`docs-${locale}`, () => {
         test.beforeAll(() => mkdirSync(path.join(OUT, locale), { recursive: true }));
+        // the overview greets by the hour: always the morning of today (Berlin), so a new run only changes what the
+        // demo data change (dates relative to today); timers keep running
+        test.beforeEach(async ({ page }) => {
+            const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' });
+            await page.clock.setFixedTime(new Date(`${today}T09:30:00+01:00`));
+        });
 
         test('login', async ({ browser, baseURL }) => {
             // signed out: a context without the stored session (newContext would take the project's storageState)

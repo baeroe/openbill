@@ -115,7 +115,7 @@ After logging in you land on the overview. Four figures sum up the money side: o
 
 ### Document editor
 
-![The editor of a draft invoice with position groups and the live preview](/screenshots/en/editor.png)
+![The editor of a draft invoice with position groups and the live preview (a German invoice of the demo company)](/screenshots/en/editor.png)
 
 Every document opens in the editor: the form on the left, a live preview on the right (below the form on narrow screens). The preview shows the pages exactly as the PDF will look – openbill renders header, content and footer on the server with the document's template and only splits them into pages in the browser. **Areas** outlines header, content and footer on every page. The preview can be hidden and shown again; the choice is remembered in this browser.
 

@@ -51,7 +51,7 @@ openbill soll wie prevju laufen: ein Image auf Docker Hub, `docker compose up -d
 - Chromium setzt Kopf-/Fußzeile in einen Flex-Container – ohne seitenbreite Hülle schrumpft der Inhalt.
 - Inertia-v3-Layouts müssen Pfeilfunktionen sein; SWRs `mutate(filter)` überspringt `useSWRInfinite`; Radix-Menüs brauchen `modal={false}`.
 - Playwright läuft in den Login-Throttle: einmal anmelden, Sitzung als `storageState` teilen. `browser.newContext()` im Test übernimmt die `storageState` des Projekts – für einen abgemeldeten Screenshot ausdrücklich leeren.
-- Chromium formatiert `<input type="date">` nach der Browsersprache (`--lang`), nicht nach der Locale des Kontexts.
+- Chromium formatiert `<input type="date">` nach der Browsersprache (`--lang`), nicht nach der Locale des Kontexts – unter macOS aber nur die Reihenfolge: die Platzhalterbuchstaben bleiben englisch (`dd.mm.yyyy` statt `TT.MM.JJJJ`), weil Chromium dort die Systemsprache nimmt. So akzeptiert.
 - serversideups Entrypoint läuft in einer Subshell: `APP_KEY` erreicht PHP-FPM nur über den Config-Cache.
 - Je nach Docker-Setup kommen Anfragen von außen mit der Gateway-IP `172.x.0.1` an, die in den privaten Netzen liegt – deshalb Bind auf `127.0.0.1` als Standard.
 - Laravel vertraut `X-Forwarded-Prefix` standardmäßig; openbill läuft nur an der Wurzel und ignoriert ihn seit Phase 11.

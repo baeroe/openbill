@@ -26,7 +26,7 @@ Text, long text, number, amount, date, selection (with options), yes/no and imag
 ```
 :::
 
-Uploaded files are kept even when the value changes, because finalized documents still refer to them.
+Uploaded files are kept even when the value changes, because finalized documents still refer to them. Images nothing refers to anymore (no record, no finalized document) are listed by `docker compose exec openbill php artisan app:prune-images --dry-run`; without `--dry-run` they are deleted. Files younger than 24 hours stay (`--min-age=<hours>`), because an upload is stored before its form is saved.
 
 ## Adding and editing
 

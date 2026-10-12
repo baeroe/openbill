@@ -26,7 +26,7 @@ Text, langer Text, Zahl, Betrag, Datum, Auswahl (mit Optionen), Ja/Nein und Bild
 ```
 :::
 
-Hochgeladene Dateien bleiben erhalten, auch wenn sich der Wert ändert, weil abgeschlossene Dokumente noch auf sie verweisen.
+Hochgeladene Dateien bleiben erhalten, auch wenn sich der Wert ändert, weil abgeschlossene Dokumente noch auf sie verweisen. Bilder, auf die nichts mehr verweist (kein Datensatz, kein abgeschlossenes Dokument), listet `docker compose exec openbill php artisan app:prune-images --dry-run` auf; ohne `--dry-run` werden sie gelöscht. Dateien, die jünger als 24 Stunden sind, bleiben (`--min-age=<Stunden>`), weil ein Upload gespeichert wird, bevor sein Formular gespeichert ist.
 
 ## Anlegen und bearbeiten
 

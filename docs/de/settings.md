@@ -4,7 +4,7 @@ Unter **Einstellungen** stehen deine Firma, die Dokumenttypen und die Stammdaten
 
 ## Organisation
 
-Name, Adresse, Logo (PNG, JPEG, GIF, WebP oder SVG, höchstens 1 MB – ohne Logo zeigen die Templates den Namen), Besteuerung (Regelbesteuerung oder Kleinunternehmer nach § 19 UStG), USt-ID, Steuernummer, **Registernummer** (`registration_id`, z. B. der Handelsregistereintrag), Bank- und Kontaktdaten, die Standard-Dokumentsprache und die eigenen Felder der Organisation. Fehlende Angaben des E-Rechnungs-Profils erscheinen in der Prüfanzeige des Dokument-Editors; ein Klick dort öffnet diese Seite am richtigen Feld.
+Name, Adresse, Logo (PNG, JPEG, GIF, WebP oder SVG, höchstens 1 MB – ohne Logo zeigen die Templates den Namen), Besteuerung (Regelbesteuerung oder Kleinunternehmer nach § 19 UStG), USt-ID, Steuernummer, **Registernummer** (`registration_id`, z. B. der Handelsregistereintrag), Bank- und Kontaktdaten, die Standard-Dokumentsprache und die eigenen Felder der Organisation. Fehlende Angaben des E-Rechnungs-Profils erscheinen in der Prüfanzeige des Dokument-Editors; ein Klick dort öffnet diese Seite am richtigen Feld. Ein neues Logo behält die alte Datei für abgeschlossene Dokumente; `app:prune-images` entfernt alte Logos, auf die nichts mehr verweist (siehe [Eigene Felder](/de/custom-fields#typen)).
 
 Das E-Rechnungs-Profil braucht die USt-ID oder die Registernummer; bei Reverse Charge und Ausfuhr von Waren die USt-ID, bei Dienstleistungen an Kunden außerhalb der EU die Registernummer (die USt-IDs dürfen in dieser E-Rechnung nicht stehen).
 

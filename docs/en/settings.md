@@ -4,7 +4,7 @@
 
 ## Organization
 
-Name, address, logo (PNG, JPEG, GIF, WebP or SVG, at most 1 MB – without a logo templates show the name), taxation (standard or small business under § 19 UStG), VAT ID, tax number, **register number** (`registration_id`, e.g. the commercial register entry), bank and contact details, the default document language and the custom fields of the organization. Missing details of the e-invoice profile show up in the check panel of the document editor; a click there opens this page at the right field.
+Name, address, logo (PNG, JPEG, GIF, WebP or SVG, at most 1 MB – without a logo templates show the name), taxation (standard or small business under § 19 UStG), VAT ID, tax number, **register number** (`registration_id`, e.g. the commercial register entry), bank and contact details, the default document language and the custom fields of the organization. Missing details of the e-invoice profile show up in the check panel of the document editor; a click there opens this page at the right field. A new logo keeps the old file for finalized documents; `app:prune-images` removes old logos nothing refers to anymore (see [Custom fields](/en/custom-fields#types)).
 
 The e-invoice profile needs the VAT ID or the register number; with reverse charge and exports of goods the VAT ID, with services to customers outside the EU the register number (the VAT IDs must not appear in that e-invoice).
 

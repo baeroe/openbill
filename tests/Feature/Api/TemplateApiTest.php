@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Document;
+use App\Models\DocumentTypeSetting;
 use App\Models\Template;
 use App\Rendering\TemplatePackage;
 use Illuminate\Http\UploadedFile;
@@ -127,4 +128,14 @@ it('duplicates a template over the API in the language of the request', function
         ->assertJsonPath('name', 'Klar (Kopie)')
         ->assertJsonPath('built_in', false)
         ->assertJsonPath('manifest.name', 'Klar (Kopie)');
+});
+
+it('lists templates used as a default first (review #13)', function () {
+    $leise = Template::query()->where('slug', 'leise')->sole();
+    DocumentTypeSetting::query()->update(['template_id' => $leise->id]);
+
+    expect(collect($this->getJson('/api/templates')->assertOk()->json())->pluck('slug')->first())->toBe('leise');
+
+    DocumentTypeSetting::query()->update(['template_id' => null]);
+    expect(collect($this->getJson('/api/templates')->json())->pluck('slug')->first())->toBe('klar');
 });

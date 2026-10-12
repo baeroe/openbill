@@ -1,6 +1,7 @@
 import { SWRConfig } from 'swr';
 import { flushAutosaves, resetAutosaves } from '@/editor/autosave-registry';
 import { useEditor } from '@/editor/store';
+import { clearDrafts } from '@/editor/unsaved-drafts';
 import { cookie } from '@/lib/api';
 import { path, t } from '@/lib/i18n';
 import { flushPendingDeletes } from '@/lib/pending-delete';
@@ -77,6 +78,7 @@ export async function logout({
         resetAutosaves();
         useEditor.getState().reset();
         clearApiCache();
+        clearDrafts();
         leave();
         return true;
     } finally {

@@ -1,8 +1,10 @@
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import type { DocumentDetail } from '@/api/types';
 import { acquireAutosave, releaseAutosave, showDocument, type AutosaveEntry } from './autosave-registry';
+import type { SharedProps } from '@/types';
 import { useEditor } from './store';
+import { setDraftOwner } from './unsaved-drafts';
 
 /**
  * Connects the editor of one document with its autosave (autosave-registry.ts: one instance per document, also across
@@ -13,6 +15,9 @@ import { useEditor } from './store';
  */
 export function useAutosave(id: string, document: DocumentDetail | undefined): { flush(): Promise<void>; retry(): void; stop(): void } {
     const [entry, setEntry] = useState<AutosaveEntry | null>(null);
+    const user = usePage<SharedProps>().props.auth.user?.id ?? null;
+    // before the effects below: whose kept input showDocument may hand out
+    useEffect(() => setDraftOwner(user), [user]);
 
     useEffect(() => {
         const held = acquireAutosave(id);

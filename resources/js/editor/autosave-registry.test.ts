@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DocumentDetail } from '@/api/types';
-import { acquireAutosave, flushAllKeepalive, releaseAutosave, resetAutosaves, showDocument } from './autosave-registry';
+import { currentToasts } from '@/lib/toast';
+import { memoryStorage } from '@/test-utils/memory-storage';
+import { acquireAutosave, flushAllKeepalive, releaseAutosave, resetAutosaves, showDocument, stashUnsavedDrafts } from './autosave-registry';
 import { useEditor } from './store';
 import type { DraftPayload } from './types';
+import { setDraftOwner } from './unsaved-drafts';
 
 const invalidated = vi.hoisted(() => [] as [string, string[]][]);
 vi.mock('@/api/paged', () => ({
@@ -72,7 +75,10 @@ beforeEach(() => {
     resetAutosaves();
     useEditor.getState().reset();
 });
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+});
 
 describe('autosave registry', () => {
     it('A → B → back to A while A is still saving: the newest input of A is shown and saved, never the older cache (review)', async () => {
@@ -207,5 +213,39 @@ describe('autosave registry', () => {
         await left;
 
         expect(invalidated).toEqual([['/api/documents', ['/api/documents/a']]]);
+    });
+
+    it('keeps unsaved input across an expired session and brings it back after the login (ledger phase 6, #8)', async () => {
+        vi.stubGlobal('sessionStorage', memoryStorage());
+        setDraftOwner('u1');
+        const a = open('a', detail('a'));
+        a.type('Hallo Jana');
+        await vi.advanceTimersByTimeAsync(600); // the save goes out … and the server answers 401
+        stashUnsavedDrafts(); // what the 401 handler does before the browser goes to the login
+
+        // the login is a full page load: nothing in memory survives
+        resetAutosaves();
+        useEditor.getState().reset();
+        calls = [];
+
+        open('a', detail('a', ''));
+        expect(useEditor.getState().draft?.intro).toBe('Hallo Jana');
+        expect(useEditor.getState().saveState).toBe('dirty');
+        expect(currentToasts().map((toast) => toast.message)).toContain('editor.restored_after_login');
+        await vi.advanceTimersByTimeAsync(600);
+        expect(calls.map((call) => call.intro)).toEqual(['Hallo Jana']);
+    });
+
+    it('does not put kept input into a document that was finalized in the meantime', () => {
+        vi.stubGlobal('sessionStorage', memoryStorage());
+        setDraftOwner('u1');
+        open('a', detail('a')).type('Hallo Jana');
+        stashUnsavedDrafts();
+        resetAutosaves();
+        useEditor.getState().reset();
+
+        open('a', { ...detail('a', ''), status: 'open', is_locked: true });
+        expect(useEditor.getState().draft?.intro).toBe('');
+        expect(sessionStorage.length).toBe(0);
     });
 });

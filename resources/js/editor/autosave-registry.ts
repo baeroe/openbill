@@ -3,7 +3,8 @@ import { saveDraft } from '@/api/documents';
 import { keys } from '@/api/keys';
 import { invalidate } from '@/api/paged';
 import type { DocumentDetail } from '@/api/types';
-import { ApiError, errorMessage } from '@/lib/api';
+import { ApiError, errorMessage, goToLogin, setUnauthenticatedHandler } from '@/lib/api';
+import { t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { Autosave } from './autosave';
 import { draftSource, type DraftSource } from './draft-source';
@@ -11,6 +12,7 @@ import { fromDocument, samePayload, toPayload } from './ops';
 import { fieldErrors } from './paths';
 import { useEditor } from './store';
 import type { DraftPayload } from './types';
+import { stashDrafts, takeDraft } from './unsaved-drafts';
 
 export type Save = (id: string, payload: DraftPayload) => Promise<DocumentDetail>;
 /** users: editors holding the entry (never dropped while > 0); disposed: dropped for good, never handed out again. */
@@ -81,6 +83,20 @@ export function flushAllKeepalive(save: (id: string, payload: DraftPayload) => v
 }
 
 /**
+ * The session is gone (401): the unsaved input of every open document goes to sessionStorage before the browser
+ * leaves for the login. Opening the document again after logging in brings it back (showDocument).
+ */
+export function stashUnsavedDrafts(): void {
+    const drafts: { id: string; payload: DraftPayload }[] = [];
+    for (const entry of entries.values()) {
+        if (!entry.autosave.pending || entry.autosave.stopped) continue;
+        const payload = entry.source.payload();
+        if (payload) drafts.push({ id: entry.id, payload });
+    }
+    stashDrafts(drafts);
+}
+
+/**
  * The editor of a document takes its autosave and holds it until releaseAutosave (one step, in the mount effect): the
  * running entry from an earlier visit, or a fresh one with a live store subscription.
  */
@@ -95,6 +111,11 @@ export function acquireAutosave(id: string, save: Save = patch): AutosaveEntry {
     if (!listening && typeof window !== 'undefined') {
         listening = true;
         window.addEventListener('pagehide', () => flushAllKeepalive());
+        // 401 anywhere in the app: keep what is not saved, then the login (api.ts' default only does the latter)
+        setUnauthenticatedHandler(() => {
+            stashUnsavedDrafts();
+            goToLogin();
+        });
     }
     return entry;
 }
@@ -109,16 +130,22 @@ export function releaseAutosave(entry: AutosaveEntry): Promise<void> {
 /**
  * Server state → store while the editor shows the document. Opening it (the store holds another document) shows the
  * server state – or, while this document's autosave still has unsaved input, that input on top of it. Later only a
- * changed lock or an external change while nothing is pending replaces the local state.
+ * changed lock or an external change while nothing is pending replaces the local state. Input kept from an expired
+ * session (unsaved-drafts.ts) comes back the same way, with a message.
  */
 export function showDocument(entry: AutosaveEntry, document: DocumentDetail): void {
     const { autosave, source } = entry;
     const store = useEditor.getState();
     if (store.draft === null || store.draft.id !== entry.id) {
         const local = autosave.pending && !autosave.stopped ? source.payload() : null;
-        store.load(document, local ? { payload: local, saveState: autosave.state } : undefined);
-        if (local) autosave.changed();
+        // input kept from before an expired session (stashed on 401): only into a document that is still a draft
+        const kept = local === null ? takeDraft(entry.id) : null;
+        const restored = kept !== null && !document.is_locked ? kept : null;
+        const payload = local ?? restored;
+        store.load(document, payload ? { payload, saveState: local ? autosave.state : 'dirty' } : undefined);
+        if (payload) autosave.changed();
         else autosave.reset();
+        if (restored) toast.info(t('editor.restored_after_login'));
         return;
     }
     const lockChanged = (store.draft.status !== 'draft') !== document.is_locked;

@@ -326,6 +326,7 @@
     "editor.read_only_other": "Duplicate it for a new version.",
     "editor.remove": "Remove",
     "editor.restored": "Draft kept",
+    "editor.restored_after_login": "Your changes from before the login are back and are being saved.",
     "editor.save.dirty": "Unsaved",
     "editor.save.error": "Not saved, trying again",
     "editor.save.invalid": "Not saved: check the marked fields",

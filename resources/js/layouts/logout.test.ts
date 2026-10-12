@@ -4,8 +4,10 @@ import type { DocumentDetail } from '@/api/types';
 import { acquireAutosave, resetAutosaves, showDocument } from '@/editor/autosave-registry';
 import { useEditor } from '@/editor/store';
 import type { DraftPayload } from '@/editor/types';
+import { setDraftOwner, stashDrafts } from '@/editor/unsaved-drafts';
 import { commitAllKeepalive, pendingDeleteIds, scheduleDelete } from '@/lib/pending-delete';
 import { currentToasts, dismissToast } from '@/lib/toast';
+import { memoryStorage } from '@/test-utils/memory-storage';
 import { LOGOUT_POST_TIMEOUT, LOGOUT_SAVE_WAIT, logout } from './logout';
 
 const detail = (id: string, intro = ''): DocumentDetail =>
@@ -191,5 +193,14 @@ describe('logout', () => {
         expect(leave).not.toHaveBeenCalled();
         expect(currentToasts().map((toast) => [toast.tone, toast.message])).toEqual([['error', 'user_menu.logout_failed']]);
         expect(LOGOUT_POST_TIMEOUT).toBe(10000);
+    });
+
+    it('forgets input kept from an expired session (the next person in this tab must not get it)', async () => {
+        vi.stubGlobal('sessionStorage', memoryStorage());
+        setDraftOwner('u1');
+        stashDrafts([{ id: 'a', payload: { intro: 'Hallo' } as unknown as DraftPayload }]);
+
+        expect(await logout({ post: async () => undefined, leave: () => undefined })).toBe(true);
+        expect(sessionStorage.length).toBe(0);
     });
 });

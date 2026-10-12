@@ -1,6 +1,6 @@
 # Einstellungen
 
-Unter **Einstellungen** stehen deine Firma, die Dokumenttypen und die Stammdaten. Alles davon geht auch über die REST-API (außer Benutzer).
+Unter **Einstellungen** stehen deine Firma, die Dokumenttypen und die Stammdaten. Alles davon geht auch über die REST-API (außer Benutzer und Tokens).
 
 ## Organisation
 
@@ -35,3 +35,7 @@ openbill verschickt keine E-Mails: **Einladen** erzeugt einen Link zum Weitergeb
 Benutzer werden nie gelöscht, sondern **deaktiviert**: Das Konto bleibt, damit Dokumente und ihr Protokoll ihren Ersteller behalten, aber die Person kann sich nicht mehr anmelden (die Anmeldung sagt, dass das Konto deaktiviert ist), ihre API-Tokens und Sitzungen enden sofort und sie bekommt keine neuen Tokens. **Wieder aktivieren** lässt sie sich wieder anmelden; alte Tokens bleiben widerrufen.
 
 Die Benutzerverwaltung gibt es nur in der App (nicht über API-Tokens oder MCP).
+
+## API & MCP
+
+Mit Tokens handeln Agenten, Skripte und das Template-Toolkit in deinem Namen. **Neuer Token** fragt nach einem Namen und den Fähigkeiten (MCP, REST-API lesen bzw. lesen und schreiben, Template-Vorschau); openbill zeigt den Token einmal an, mit den fertigen Einrichtungsbefehlen für Claude Code, Codex und andere MCP-Clients. Die Liste zeigt deine eigenen Tokens mit Fähigkeiten, Anlagedatum und letzter Benutzung; **Widerrufen** beendet einen Token sofort. Tokens für das Template-Toolkit entstehen im Template-Editor und erscheinen hier als *Toolkit · &lt;Template&gt;*. Die Karte **REST-API** öffnet die interaktive API-Referenz (`/api/docs`). Details: [MCP](/de/mcp), [REST-API](/de/api).

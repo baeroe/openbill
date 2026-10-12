@@ -15,7 +15,7 @@ export OPENBILL_TOKEN='01J…|openbill_…'
 curl -H "Authorization: Bearer $OPENBILL_TOKEN" -H 'Accept: application/json' "$OPENBILL_URL/api/documents"
 ```
 
-Create a token on the command line (the settings page "API & MCP" follows in a later version). The token is shown once:
+Create a token under **Settings → API & MCP** in the app (see [MCP](/en/mcp#connect)) or on the command line. The token is shown once:
 
 ```bash
 php artisan app:create-token admin@example.com --name=agent --ability=api:read --ability=api:write
@@ -28,7 +28,7 @@ php artisan app:create-token admin@example.com --name=agent --ability=api:read -
 | `api:write` | everything `api:read` allows, plus creating, changing and deleting |
 | `templates:render` | previews: `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema`. **This is read access to all documents:** the token can render every document (customer, address, positions, amounts) and `render/sources` lists recent documents with number and customer name. The toolkit needs this to preview templates with real documents. |
 | `templates:write` | reading and writing **one** template (`--template=<id>`): `GET /api/templates/{id}`, `GET /api/templates/{id}/package`, `PUT /api/templates/{id}/files` |
-| `mcp` | the MCP server only (no REST endpoint) |
+| `mcp` | the [MCP server](/en/mcp) only (no REST endpoint) |
 
 Without a valid token the API answers `401`, with a token that lacks the ability `403`. A revoked or expired token gets `401`.
 

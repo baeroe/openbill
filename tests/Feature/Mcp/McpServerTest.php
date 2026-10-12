@@ -149,3 +149,12 @@ it('lists both resources over HTTP and reads one', function () {
         ->and($read['mimeType'])->toBe('application/json')
         ->and(json_decode($read['text'], true))->toHaveKey('levels');
 });
+
+it('documents every tool in docs/{locale}/mcp.md and names no other', function (string $locale) {
+    $markdown = (string) file_get_contents(base_path("docs/{$locale}/mcp.md"));
+
+    foreach (SPEC_TOOLS as $name) {
+        expect($markdown)->toContain("`{$name}`");
+    }
+    expect(array_values(array_diff(mentionedToolNames($markdown), SPEC_TOOLS)))->toBe([]);
+})->with(['en', 'de']);

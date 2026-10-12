@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Page, PageHeader, Skeleton, cx } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
 import { path, t } from '@/lib/i18n';
+import { DocumentTypeSettings } from '@/settings/document-types';
 import { OrganizationSettings } from '@/settings/organization';
 import { SECTION_ICONS, SETTINGS_SECTIONS, sectionKey, type SettingsSection } from '@/settings/sections';
 
@@ -42,6 +43,8 @@ function renderSection(section: SettingsSection, canManageUsers: boolean): React
     switch (section) {
         case 'organization':
             return <OrganizationSettings />;
+        case 'document-types':
+            return <DocumentTypeSettings />;
         default:
             return <Skeleton h={320} r={18} />;
     }

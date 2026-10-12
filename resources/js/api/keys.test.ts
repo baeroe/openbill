@@ -29,4 +29,9 @@ describe('keys', () => {
         expect(keys.allFieldDefinitions()).toBe('/api/field-definitions');
         expect(keys.organization()).toBe('/api/organization');
     });
+
+    it('builds the number preview URL', () => {
+        expect(keys.numberPreview('invoice', 'INV-{YYYY}-{0000}', true, 7)).toBe('/api/document-types/invoice/number-preview?pattern=INV-%7BYYYY%7D-%7B0000%7D&reset_yearly=1&next_value=7');
+        expect(keys.numberPreview('offer', 'Q-{0000}', false, null)).toBe('/api/document-types/offer/number-preview?pattern=Q-%7B0000%7D&reset_yearly=0');
+    });
 });

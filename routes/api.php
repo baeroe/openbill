@@ -4,6 +4,7 @@ use App\Http\Api\ApiMiddleware;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
 use App\Http\Controllers\Api\FieldOrderController;
+use App\Http\Controllers\Api\NumberPreviewController;
 use App\Http\Controllers\Api\OrganizationLogoController;
 use App\Http\Controllers\Api\PositionSuggestionsController;
 use App\Http\Controllers\Api\RenderController;
@@ -28,6 +29,7 @@ Route::middleware(ApiMiddleware::READ)->group(function (): void {
         ->where('name', '[0-9a-z]{26}\.(png|jpg|jpeg|gif|webp|svg)')
         ->name('api.uploads.show');
     Route::get('/organization/logo', [OrganizationLogoController::class, 'show'])->name('api.organization.logo');
+    Route::get('/document-types/{type}/number-preview', NumberPreviewController::class)->name('api.document-types.number-preview');
 });
 
 Route::middleware(ApiMiddleware::WRITE)->group(function (): void {

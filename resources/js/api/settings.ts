@@ -1,5 +1,6 @@
 import useSWR, { mutate } from 'swr';
 import { api, apiUpload } from '@/lib/api';
+import { useDebounced } from '@/lib/hooks';
 import { keys } from './keys';
 import type { ComplianceProfile, CustomValues, DocumentType } from './types';
 
@@ -69,3 +70,27 @@ export async function removeLogo(): Promise<void> {
 
 /** Changes with every new logo, so the browser does not show a cached old one. */
 export const logoUrl = (organization: Organization): string => `/api/organization/logo?v=${encodeURIComponent(organization.updated_at ?? '')}`;
+
+export type DocumentTypeInput = {
+    profile: ComplianceProfile;
+    template_id: string | null;
+    default_intro_block_id: string | null;
+    default_closing_block_id: string | null;
+    payment_term_days: number | null;
+    validity_days: number | null;
+    numbering: { pattern: string; reset_yearly: boolean; next_value?: number };
+};
+
+export async function saveDocumentType(type: DocumentType, input: DocumentTypeInput): Promise<DocumentTypeSetting> {
+    const saved = await api<DocumentTypeSetting>(`/api/document-types/${type}`, { method: 'PATCH', body: input });
+    await mutate(keys.documentTypes());
+    return saved;
+}
+
+export type NumberPreview = { number: string | null; valid: boolean; message: string | null };
+
+/** Next number for the pattern being typed, from the server (250 ms after the last keystroke). */
+export function useNumberPreview(type: DocumentType, pattern: string, resetYearly: boolean, nextValue: number | null) {
+    const key = useDebounced(keys.numberPreview(type, pattern, resetYearly, nextValue), 250);
+    return useSWR<NumberPreview>(pattern.trim() ? key : null, { keepPreviousData: true, revalidateOnFocus: false });
+}

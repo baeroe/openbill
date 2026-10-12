@@ -1,5 +1,5 @@
 import { apiUrl } from '@/lib/api';
-import type { DocumentFilters, FieldScope } from './types';
+import type { DocumentFilters, DocumentType, FieldScope } from './types';
 
 /** Rows per page of the paginated lists (the API allows up to 100). */
 export const PAGE_SIZE = 50;
@@ -40,4 +40,6 @@ export const keys = {
     renderSchema: () => '/api/render/schema',
     documentTypes: () => '/api/document-types',
     organization: () => '/api/organization',
+    numberPreview: (type: DocumentType, pattern: string, resetYearly: boolean, nextValue: number | null) =>
+        apiUrl(`/api/document-types/${type}/number-preview`, { pattern, reset_yearly: resetYearly ? 1 : 0, next_value: nextValue }),
 };

@@ -138,6 +138,18 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     summary: 'Removes the logo; templates show the company name again.',
                 ),
             ),
+            '/api/document-types/{type}/number-preview' => new PathItem(get: new Operation(
+                operationId: 'previewDocumentNumber',
+                tags: ['DocumentType'],
+                responses: self::responses(self::json('number (null when invalid), valid, message.')),
+                summary: 'Previews the next number for a (not yet saved) pattern.',
+                parameters: [
+                    new Parameter('type', 'path', 'offer, confirmation, invoice or cancellation', true, schema: ['type' => 'string']),
+                    $query('pattern', 'e.g. INV-{YYYY}-{0000}'),
+                    $query('reset_yearly', '1 = start at 1 every year', 'boolean'),
+                    $query('next_value', 'running number to show; default the current next value', 'integer'),
+                ],
+            )),
             '/api/render' => new PathItem(post: new Operation(
                 operationId: 'render',
                 tags: ['Render'],

@@ -81,6 +81,7 @@ const MATRIX_ROUTES = [
     'organization logo' => ['GET', '/api/organization/logo', MATRIX_READ],
     'upload organization logo' => ['POST', '/api/organization/logo', ['api:write']],
     'remove organization logo' => ['DELETE', '/api/organization/logo', ['api:write']],
+    'number preview' => ['GET', '/api/document-types/invoice/number-preview', MATRIX_READ],
     'write own template' => ['PUT', '/api/templates/{A}/files', ['api:write', 'templates:write(A)']],
     'duplicate own template' => ['POST', '/api/templates/{A}/duplicate', ['api:write']],
     'delete own template' => ['DELETE', '/api/templates/{A}', ['api:write']],

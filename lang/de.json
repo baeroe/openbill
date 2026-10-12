@@ -71,6 +71,7 @@
     "customer.all": "Alle Kunden",
     "customer.base": "Stammdaten",
     "customer.city": "Ort",
+    "customer.consumer_reverse_charge": "Reverse Charge gilt nur für Unternehmen: Eine Privatperson zahlt Umsatzsteuer.",
     "customer.contact_actions": "Aktionen für :name",
     "customer.contact_default": "Standard",
     "customer.contact_edit": "Bearbeiten",

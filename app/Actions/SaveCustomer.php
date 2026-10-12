@@ -16,6 +16,7 @@ use App\Support\Actor;
 use App\Support\DomainMapper;
 use App\Support\EventLog;
 use App\Support\FieldErrors;
+use App\Support\Text;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -66,6 +67,15 @@ final class SaveCustomer
             'contacts.*.is_default' => ['sometimes', 'boolean'],
             'contacts.*.custom' => ['sometimes', 'array'],
         ])->validate();
+
+        // reverse charge (§ 13b UStG) shifts the VAT to a business; a private person always pays it
+        if (array_key_exists('customer_kind', $data) || array_key_exists('tax_treatment', $data)) {
+            $kind = $data['customer_kind'] ?? $customer?->customer_kind->value ?? CustomerKind::Business->value;
+            $treatment = $data['tax_treatment'] ?? $customer?->tax_treatment->value ?? TaxTreatment::Domestic->value;
+            if ($kind === CustomerKind::Consumer->value && $treatment === TaxTreatment::EuReverseCharge->value) {
+                throw ValidationException::withMessages(['customer_kind' => Text::t('customer.consumer_reverse_charge')]);
+            }
+        }
 
         $definitions = DomainMapper::currentFieldDefinitions();
         $customerFields = FieldRegistry::forScope($definitions, FieldScope::Customer);

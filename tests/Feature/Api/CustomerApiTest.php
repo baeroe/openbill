@@ -78,3 +78,9 @@ it('deletes a customer without finalized documents and refuses it otherwise', fu
         ->assertStatus(409)
         ->assertJsonPath('reason', 'customer_has_finalized_documents');
 });
+
+it('answers 422 at customer_kind for a private person with reverse charge', function () {
+    $this->postJson('/api/customers', ['name' => 'Kulturwerk Elbinsel', 'tax_treatment' => 'eu_reverse_charge', 'customer_kind' => 'consumer'])
+        ->assertUnprocessable()
+        ->assertJsonPath('violations.0.path', 'customer_kind');
+});

@@ -21,7 +21,7 @@ final class DocumentQuery
     public const OVERDUE = 'overdue';
 
     /** Filters a page URL may carry (the API takes all rules). */
-    private const PAGE_FILTERS = ['type', 'status', 'customer_id', 'q'];
+    private const PAGE_FILTERS = ['type', 'status', 'customer_id', 'q', 'date_from', 'date_to'];
 
     /**
      * @return array<string, list<mixed>>

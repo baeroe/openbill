@@ -86,6 +86,9 @@ export type DocumentFilters = {
     status?: DocumentStatus | 'overdue' | null;
     customer_id?: string | null;
     q?: string | null;
+    /** Document date, inclusive (YYYY-MM-DD). */
+    date_from?: string | null;
+    date_to?: string | null;
 };
 
 export type FieldDefinition = {

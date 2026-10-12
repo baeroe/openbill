@@ -4,14 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import { useDocumentList } from '@/api/documents';
 import type { DocumentFilters, DocumentStatus, DocumentSummary, DocumentType } from '@/api/types';
 import { useNewDocument } from '@/components/new-document/new-document-context';
-import { Button, Card, cx, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, PillButton, SearchInput, SelectControl, StatusBadge } from '@/components/ui';
+import { Button, Card, controlClass, cx, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, PillButton, SearchInput, SelectControl, StatusBadge } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
 import { formatDate, formatMoney, formatMonth, groupByMonth } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks';
 import { path, t, tn } from '@/lib/i18n';
 import { usePendingDeletes } from '@/lib/pending-delete';
 
-type Filters = { type: DocumentType | null; status: DocumentFilters['status']; customer_id: string | null; q: string | null };
+type Filters = {
+    type: DocumentType | null;
+    status: DocumentFilters['status'];
+    customer_id: string | null;
+    q: string | null;
+    date_from: string | null;
+    date_to: string | null;
+};
 
 type Props = {
     filters: Filters;
@@ -33,7 +40,7 @@ const STATUS_OPTIONS: (DocumentStatus | 'overdue')[] = ['draft', 'open', 'overdu
 /** Number · customer · date · due/valid until · status · amount; on phones two lines (customer/amount, number/status). */
 const GRID = 'grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[8rem_minmax(0,1fr)_6.5rem_7.5rem_7rem] lg:grid-cols-[8.5rem_minmax(0,1fr)_5.5rem_6.5rem_7.5rem_7rem]';
 
-const EMPTY: Filters = { type: null, status: null, customer_id: null, q: null };
+const EMPTY: Filters = { type: null, status: null, customer_id: null, q: null, date_from: null, date_to: null };
 
 export default function Documents({ filters, counts, summary, customers }: Props) {
     const openNewDocument = useNewDocument();
@@ -44,7 +51,7 @@ export default function Documents({ filters, counts, summary, customers }: Props
     const removed = usePendingDeletes();
     const items = list.items.filter((row) => !removed.has(row.id));
     const groups = groupByMonth(items);
-    const filtered = Boolean(filters.type || filters.status || filters.customer_id || filters.q);
+    const filtered = Boolean(filters.type || filters.status || filters.customer_id || filters.q || filters.date_from || filters.date_to);
 
     // the URL is the state: every change is an Inertia visit that also brings fresh counts and sum
     // pills and selects add a history entry (back restores the previous filter); typing replaces it
@@ -138,6 +145,25 @@ export default function Documents({ filters, counts, summary, customers }: Props
                             </option>
                         ))}
                     </SelectControl>
+                    {/* document date from/to; typing a date replaces the history entry like the search does */}
+                    <input
+                        type="date"
+                        className={controlClass(false, 'h-control flex-[1_1_9rem] sm:flex-[0_1_10rem]')}
+                        value={filters.date_from ?? ''}
+                        max={filters.date_to ?? undefined}
+                        onChange={(e) => set({ date_from: e.target.value || null }, true)}
+                        aria-label={t('documents.filter_date_from')}
+                        title={t('documents.filter_date_from')}
+                    />
+                    <input
+                        type="date"
+                        className={controlClass(false, 'h-control flex-[1_1_9rem] sm:flex-[0_1_10rem]')}
+                        value={filters.date_to ?? ''}
+                        min={filters.date_from ?? undefined}
+                        onChange={(e) => set({ date_to: e.target.value || null }, true)}
+                        aria-label={t('documents.filter_date_to')}
+                        title={t('documents.filter_date_to')}
+                    />
                     {filtered && (
                         <Button variant="ghost" size="sm" onClick={reset}>
                             {t('documents.reset')}

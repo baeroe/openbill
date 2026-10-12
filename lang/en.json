@@ -181,6 +181,8 @@
     "documents.empty": "No documents yet",
     "documents.empty_text": "Create a quote or an invoice. openbill assigns numbers when finalizing.",
     "documents.filter_customer": "Filter by customer",
+    "documents.filter_date_from": "Date from",
+    "documents.filter_date_to": "Date to",
     "documents.filter_status": "Filter by status",
     "documents.filter_type": "Filter by type",
     "documents.first": "Create the first document",

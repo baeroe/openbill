@@ -181,6 +181,8 @@
     "documents.empty": "Noch keine Dokumente",
     "documents.empty_text": "Leg ein Angebot oder eine Rechnung an. Nummern vergibt openbill beim Abschließen.",
     "documents.filter_customer": "Nach Kunde filtern",
+    "documents.filter_date_from": "Datum von",
+    "documents.filter_date_to": "Datum bis",
     "documents.filter_status": "Nach Status filtern",
     "documents.filter_type": "Nach Art filtern",
     "documents.first": "Erstes Dokument anlegen",

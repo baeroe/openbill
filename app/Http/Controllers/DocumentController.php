@@ -28,6 +28,8 @@ class DocumentController extends Controller
                 'status' => $filters['status'] ?? null,
                 'customer_id' => $filters['customer_id'] ?? null,
                 'q' => $filters['q'] ?? null,
+                'date_from' => $filters['date_from'] ?? null,
+                'date_to' => $filters['date_to'] ?? null,
             ],
             // the type pills show what each type would give under the other filters
             'counts' => DocumentQuery::counts(Arr::except($filters, ['type']), $today),

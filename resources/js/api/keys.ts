@@ -18,6 +18,8 @@ export const keys = {
             status: filters.status,
             customer_id: filters.customer_id,
             q: filters.q?.trim(),
+            date_from: filters.date_from,
+            date_to: filters.date_to,
             page,
             itemsPerPage: PAGE_SIZE,
         }),

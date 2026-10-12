@@ -144,6 +144,7 @@ package.json (build), vite.config.ts (watch.ignored), .gitignore, CLAUDE.md
 **Für Phase 10 (Docker)**
 
 - Die Node-Stage führt `pnpm build` aus (baut `public/build` **und** `packages/template-kit/dist/kit`); die PHP-Stage kopiert beide. Ohne `dist/kit` antwortet der Toolkit-Download mit 503. `OPENBILL_TOOLKIT_PATH` nur, wenn das Kit woanders liegt.
+- `APP_URL` muss die öffentliche https-Adresse sein: Der Toolkit-Download schreibt sie als `OPENBILL_URL` in `.env.local` (Fix-Runde 1, nicht mehr Host/Schema der Anfrage), das Kit lehnt `http://` außer Loopback ab. Trusted Proxies und Trusted Hosts für den TLS-terminierenden Proxy explizit konfigurieren.
 - Der `e2e`-Job gegen den Compose-Stack setzt `OPENBILL_URL`; `e2e/global-setup.ts` prüft das lokale Kit dann nicht. `toolkit.spec.ts` braucht auf dem Runner Node 24, pnpm und `unzip`.
 
 ---

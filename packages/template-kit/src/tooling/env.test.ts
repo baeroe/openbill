@@ -33,4 +33,16 @@ describe('readKitEnv', () => {
         expect(() => readKitEnv(dir, {})).toThrow(KitConfigError);
         expect(() => readKitEnv(dir, {})).toThrow(/must start with http/);
     });
+
+    it.each(['http://openbill.example', 'http://192.168.1.20:8080', 'http://openbill.localhost'])('refuses plain http for %s: the token would travel unencrypted', (url) => {
+        const dir = kit(`OPENBILL_URL="${url}"\nOPENBILL_TOKEN="3|x"\nOPENBILL_TEMPLATE_ID="01k"\n`);
+
+        expect(() => readKitEnv(dir, {})).toThrow(/OPENBILL_URL must use https:\/\//);
+    });
+
+    it.each(['http://localhost:8000', 'http://127.0.0.1:8000', 'http://[::1]:8000', 'https://openbill.example'])('accepts %s', (url) => {
+        const dir = kit(`OPENBILL_URL="${url}"\nOPENBILL_TOKEN="3|x"\nOPENBILL_TEMPLATE_ID="01k"\n`);
+
+        expect(readKitEnv(dir, {}).url).toBe(url);
+    });
 });

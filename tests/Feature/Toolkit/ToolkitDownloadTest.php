@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 const TOOLKIT_FOLDER = 'openbill-fjord-brief';
 
 beforeEach(function () {
+    config(['app.url' => 'https://openbill.example']);
     $this->kitDir = fakeToolkit();
     $this->user = User::factory()->create();
     $this->template = Template::factory()->create([
@@ -62,6 +63,14 @@ it('creates a token for the signed-in user that previews and writes only this te
         ->and($token->name)->toStartWith('Toolkit: Fjord Brief (')
         ->and($token->expires_at)->toBeNull()
         ->and(ApiTokens::row($token))->toMatchArray(['is_toolkit' => true, 'template_name' => 'Fjord Brief']);
+});
+
+it('writes APP_URL into .env.local, never the host of the request', function () {
+    $zip = $this->actingAs($this->user)
+        ->post("http://openbill-rebind.example:8080/en/templates/{$this->template->id}/toolkit", [], ['Host' => 'openbill-rebind.example:8080', 'X-Forwarded-Host' => 'openbill-proxy.example'])
+        ->assertOk()->getContent();
+
+    expect(envLocal(zipEntries((string) $zip)[TOOLKIT_FOLDER.'/.env.local'])['OPENBILL_URL'])->toBe('https://openbill.example');
 });
 
 it('makes a new token with every download and keeps the older ones', function () {

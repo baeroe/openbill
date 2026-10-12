@@ -25,6 +25,8 @@ final class DownloadTemplateToolkit
     public function __construct(private readonly IssueApiToken $tokens) {}
 
     /**
+     * @param  string  $instanceUrl  APP_URL (written to .env.local as OPENBILL_URL)
+     *
      * @throws ActionNotAllowedException|ToolkitUnavailableException
      */
     public function handle(Actor $actor, User $user, Template $template, string $instanceUrl): DownloadFile

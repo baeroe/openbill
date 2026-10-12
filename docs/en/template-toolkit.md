@@ -6,6 +6,7 @@ The template toolkit lets you write a template in your own editor with a live pr
 
 - Node.js 24 or newer and pnpm (`corepack enable` sets pnpm up).
 - An openbill instance your computer can reach. The toolkit renders on the instance; without it there is no preview.
+- `APP_URL` of the instance must be the https address you reach openbill under: the download writes it into `.env.local`, never the address of the request. The toolkit refuses plain `http://` except for `localhost`, `127.0.0.1` and `::1`, so the token never travels unencrypted.
 - An imported or duplicated template. The built-in templates (Klar, Kante, Leise) are read-only: open one and choose **Duplicate to customize** first.
 
 ## Download
@@ -15,7 +16,7 @@ Open the template in the editor and choose **Toolkit → Download toolkit**. Uns
 | Path | Content |
 |---|---|
 | `template/` | the template as package files: `manifest.json`, `template.liquid`, `header.liquid`, `footer.liquid`, `styles.css`, `assets/…` |
-| `.env.local` | `OPENBILL_URL` (the address you use openbill under), `OPENBILL_TOKEN`, `OPENBILL_TEMPLATE_ID` |
+| `.env.local` | `OPENBILL_URL` (the `APP_URL` of the instance), `OPENBILL_TOKEN`, `OPENBILL_TEMPLATE_ID` |
 | `.gitignore` | keeps `.env.local`, `node_modules/` and packed ZIPs out of git |
 | `package.json`, `pnpm-workspace.yaml`, `vite.config.js`, `index.html`, `assets/`, `tooling/` | the toolkit itself, prebuilt; it only installs Vite |
 | `README.md` | the short version of this page |
@@ -84,6 +85,7 @@ NODE_OPTIONS=--use-system-ca pnpm push
 | The token may not do this (403) | `OPENBILL_TEMPLATE_ID` points to another template than the token. |
 | Built-in templates are read-only | Duplicate the template and download the toolkit of the copy. |
 | Missing OPENBILL_URL … | `.env.local` is missing or incomplete. |
+| OPENBILL_URL must use https:// | `APP_URL` of the instance is a plain `http://` address. The operator sets `APP_URL` to the https address, then download the toolkit again. |
 | Nothing was pushed: fix template/ first | The list below names every file that the import would refuse. |
 | The template toolkit is missing in this installation (download) | The operator did not build the kit (`pnpm build`); the Docker image contains it. |
 

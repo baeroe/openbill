@@ -49,3 +49,4 @@ Assets: the preview uses the assets saved in openbill. New or changed files in `
 | The token may not do this (403) | `OPENBILL_TEMPLATE_ID` points to another template than the token. |
 | Built-in templates are read-only | Duplicate the template in openbill and download the toolkit of the copy. |
 | Missing OPENBILL_URL … | `.env.local` is missing or incomplete. |
+| OPENBILL_URL must use https:// | openbill's `APP_URL` is a plain `http://` address. Ask the operator to set `APP_URL` to the https address, then download the toolkit again. |

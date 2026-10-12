@@ -6,6 +6,7 @@ Mit dem Template-Toolkit schreibst du ein Template in deinem eigenen Editor mit 
 
 - Node.js 24 oder neuer und pnpm (`corepack enable` richtet pnpm ein).
 - Eine openbill-Instanz, die dein Rechner erreicht. Das Toolkit rendert auf der Instanz; ohne sie gibt es keine Vorschau.
+- `APP_URL` der Instanz muss die https-Adresse sein, unter der du openbill erreichst: Der Download schreibt sie in `.env.local`, nie die Adresse der Anfrage. Das Toolkit lehnt unverschlüsseltes `http://` ab, außer für `localhost`, `127.0.0.1` und `::1`, damit der Token nie im Klartext unterwegs ist.
 - Ein importiertes oder dupliziertes Template. Die mitgelieferten Templates (Klar, Kante, Leise) sind schreibgeschützt: erst öffnen und **Duplizieren, um es anzupassen** wählen.
 
 ## Herunterladen
@@ -15,7 +16,7 @@ Mit dem Template-Toolkit schreibst du ein Template in deinem eigenen Editor mit 
 | Pfad | Inhalt |
 |---|---|
 | `template/` | das Template als Paketdateien: `manifest.json`, `template.liquid`, `header.liquid`, `footer.liquid`, `styles.css`, `assets/…` |
-| `.env.local` | `OPENBILL_URL` (die Adresse, unter der du openbill nutzt), `OPENBILL_TOKEN`, `OPENBILL_TEMPLATE_ID` |
+| `.env.local` | `OPENBILL_URL` (die `APP_URL` der Instanz), `OPENBILL_TOKEN`, `OPENBILL_TEMPLATE_ID` |
 | `.gitignore` | hält `.env.local`, `node_modules/` und gepackte ZIPs aus Git heraus |
 | `package.json`, `pnpm-workspace.yaml`, `vite.config.js`, `index.html`, `assets/`, `tooling/` | das Toolkit selbst, vorgebaut; es installiert nur Vite |
 | `README.md` | die Kurzfassung dieser Seite (Englisch) |
@@ -86,6 +87,7 @@ NODE_OPTIONS=--use-system-ca pnpm push
 | The token may not do this (403) | `OPENBILL_TEMPLATE_ID` zeigt auf ein anderes Template als der Token. |
 | Built-in templates are read-only | Template duplizieren und das Toolkit der Kopie herunterladen. |
 | Missing OPENBILL_URL … | `.env.local` fehlt oder ist unvollständig. |
+| OPENBILL_URL must use https:// | `APP_URL` der Instanz ist eine unverschlüsselte `http://`-Adresse. Der Betreiber stellt `APP_URL` auf die https-Adresse um, danach das Toolkit neu herunterladen. |
 | Nothing was pushed: fix template/ first | Die Liste darunter nennt jede Datei, die der Import ablehnen würde. |
 | Das Template-Toolkit fehlt in dieser Installation (beim Download) | Der Betreiber hat das Kit nicht gebaut (`pnpm build`); das Docker-Image enthält es. |
 

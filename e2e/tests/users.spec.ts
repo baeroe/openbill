@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { apiPost } from './helpers';
 
 test('invite by link, accept in a fresh browser, disable and enable again', async ({ page, browser }) => {
     const suffix = Date.now().toString(36);
@@ -70,4 +71,38 @@ test('lays out the user list on a phone (review #4)', async ({ page }) => {
     expect(await role.evaluate((el: HTMLSelectElement) => el.scrollWidth <= el.clientWidth)).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     await page.screenshot({ path: test.info().outputPath('users-390.png'), fullPage: true });
+});
+
+test('changes the own password in Settings → Your account (review I2)', async ({ page, browser }) => {
+    const suffix = Date.now().toString(36);
+    // a fresh account: changing the password signs out its other sessions, never the shared e2e session
+    const email = `e2e.pia.${suffix}@example.com`;
+    await page.goto('/en/settings/users');
+    const invitation = (await apiPost(page, '/api/invitations', { email, role: 'member' })) as { link: string };
+
+    const guest = await browser.newContext({ storageState: { cookies: [], origins: [] }, ignoreHTTPSErrors: true });
+    const own = await guest.newPage();
+    await own.goto(invitation.link);
+    await own.getByLabel('Your name').fill(`Pia Pass ${suffix}`);
+    await own.getByLabel('Password', { exact: true }).fill('first-password');
+    await own.getByLabel('Repeat password').fill('first-password');
+    await own.getByRole('button', { name: 'Create account' }).click();
+    await expect(own).toHaveURL(/\/en$/);
+
+    await own.goto('/en/settings/account');
+    await expect(own.getByText(email)).toBeVisible();
+    await own.getByLabel('Current password', { exact: true }).fill('wrong-password');
+    await own.getByLabel('New password', { exact: true }).fill('second-password');
+    await own.getByLabel('Repeat the new password').fill('second-password');
+    await own.getByRole('button', { name: 'Change password' }).click();
+    await expect(own.getByText('The current password is not correct.')).toBeVisible();
+
+    await own.getByLabel('Current password', { exact: true }).fill('first-password');
+    await own.getByRole('button', { name: 'Change password' }).click();
+    await expect(own.getByText('Password changed. Other sessions were signed out.')).toBeVisible();
+    await expect(own.getByLabel('Current password', { exact: true })).toHaveValue('');
+    // this session stays signed in
+    await own.goto('/en/settings/account');
+    await expect(own.getByText(email)).toBeVisible();
+    await guest.close();
 });

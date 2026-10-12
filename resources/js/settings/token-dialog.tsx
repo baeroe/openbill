@@ -1,5 +1,5 @@
 import { Check, Copy, KeyRound } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { abilityKey, createToken, TOKEN_ABILITIES, type NewToken, type TokenAbility } from '@/api/tokens';
 import { copyText } from '@/api/users';
 import { Button, Checkbox, Dialog, TextInput } from '@/components/ui';
@@ -16,6 +16,7 @@ export function TokenDialog({ mcpUrl, onClose }: { mcpUrl: string; onClose(): vo
     const [pending, setPending] = useState(false);
     const [created, setCreated] = useState<NewToken | null>(null);
     const [copied, setCopied] = useState(false);
+    const tokenInput = useRef<HTMLInputElement>(null);
 
     const toggle = (ability: TokenAbility, on: boolean) =>
         setAbilities((current) => (on ? [...current, ability] : current.filter((item) => item !== ability)));
@@ -43,10 +44,15 @@ export function TokenDialog({ mcpUrl, onClose }: { mcpUrl: string; onClose(): vo
     };
 
     const copy = async () => {
-        if (created && (await copyText(created.plain_text_token))) {
+        if (!created) return;
+        if (await copyText(created.plain_text_token)) {
             setCopied(true);
             toast.success(t('tokens.copied'));
+            return;
         }
+        // select the field for copying by hand; the token never goes into a toast
+        tokenInput.current?.select();
+        toast.error(t('mcp.copy_failed'));
     };
 
     if (created) {
@@ -69,7 +75,7 @@ export function TokenDialog({ mcpUrl, onClose }: { mcpUrl: string; onClose(): vo
                 }
             >
                 <div className="grid min-w-0 gap-5">
-                    <TextInput label={t('tokens.token')} value={created.plain_text_token} readOnly className="font-mono" onFocus={(e) => e.currentTarget.select()} />
+                    <TextInput ref={tokenInput} label={t('tokens.token')} value={created.plain_text_token} readOnly className="font-mono" onFocus={(e) => e.currentTarget.select()} />
                     <SetupSnippets url={mcpUrl} token={created.plain_text_token} />
                 </div>
             </Dialog>

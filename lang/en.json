@@ -564,6 +564,7 @@
     "mcp.clients": "Client",
     "mcp.copied": "Copied",
     "mcp.copy": "Copy",
+    "mcp.copy_failed": "Copying did not work. The text is selected: copy it with ⌘C or Ctrl+C.",
     "mcp.hint.claude": "Run it in a terminal. --scope user makes openbill available in all your projects.",
     "mcp.hint.codex": "Add it to ~/.codex/config.toml (all projects) or .codex/config.toml in a project you keep out of git.",
     "mcp.hint.json": "For clients with an mcpServers configuration, e.g. .mcp.json.",

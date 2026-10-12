@@ -1,5 +1,5 @@
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { copyText } from '@/api/users';
 import { Button, Tabs } from '@/components/ui';
 import { t } from '@/lib/i18n';
@@ -11,14 +11,17 @@ export function SetupSnippets({ url, token }: { url: string; token?: string }) {
     const [client, setClient] = useState<SetupClient>('claude');
     const [copied, setCopied] = useState(false);
     const snippet = setupSnippet(client, url, token);
+    const block = useRef<HTMLPreElement>(null);
 
     const copy = async () => {
         if (await copyText(snippet)) {
             setCopied(true);
             toast.success(t('mcp.copied'));
-        } else {
-            toast.info(snippet);
+            return;
         }
+        // never repeat the snippet (it may hold the token) in a toast: select it for copying by hand instead
+        if (block.current) window.getSelection()?.selectAllChildren(block.current);
+        toast.error(t('mcp.copy_failed'));
     };
 
     return (
@@ -37,7 +40,7 @@ export function SetupSnippets({ url, token }: { url: string; token?: string }) {
             </div>
             {/* the button sits next to the scrolling block, so long lines never run under it */}
             <div className="flex min-w-0 items-start rounded-md bg-surface-2">
-                <pre className="m-0 min-w-0 flex-1 overflow-x-auto p-3 font-mono text-sm whitespace-pre">{snippet}</pre>
+                <pre ref={block} className="m-0 min-w-0 flex-1 overflow-x-auto p-3 font-mono text-sm whitespace-pre">{snippet}</pre>
                 <Button size="sm" variant="ghost" iconOnly icon={copied ? <Check /> : <Copy />} className="m-1.5" onClick={() => void copy()}>
                     {t('mcp.copy')}
                 </Button>

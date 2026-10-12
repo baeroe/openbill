@@ -49,7 +49,9 @@ test('invite by link, accept in a fresh browser, disable and enable again', asyn
     // leave the account disabled; the seeder removes it before the next run
     await page.getByRole('button', { name: `Disable ${name}` }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Disable' }).click();
-    await expect(page.getByText(`${name} disabled`)).toBeVisible();
+    // the toast of the first disabling may still be there (slow CI): two toasts with the same text
+    await expect(page.getByText(`${name} disabled`).last()).toBeVisible();
+    await expect(page.getByRole('listitem').filter({ hasText: email }).getByText('Disabled')).toBeVisible();
 });
 
 test('lays out the user list on a phone (review #4)', async ({ page }) => {

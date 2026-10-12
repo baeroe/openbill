@@ -81,7 +81,7 @@ export function ToolkitSlot({ templateId, builtIn, dirty, save }: ToolkitSlotPro
                             </li>
                         </ol>
                         <Notice tone="warn" icon={<AlertTriangle />}>
-                            <b>{t('toolkit.token_title')}</b> {t('toolkit.token_text')} <Link href={path('/settings/api')}>{t('toolkit.token_link')}</Link>
+                            <b>{t('toolkit.token_title')}</b> {t('toolkit.token_text')} <Link href={path('/settings/api')} className="font-medium underline underline-offset-2">{t('toolkit.token_link')}</Link>
                         </Notice>
                         {dirty && <Notice>{t('toolkit.unsaved')}</Notice>}
                         <p className="m-0 text-sm text-muted">{t('toolkit.requirements')}</p>

@@ -62,6 +62,8 @@ Text lines are not part of the XML; optional items only exist in offers.
 
 ## Downloads
 
+![The archived XML of a finalized invoice in the editor](/screenshots/en/einvoice.png)
+
 The archived PDF and the archived XML can be downloaded separately; both are always the files from the archive, never rendered again. Only finalized invoices and cancellations with the e-invoice profile have an XML.
 
 ## Archive

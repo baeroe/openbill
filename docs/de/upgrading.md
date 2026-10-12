@@ -23,5 +23,6 @@ Alle Versionen und ihre Änderungen: https://github.com/baeroe/openbill/releases
 
 ### 0.1.0
 
-- Erstes Release: Angebote, Auftragsbestätigungen, Rechnungen und Stornos mit eigenen Feldern, Liquid-Templates (Klar, Kante, Leise und eigene), E-Rechnungen nach EN 16931 als PDF/A-3 mit eingebettetem XML, REST-API, MCP-Server und das Template-Toolkit.
-- Läuft als Docker-Compose-Stack mit MariaDB 11.4 und Gotenberg 8, siehe [Einrichtung](https://github.com/baeroe/openbill/blob/main/docs/de/setup.md).
+- Erstes Release: Angebote, Auftragsbestätigungen, Rechnungen und Stornos mit eigenen Feldern auf jeder Ebene, Positionen in Gruppen, Liquid-Templates (Klar, Kante, Leise und eigene, mit dem Template-Toolkit), E-Rechnungen nach EN 16931 als PDF/A-3 mit eingebetteter XML, REST-API und MCP-Server, auf Englisch und Deutsch.
+- Image `baeroe/openbill:0.1.0` für `linux/amd64` und `linux/arm64`. Läuft als Docker-Compose-Stack mit MariaDB 11.4 und Gotenberg 8, siehe [Einrichtung](https://github.com/baeroe/openbill/blob/main/docs/de/setup.md).
+- Dokumentation: https://baeroe.github.io/openbill/de/

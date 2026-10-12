@@ -4,6 +4,8 @@ Unter **Einstellungen** stehen deine Firma, die Dokumenttypen und die Stammdaten
 
 ## Organisation
 
+![Einstellungen der Organisation](/screenshots/de/settings-organization.png)
+
 Name, Adresse, Logo (PNG, JPEG, GIF, WebP oder SVG, höchstens 1 MB – ohne Logo zeigen die Templates den Namen), Besteuerung (Regelbesteuerung oder Kleinunternehmer nach § 19 UStG), USt-ID, Steuernummer, **Registernummer** (`registration_id`, z. B. der Handelsregistereintrag), Bank- und Kontaktdaten, die Standard-Dokumentsprache und die eigenen Felder der Organisation. Fehlende Angaben des E-Rechnungs-Profils erscheinen in der Prüfanzeige des Dokument-Editors; ein Klick dort öffnet diese Seite am richtigen Feld. Ein neues Logo behält die alte Datei für abgeschlossene Dokumente; `app:prune-images` entfernt alte Logos, auf die nichts mehr verweist (siehe [Eigene Felder](/de/custom-fields#typen)).
 
 Das E-Rechnungs-Profil braucht die USt-ID oder die Registernummer; bei Reverse Charge und Ausfuhr von Waren die USt-ID, bei Dienstleistungen an Kunden außerhalb der EU die Registernummer (die USt-IDs dürfen in dieser E-Rechnung nicht stehen).
@@ -37,5 +39,7 @@ Benutzer werden nie gelöscht, sondern **deaktiviert**: Das Konto bleibt, damit 
 Die Benutzerverwaltung gibt es nur in der App (nicht über API-Tokens oder MCP).
 
 ## API & MCP
+
+![API-Tokens und die MCP-Einrichtung](/screenshots/de/settings-api.png)
 
 Mit Tokens handeln Agenten, Skripte und das Template-Toolkit in deinem Namen. **Neuer Token** fragt nach einem Namen und den Fähigkeiten (MCP, REST-API lesen bzw. lesen und schreiben, Template-Vorschau); openbill zeigt den Token einmal an, mit den fertigen Einrichtungsbefehlen für Claude Code, Codex und andere MCP-Clients. Die Liste zeigt deine eigenen Tokens mit Fähigkeiten, Anlagedatum und letzter Benutzung; **Widerrufen** beendet einen Token sofort. Tokens für das Template-Toolkit entstehen im Template-Editor und erscheinen hier als *Toolkit · &lt;Template&gt;*. Die Karte **REST-API** öffnet die interaktive API-Referenz (`/api/docs`). Details: [MCP](/de/mcp), [REST-API](/de/api).

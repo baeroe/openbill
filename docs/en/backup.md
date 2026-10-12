@@ -47,3 +47,4 @@ openbill finds the restored `APP_KEY` in the data volume, so existing sessions s
 - Keep the database user `openbill` (from `docker-compose.yml`): the triggers in the dump are defined for it.
 - `docker compose down -v` deletes both volumes. Without `-v`, `down` keeps them.
 - Moving to a new server is backup on the old one plus restore on the new one, with the same `.env`.
+- `app:prune-images` deletes images for good – run it after a backup.

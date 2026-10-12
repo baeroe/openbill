@@ -26,6 +26,8 @@ Fülle `.env` vor dem ersten Start aus. Die Passwörter sind in der Vorlage absi
 
 ## Starten
 
+![Die Anmeldung einer frischen Instanz](/screenshots/de/login.png)
+
 ```bash
 docker compose up -d
 docker compose logs -f openbill    # auf "openbill: ready" warten, dann Strg+C

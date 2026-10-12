@@ -4,6 +4,8 @@
 
 ## Organization
 
+![Organization settings](/screenshots/en/settings-organization.png)
+
 Name, address, logo (PNG, JPEG, GIF, WebP or SVG, at most 1 MB – without a logo templates show the name), taxation (standard or small business under § 19 UStG), VAT ID, tax number, **register number** (`registration_id`, e.g. the commercial register entry), bank and contact details, the default document language and the custom fields of the organization. Missing details of the e-invoice profile show up in the check panel of the document editor; a click there opens this page at the right field. A new logo keeps the old file for finalized documents; `app:prune-images` removes old logos nothing refers to anymore (see [Custom fields](/en/custom-fields#types)).
 
 The e-invoice profile needs the VAT ID or the register number; with reverse charge and exports of goods the VAT ID, with services to customers outside the EU the register number (the VAT IDs must not appear in that e-invoice).
@@ -37,5 +39,7 @@ Users are never deleted, they are **disabled**: the account stays so that docume
 User management is only available in the app (not through API tokens or MCP).
 
 ## API & MCP
+
+![API tokens and the MCP setup](/screenshots/en/settings-api.png)
 
 Tokens let agents, scripts and the template toolkit act on your behalf. **New token** asks for a name and the abilities (MCP, REST API read or read and write, template preview); openbill shows the token once, with the setup commands for Claude Code, Codex and other MCP clients filled in. The list shows your own tokens with their abilities, when they were created and last used; **Revoke** ends a token at once. Tokens for the template toolkit are created in the template editor and appear here as *Toolkit · &lt;template&gt;*. The card **REST API** opens the interactive API reference (`/api/docs`). Details: [MCP](/en/mcp), [REST API](/en/api).

@@ -30,6 +30,8 @@ Uploaded files are kept even when the value changes, because finalized documents
 
 ## Adding and editing
 
+![Custom fields of documents](/screenshots/en/fields.png)
+
 **Custom fields → Add field** opens a drawer with a live preview of the input. The **key** is built from the label (`Project code` → `project_code`) and can be changed until the field is created; afterwards it is fixed so that templates and stored values stay valid. Core keys of a level (`number`, `date`, `name`, …) are reserved. **Required** fields must be filled before a document can be finalized. A **default value** is pre-filled in new entries.
 
 The arrows change the order (it is the order of the forms). **Delete** removes the field after the undo notice has gone; stored values stay in the data and finalized documents keep the field in their snapshot.

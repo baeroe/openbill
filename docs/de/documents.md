@@ -99,9 +99,13 @@ Jede Änderung an einem Dokument wird mit Urheber (Benutzer, API-Token oder Syst
 
 ### Übersicht
 
+![Die Übersicht mit offenen Beträgen, was Aufmerksamkeit braucht, und zuletzt bearbeiteten Dokumenten](/screenshots/de/overview.png)
+
 Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld zusammen: offene Rechnungen, wie viel davon überfällig ist, offene Angebote und was in diesem Monat bezahlt wurde (mit der Summe seit Jahresbeginn). Die Kennzahlen zu offenen Rechnungen und Angeboten öffnen die passend gefilterte Liste. **Braucht deine Aufmerksamkeit** zeigt zuerst überfällige Rechnungen, dann offene Angebote, deren Gültigkeit in den nächsten sieben Tagen endet oder schon abgelaufen ist, dann Entwürfe. **Zuletzt bearbeitet** zeigt die sechs zuletzt geänderten Dokumente.
 
 ### Dokumentliste
+
+![Die Dokumentliste mit Filtern nach Art, Status, Kunde und Datum](/screenshots/de/documents.png)
 
 **Dokumente** zeigt alle Dokumente, die neuesten zuerst und nach Monaten gruppiert. Filtern lässt sich nach Art (jede Pille zeigt, wie viele Dokumente dieser Art unter den übrigen Filtern dazukommen), nach Status, Kunde und Dokumentdatum (von/bis), dazu eine Suche über Nummer und Kundennamen. Der Statusfilter kennt zusätzlich **Überfällig**: offene Rechnungen, deren Fälligkeit überschritten ist. Jeder Filter steht in der Adresse, zum Beispiel `/de/documents?type=invoice&status=overdue` oder `/de/documents?date_from=2026-01-01&date_to=2026-03-31`; eine gefilterte Liste lässt sich also als Lesezeichen speichern, weitergeben und mit dem Zurück-Knopf des Browsers wieder aufrufen. Die Liste lädt 50 Dokumente auf einmal (**Mehr laden**); die Zeile darunter zählt alle passenden Dokumente und summiert ihre Bruttobeträge.
 
@@ -110,6 +114,8 @@ Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld
 **Neues Dokument** in der Seitenleiste – oder die Taste **N** überall, solange du nicht in einem Feld tippst – öffnet einen Dialog: Art und Kunde wählen (den Kunden auch später), und openbill legt einen Entwurf mit den Vorgaben des Dokumenttyps an. Stornos entstehen hier nicht, sondern immer aus einer Rechnung. Der neue Entwurf öffnet sich im Dokument-Editor.
 
 ### Dokument-Editor
+
+![Der Editor eines Rechnungsentwurfs mit Positionsgruppen und Live-Vorschau](/screenshots/de/editor.png)
 
 Jedes Dokument öffnet sich im Editor: links das Formular, rechts eine Live-Vorschau (auf schmalen Bildschirmen unter dem Formular). Die Vorschau zeigt die Seiten genau so, wie das PDF aussehen wird – openbill rendert Kopfzeile, Inhalt und Fußzeile auf dem Server mit dem Template des Dokuments und teilt sie im Browser nur in Seiten auf. **Bereiche** umrandet Kopfzeile, Inhalt und Fußzeile auf jeder Seite. Die Vorschau lässt sich aus- und wieder einblenden; die Wahl merkt sich dieser Browser.
 
@@ -122,6 +128,8 @@ Jedes Dokument öffnet sich im Editor: links das Formular, rechts eine Live-Vors
 - **Kette und E-Rechnung:** Über dem Formular verbindet die Kette Angebot, Auftragsbestätigung, Rechnung und Storno, die zusammengehören. Mit dem E-Rechnungs-Profil zeigt der Tab **E-Rechnung** die XML einer abgeschlossenen Rechnung oder eines Stornos (kopieren oder herunterladen); bei Entwürfen erklärt er, dass die XML beim Abschließen entsteht.
 
 ### Kunden
+
+![Ein Kunde mit Ansprechpartnern und eigenen Feldern](/screenshots/de/customer.png)
 
 **Kunden** listet alle Kunden mit ihrem Standard-Ansprechpartner und dem, was offen ist: die Summe ihrer offenen Rechnungen, überfällige markiert. Die Suche geht über Name, Nummer und E-Mail.
 
@@ -139,6 +147,8 @@ Die **Kundenart** sagt, ob der Kunde ein Unternehmen (Standard) oder eine Privat
 Templates, eigene Felder und Einstellungen haben eigene Seiten: siehe [Templates](/de/templates#template-editor), [Eigene Felder](/de/custom-fields) und [Einstellungen](/de/settings).
 
 ### Darstellung und Sprache
+
+![Der Editor im dunklen Modus](/screenshots/de/editor-dark.png)
 
 Das Kontomenü unten in der Seitenleiste schaltet zwischen hell, dunkel und der Systemeinstellung um (gemerkt pro Browser) und zwischen Englisch und Deutsch. Die Seitenleiste lässt sich auf Symbole einklappen; auf kleinen Bildschirmen öffnet sie der Menü-Knopf.
 

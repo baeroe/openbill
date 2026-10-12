@@ -96,7 +96,7 @@ Paths come in two forms. **Validation** uses the position in the request: `group
 | Templates | `GET /api/templates`, `POST /api/templates` (package ZIP as multipart field `package`), `GET/DELETE /api/templates/{id}`, `PUT /api/templates/{id}/files`, `GET /api/templates/{id}/package` |
 | Preview | `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
 
-Additional endpoints (phase 7):
+Additional endpoints:
 
 | Endpoint | What it does |
 |---|---|

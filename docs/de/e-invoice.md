@@ -62,6 +62,8 @@ Textzeilen stehen nicht in der XML; optionale Positionen gibt es nur in Angebote
 
 ## Downloads
 
+![Die archivierte XML einer abgeschlossenen Rechnung im Editor](/screenshots/de/einvoice.png)
+
 Das archivierte PDF und die archivierte XML lassen sich einzeln herunterladen; beides sind immer die Dateien aus dem Archiv, nie ein neues Rendering. Nur abgeschlossene Rechnungen und Stornos mit E-Rechnungsprofil haben eine XML.
 
 ## Archiv

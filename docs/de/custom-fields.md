@@ -30,6 +30,8 @@ Hochgeladene Dateien bleiben erhalten, auch wenn sich der Wert ändert, weil abg
 
 ## Anlegen und bearbeiten
 
+![Eigene Felder der Dokumente](/screenshots/de/fields.png)
+
 **Eigene Felder → Feld hinzufügen** öffnet einen Drawer mit Live-Vorschau des Eingabefelds. Der **Schlüssel** entsteht aus der Bezeichnung (`Projektcode` → `projektcode`) und lässt sich bis zum Anlegen ändern; danach ist er fest, damit Templates und gespeicherte Werte gültig bleiben. Kernschlüssel einer Ebene (`number`, `date`, `name`, …) sind reserviert. **Pflichtfelder** müssen vor dem Abschließen ausgefüllt sein. Ein **Standardwert** wird bei neuen Einträgen vorausgefüllt.
 
 Die Pfeile ändern die Reihenfolge (so stehen die Felder in den Formularen). **Löschen** entfernt das Feld, sobald der Hinweis mit „Rückgängig“ verschwunden ist; gespeicherte Werte bleiben in den Daten, abgeschlossene Dokumente behalten das Feld in ihrem Snapshot.

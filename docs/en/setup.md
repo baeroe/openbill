@@ -26,6 +26,8 @@ Fill in `.env` before the first start. The passwords are empty in the template o
 
 ## Start
 
+![The login of a fresh instance](/screenshots/en/login.png)
+
 ```bash
 docker compose up -d
 docker compose logs -f openbill    # wait for "openbill: ready", then Ctrl+C

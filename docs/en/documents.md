@@ -99,9 +99,13 @@ Every change to a document is logged with who made it (user, API token or the sy
 
 ### Overview
 
+![The overview with open amounts, what needs attention and recently edited documents](/screenshots/en/overview.png)
+
 After logging in you land on the overview. Four figures sum up the money side: open invoices, how much of that is overdue, open quotes, and what was paid this month (with the total since the start of the year). The figures of open invoices and quotes open the matching filtered list. **Needs your attention** lists overdue invoices first, then open quotes whose validity ends within seven days or has ended, then drafts. **Recently edited** shows the six documents changed last.
 
 ### Document list
+
+![The document list, filtered by type, status, customer and date](/screenshots/en/documents.png)
 
 **Documents** shows all documents, newest first and grouped by month. Filter by type (each pill shows how many documents that type has under the other filters), by status, by customer and by document date (from/to), and search number and customer name. The status filter also offers **Overdue**: open invoices past their due date. Every filter is part of the address, for example `/en/documents?type=invoice&status=overdue` or `/en/documents?date_from=2026-01-01&date_to=2026-03-31`, so a filtered list can be bookmarked, shared and reached again with the browser's back button. The list loads 50 documents at a time (**Load more**); the line below it counts all matching documents and sums their gross amounts.
 
@@ -110,6 +114,8 @@ After logging in you land on the overview. Four figures sum up the money side: o
 **New document** in the sidebar – or the key **N** anywhere, as long as you are not typing in a field – opens a dialog: choose the type and the customer (or choose the customer later), and openbill creates a draft with the defaults of the document type. Cancellations are not created here; they always come from an invoice. The new draft opens in the document editor.
 
 ### Document editor
+
+![The editor of a draft invoice with position groups and the live preview](/screenshots/en/editor.png)
 
 Every document opens in the editor: the form on the left, a live preview on the right (below the form on narrow screens). The preview shows the pages exactly as the PDF will look – openbill renders header, content and footer on the server with the document's template and only splits them into pages in the browser. **Areas** outlines header, content and footer on every page. The preview can be hidden and shown again; the choice is remembered in this browser.
 
@@ -122,6 +128,8 @@ Every document opens in the editor: the form on the left, a live preview on the 
 - **Chain and e-invoice:** above the form, the chain links the quote, order confirmation, invoice and cancellation that belong together. With the e-invoice profile, the tab **E-invoice** shows the XML of a finalized invoice or cancellation (copy or download); for drafts it explains that the XML is created when finalizing.
 
 ### Customers
+
+![A customer with contacts and custom fields](/screenshots/en/customer.png)
 
 **Customers** lists all customers with their default contact and what is open: the sum of their open invoices, overdue ones marked. The search looks through name, number and email.
 
@@ -139,6 +147,8 @@ A customer's page holds the master data, the **tax treatment** (domestic; EU wit
 Templates, custom fields and settings have their own pages: see [Templates](/en/templates#template-editor), [Custom fields](/en/custom-fields) and [Settings](/en/settings).
 
 ### Appearance and language
+
+![The editor in dark mode](/screenshots/en/editor-dark.png)
 
 The account menu at the bottom of the sidebar switches between light, dark and the system setting (remembered per browser) and between English and German. The sidebar can be collapsed to icons; on small screens it opens from the menu button.
 

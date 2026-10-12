@@ -4,6 +4,8 @@ openbill renders every document on the server from a template written in HTML, C
 
 ## Built-in templates
 
+![The template gallery with Klar, Kante and Leise](/screenshots/en/templates.png)
+
 | Template | Look |
 |---|---|
 | Klar | calm, classic layout with a clear table |
@@ -17,6 +19,8 @@ The built-in templates speak English and German (they follow the language of the
 A document uses its own template if it has one, else the default template of its document type, else Klar. When a document is finalized, the template is frozen together with the other master data and the PDF is archived. Changing or deleting the template later never changes a finalized document or its PDF.
 
 ## Template editor
+
+![The template editor: code on the left, preview on the right](/screenshots/en/template-editor.png)
 
 **Templates** shows every template with a preview of its first page (rendered on the server with sample data). **Import ZIP** adds a template package, **Duplicate** creates an editable copy (“Klar (copy)”), **Delete** removes your own templates (not while documents still use them).
 

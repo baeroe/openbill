@@ -4,6 +4,8 @@ openbill rendert jedes Dokument auf dem Server aus einem Template aus HTML, CSS 
 
 ## Mitgelieferte Templates
 
+![Die Template-Galerie mit Klar, Kante und Leise](/screenshots/de/templates.png)
+
 | Template | Stil |
 |---|---|
 | Klar | ruhig, klassisch, klare Tabelle |
@@ -17,6 +19,8 @@ Die mitgelieferten Templates können Deutsch und Englisch (sie folgen der Sprach
 Ein Dokument nutzt sein eigenes Template, sonst das Standard-Template seines Dokumenttyps, sonst Klar. Beim Abschließen wird das Template mit den übrigen Stammdaten eingefroren und das PDF archiviert. Spätere Änderungen am Template oder sein Löschen ändern ein abgeschlossenes Dokument und sein PDF nie.
 
 ## Template-Editor
+
+![Der Template-Editor: Code links, Vorschau rechts](/screenshots/de/template-editor.png)
 
 **Templates** zeigt jedes Template mit einer Vorschau seiner ersten Seite (auf dem Server mit Beispieldaten gerendert). **ZIP importieren** fügt ein Template-Paket hinzu, **Duplizieren** legt eine bearbeitbare Kopie an („Klar (Kopie)“), **Löschen** entfernt eigene Templates (nicht, solange Dokumente sie benutzen).
 

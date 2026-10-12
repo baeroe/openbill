@@ -11,6 +11,8 @@ Mit dem Template-Toolkit schreibst du ein Template in deinem eigenen Editor mit 
 
 ## Herunterladen
 
+![Der Toolkit-Dialog eines Templates](/screenshots/de/toolkit.png)
+
 Öffne das Template im Editor und wähle **Toolkit → Toolkit herunterladen**. Ungespeicherte Änderungen werden vorher gespeichert (**Speichern und herunterladen**). Das ZIP enthält einen Ordner `openbill-<template>`:
 
 | Pfad | Inhalt |

@@ -795,7 +795,7 @@
     "tax_treatment.eu_reverse_charge_text": "No VAT, the customer accounts for it. Their VAT ID is required.",
     "tax_treatment.third_country": "Third country",
     "tax_treatment.third_country_tag": "Third country",
-    "tax_treatment.third_country_text": "Outside the EU. The service is not taxable in Germany.",
+    "tax_treatment.third_country_text": "Outside the EU. What you supply and the kind of customer decide the tax.",
     "template.amount_due": "Amount due",
     "template.credit": "Credit",
     "template.customer_number": "Customer no.",

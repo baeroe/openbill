@@ -795,7 +795,7 @@
     "tax_treatment.eu_reverse_charge_text": "Keine Umsatzsteuer, der Kunde führt sie selbst ab. Seine USt-ID ist Pflicht.",
     "tax_treatment.third_country": "Drittland",
     "tax_treatment.third_country_tag": "Drittland",
-    "tax_treatment.third_country_text": "Außerhalb der EU. Die Leistung ist im Inland nicht steuerbar.",
+    "tax_treatment.third_country_text": "Außerhalb der EU. Leistungsart und Kundenart entscheiden über die Steuer.",
     "template.amount_due": "Zu zahlen",
     "template.credit": "Gutschrift",
     "template.customer_number": "Kunde",

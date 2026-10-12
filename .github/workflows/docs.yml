@@ -38,7 +38,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --dir docs build
 
-      - uses: actions/configure-pages@v5
+      # no actions/configure-pages: its outputs (base_url …) are not used, the base comes from DOCS_BASE, and it would
+      # need pages: read in this job
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist

@@ -62,4 +62,16 @@ describe('unsaved drafts', () => {
         expect(takeDraft('a')).toBeNull();
         expect(() => clearDrafts()).not.toThrow();
     });
+
+    it("removes another person's kept input and input older than a day as soon as someone signs in (review phase 11)", () => {
+        vi.useFakeTimers();
+        stashDrafts([{ id: 'old', payload: payload('alt') }]);
+        vi.advanceTimersByTime(UNSAVED_MAX_AGE + 1);
+        stashDrafts([{ id: 'a', payload: payload('Hallo Jana') }]);
+        setDraftOwner('u1'); // the same person again: only the old input goes
+        expect(sessionStorage.length).toBe(1);
+
+        setDraftOwner('u2'); // someone else signs in in this tab
+        expect(sessionStorage.length).toBe(0);
+    });
 });

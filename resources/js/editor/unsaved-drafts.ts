@@ -13,16 +13,43 @@ type Stash = { user: string; at: number; payload: DraftPayload };
 
 let owner: string | null = null;
 
-/** The signed-in person (Inertia's auth.user.id): input is kept and handed out for them only. */
-export function setDraftOwner(id: string | null): void {
-    owner = id;
-}
-
 function storage(): Storage | null {
     try {
         return typeof sessionStorage === 'undefined' ? null : sessionStorage;
     } catch {
         return null; // storage blocked by privacy settings throws on access
+    }
+}
+
+/**
+ * The signed-in person (Inertia's auth.user.id): input is kept and handed out for them only. Whatever another person
+ * left in this tab (a 401, then someone else logs in) and whatever is older than a day is removed right away.
+ */
+export function setDraftOwner(id: string | null): void {
+    owner = id;
+    if (id !== null) prune((stash) => stash?.user !== id || typeof stash.at !== 'number' || Date.now() - stash.at > UNSAVED_MAX_AGE);
+}
+
+/** Removes the kept input for which `drop` says so (unreadable entries count as null). */
+function prune(drop: (stash: Partial<Stash> | null) => boolean): void {
+    const store = storage();
+    if (!store) return;
+    try {
+        const keys: string[] = [];
+        for (let i = 0; i < store.length; i++) {
+            const key = store.key(i);
+            if (!key?.startsWith(PREFIX)) continue;
+            let stash: Partial<Stash> | null = null;
+            try {
+                stash = JSON.parse(store.getItem(key) ?? 'null') as Partial<Stash> | null;
+            } catch {
+                // unreadable: dropped like a foreign one
+            }
+            if (drop(stash)) keys.push(key);
+        }
+        keys.forEach((key) => store.removeItem(key));
+    } catch {
+        // nothing to clear
     }
 }
 
@@ -61,16 +88,5 @@ export function takeDraft(id: string): DraftPayload | null {
 
 /** Logout: nothing of this person stays in the tab. */
 export function clearDrafts(): void {
-    const store = storage();
-    if (!store) return;
-    try {
-        const keys: string[] = [];
-        for (let i = 0; i < store.length; i++) {
-            const key = store.key(i);
-            if (key?.startsWith(PREFIX)) keys.push(key);
-        }
-        keys.forEach((key) => store.removeItem(key));
-    } catch {
-        // nothing to clear
-    }
+    prune(() => true);
 }

@@ -2,21 +2,24 @@ import { router } from '@inertiajs/react';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { mutate } from 'swr';
 import { keys } from '@/api/keys';
-import { duplicateTemplate, saveTemplateFiles, type TemplateDetail } from '@/api/templates';
+import { duplicateTemplate, saveTemplateFiles, useRenderSchema, useRenderSources, type TemplateDetail } from '@/api/templates';
+import type { RenderErrorItem } from '@/api/types';
 import type { CodeEditorHandle } from '@/components/code-editor';
 import { ApiError, errorMessage } from '@/lib/api';
 import { useLeaveGuard } from '@/lib/hooks';
 import { path, t } from '@/lib/i18n';
 import { useStoredFlag } from '@/lib/prefs';
 import { toast } from '@/lib/toast';
-import type { LineError } from '../diagnostics';
-import { editorReducer, initEditor, isDirty, savePayload, type Part } from '../editor-state';
+import { editorReducer, initEditor, isDirty, savePayload, zoneOf } from '../editor-state';
+import { errorsByPart, missingExpectedFields } from '../errors';
+import { defaultSource, type SampleSource } from '../scenario';
 import { CodePane } from './code-pane';
 import { EditorHeader } from './editor-header';
+import { FieldSidebar } from './field-sidebar';
+import { PreviewPane } from './preview-pane';
+import { useTemplatePreview } from './use-template-preview';
 
-const NO_ERRORS: Record<Part, LineError[]> = { header: [], body: [], footer: [], css: [], manifest: [] };
-
-/** Template editor: header, (Task 6: field bar), code, (Task 6: preview). Keyed by template id in the page. */
+/** Template editor: header, field bar, code, preview. Keyed by template id in the page. */
 export function TemplateEditor({ template }: { template: TemplateDetail }) {
     const [state, dispatch] = useReducer(editorReducer, template, initEditor);
     const [saving, setSaving] = useState(false);
@@ -27,7 +30,22 @@ export function TemplateEditor({ template }: { template: TemplateDetail }) {
     const readOnly = template.built_in;
     const dirty = !readOnly && isDirty(state);
     const releaseGuard = useLeaveGuard(dirty, t('templates.leave_confirm'));
-    const errors = NO_ERRORS; // Task 6: from the render answer
+    const sources = useRenderSources();
+    const schema = useRenderSchema();
+    const [picked, setPicked] = useState<SampleSource | null>(null);
+    const source = picked ?? (sources.data ? defaultSource(sources.data) : null);
+    const preview = useTemplatePreview(template.id, state.files, source);
+    const errors = useMemo(() => errorsByPart(preview.data?.errors ?? []), [preview.data?.errors]);
+    const missing = useMemo(() => (schema.data ? missingExpectedFields(state.files.manifest, schema.data) : []), [schema.data, state.files.manifest]);
+    const liquidPart = state.part === 'header' || state.part === 'body' || state.part === 'footer';
+    const insertDisabled = readOnly ? t('templates.insert_read_only') : !liquidPart ? t('templates.insert_liquid_only') : null;
+
+    const jump = (item: RenderErrorItem) => {
+        if (item.part !== 'header' && item.part !== 'body' && item.part !== 'footer' && item.part !== 'css' && item.part !== 'manifest') return;
+        dispatch({ type: 'part', part: item.part });
+        // the tab's editor mounts in the next frame
+        requestAnimationFrame(() => item.line && editorRef.current?.goToLine(item.line));
+    };
 
     const save = useCallback(async (): Promise<boolean> => {
         const payload = savePayload(state);
@@ -83,7 +101,9 @@ export function TemplateEditor({ template }: { template: TemplateDetail }) {
         return () => document.removeEventListener('keydown', onKey);
     }, [readOnly, dirty, saving, save]);
 
-    const layout = useMemo(() => (fieldsOpen ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]' : 'lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]'), [fieldsOpen]);
+    const layout = fieldsOpen
+        ? 'lg:grid-cols-[12rem_minmax(0,1fr)_minmax(0,0.8fr)] xl:grid-cols-[15rem_minmax(0,1fr)_minmax(0,0.9fr)]'
+        : 'lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]';
 
     return (
         <div className="grid grid-rows-[auto_minmax(0,1fr)] lg:h-[calc(100dvh-1.5rem)]">
@@ -102,6 +122,7 @@ export function TemplateEditor({ template }: { template: TemplateDetail }) {
                 onDuplicate={() => void duplicate()}
             />
             <div className={`grid min-h-0 gap-3 px-3 pb-3 ${layout}`}>
+                {fieldsOpen && <FieldSidebar schema={schema.data} disabledReason={insertDisabled} onInsert={(code) => editorRef.current?.insert(code)} onClose={() => setFieldsOpen(false)} />}
                 <CodePane
                     state={state}
                     readOnly={readOnly}
@@ -114,6 +135,16 @@ export function TemplateEditor({ template }: { template: TemplateDetail }) {
                     onEdit={(part, value) => dispatch({ type: 'edit', part, value })}
                     onManifestText={(text) => dispatch({ type: 'manifest_text', text })}
                     onPaper={(patch) => dispatch({ type: 'paper', patch })}
+                />
+                <PreviewPane
+                    data={preview.data}
+                    error={preview.error}
+                    highlight={zoneOf(state.part)}
+                    sources={sources.data}
+                    source={source}
+                    missing={missing}
+                    onSource={setPicked}
+                    onJump={jump}
                 />
             </div>
         </div>

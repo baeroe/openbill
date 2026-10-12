@@ -36,11 +36,12 @@ Ein Rabatt ist eine Position mit negativem Preis. In der XML bleibt der Preis po
 | Kleinunternehmer (§ 19 UStG) | `E` | der Kleinunternehmer-Hinweis |
 | Reverse Charge in der EU | `AE` (USt-ID des Kunden nötig) | der Reverse-Charge-Hinweis |
 | Waren an Kunden außerhalb der EU | `G` | der Drittland-Hinweis |
-| Dienstleistungen an Kunden außerhalb der EU | `O` (ohne Satz) | der Hinweis auf die im Inland nicht steuerbare Leistung |
+| Dienstleistungen an Unternehmen außerhalb der EU | `O` (ohne Satz) | der Hinweis auf die im Inland nicht steuerbare Leistung |
+| Dienstleistungen an Privatpersonen außerhalb der EU | der Satz der Position (meist `S`) | – |
 
 Ohne Steuer- oder Rechtshinweis bekommt eine steuerbefreite Kategorie einen Standardgrund (z. B. „Steuerbefreit“).
 
-`O` – nicht steuerbar: Dienstleistungen an Kunden außerhalb der EU (Kundenoption „Leistungsart“ = Dienstleistung). Die XML enthält dann weder deine USt-ID noch die des Kunden (BR-O-02) und keinen Steuersatz; deine Registernummer identifiziert dich (BR-CO-26), deshalb verlangt das E-Rechnungs-Profil sie. Waren an Kunden außerhalb der EU bleiben Ausfuhren (`G`) und brauchen deine USt-ID. Dokumente, die vor dieser Option abgeschlossen wurden, behalten ihre Kategorie über ihren Snapshot.
+`O` – nicht steuerbar: Dienstleistungen an Unternehmen außerhalb der EU (Kundenoptionen „Leistungsart“ = Dienstleistung und „Kundenart“ = Unternehmen, § 3a Abs. 2 UStG). Dienstleistungen an Privatpersonen außerhalb der EU sind im Inland steuerbar (§ 3a Abs. 1 UStG): Sie behalten den normalen Satz der Position und bekommen keinen Befreiungshinweis. Die XML enthält dann weder deine USt-ID noch die des Kunden (BR-O-02) und keinen Steuersatz; deine Registernummer identifiziert dich (BR-CO-26), deshalb verlangt das E-Rechnungs-Profil sie. Waren an Kunden außerhalb der EU bleiben Ausfuhren (`G`) und brauchen deine USt-ID. Dokumente, die vor dieser Option abgeschlossen wurden, behalten ihre Kategorie über ihren Snapshot.
 
 Die gesetzlichen Hinweise stehen außerdem als Dokumentnotizen in der XML.
 

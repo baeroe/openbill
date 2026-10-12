@@ -113,7 +113,7 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 | `taxation_mode`, `small_business` | `regular` or `small_business`; `small_business` is `true` for small businesses (§ 19 UStG) |
 | `locale` | default language |
 
-**`customer`** – empty when the document has no customer: `number`, `name`, `street`, `zip`, `city`, `country`, `email`, `vat_id`, `tax_treatment` (`domestic`, `eu_reverse_charge`, `third_country`), `locale`.
+**`customer`** – empty when the document has no customer: `number`, `name`, `street`, `zip`, `city`, `country`, `email`, `vat_id`, `tax_treatment` (`domestic`, `eu_reverse_charge`, `third_country`), `kind` (`business`, `consumer`), `locale`.
 
 **`contact`** – the contact person, may be empty: `salutation`, `first_name`, `last_name`, `full_name`, `position`, `email`, `phone`.
 

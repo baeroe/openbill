@@ -125,14 +125,14 @@ Jedes Dokument öffnet sich im Editor: links das Formular, rechts eine Live-Vors
 
 **Kunden** listet alle Kunden mit ihrem Standard-Ansprechpartner und dem, was offen ist: die Summe ihrer offenen Rechnungen, überfällige markiert. Die Suche geht über Name, Nummer und E-Mail.
 
-Die Seite eines Kunden enthält die Stammdaten, die **Steuerbehandlung** (Inland; EU mit USt-ID, also Reverse Charge; Drittland), bei Kunden außerhalb der EU die **Leistungsart**, die eigenen Felder des Kunden, die **Ansprechpartner** und seine Dokumente. Ansprechpartner bearbeitest du in einem Seitenpanel; einer davon ist der Standard, den neue Dokumente übernehmen. Alle Änderungen, auch die an Ansprechpartnern, speichert **Speichern** zusammen:
+Die Seite eines Kunden enthält die Stammdaten, die **Steuerbehandlung** (Inland; EU mit USt-ID, also Reverse Charge; Drittland), die **Kundenart** (Unternehmen oder Privatperson), bei Kunden außerhalb der EU die **Leistungsart**, die eigenen Felder des Kunden, die **Ansprechpartner** und seine Dokumente. Ansprechpartner bearbeitest du in einem Seitenpanel; einer davon ist der Standard, den neue Dokumente übernehmen. Alle Änderungen, auch die an Ansprechpartnern, speichert **Speichern** zusammen:
 
 - Fehler stehen am betroffenen Feld (oder am Ansprechpartner), und gespeichert wird erst, wenn alles gültig ist.
 - Leerzeichen am Anfang und Ende werden entfernt; eine leere Kundennummer bekommt die nächste freie Nummer.
 - Wer die Seite mit ungespeicherten Änderungen verlässt, wird vorher gefragt.
 - Kunden mit abgeschlossenen Dokumenten lassen sich nicht löschen.
 
-Bei Kunden außerhalb der EU entscheidet die **Leistungsart** über die Steuer: Dienstleistungen sind im Inland nicht steuerbar (Kategorie `O`), Waren steuerfreie Ausfuhren (`G`).
+Die **Kundenart** sagt, ob der Kunde ein Unternehmen (Standard) oder eine Privatperson ist. Bei Kunden außerhalb der EU entscheiden **Leistungsart** und **Kundenart** über die Steuer: Dienstleistungen an Unternehmen sind im Inland nicht steuerbar (Kategorie `O`), Dienstleistungen an Privatpersonen behalten den normalen Satz, Waren sind steuerfreie Ausfuhren (`G`). Bestehende Drittland-Kunden wurden beim Einführen der Option auf Ware gesetzt, ihre Entwürfe behalten also die bisherige Behandlung.
 
 ### Templates, eigene Felder und Einstellungen
 

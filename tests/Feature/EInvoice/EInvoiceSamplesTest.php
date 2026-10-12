@@ -58,6 +58,7 @@ function eInvoiceCases(): array
         },
         'reverse_charge' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Fjord Analytics AB', 'street' => 'Storgatan 1', 'zip' => '11122', 'city' => 'Stockholm', 'country' => 'SE', 'vat_id' => 'SE556677889901', 'tax_treatment' => TaxTreatment::EuReverseCharge]),
         'third_country' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Bergbahn Demo AG', 'street' => 'Talweg 3', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry, 'supply_type' => 'goods']),
+        'third_country_consumer_services' => fn () => finalizedInvoice([itemRow('Workshop', '10', '95')], [], ['name' => 'Lea Sommer', 'street' => 'Talweg 5', 'zip' => '3920', 'city' => 'Zermatt', 'country' => 'CH', 'vat_id' => '', 'tax_treatment' => TaxTreatment::ThirdCountry, 'supply_type' => 'services', 'customer_kind' => 'consumer']),
         'third_country_services' => function () {
             Organization::current()->forceFill(['registration_id' => 'HRB 000000'])->save();
 
@@ -87,4 +88,12 @@ it('leaves out the VAT IDs for services to third-country customers (BR-O-02)', f
         ->and($xml)->not->toContain('schemeID="VA"')
         ->and($xml)->not->toContain('RateApplicablePercent')
         ->and($xml)->toContain('HRB 000000');
+});
+
+it('taxes services to third-country consumers at the regular rate (review #5)', function () {
+    $xml = archivedXml(eInvoiceCases()['third_country_consumer_services']());
+
+    expect($xml)->toContain('<ram:CategoryCode>S</ram:CategoryCode>')
+        ->and($xml)->not->toContain('<ram:CategoryCode>O</ram:CategoryCode>')
+        ->and($xml)->toContain('schemeID="VA"');
 });

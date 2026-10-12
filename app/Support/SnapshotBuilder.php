@@ -32,6 +32,7 @@ final class SnapshotBuilder
                 ...$customer->only(['id', 'number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'locale']),
                 'tax_treatment' => $customer->tax_treatment->value,
                 'supply_type' => $customer->supply_type->value,
+                'customer_kind' => $customer->customer_kind->value,
                 'custom' => $customer->custom ?? [],
             ],
             'contact' => $contact === null ? null : [

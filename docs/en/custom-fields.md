@@ -36,7 +36,7 @@ The arrows change the order (it is the order of the forms). **Delete** removes t
 
 ## Built-in fields
 
-Each level has core fields (always available, listed under “Built-in fields”) and, for the e-invoice profile, required details such as a complete address, VAT ID or tax number, IBAN, service date and unit codes. They cannot be removed because totals, numbers and the e-invoice depend on them.
+Each level has core fields (always available, listed under “Built-in fields”; for customers e.g. `kind`, business or private person) and, for the e-invoice profile, required details such as a complete address, VAT ID or tax number, IBAN, service date and unit codes. They cannot be removed because totals, numbers and the e-invoice depend on them.
 
 ## Templates
 

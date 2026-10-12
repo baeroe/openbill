@@ -107,7 +107,7 @@ Additional endpoints (phase 7):
 | `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | next number for a pattern that is not saved yet |
 | `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | undo of the archiving `DELETE` |
 
-Customers have `supply_type` (`goods` or `services`, default `services`); for customers outside the EU it decides between tax category `G` and `O` (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) is only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.
+Customers have `supply_type` (`goods` or `services`, default `services`) and `customer_kind` (`business` or `consumer`, default `business`); for customers outside the EU they decide between tax category `G`, `O` (services to businesses) and the regular rate (services to consumers) (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) is only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.
 
 A document in a list has the short form (number, status, customer, totals, dates). `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes) and – for drafts – `issues`: everything finalizing would still complain about.
 

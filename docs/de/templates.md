@@ -113,7 +113,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `taxation_mode`, `small_business` | `regular` oder `small_business`; `small_business` ist bei Kleinunternehmern (§ 19 UStG) `true` |
 | `locale` | Standardsprache |
 
-**`customer`** – leer, wenn das Dokument keinen Kunden hat: `number`, `name`, `street`, `zip`, `city`, `country`, `email`, `vat_id`, `tax_treatment` (`domestic`, `eu_reverse_charge`, `third_country`), `locale`.
+**`customer`** – leer, wenn das Dokument keinen Kunden hat: `number`, `name`, `street`, `zip`, `city`, `country`, `email`, `vat_id`, `tax_treatment` (`domestic`, `eu_reverse_charge`, `third_country`), `kind` (`business`, `consumer`), `locale`.
 
 **`contact`** – der Ansprechpartner, kann leer sein: `salutation`, `first_name`, `last_name`, `full_name`, `position`, `email`, `phone`.
 

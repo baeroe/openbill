@@ -3,7 +3,7 @@ import { AlertTriangle, FilePlus, MoreHorizontal, Pencil, Plus, Star, Trash2, Us
 import { useMemo, useState, type FormEvent } from 'react';
 import { deleteCustomer, saveCustomer, useCustomer } from '@/api/customers';
 import { useFieldDefinitions } from '@/api/fields';
-import type { SupplyType, TaxTreatment } from '@/api/types';
+import type { CustomerKind, SupplyType, TaxTreatment } from '@/api/types';
 import { ContactDrawer } from '@/components/customers/contact-drawer';
 import { CustomerDocuments } from '@/components/customers/customer-documents';
 import { CustomFieldInput } from '@/components/custom-field-input';
@@ -251,19 +251,32 @@ function CustomerEditor({ id, initial }: { id: string | null; initial: CustomerD
                                     <TaxOption key={value} value={value} checked={draft.tax_treatment === value} onChange={() => set({ tax_treatment: value })} />
                                 ))}
                             </div>
-                            {draft.tax_treatment === 'third_country' && (
+                            <div className="mt-4 grid items-start gap-4 sm:grid-cols-2">
                                 <Select
-                                    label={t('customer.supply_type')}
-                                    hint={t('customer.supply_type_hint')}
-                                    wrapClassName="mt-4 max-w-sm"
-                                    value={draft.supply_type}
-                                    error={errors.supply_type}
-                                    onChange={(e) => set({ supply_type: e.target.value as SupplyType })}
+                                    label={t('customer.kind')}
+                                    hint={t('customer.kind_hint')}
+                                    path="customer_kind"
+                                    value={draft.customer_kind}
+                                    error={errors.customer_kind}
+                                    onChange={(e) => set({ customer_kind: e.target.value as CustomerKind })}
                                 >
-                                    <option value="services">{t('customer.supply_type.services')}</option>
-                                    <option value="goods">{t('customer.supply_type.goods')}</option>
+                                    <option value="business">{t('customer.kind.business')}</option>
+                                    <option value="consumer">{t('customer.kind.consumer')}</option>
                                 </Select>
-                            )}
+                                {draft.tax_treatment === 'third_country' && (
+                                    <Select
+                                        label={t('customer.supply_type')}
+                                        hint={t('customer.supply_type_hint')}
+                                        path="supply_type"
+                                        value={draft.supply_type}
+                                        error={errors.supply_type}
+                                        onChange={(e) => set({ supply_type: e.target.value as SupplyType })}
+                                    >
+                                        <option value="services">{t('customer.supply_type.services')}</option>
+                                        <option value="goods">{t('customer.supply_type.goods')}</option>
+                                    </Select>
+                                )}
+                            </div>
                             {vatMissing && (
                                 <Notice tone="warn" icon={<AlertTriangle />} className="mt-4">
                                     <b>{t('customer.vat_missing')}</b> {t('customer.vat_missing_text')}

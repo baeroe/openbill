@@ -125,14 +125,14 @@ Every document opens in the editor: the form on the left, a live preview on the 
 
 **Customers** lists all customers with their default contact and what is open: the sum of their open invoices, overdue ones marked. The search looks through name, number and email.
 
-A customer's page holds the master data, the **tax treatment** (domestic; EU with VAT ID, which means reverse charge; third country), for customers outside the EU **What you supply**, the customer's custom fields, the **contacts** and the customer's documents. Contacts are edited in a side panel; one of them is the default that new documents use. All changes, contacts included, are saved together with **Save**:
+A customer's page holds the master data, the **tax treatment** (domestic; EU with VAT ID, which means reverse charge; third country), the **Customer** kind (business or private person), for customers outside the EU **What you supply**, the customer's custom fields, the **contacts** and the customer's documents. Contacts are edited in a side panel; one of them is the default that new documents use. All changes, contacts included, are saved together with **Save**:
 
 - Mistakes are shown at the field they belong to (or at the contact), and nothing is saved until everything is valid.
 - Leading and trailing spaces are removed; an empty customer number gets the next free number.
 - Leaving the page with unsaved changes asks first.
 - A customer with finalized documents cannot be deleted.
 
-For customers outside the EU, **What you supply** decides the tax: services are not taxable in Germany (category `O`), goods are tax-free exports (`G`).
+**Customer** says whether the customer is a business (default) or a private person. For customers outside the EU, **What you supply** and **Customer** decide the tax: services to businesses are not taxable in Germany (category `O`), services to private persons keep the regular rate, goods are tax-free exports (`G`). Existing third-country customers were set to goods when the option was introduced, so their drafts keep the previous treatment.
 
 ### Templates, custom fields and settings
 

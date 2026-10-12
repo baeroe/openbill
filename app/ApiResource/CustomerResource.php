@@ -56,6 +56,7 @@ final class CustomerResource
         public string $vat_id,
         public string $tax_treatment,
         public string $supply_type,
+        public string $customer_kind,
         public ?string $locale,
         public ArrayObject $custom,
         public array $contacts,
@@ -81,6 +82,7 @@ final class CustomerResource
             vat_id: (string) $customer->vat_id,
             tax_treatment: $customer->tax_treatment->value,
             supply_type: $customer->supply_type->value,
+            customer_kind: $customer->customer_kind->value,
             locale: $customer->locale,
             custom: new ArrayObject($customer->custom ?? []),
             contacts: $customer->contacts->map(fn (Contact $contact): array => [

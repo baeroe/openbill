@@ -2,6 +2,7 @@
 
 namespace App\Domain\Compliance;
 
+use App\Enums\CustomerKind;
 use App\Enums\SupplyType;
 use App\Enums\TaxTreatment;
 
@@ -24,6 +25,7 @@ final readonly class PartyFacts
         public ?TaxTreatment $taxTreatment = null,
         public string $registrationId = '',
         public ?SupplyType $supplyType = null,
+        public ?CustomerKind $customerKind = null,
     ) {}
 
     public function addressComplete(): bool

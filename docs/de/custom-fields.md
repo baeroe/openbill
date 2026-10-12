@@ -36,7 +36,7 @@ Die Pfeile ändern die Reihenfolge (so stehen die Felder in den Formularen). **L
 
 ## Eingebaute Felder
 
-Jede Ebene hat Kernfelder (immer vorhanden, unter „Eingebaute Felder“) und für das E-Rechnungs-Profil Pflichtangaben wie vollständige Adresse, USt-ID oder Steuernummer, IBAN, Leistungsdatum und Einheiten-Codes. Sie lassen sich nicht entfernen, weil Summen, Nummern und die E-Rechnung sie brauchen.
+Jede Ebene hat Kernfelder (immer vorhanden, unter „Eingebaute Felder“; bei Kunden z. B. `kind`, Unternehmen oder Privatperson) und für das E-Rechnungs-Profil Pflichtangaben wie vollständige Adresse, USt-ID oder Steuernummer, IBAN, Leistungsdatum und Einheiten-Codes. Sie lassen sich nicht entfernen, weil Summen, Nummern und die E-Rechnung sie brauchen.
 
 ## Templates
 

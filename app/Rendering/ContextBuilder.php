@@ -85,6 +85,7 @@ final class ContextBuilder
             'customer' => $customer === null ? null : [
                 ...$this->inlineImages($customer['custom'] ?? [], $images['customer']),
                 ...self::pick($customer, ['number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'tax_treatment']),
+                'kind' => (string) ($customer['customer_kind'] ?? 'business'),
                 'locale' => $customer['locale'] ?? null,
             ],
             'contact' => $contact === null ? null : [

@@ -72,3 +72,14 @@ it('rejects money with more than two decimals and impossible dates', function ()
 
     expect(array_map(fn ($e) => $e->code, $result->errors))->toBe([FieldErrorCode::NotMoney, FieldErrorCode::NotDate]);
 });
+
+it('accepts only uploaded image paths for image fields (review focus)', function () {
+    $image = [new FieldDefinitionData(scope: FieldScope::Document, key: 'stamp', label: 'Stamp', type: FieldType::Image, docTypes: [DocumentType::Invoice])];
+    $check = fn (mixed $value) => CustomValueValidator::validate($image, ['stamp' => $value], 'custom.', false);
+
+    expect($check('uploads/01k9x2m3n4p5q6r7s8t9v0w1y2.png')->ok())->toBeTrue()
+        ->and($check('uploads/01k9x2m3n4p5q6r7s8t9v0w1y2.svg')->ok())->toBeTrue();
+    foreach (['https://example.com/logo.png', '../../.env', 'uploads/01k9x2m3n4p5q6r7s8t9v0w1y2.exe', 'uploads/short.png', 'logos/01k9x2m3n4p5q6r7s8t9v0w1y2.png'] as $bad) {
+        expect($check($bad)->errors[0]->code ?? null)->toBe(FieldErrorCode::NotImage, $bad);
+    }
+});

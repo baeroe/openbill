@@ -88,6 +88,33 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                 summary: 'Downloads a template as package ZIP.',
                 parameters: [$id],
             )),
+            '/api/uploads' => new PathItem(post: new Operation(
+                operationId: 'uploadImage',
+                tags: ['Upload'],
+                responses: self::responses(self::json('Stored image: path (the value of an image field), mime, size.')),
+                summary: 'Uploads an image (PNG, JPEG, GIF, WebP, SVG, at most 1 MB) for an image field.',
+                requestBody: new RequestBody('Multipart form with the field "file"', new ArrayObject(['multipart/form-data' => ['schema' => [
+                    'type' => 'object', 'properties' => ['file' => ['type' => 'string', 'format' => 'binary']], 'required' => ['file'],
+                ]]]), true),
+            )),
+            '/api/uploads/{name}' => new PathItem(get: new Operation(
+                operationId: 'getUpload',
+                tags: ['Upload'],
+                responses: self::responses(self::file('image/*', 'The stored image (sandboxed).')),
+                summary: 'Downloads an uploaded image.',
+                parameters: [new Parameter('name', 'path', '<ulid>.<ext> from the upload path', true, schema: ['type' => 'string'])],
+            )),
+            '/api/field-definitions/reorder' => new PathItem(post: new Operation(
+                operationId: 'reorderFieldDefinitions',
+                tags: ['FieldDefinition'],
+                responses: self::responses(new Response('Order stored')),
+                summary: 'Sets the order of all custom fields of one level.',
+                requestBody: new RequestBody('scope and every field id of that level', new ArrayObject(['application/json' => ['schema' => [
+                    'type' => 'object',
+                    'properties' => ['scope' => ['type' => 'string'], 'ids' => ['type' => 'array', 'items' => ['type' => 'string']]],
+                    'required' => ['scope', 'ids'],
+                ]]]), true),
+            )),
             '/api/render' => new PathItem(post: new Operation(
                 operationId: 'render',
                 tags: ['Render'],

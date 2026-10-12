@@ -12,8 +12,6 @@ final class CustomValueValidator
 
     private const MAX_TEXTAREA = 10000;
 
-    private const MAX_IMAGE = 2048;
-
     /**
      * @param  list<FieldDefinitionData>  $definitions  fields valid for this level (and document type)
      * @param  array<array-key, mixed>  $values
@@ -73,7 +71,7 @@ final class CustomValueValidator
             FieldType::Date => is_string($value) && self::isDate($value) ? $value : FieldErrorCode::NotDate,
             FieldType::Select => is_string($value) && in_array($value, $definition->options, true) ? $value : FieldErrorCode::NotOption,
             FieldType::Boolean => is_bool($value) ? $value : FieldErrorCode::NotBoolean,
-            FieldType::Image => is_string($value) && mb_strlen($value) <= self::MAX_IMAGE ? $value : FieldErrorCode::NotImage,
+            FieldType::Image => is_string($value) && ImagePath::isValid($value) ? $value : FieldErrorCode::NotImage,
         };
     }
 

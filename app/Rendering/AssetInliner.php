@@ -2,6 +2,7 @@
 
 namespace App\Rendering;
 
+use App\Domain\Fields\ImagePath;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -24,6 +25,17 @@ final class AssetInliner
         $mime = $disk->mimeType($path);
 
         return self::dataUrl(is_string($mime) ? $mime : 'application/octet-stream', $contents);
+    }
+
+    /** Value of an image field as data URL; '' for anything that is no stored upload. */
+    public function upload(?string $path): string
+    {
+        if ($path === null || ! ImagePath::isValid($path)) {
+            return '';
+        }
+        $contents = Storage::disk('local')->get($path);
+
+        return $contents === null ? '' : self::dataUrl(TemplatePackage::mimeOf($path), $contents);
     }
 
     /**

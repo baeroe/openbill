@@ -75,6 +75,9 @@ const MATRIX_ROUTES = [
     'import template' => ['POST', '/api/templates', ['api:write']],
     'own template' => ['GET', '/api/templates/{A}', MATRIX_OWN_TEMPLATE_READ],
     'own package' => ['GET', '/api/templates/{A}/package', MATRIX_OWN_TEMPLATE_READ],
+    'upload image' => ['POST', '/api/uploads', ['api:write']],
+    'read upload' => ['GET', '/api/uploads/01k9x2m3n4p5q6r7s8t9v0w1y2.png', MATRIX_READ],
+    'reorder fields' => ['POST', '/api/field-definitions/reorder', ['api:write']],
     'write own template' => ['PUT', '/api/templates/{A}/files', ['api:write', 'templates:write(A)']],
     'duplicate own template' => ['POST', '/api/templates/{A}/duplicate', ['api:write']],
     'delete own template' => ['DELETE', '/api/templates/{A}', ['api:write']],
@@ -161,7 +164,7 @@ it('has a matrix row for every API route (new routes need one)', function () {
         'api/validation_errors/{id}', 'api/docs{_format?}', 'api/downloads/documents/{id}/{kind}'];
     $placeholders = '/\\{(draft|A|B|customer|field|block|rate|unit)\\}/';
     $covered = collect(MATRIX_ROUTES)
-        ->map(fn (array $row): string => $row[0].' '.preg_replace($placeholders, '{id}', str_replace('/document-types/invoice', '/document-types/{type}', ltrim($row[1], '/'))))
+        ->map(fn (array $row): string => $row[0].' '.preg_replace($placeholders, '{id}', preg_replace('#/uploads/[^/]+$#', '/uploads/{name}', str_replace('/document-types/invoice', '/document-types/{type}', ltrim($row[1], '/')))))
         ->unique()->sort()->values()->all();
 
     $routes = collect(Route::getRoutes()->getRoutes())

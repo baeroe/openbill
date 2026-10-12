@@ -2,6 +2,10 @@
 
 openbill creates e-invoices according to **EN 16931** in the UN/CEFACT CII syntax (Factur-X / ZUGFeRD profile EN 16931). The XML is embedded in a **PDF/A-3b**, so one file serves people and accounting software.
 
+::: warning No tax or legal advice
+openbill helps you write invoices that meet EN 16931 and checks what it can, but it is no tax or legal advice and does not guarantee that your documents, your archive or your processes meet the rules that apply to you (e.g. GoBD, VAT law). Check your setup with your tax advisor. openbill comes without warranty (MIT License).
+:::
+
 ## Turning it on
 
 The compliance profile is set per document type: `basic` or `en16931`. The e-invoice profile can only be chosen for invoices and cancellations. With `en16931`, finalizing checks everything an e-invoice needs (see [compliance profiles](/en/documents#compliance-profiles)) and stops with a list of what is missing.

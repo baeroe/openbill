@@ -2,6 +2,10 @@
 
 openbill runs as a Docker Compose stack: the app (`baeroe/openbill`, for `linux/amd64` and `linux/arm64`), MariaDB 11.4 and Gotenberg 8, which renders the PDFs. You need Docker with Compose v2 and, for HTTPS, a reverse proxy in front (see [Reverse proxy](/en/reverse-proxy)).
 
+::: tip Your instance, your responsibility
+openbill is no tax or legal advice and comes without warranty (MIT License). Whether your invoices and your archive meet the rules that apply to you (e.g. GoBD), check with your tax advisor; see [E-invoices](/en/e-invoice).
+:::
+
 ## Quick start: paste and deploy
 
 One compose file with everything in it, no `.env`:

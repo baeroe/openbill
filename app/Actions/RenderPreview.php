@@ -86,7 +86,7 @@ final class RenderPreview
         $context = $this->contexts->build($document, $sources);
         $result = $this->renderer->render($template, $context->data, new RenderOptions($document->locale));
 
-        return new PreviewResult($result, $context->totals, $issues);
+        return new PreviewResult($result, $context->totals, $issues, $template->manifest);
     }
 
     /**

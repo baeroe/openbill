@@ -39,6 +39,7 @@ final class OpenbillServer extends Server
         Tools\ListTemplatesTool::class,
         Tools\GetTemplateTool::class,
         Tools\UpdateTemplateTool::class,
+        Tools\RenderTemplatePreviewTool::class,
         Tools\GetSettingsTool::class,
         Tools\UpdateOrganizationTool::class,
         Tools\ListTaxRatesAndUnitsTool::class,

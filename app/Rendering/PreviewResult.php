@@ -11,11 +11,13 @@ final readonly class PreviewResult
 {
     /**
      * @param  list<ComplianceIssue>  $issues
+     * @param  array<string, mixed>  $manifest  the manifest of the template that was rendered (not part of toArray())
      */
     public function __construct(
         public RenderResult $render,
         public Totals $totals,
         public array $issues = [],
+        public array $manifest = [],
     ) {}
 
     /**

@@ -13,7 +13,8 @@ use App\Models\Organization;
 use Illuminate\Support\Facades\Storage;
 
 /*
- * The e-invoice cases the EN 16931 Schematron check runs on (scripts/validate-einvoice.sh, CI job "einvoice").
+ * The e-invoice cases the EN 16931 checks run on (CEN Schematron and KoSIT validator, scripts/validate-einvoice.sh, CI
+ * job "einvoice").
  * Every case goes through FinalizeDocument, so the XML is exactly what gets archived. With
  * EINVOICE_SAMPLES_DIR set, the XMLs are written there as <case>.xml.
  */

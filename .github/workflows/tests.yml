@@ -133,8 +133,9 @@ jobs:
       - name: Docs
         run: pnpm --dir docs build
 
-  # EN 16931 business rules (official CII Schematron, Saxon-HE) on the e-invoices the tests archive.
-  # Not a required check; see scripts/validate-einvoice.sh.
+  # EN 16931 business rules on the e-invoices the tests archive: the official CEN CII Schematron (Saxon-HE) and the
+  # KoSIT validator (scenario "EN16931 (CII)" of its XRechnung configuration). Not a required check; see
+  # scripts/validate-einvoice.sh.
   einvoice:
     needs: tests
     runs-on: ubuntu-latest
@@ -146,14 +147,14 @@ jobs:
           name: einvoice-samples
           path: einvoice-samples
 
-      # Schematron, Saxon-HE and xmlresolver: downloaded once per version of the script (it pins URLs and SHA-256),
-      # so a flaky download source only hurts the first run after a version bump
+      # Schematron, Saxon-HE, xmlresolver, KoSIT validator and configuration: downloaded once per version of the script
+      # (it pins URLs and SHA-256), so a flaky download source only hurts the first run after a version bump
       - uses: actions/cache@v4
         with:
           path: storage/framework/testing/einvoice-validator
           key: einvoice-validator-${{ hashFiles('scripts/validate-einvoice.sh') }}
 
-      - name: EN 16931 Schematron
+      - name: EN 16931 Schematron and KoSIT
         run: scripts/validate-einvoice.sh einvoice-samples
 
   # Playwright against the Compose stack built from this commit: production image, MariaDB, hardened Gotenberg,

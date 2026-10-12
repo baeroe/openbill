@@ -32,10 +32,13 @@ export function CompliancePanel({ issues, profile, customerId, onJump }: { issue
                                     </span>
                                 </Link>
                             ) : issue.path.startsWith('org.') ? (
-                                <div className={ITEM}>
+                                <Link href={path(`/settings/organization?focus=${encodeURIComponent(issue.path)}`)} className={ITEM}>
                                     {issue.message}
-                                    <span className={WHERE}>{t('editor.check.org')}</span>
-                                </div>
+                                    <span className={WHERE}>
+                                        {t('editor.check.org')}
+                                        <ArrowUpRight aria-hidden />
+                                    </span>
+                                </Link>
                             ) : (
                                 <button type="button" className={ITEM} onClick={() => onJump(issue.path)}>
                                     {issue.message}

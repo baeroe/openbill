@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { computePageBreaks, pageGeometry, type Paper } from './geometry';
+import { isPageFilled, observePages } from './lazy';
 import './paged-preview.css';
 
 /** The three standalone HTML documents of POST /api/render. */
@@ -33,6 +34,8 @@ export type PagedPreviewProps = {
     onPageCount?(count: number): void;
     className?: string;
     labels?: Partial<PagedPreviewLabels>;
+    /** Fill pages after the first only when they come into view (long documents, galleries). */
+    lazy?: boolean;
 };
 
 /** Elements never split across pages (what Chromium tries for rows and paragraphs). */
@@ -48,9 +51,8 @@ const cx = (...names: (string | false | null | undefined)[]) => names.filter(Boo
  * Security: every frame is sandbox="allow-same-origin" WITHOUT allow-scripts. Same origin is needed to measure the body
  * and fill in page numbers from outside; without script rights nothing in the rendered markup can run. Never add
  * allow-scripts here – together with allow-same-origin a frame could lift its own sandbox.
- * Cost: n pages make 3n+1 frames, all reloaded on every render answer. Fine for the editor; when the template editor
- * (phase 7) or the toolkit (phase 9) show long documents, fill frames outside the viewport only once visible
- * (IntersectionObserver).
+ * Cost: n pages make 3n+1 frames, all reloaded on every render answer. With `lazy`, pages after the first get their
+ * frames only once they come into view (and keep them).
  */
 
 /** Fills {{ page.number }} / {{ page.total }} (rendered as .pageNumber / .totalPages) of one header or footer frame. */
@@ -82,7 +84,7 @@ function Band({ html, top, width, height, page, total, title }: { html: string; 
  * Pages as in the finished PDF: the header in the top margin and the footer in the bottom margin of every page,
  * the body cut into pages in between. All frames run without script rights; the markup is rendered on the server.
  */
-export function PagedPreview({ parts, paper, showGuides = false, highlight = null, maxPages, maxHeight, onPageCount, className, labels }: PagedPreviewProps): JSX.Element {
+export function PagedPreview({ parts, paper, showGuides = false, highlight = null, maxPages, maxHeight, onPageCount, className, labels, lazy = false }: PagedPreviewProps): JSX.Element {
     const text = { ...DEFAULT_LABELS, ...labels };
     // the render answer is a new object every time: only real changes of the paper count
     const g = useMemo(() => pageGeometry(paper), [paper.format, paper.marginX, paper.headerHeight, paper.footerHeight]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -90,6 +92,8 @@ export function PagedPreview({ parts, paper, showGuides = false, highlight = nul
     const measure = useRef<HTMLIFrameElement>(null);
     const pageCountRef = useRef(onPageCount);
     const [boxWidth, setBoxWidth] = useState(400);
+    const stack = useRef<HTMLDivElement>(null);
+    const [filled, setFilled] = useState<ReadonlySet<number>>(() => new Set());
     const [layout, setLayout] = useState<{ breaks: number[]; total: number }>({ breaks: [0], total: g.contentHeight });
 
     useEffect(() => {
@@ -125,6 +129,13 @@ export function PagedPreview({ parts, paper, showGuides = false, highlight = nul
     const scale = Math.max(0.1, (boxWidth - gutter) / g.width);
     const pageCount = layout.breaks.length;
     const pages = layout.breaks.slice(0, maxPages ?? pageCount);
+    const pending = lazy ? pages.map((_, i) => i).filter((i) => !isPageFilled(i, filled, true)) : [];
+    const pendingKey = pending.join(',');
+    useEffect(() => {
+        if (!lazy || pendingKey === '' || !stack.current) return;
+        const elements = pendingKey.split(',').map((i) => stack.current?.querySelector(`[data-page="${Number(i) + 1}"]`)).filter((e): e is Element => !!e);
+        return observePages(elements, (index) => setFilled((current) => (current.has(index) ? current : new Set([...current, index]))));
+    }, [lazy, pendingKey]);
     const stackHeight = pages.length * g.height + (pages.length - 1) * PAGE_GAP;
     const visible = maxHeight ? Math.min(stackHeight * scale, maxHeight) : stackHeight * scale;
     const zones: { zone: Zone; label: string; y: number; h: number; x: number; w: number }[] = [
@@ -148,23 +159,28 @@ export function PagedPreview({ parts, paper, showGuides = false, highlight = nul
                 tabIndex={-1}
             />
 
-            <div className="pp-stack" style={{ left: gutter, width: g.width, transform: `scale(${scale})` }}>
+            <div ref={stack} className="pp-stack" style={{ left: gutter, width: g.width, transform: `scale(${scale})` }}>
                 {pages.map((start, i) => {
                     const end = layout.breaks[i + 1] ?? layout.total;
+                    const fill = isPageFilled(i, filled, lazy);
                     return (
-                        <div key={i} data-page={i + 1} className="pp-page" style={{ top: i * (g.height + PAGE_GAP), width: g.width, height: g.height }}>
-                            <Band html={parts.header} top={0} width={g.width} height={g.headerHeight} page={i + 1} total={pageCount} title={text.header} />
-                            <div className="pp-clip" style={{ top: g.headerHeight, left: g.marginX, width: g.contentWidth, height: end - start }}>
-                                <iframe
-                                    title={i === 0 ? text.document : text.page(i + 1)}
-                                    sandbox="allow-same-origin"
-                                    srcDoc={parts.body}
-                                    className="pp-frame"
-                                    style={{ top: -start, width: g.contentWidth, height: layout.total }}
-                                    tabIndex={-1}
-                                />
-                            </div>
-                            <Band html={parts.footer} top={g.height - g.footerHeight} width={g.width} height={g.footerHeight} page={i + 1} total={pageCount} title={text.footer} />
+                        <div key={i} data-page={i + 1} className={cx('pp-page', !fill && 'pp-page--pending')} style={{ top: i * (g.height + PAGE_GAP), width: g.width, height: g.height }}>
+                            {fill && (
+                                <>
+                                    <Band html={parts.header} top={0} width={g.width} height={g.headerHeight} page={i + 1} total={pageCount} title={text.header} />
+                                    <div className="pp-clip" style={{ top: g.headerHeight, left: g.marginX, width: g.contentWidth, height: end - start }}>
+                                        <iframe
+                                            title={i === 0 ? text.document : text.page(i + 1)}
+                                            sandbox="allow-same-origin"
+                                            srcDoc={parts.body}
+                                            className="pp-frame"
+                                            style={{ top: -start, width: g.contentWidth, height: layout.total }}
+                                            tabIndex={-1}
+                                        />
+                                    </div>
+                                    <Band html={parts.footer} top={g.height - g.footerHeight} width={g.width} height={g.footerHeight} page={i + 1} total={pageCount} title={text.footer} />
+                                </>
+                            )}
                             {shown.map((z) => (
                                 <div key={z.zone} className={cx('pp-guide', highlight === z.zone && 'pp-guide--on')} style={{ top: z.y, left: z.x, width: z.w, height: z.h }} />
                             ))}

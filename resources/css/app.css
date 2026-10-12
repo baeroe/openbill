@@ -1,6 +1,8 @@
 /* Only resources/ is scanned: the prototypes and docs carry their own (old) classes. */
 @import 'tailwindcss' source(none);
 @import './editor.css';
+@import './templates.css';
+@import './settings.css';
 @source '../js';
 @source '../views';
 

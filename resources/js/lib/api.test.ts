@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { api, ApiError, apiPage, apiText, apiUrl, errorMessage, setUnauthenticatedHandler } from './api';
+import { api, ApiError, apiPage, apiUpload, apiText, apiUrl, errorMessage, setUnauthenticatedHandler } from './api';
 
 const json = (status: number, body: unknown, type = 'application/json') =>
     new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { 'Content-Type': type } });
@@ -130,6 +130,18 @@ describe('api', () => {
         fetchMock.mockRejectedValue(abort);
 
         await expect(api('/api/render', { method: 'POST', body: {} })).rejects.toBe(abort);
+    });
+    it('uploads multipart form data without its own Content-Type (the browser sets the boundary)', async () => {
+        fetchMock.mockResolvedValue(json(201, { id: 't1' }));
+        const form = new FormData();
+        form.append('package', new Blob(['zip']), 'kante.zip');
+
+        await expect(apiUpload('/api/templates', form)).resolves.toEqual({ id: 't1' });
+        const { init, headers } = sent();
+        expect(init.method).toBe('POST');
+        expect(init.body).toBe(form);
+        expect(headers['Content-Type']).toBeUndefined();
+        expect(headers['X-XSRF-TOKEN']).toBe('abc==');
     });
 });
 

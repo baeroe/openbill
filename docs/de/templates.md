@@ -10,11 +10,17 @@ openbill rendert jedes Dokument auf dem Server aus einem Template aus HTML, CSS 
 | Kante | markant: kräftiger Farbblock, große Summe, starke Linien |
 | Leise | minimal: viel Weißraum, Serifenschrift, Haarlinien |
 
-Die mitgelieferten Templates können Deutsch und Englisch (sie folgen der Sprache des Dokuments) und zeigen Zwischensummen der Gruppen, optionale Positionen, Steuerzeilen, gesetzliche Hinweise und Seitenzahlen. Sie sind schreibgeschützt und werden mit openbill aktualisiert (`php artisan migrate` legt sie an, `php artisan app:sync-templates` bringt sie auf den neuesten Stand). Zum Anpassen exportierst du eins und importierst das Paket als eigenes Template.
+Die mitgelieferten Templates können Deutsch und Englisch (sie folgen der Sprache des Dokuments) und zeigen Zwischensummen der Gruppen, optionale Positionen, Steuerzeilen, gesetzliche Hinweise und Seitenzahlen. Sie sind schreibgeschützt und werden mit openbill aktualisiert (`php artisan migrate` legt sie an, `php artisan app:sync-templates` bringt sie auf den neuesten Stand). Zum Anpassen duplizierst du es (Templates → Duplizieren) und bearbeitest die Kopie.
 
 ## Welches Template ein Dokument nutzt
 
 Ein Dokument nutzt sein eigenes Template, sonst das Standard-Template seines Dokumenttyps, sonst Klar. Beim Abschließen wird das Template mit den übrigen Stammdaten eingefroren und das PDF archiviert. Spätere Änderungen am Template oder sein Löschen ändern ein abgeschlossenes Dokument und sein PDF nie.
+
+## Template-Editor
+
+**Templates** zeigt jedes Template mit einer Vorschau seiner ersten Seite (auf dem Server mit Beispieldaten gerendert). **ZIP importieren** fügt ein Template-Paket hinzu, **Duplizieren** legt eine bearbeitbare Kopie an („Klar (Kopie)“), **Löschen** entfernt eigene Templates (nicht, solange Dokumente sie benutzen).
+
+Der Editor hat fünf Tabs – Kopfzeile, Inhalt, Fußzeile, CSS und Manifest – mit Syntax-Hervorhebung; im Manifest-Tab gibt es zusätzlich ein Formular für das Papier (Format, Höhe von Kopf- und Fußzeile, Seitenränder). Links listet die Feldleiste Kern- und eigene Felder jeder Ebene; ein Klick fügt den Ausdruck an der Cursorposition ein. Rechts rendert die Vorschau den ungespeicherten Stand 250 ms nach der letzten Änderung auf dem Server und hebt den Bereich des aktuellen Tabs hervor. **Beispieldaten** wechselt zwischen den Beispielszenarien und echten Dokumenten (auch Entwürfen). Fehler stehen über der Vorschau mit Datei und Zeile und sind im Code unterwellt; ein Klick springt hin. **Speichern** (⌘S / Strg+S) schreibt die Teile, **Exportieren** lädt den gespeicherten Stand als Paket. Mitgelieferte Templates öffnen schreibgeschützt. Assets (Schriften, Bilder) bearbeitet der Editor nicht: Sie kommen mit dem Paket oder per `PUT /api/templates/{id}/files`.
 
 ## Template-Paket
 
@@ -107,7 +113,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `taxation_mode`, `small_business` | `regular` oder `small_business`; `small_business` ist bei Kleinunternehmern (§ 19 UStG) `true` |
 | `locale` | Standardsprache |
 
-**`customer`** – leer, wenn das Dokument keinen Kunden hat: `number`, `name`, `street`, `zip`, `city`, `country`, `email`, `vat_id`, `tax_treatment` (`domestic`, `eu_reverse_charge`, `third_country`), `locale`.
+**`customer`** – leer, wenn das Dokument keinen Kunden hat: `number`, `name`, `street`, `zip`, `city`, `country`, `email`, `vat_id`, `tax_treatment` (`domestic`, `eu_reverse_charge`, `third_country`), `kind` (`business`, `consumer`), `locale`.
 
 **`contact`** – der Ansprechpartner, kann leer sein: `salutation`, `first_name`, `last_name`, `full_name`, `position`, `email`, `phone`.
 
@@ -218,6 +224,7 @@ Ein Template kann openbill weder kaputt machen noch blockieren:
 - ein Rendering bricht nach 5 Sekunden ab; die Zeit wird in jedem Schleifendurchlauf und vor jedem Filteraufruf geprüft, auch eine lange Filterkette endet also rechtzeitig,
 - keine Skripte und keine externen URLs: `<script>`, `<iframe>`, Bilder, Schriften und Stylesheets von `http(s)://` werden blockiert (Template-Assets nutzen), und jedes `<meta http-equiv>` (refresh, eigene Regeln) ist ein Template-Fehler,
 - ein Rendering darf höchstens 128 MB Speicher nutzen; `capture` und jeder Filter, dessen Ergebnis größer als seine Eingabe werden kann (`replace`, `append`, `join`, `split`, `base64_encode`, `url_encode`, `upcase`, …), prüft die Größe vor dem Aufbau gegen die Ausgabegrenze, Arrays aus Filtern haben höchstens 100 000 Einträge, Zahlen in Rechenfiltern höchstens 1 000 Stellen.
+- `file:`-URLs: Gotenberg dürfte lokale Dateien lesen, aber die Content-Security-Policy am Anfang jedes gerenderten Dokuments sperrt alles außer `data:` – ein Template mit `file:///tmp/…` oder anderen lokalen Pfaden zeigt nichts an. Verwende in Templates nie `file:`, sondern Assets.
 
 Jeder Fehler wird mit **Bereich** (`header`, `body`, `footer`, `css`, `manifest`, `intro`, `closing`), **Datei** und **Zeile** gemeldet, zum Beispiel `body · template.liquid · Zeile 3 · Unexpected character }`. Die Vorschau zeigt den Fehler anstelle des kaputten Teils. Abschließen und Entwurfs-PDF verweigern, solange das Template Fehler hat; ein kaputtes Template landet so nie in einem archivierten PDF.
 

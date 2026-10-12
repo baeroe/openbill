@@ -96,6 +96,19 @@ Pfade gibt es in zwei Formen. Die **Validierung** nutzt die Stelle in der Anfrag
 | Templates | `GET /api/templates`, `POST /api/templates` (Paket-ZIP als Multipart-Feld `package`), `GET/DELETE /api/templates/{id}`, `PUT /api/templates/{id}/files`, `GET /api/templates/{id}/package` |
 | Vorschau | `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
 
+Zusätzliche Endpunkte (Phase 7):
+
+| Endpunkt | Was er tut |
+|---|---|
+| `POST /api/templates/{id}/duplicate` | bearbeitbare Kopie eines Templates (auch eines mitgelieferten), 201 |
+| `POST /api/field-definitions/reorder` | Reihenfolge aller Felder einer Ebene: `{"scope", "ids"}` |
+| `POST /api/uploads`, `GET /api/uploads/{name}` | Bild für ein Bildfeld (multipart `file`, höchstens 1 MB); `path` der Antwort ist der Feldwert |
+| `GET`, `POST`, `DELETE /api/organization/logo` | Logo der Organisation (multipart `logo`) |
+| `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | nächste Nummer für ein noch nicht gespeichertes Muster |
+| `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | macht das archivierende `DELETE` rückgängig |
+
+Kunden haben `supply_type` (`goods` oder `services`, Standard `services`) und `customer_kind` (`business` oder `consumer`, Standard `business`); bei Kunden außerhalb der EU entscheiden sie zwischen Steuerkategorie `G`, `O` (Dienstleistungen an Unternehmen) und dem normalen Satz (Dienstleistungen an Privatpersonen) (siehe [E-Rechnung](/de/e-invoice#steuern)). Die Benutzerverwaltung (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) steht nur der Sitzung der App offen, nie Tokens; deaktivierte Konten bekommen keine API-Tokens, ihre vorhandenen funktionieren nicht mehr.
+
 Ein Dokument in einer Liste hat die Kurzform (Nummer, Status, Kunde, Summen, Datumswerte). `GET /api/documents/{id}` ergänzt Texte, eigene Felder, `groups` mit ihren Positionen, `totals` (netto, Steuer, brutto, Steueraufschlüsselung, Rechtshinweise) und bei Entwürfen `issues`: alles, was das Abschließen noch bemängeln würde.
 
 Der Filter `status` von `GET /api/documents` kennt zusätzlich `overdue`: offene Rechnungen, deren Fälligkeit überschritten ist. Überfällig ist kein eigener Status; Dokumente tragen ihn nie.

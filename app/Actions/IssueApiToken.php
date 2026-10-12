@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Enums\TokenAbility;
+use App\Exceptions\ActionNotAllowedException;
 use App\Models\User;
 use App\Support\Actor;
 use Carbon\CarbonImmutable;
@@ -25,6 +26,9 @@ final class IssueApiToken
      */
     public function handle(Actor $actor, User $user, array $input): NewAccessToken
     {
+        if ($user->isDisabled()) {
+            throw ActionNotAllowedException::userDisabled();
+        }
         $abilities = is_array($input['abilities'] ?? null) ? $input['abilities'] : [];
         $writesTemplate = in_array(TokenAbility::TemplatesWrite->value, $abilities, true);
 

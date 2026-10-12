@@ -2,6 +2,8 @@
 
 namespace App\Domain\Compliance;
 
+use App\Enums\CustomerKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxTreatment;
 
 /** What the checks need from the organization or a customer. */
@@ -22,6 +24,8 @@ final readonly class PartyFacts
         public array $custom = [],
         public ?TaxTreatment $taxTreatment = null,
         public string $registrationId = '',
+        public ?SupplyType $supplyType = null,
+        public ?CustomerKind $customerKind = null,
     ) {}
 
     public function addressComplete(): bool

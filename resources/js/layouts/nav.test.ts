@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isActive, navItems } from './nav';
+import { isActive, navItems, setupItems } from './nav';
 
 describe('isActive', () => {
     it('matches the overview exactly and sections with their sub pages', () => {
@@ -13,7 +13,15 @@ describe('isActive', () => {
         expect(isActive('/en/documents-archive', documents)).toBe(false);
     });
 
-    it('lists only pages that exist in this phase', () => {
-        expect(navItems().map((item) => item.href)).toEqual(['/en', '/en/documents', '/en/customers']);
+    it('lists the main pages and the setup group', () => {
+        expect(navItems().map((item) => item.href)).toEqual(['/en', '/en/documents', '/en/customers', '/en/templates']);
+        expect(setupItems().map((item) => item.href)).toEqual(['/en/fields', '/en/settings']);
+    });
+
+    it('keeps settings active on every section', () => {
+        const [, settings] = setupItems();
+
+        expect(isActive('/en/settings/taxes-units', settings)).toBe(true);
+        expect(isActive('/en/settings', settings)).toBe(true);
     });
 });

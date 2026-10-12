@@ -6,9 +6,11 @@ use App\Domain\Fields\FieldDefinitionData;
 use App\Domain\Fields\FieldRegistry;
 use App\Domain\Totals\PositionInput;
 use App\Enums\ComplianceProfile;
+use App\Enums\CustomerKind;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
 use App\Enums\PositionKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxTreatment;
 
@@ -71,11 +73,22 @@ final class ComplianceChecker
         if (trim($in->org->name) === '' || ! $in->org->addressComplete()) {
             $issues[] = new ComplianceIssue('org.address', ComplianceRule::OrgAddressMissing);
         }
-        if (trim($in->org->vatId) === '') {
+        // services to third-country customers are not subject to VAT (category O): BR-O-02 forbids the VAT IDs in the
+        // XML, so BR-CO-26 needs the legal registration ID (BT-30)
+        $thirdCountryServices = $in->customer?->taxTreatment === TaxTreatment::ThirdCountry && $in->customer->supplyType === SupplyType::Services;
+        $consumer = $in->customer?->customerKind === CustomerKind::Consumer;
+        $notSubjectToVat = $in->taxationMode === TaxationMode::Regular && $thirdCountryServices && ! $consumer;
+        // services to a third-country consumer are taxed like at home (regular rate, § 3a (1) UStG)
+        $exempt = $in->customer?->taxTreatment === TaxTreatment::EuReverseCharge
+            || ($in->customer?->taxTreatment === TaxTreatment::ThirdCountry && ! $thirdCountryServices);
+        if ($notSubjectToVat) {
+            if (trim($in->org->registrationId) === '') {
+                $issues[] = new ComplianceIssue('org.registration_id', ComplianceRule::OrgSellerIdMissing);
+            }
+        } elseif (trim($in->org->vatId) === '') {
             // BR-AE-02 / BR-G-02 (and § 14a UStG): reverse charge and exports need the seller's VAT ID. A small
             // business always invoices with category E (EffectiveTax), where the tax number is enough (BR-E-02).
-            if ($in->taxationMode === TaxationMode::Regular
-                && in_array($in->customer?->taxTreatment, [TaxTreatment::EuReverseCharge, TaxTreatment::ThirdCountry], true)) {
+            if ($in->taxationMode === TaxationMode::Regular && $exempt) {
                 $issues[] = new ComplianceIssue('org.vat_id', ComplianceRule::OrgVatIdRequired);
             } else {
                 if (trim($in->org->taxNumber) === '') {

@@ -31,6 +31,17 @@ use App\State\Provider\UnitProvider;
         new Post(uriTemplate: '/units', middleware: ApiMiddleware::WRITE, read: false, deserialize: false, processor: UnitProcessor::class),
         new Patch(uriTemplate: '/units/{id}', middleware: ApiMiddleware::WRITE, read: false, deserialize: false, processor: UnitProcessor::class),
         new Delete(uriTemplate: '/units/{id}', middleware: ApiMiddleware::WRITE, read: false, processor: UnitProcessor::class, description: 'Archives the unit.'),
+        new Post(
+            uriTemplate: '/units/{id}/restore',
+            name: 'unit_restore',
+            status: 200,
+            input: false,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: UnitProcessor::class,
+            description: 'Restores an archived unit.',
+        ),
     ],
 )]
 final class UnitResource

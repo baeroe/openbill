@@ -12,7 +12,7 @@ use App\State\Processor\OrganizationProcessor;
 use App\State\Provider\OrganizationProvider;
 use ArrayObject;
 
-/** The one organization of this instance (sender of every document). The logo upload comes in phase 7. */
+/** The one organization of this instance (sender of every document). The logo has its own endpoints (/api/organization/logo). */
 #[ApiResource(
     shortName: 'Organization',
     normalizationContext: Normalization::CONTEXT,

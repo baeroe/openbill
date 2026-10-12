@@ -1,5 +1,5 @@
 import { apiUrl } from '@/lib/api';
-import type { DocumentFilters, FieldScope } from './types';
+import type { DocumentFilters, DocumentType, FieldScope } from './types';
 
 /** Rows per page of the paginated lists (the API allows up to 100). */
 export const PAGE_SIZE = 50;
@@ -22,6 +22,7 @@ export const keys = {
             itemsPerPage: PAGE_SIZE,
         }),
     document: (id: string) => `/api/documents/${id}`,
+    allFieldDefinitions: () => '/api/field-definitions',
     fieldDefinitions: (scope: FieldScope) => apiUrl('/api/field-definitions', { scope }),
     // archived rates and units stay readable in old drafts and finalized documents; pickers offer only active ones
     taxRates: () => apiUrl('/api/tax-rates', { include_archived: true }),
@@ -33,4 +34,13 @@ export const keys = {
     suggestions: (q: string) => (q.trim() ? apiUrl('/api/position-suggestions', { q: q.trim(), limit: 6 }) : null),
     documentXml: (id: string) => `/api/documents/${id}/xml`,
     documentPdf: (id: string) => `/api/documents/${id}/pdf?inline=1`,
+    templates: () => '/api/templates',
+    template: (id: string) => `/api/templates/${id}`,
+    renderSources: () => apiUrl('/api/render/sources', { limit: 50 }),
+    renderSchema: () => '/api/render/schema',
+    documentTypes: () => '/api/document-types',
+    organization: () => '/api/organization',
+    users: () => '/api/users',
+    numberPreview: (type: DocumentType, pattern: string, resetYearly: boolean, nextValue: number | null) =>
+        apiUrl(`/api/document-types/${type}/number-preview`, { pattern, reset_yearly: resetYearly ? 1 : 0, next_value: nextValue }),
 };

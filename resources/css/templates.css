@@ -1,0 +1,37 @@
+/* CodeMirror inside the template editor: fill the pane, tooltips in app colors (lint messages). */
+@layer components {
+    .code-editor .cm-editor {
+        height: 100%;
+    }
+    .code-editor .cm-tooltip {
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: var(--shadow-float);
+    }
+    .code-editor .cm-diagnostic-error {
+        border-left-color: var(--bad);
+    }
+    .code-editor .cm-lintRange-error {
+        background-image: none;
+        text-decoration: underline wavy var(--bad);
+        text-underline-offset: 3px;
+    }
+}
+
+/*
+ * Outside @layer: these override utilities of shared components (Tabs, SelectControl) inside the editor panes,
+ * like the clickdummy (tabs on surface-3 within the tinted pane, a white compact sample select).
+ */
+.tpl-tabs [role='tablist'] {
+    background-color: var(--surface-3);
+}
+.tpl-tabs [role='tab'][aria-selected='true'] {
+    background-color: var(--surface);
+}
+.tpl-sample select {
+    height: var(--spacing-control-sm);
+    background-color: var(--surface);
+    font-size: var(--text-sm);
+}

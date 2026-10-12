@@ -13,6 +13,8 @@ const customer: Customer = {
     email: 'buchhaltung@hafenkontor.example',
     vat_id: 'DE987654321',
     tax_treatment: 'domestic',
+    supply_type: 'services',
+    customer_kind: 'business',
     locale: null,
     custom: { industry: 'Handel' },
     contacts: [
@@ -35,10 +37,12 @@ describe('draft ↔ API', () => {
         expect('key' in input.contacts[2]).toBe(false);
         expect(input).not.toHaveProperty('id');
         expect(input.custom).toEqual({ industry: 'Handel' });
+        expect(input.supply_type).toBe('services');
+        expect(input.customer_kind).toBe('business');
     });
 
     it('starts a new customer empty and domestic', () => {
-        expect(emptyCustomer()).toMatchObject({ name: '', number: '', country: 'DE', tax_treatment: 'domestic', contacts: [] });
+        expect(emptyCustomer()).toMatchObject({ name: '', number: '', country: 'DE', tax_treatment: 'domestic', supply_type: 'services', customer_kind: 'business', contacts: [] });
     });
 });
 

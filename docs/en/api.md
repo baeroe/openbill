@@ -96,6 +96,19 @@ Paths come in two forms. **Validation** uses the position in the request: `group
 | Templates | `GET /api/templates`, `POST /api/templates` (package ZIP as multipart field `package`), `GET/DELETE /api/templates/{id}`, `PUT /api/templates/{id}/files`, `GET /api/templates/{id}/package` |
 | Preview | `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
 
+Additional endpoints (phase 7):
+
+| Endpoint | What it does |
+|---|---|
+| `POST /api/templates/{id}/duplicate` | editable copy of a template (also of a built-in one), 201 |
+| `POST /api/field-definitions/reorder` | order of all fields of one level: `{"scope", "ids"}` |
+| `POST /api/uploads`, `GET /api/uploads/{name}` | image for an image field (multipart `file`, at most 1 MB); the answer's `path` is the field value |
+| `GET`, `POST`, `DELETE /api/organization/logo` | logo of the organization (multipart `logo`) |
+| `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | next number for a pattern that is not saved yet |
+| `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | undo of the archiving `DELETE` |
+
+Customers have `supply_type` (`goods` or `services`, default `services`) and `customer_kind` (`business` or `consumer`, default `business`); for customers outside the EU they decide between tax category `G`, `O` (services to businesses) and the regular rate (services to consumers) (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) is only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.
+
 A document in a list has the short form (number, status, customer, totals, dates). `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes) and – for drafts – `issues`: everything finalizing would still complain about.
 
 The `status` filter of `GET /api/documents` also takes `overdue`: open invoices whose due date has passed. Overdue is not a status of its own, so documents never carry it.

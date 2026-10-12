@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { CustomValue, FieldDefinition } from '@/api/types';
 import { controlClass, cx, Field, SelectControl, Switch, Textarea, TextInput } from '@/components/ui';
 import { toDecimalString } from '@/lib/format';
+import { ImageFieldInput } from './image-field-input';
 import { t } from '@/lib/i18n';
 
 type Props = {
@@ -74,8 +75,7 @@ export function CustomFieldInput({ definition, value, onChange, error, disabled 
                 </Field>
             );
         case 'image':
-            // no upload path for images yet (phase 7 brings asset uploads); the stored path stays as it is
-            return <TextInput label={label} hint={compact ? undefined : t('fields.image_read_only')} error={error} path={path} value={text} disabled readOnly aria-label={aria} />;
+            return <ImageFieldInput label={label} hint={hint} error={error} path={path} value={text || null} disabled={disabled} compact={compact} aria={aria} onChange={onChange} />;
         default:
             return <TextInput label={label} hint={hint} error={error} path={path} value={text} disabled={disabled} aria-label={aria} aria-required={required} onChange={(e) => onChange(e.target.value)} />;
     }

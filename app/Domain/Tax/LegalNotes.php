@@ -9,5 +9,6 @@ final readonly class LegalNotes
         public string $smallBusiness,
         public string $reverseCharge,
         public string $thirdCountry,
+        public string $thirdCountryServices,
     ) {}
 }

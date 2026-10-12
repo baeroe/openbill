@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\CustomerKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxTreatment;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -24,6 +26,8 @@ class Customer extends Model
     {
         return [
             'tax_treatment' => TaxTreatment::class,
+            'supply_type' => SupplyType::class,
+            'customer_kind' => CustomerKind::class,
             'custom' => 'array',
         ];
     }

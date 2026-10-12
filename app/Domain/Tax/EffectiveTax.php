@@ -3,6 +3,8 @@
 namespace App\Domain\Tax;
 
 use App\Domain\Money\Decimal;
+use App\Enums\CustomerKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
@@ -26,7 +28,14 @@ final readonly class EffectiveTax
             return new self(Decimal::zero(), TaxCategory::AE, $ctx->notes->reverseCharge);
         }
         if ($ctx->taxTreatment === TaxTreatment::ThirdCountry) {
-            return new self(Decimal::zero(), TaxCategory::G, $ctx->notes->thirdCountry);
+            if ($ctx->supplyType === SupplyType::Goods) {
+                return new self(Decimal::zero(), TaxCategory::G, $ctx->notes->thirdCountry);
+            }
+            // services: to a business the place of supply is abroad (§ 3a (2) UStG, not subject to VAT, O); to a
+            // consumer it stays in Germany (§ 3a (1) UStG): the regular rate of the position below, no note
+            if ($ctx->customerKind === CustomerKind::Business) {
+                return new self(Decimal::zero(), TaxCategory::O, $ctx->notes->thirdCountryServices);
+            }
         }
 
         $rate = $ctx->rate($taxRateId);

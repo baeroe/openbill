@@ -13,8 +13,9 @@ it('documents every resource, document action and file endpoint in OpenAPI', fun
             '/api/documents/{id}/cancel', '/api/documents/{id}/duplicate',
             '/api/documents/{id}/pdf', '/api/documents/{id}/xml',
             '/api/field-definitions', '/api/tax-rates', '/api/units', '/api/text-blocks',
-            '/api/templates', '/api/templates/{id}', '/api/templates/{id}/files', '/api/templates/{id}/package',
-            '/api/document-types', '/api/document-types/{type}', '/api/organization',
+            '/api/templates', '/api/templates/{id}', '/api/templates/{id}/duplicate', '/api/templates/{id}/files', '/api/templates/{id}/package',
+            '/api/document-types', '/api/document-types/{type}', '/api/document-types/{type}/number-preview', '/api/organization', '/api/organization/logo',
+            '/api/uploads', '/api/uploads/{name}', '/api/field-definitions/reorder',
             '/api/render', '/api/render/sources', '/api/render/schema', '/api/position-suggestions',
         )
         ->and($doc['components']['securitySchemes'] ?? [])->not->toBeEmpty()

@@ -30,7 +30,8 @@ final class SaveTaxRate
                     $fail(Text::t('errors.percent_range'));
                 }
             }],
-            'category' => [$required, Rule::enum(TaxCategory::class)],
+            // O (not subject to VAT) is never a rate of its own: EffectiveTax assigns it per customer (third-country business services)
+            'category' => [$required, Rule::enum(TaxCategory::class)->except([TaxCategory::O])],
             'exemption_note' => ['sometimes', 'nullable', 'string', 'max:1000'],
             'sort' => ['sometimes', 'integer', 'min:0'],
         ])->validate();

@@ -8,18 +8,22 @@ use App\Domain\Tax\TaxRateData;
 use App\Domain\Totals\GroupInput;
 use App\Domain\Totals\PositionInput;
 use App\Domain\Totals\TotalsCalculator;
+use App\Enums\CustomerKind;
 use App\Enums\PositionKind;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
 
-function totalsCtx(TaxationMode $mode = TaxationMode::Regular, TaxTreatment $treatment = TaxTreatment::Domestic): TaxContext
+function totalsCtx(TaxationMode $mode = TaxationMode::Regular, TaxTreatment $treatment = TaxTreatment::Domestic, SupplyType $supply = SupplyType::Goods, CustomerKind $kind = CustomerKind::Business): TaxContext
 {
     return new TaxContext(
         [new TaxRateData('r19', Decimal::of('19'), TaxCategory::S), new TaxRateData('r7', Decimal::of('7'), TaxCategory::S)],
         $mode,
         $treatment,
-        new LegalNotes('small business note', 'reverse charge note', 'third country note'),
+        new LegalNotes('small business note', 'reverse charge note', 'third country note', 'third country services note'),
+        $supply,
+        $kind,
     );
 }
 
@@ -150,4 +154,25 @@ describe('Decimal', function () {
         [null, 4, false],
         ['123456789012', 4, false],
     ]);
+
+    it('uses O with its own note for services to third-country customers, G for goods', function () {
+        $services = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Services));
+        $goods = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Goods));
+
+        expect($services?->category)->toBe(TaxCategory::O)
+            ->and((string) $services?->percent)->toBe('0')
+            ->and($services?->note)->toBe('third country services note')
+            ->and($goods?->category)->toBe(TaxCategory::G)
+            ->and($goods?->note)->toBe('third country note');
+    });
+
+    it('taxes services to third-country consumers at the regular rate without a note (review #5)', function () {
+        $consumer = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Services, kind: CustomerKind::Consumer));
+        $goods = EffectiveTax::resolve('r19', totalsCtx(treatment: TaxTreatment::ThirdCountry, supply: SupplyType::Goods, kind: CustomerKind::Consumer));
+
+        expect($consumer?->category)->toBe(TaxCategory::S)
+            ->and((string) $consumer?->percent)->toBe('19')
+            ->and($consumer?->note)->toBeNull()
+            ->and($goods?->category)->toBe(TaxCategory::G);
+    });
 });

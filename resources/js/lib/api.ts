@@ -48,6 +48,8 @@ export type ApiOptions = {
     format?: 'json' | 'jsonld';
     /** Request outlives the page (saving while the tab closes; body ≤ 64 KB). */
     keepalive?: boolean;
+    /** Multipart body (uploads); replaces body, the browser sets the Content-Type. */
+    form?: FormData;
 };
 
 type Format = NonNullable<ApiOptions['format']> | 'text';
@@ -87,7 +89,7 @@ async function send(path: string, options: ApiOptions, format: Format): Promise<
         'Accept-Language': getLocale(),
         'X-Requested-With': 'XMLHttpRequest',
     };
-    if (options.body !== undefined) headers['Content-Type'] = method === 'PATCH' ? 'application/merge-patch+json' : 'application/json';
+    if (options.body !== undefined && !options.form) headers['Content-Type'] = method === 'PATCH' ? 'application/merge-patch+json' : 'application/json';
     // the session's CSRF token for writes (Sanctum "stateful" requests, phase 4)
     const xsrf = cookie('XSRF-TOKEN');
     if (xsrf && method !== 'GET') headers['X-XSRF-TOKEN'] = xsrf;
@@ -99,7 +101,7 @@ async function send(path: string, options: ApiOptions, format: Format): Promise<
             credentials: 'same-origin',
             signal: options.signal,
             keepalive: options.keepalive,
-            body: options.body === undefined ? undefined : JSON.stringify(options.body),
+            body: options.form ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
         });
     } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') throw error;
@@ -144,6 +146,11 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
 }
 
 /** A text answer (e-invoice XML); errors still arrive as Problem Details. */
+/** POST of a multipart form (template ZIP, logo, image field) to the own API. */
+export function apiUpload<T>(path: string, form: FormData, options: { signal?: AbortSignal } = {}): Promise<T> {
+    return api<T>(path, { method: 'POST', form, signal: options.signal });
+}
+
 export async function apiText(path: string, options: Omit<ApiOptions, 'format'> = {}): Promise<string> {
     return (await request(path, options, 'text')).text();
 }

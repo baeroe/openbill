@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use App\ApiResource\Input\TemplateFilesInput;
+use App\Enums\DocumentType;
 use App\Http\Api\ApiMiddleware;
 use App\Models\Template;
 use App\Models\TemplateAsset;
@@ -63,6 +64,17 @@ use Symfony\Component\Serializer\Attribute\Groups;
             processor: TemplateProcessor::class,
             description: 'Replaces the given files: header, body, footer, css, manifest and the complete assets list (base64).',
         ),
+        new Post(
+            uriTemplate: '/templates/{id}/duplicate',
+            name: 'template_duplicate',
+            status: 201,
+            input: false,
+            middleware: ApiMiddleware::WRITE,
+            read: false,
+            deserialize: false,
+            processor: TemplateProcessor::class,
+            description: 'Copies a template (also a built-in one) into a new, editable template.',
+        ),
         new Delete(uriTemplate: '/templates/{id}', middleware: ApiMiddleware::WRITE, read: false, processor: TemplateProcessor::class),
     ],
 )]
@@ -94,6 +106,9 @@ final class TemplateResource
         public ?string $description,
         #[Groups([self::LIST, self::ITEM])]
         public bool $built_in,
+        /** @var list<string> */
+        #[Groups([self::LIST, self::ITEM])]
+        public array $document_types,
         #[Groups([self::ITEM])]
         public ArrayObject $manifest,
         #[Groups([self::ITEM])]
@@ -123,6 +138,7 @@ final class TemplateResource
             license: (string) $template->license,
             description: $template->description,
             built_in: $template->built_in,
+            document_types: self::documentTypes($template->manifest ?? []),
             manifest: new ArrayObject($template->manifest ?? []),
             header: (string) $template->header,
             body: (string) $template->body,
@@ -135,5 +151,19 @@ final class TemplateResource
             ])->values()->all(),
             updated_at: $template->updated_at?->toAtomString(),
         );
+    }
+
+    /**
+     * manifest.documentTypes when valid, otherwise all types (the manifest key is optional).
+     *
+     * @param  array<string, mixed>  $manifest
+     * @return list<string>
+     */
+    private static function documentTypes(array $manifest): array
+    {
+        $all = array_map(fn (DocumentType $type): string => $type->value, DocumentType::cases());
+        $types = $manifest['documentTypes'] ?? null;
+
+        return is_array($types) && $types !== [] ? array_values(array_intersect($all, $types)) : $all;
     }
 }

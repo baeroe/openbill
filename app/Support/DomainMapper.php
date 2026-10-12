@@ -13,9 +13,11 @@ use App\Domain\Tax\TaxRateData;
 use App\Domain\Totals\GroupInput;
 use App\Domain\Totals\PositionInput;
 use App\Enums\ComplianceProfile;
+use App\Enums\CustomerKind;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
 use App\Enums\FieldType;
+use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
 use App\Enums\TaxCategory;
 use App\Enums\TaxTreatment;
@@ -68,6 +70,10 @@ final class DomainMapper
             TaxationMode::from($sources['org']['taxation_mode']),
             TaxTreatment::from($sources['customer']['tax_treatment'] ?? TaxTreatment::Domestic->value),
             $notes,
+            // snapshots finalized before phase 7 have no supply type and were exports (G)
+            SupplyType::from($sources['customer']['supply_type'] ?? SupplyType::Goods->value),
+            // snapshots finalized before the customer kind existed were businesses
+            CustomerKind::from($sources['customer']['customer_kind'] ?? CustomerKind::Business->value),
         );
     }
 
@@ -113,6 +119,8 @@ final class DomainMapper
             custom: $row['custom'] ?? [],
             taxTreatment: isset($row['tax_treatment']) ? TaxTreatment::from($row['tax_treatment']) : null,
             registrationId: (string) ($row['registration_id'] ?? ''),
+            supplyType: isset($row['supply_type']) ? SupplyType::from($row['supply_type']) : null,
+            customerKind: isset($row['customer_kind']) ? CustomerKind::from($row['customer_kind']) : null,
         );
     }
 

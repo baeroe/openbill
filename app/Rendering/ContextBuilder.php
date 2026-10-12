@@ -30,6 +30,7 @@ final class ContextBuilder
         $summary = $totals->toArray();
         $locale = $document->locale;
         $units = array_column($sources['units'], null, 'id');
+        $images = self::imageKeys($sources);
 
         $index = 0;
         $groups = [];
@@ -40,7 +41,7 @@ final class ContextBuilder
                 $line = $totals->lines[$position->id] ?? null;
                 $unit = $position->unit_id === null ? null : ($units[$position->unit_id] ?? null);
                 $positions[] = [
-                    ...($position->custom ?? []),
+                    ...$this->inlineImages($position->custom ?? [], $images['position']),
                     'index' => $position->kind === PositionKind::Text ? null : ++$index,
                     'kind' => $position->kind->value,
                     'is_item' => $position->kind === PositionKind::Item,
@@ -74,7 +75,7 @@ final class ContextBuilder
 
         return new TemplateContext([
             'org' => [
-                ...($org['custom'] ?? []),
+                ...$this->inlineImages($org['custom'] ?? [], $images['org']),
                 ...self::pick($org, ['name', 'street', 'zip', 'city', 'country', 'vat_id', 'tax_number', 'registration_id', 'iban', 'bic', 'bank_name', 'email', 'phone', 'website']),
                 'logo' => $this->assets->logo($org['logo_path'] ?? null),
                 'taxation_mode' => (string) $org['taxation_mode'],
@@ -82,18 +83,19 @@ final class ContextBuilder
                 'locale' => (string) ($org['locale'] ?? 'en'),
             ],
             'customer' => $customer === null ? null : [
-                ...($customer['custom'] ?? []),
+                ...$this->inlineImages($customer['custom'] ?? [], $images['customer']),
                 ...self::pick($customer, ['number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'tax_treatment']),
+                'kind' => (string) ($customer['customer_kind'] ?? 'business'),
                 'locale' => $customer['locale'] ?? null,
             ],
             'contact' => $contact === null ? null : [
-                ...($contact['custom'] ?? []),
+                ...$this->inlineImages($contact['custom'] ?? [], $images['contact']),
                 ...self::pick($contact, ['salutation', 'first_name', 'last_name']),
                 'full_name' => trim(($contact['first_name'] ?? '').' '.($contact['last_name'] ?? '')),
                 ...self::pick($contact, ['position', 'email', 'phone']),
             ],
             'document' => [
-                ...($document->custom ?? []),
+                ...$this->inlineImages($document->custom ?? [], $images['document']),
                 'type' => $document->type->value,
                 'type_label' => Text::t('document_type.'.$document->type->value, [], $locale),
                 'status' => $document->status->value,
@@ -132,5 +134,41 @@ final class ContextBuilder
         }
 
         return $values;
+    }
+
+    /**
+     * Keys of image fields per level, from the definitions of the sources (snapshot, live or sample).
+     *
+     * @param  array<string, mixed>  $sources
+     * @return array{org: list<string>, customer: list<string>, contact: list<string>, document: list<string>, position: list<string>}
+     */
+    private static function imageKeys(array $sources): array
+    {
+        $keys = ['org' => [], 'customer' => [], 'contact' => [], 'document' => [], 'position' => []];
+        foreach ($sources['field_definitions'] ?? [] as $definition) {
+            if (($definition['type'] ?? null) === 'image' && isset($keys[$definition['scope'] ?? ''])) {
+                $keys[$definition['scope']][] = (string) $definition['key'];
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Image fields become data URLs (Chromium's header/footer load no files, the CSP allows data: only).
+     *
+     * @param  array<string, mixed>  $custom
+     * @param  list<string>  $imageKeys
+     * @return array<string, mixed>
+     */
+    private function inlineImages(array $custom, array $imageKeys): array
+    {
+        foreach ($imageKeys as $key) {
+            if (array_key_exists($key, $custom)) {
+                $custom[$key] = $this->assets->upload(is_string($custom[$key]) ? $custom[$key] : null);
+            }
+        }
+
+        return $custom;
     }
 }

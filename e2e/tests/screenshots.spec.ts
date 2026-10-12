@@ -54,6 +54,23 @@ const SHOTS: Shot[] = [
             await page.locator('.pp-page').first().waitFor();
         },
     },
+    { name: 'templates', open: (page, prefix) => go(page, prefix, '/templates') },
+    {
+        name: 'template-editor',
+        open: async (page, prefix) => {
+            await go(page, prefix, '/templates');
+            await page.getByRole('link', { name: prefix ? 'View Klar' : /Klar ansehen|View Klar/ }).first().click();
+            await page.waitForURL(/\/templates\/[^/]+$/);
+            await page.locator('.pp-page').first().waitFor();
+        },
+    },
+    { name: 'fields', open: (page, prefix) => go(page, prefix, '/fields?scope=document') },
+    { name: 'settings-organization', open: (page, prefix) => go(page, prefix, '/settings/organization') },
+    // the clickdummy calls the section doc-types
+    { name: 'settings-document-types', open: (page, prefix) => go(page, prefix, prefix ? '/settings/document-types' : '/settings/doc-types') },
+    { name: 'settings-taxes-units', open: (page, prefix) => go(page, prefix, '/settings/taxes-units') },
+    { name: 'settings-text-blocks', open: (page, prefix) => go(page, prefix, '/settings/text-blocks') },
+    { name: 'settings-users', open: (page, prefix) => go(page, prefix, '/settings/users') },
 ];
 
 async function capture(page: Page, dir: string, name: string): Promise<void> {

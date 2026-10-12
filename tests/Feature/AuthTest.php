@@ -108,3 +108,14 @@ it('shows the lock message in German on the German login', function () {
 
     expect(session('errors')->first('email'))->toContain('Zu viele Anmeldeversuche');
 });
+
+it('refuses disabled accounts with their own message, but only with the right password', function () {
+    $this->user->forceFill(['disabled_at' => now()])->save();
+
+    $this->post('/en/login', ['email' => 'anna@example.com', 'password' => 'secret-pass'])
+        ->assertSessionHasErrors(['email' => __('login.disabled', [], 'en')]);
+    $this->assertGuest();
+
+    $this->post('/en/login', ['email' => 'anna@example.com', 'password' => 'wrong'])
+        ->assertSessionHasErrors(['email' => __('login.failed', [], 'en')]);
+});

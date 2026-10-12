@@ -2,7 +2,7 @@ import { defineConfig, type DefaultTheme } from 'vitepress';
 import llmstxt from 'vitepress-plugin-llms';
 
 // every page exists in docs/en and docs/de under the same file name (tests/Unit/DocsTest.php)
-const pages = ['documents', 'templates', 'e-invoice', 'api', 'development'];
+const pages = ['documents', 'custom-fields', 'templates', 'e-invoice', 'settings', 'api', 'development'];
 
 const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.SidebarItem[] => [
     { text: t.guide, items: pages.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
@@ -11,6 +11,8 @@ const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.Sideba
 const en: Record<string, string> = {
     guide: 'Guide',
     documents: 'Documents',
+    'custom-fields': 'Custom fields',
+    settings: 'Settings',
     templates: 'Templates',
     'e-invoice': 'E-invoices',
     api: 'REST API',
@@ -20,6 +22,8 @@ const en: Record<string, string> = {
 const de: Record<string, string> = {
     guide: 'Anleitung',
     documents: 'Dokumente',
+    'custom-fields': 'Eigene Felder',
+    settings: 'Einstellungen',
     templates: 'Templates',
     'e-invoice': 'E-Rechnung',
     api: 'REST-API',

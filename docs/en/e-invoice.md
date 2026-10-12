@@ -35,9 +35,13 @@ A discount is an item with a negative price. In the XML the price stays positive
 | zero rate | `Z` | – |
 | small business (§ 19 UStG) | `E` | the small business note |
 | EU reverse charge | `AE` (buyer VAT ID required) | the reverse charge note |
-| outside the EU | `G` | the third country note |
+| goods to customers outside the EU | `G` | the third country note |
+| services to businesses outside the EU | `O` (no rate) | the note on services not taxable in Germany |
+| services to private persons outside the EU | the position's rate (usually `S`) | – |
 
 Without a tax note or legal note an exempt category gets a standard reason (for example "Exempt from VAT").
+
+`O` – not subject to VAT: services to businesses outside the EU (customer options “What you supply” = services and “Customer” = business, § 3a (2) UStG). Services to private persons outside the EU are taxed in Germany (§ 3a (1) UStG): they keep the regular rate of the position and get no exemption note. The XML then contains neither your VAT ID nor the customer's (BR-O-02) and no VAT rate; your register number identifies you (BR-CO-26), so the e-invoice profile requires it. Goods to customers outside the EU stay exports (`G`) and need your VAT ID. Documents finalized before this option existed keep their category through their snapshot.
 
 The legal notes are also part of the XML as document notes.
 

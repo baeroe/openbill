@@ -139,8 +139,8 @@ final class SampleDataFactory
     private function customer(RenderScenario $scenario, string $locale, array $definitions): array
     {
         $customer = $scenario === RenderScenario::ReverseCharge
-            ? ['number' => 'K-1003', 'name' => 'Hotel Alpenglück', 'street' => 'Bergweg 7', 'zip' => '6020', 'city' => 'Innsbruck', 'country' => 'AT', 'email' => 'office@alpenglueck.example', 'vat_id' => 'ATU12345678', 'tax_treatment' => 'eu_reverse_charge']
-            : ['number' => 'K-1001', 'name' => 'Hafenkontor Lindqvist GmbH', 'street' => 'Am Sandtorkai 4', 'zip' => '20457', 'city' => 'Hamburg', 'country' => 'DE', 'email' => 'buchhaltung@hafenkontor.example', 'vat_id' => 'DE987654321', 'tax_treatment' => 'domestic'];
+            ? ['number' => 'K-1003', 'name' => 'Hotel Alpenglück', 'street' => 'Bergweg 7', 'zip' => '6020', 'city' => 'Innsbruck', 'country' => 'AT', 'email' => 'office@alpenglueck.example', 'vat_id' => 'ATU12345678', 'tax_treatment' => 'eu_reverse_charge', 'customer_kind' => 'business']
+            : ['number' => 'K-1001', 'name' => 'Hafenkontor Lindqvist GmbH', 'street' => 'Am Sandtorkai 4', 'zip' => '20457', 'city' => 'Hamburg', 'country' => 'DE', 'email' => 'buchhaltung@hafenkontor.example', 'vat_id' => 'DE987654321', 'tax_treatment' => 'domestic', 'customer_kind' => 'business'];
 
         return ['id' => 'sample-customer', ...$customer, 'locale' => $locale, 'custom' => self::custom($definitions, FieldScope::Customer, null)];
     }

@@ -94,3 +94,9 @@ export function toDecimalString(raw: string): string | null {
     if (value === '') return null;
     return value.includes(',') ? value.replace(/\./g, '').replace(',', '.') : value;
 }
+
+/** "19.00" → "19 %" (de) / "19%" (en). Intl formats the decimal string exactly (ES2023), no float maths. */
+export function formatPercent(percent: string, locale?: string): string {
+    const format = new Intl.NumberFormat(intlLocale(locale), { style: 'percent', maximumFractionDigits: 2 }).format as unknown as (value: string) => string;
+    return format(`${percent}E-2`);
+}

@@ -5,6 +5,7 @@ import {
     formatDate,
     formatLongDate,
     formatMoney,
+    formatPercent,
     formatMonth,
     groupByMonth,
     initials,
@@ -98,5 +99,13 @@ describe('toDecimalString', () => {
         expect(toDecimalString('-3')).toBe('-3');
         expect(toDecimalString('')).toBeNull();
         expect(toDecimalString('abc')).toBe('abc'); // left for the server to refuse with a message
+    });
+});
+
+describe('formatPercent', () => {
+    it('formats percent strings exactly', () => {
+        expect(plain(formatPercent('19.00', 'de'))).toBe('19 %');
+        expect(plain(formatPercent('7.5', 'de'))).toBe('7,5 %');
+        expect(formatPercent('19.00', 'en')).toBe('19%');
     });
 });

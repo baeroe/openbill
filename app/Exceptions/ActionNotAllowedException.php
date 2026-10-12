@@ -24,6 +24,23 @@ final class ActionNotAllowedException extends DomainActionException
         return new self('conversion', Text::t('errors.conversion', ['from' => $from->value, 'to' => $to->value]));
     }
 
+    /** At least one active owner must stay (role change or disabling). */
+    public static function lastOwner(): self
+    {
+        return new self('last_owner', Text::t('errors.last_owner'));
+    }
+
+    public static function cannotDisableSelf(): self
+    {
+        return new self('cannot_disable_self', Text::t('errors.cannot_disable_self'));
+    }
+
+    /** Disabled accounts get no API token. */
+    public static function userDisabled(): self
+    {
+        return new self('user_disabled', Text::t('errors.user_disabled'));
+    }
+
     public static function duplicateCancellation(): self
     {
         return new self('duplicate_cancellation', Text::t('errors.duplicate_cancellation'));

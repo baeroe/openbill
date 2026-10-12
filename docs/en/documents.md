@@ -56,7 +56,7 @@ The lock is enforced by the database too: writes that change a finalized documen
 | Profile | Checks |
 |---|---|
 | Basic | date, customer, at least one item, title, tax rate (unless small business) and unit of every item, required custom fields |
-| E-invoice (EN 16931) | everything from Basic, plus organization name, full address, VAT ID or tax number, VAT ID or register number (with regular taxation the VAT ID is required for reverse charge and customers outside the EU) and IBAN, full customer address, the customer's VAT ID for reverse charge, service date, due date (invoices), a unit code for every unit and no quantity 0 |
+| E-invoice (EN 16931) | everything from Basic, plus organization name, full address, VAT ID or tax number, VAT ID or register number (with regular taxation the VAT ID is required for reverse charge and exports of goods, the register number for services to customers outside the EU) and IBAN, full customer address, the customer's VAT ID for reverse charge, service date, due date (invoices), a unit code for every unit and no quantity 0 |
 
 The e-invoice profile can only be chosen for invoices and cancellations.
 
@@ -116,7 +116,7 @@ Every document opens in the editor: the form on the left, a live preview on the 
 - **Header fields:** customer, contact (the customer's default contact is preselected), date, valid until (quotes), service period (invoices and cancellations), due date (invoices), document language and template, plus the document's custom fields. A cancellation always keeps the customer of its invoice.
 - **Positions:** organize positions in groups, each with its subtotal. Drag groups and positions by their handle – also with the keyboard: focus the handle, press Space, move with the arrow keys, press Space again. A position is a service, a text line or, in quotes, an optional service that is shown but not added to the total. While you type a title, openbill suggests positions from earlier documents with their price, unit and tax rate. Numbers can be typed with a comma or a dot (`12,5` or `12.5`); invalid input is marked and not saved. Removing a group or a position can be undone from the message that appears.
 - **Texts:** introduction and closing text, typed or inserted from text blocks.
-- **Totals and check:** net, VAT per rate, total, optional positions and legal notes come from the server, as do the line and group totals. The check panel lists what the document's compliance profile still requires; click an entry to jump to the field. Entries about the customer link to the customer; entries about your organization name the organization settings.
+- **Totals and check:** net, VAT per rate, total, optional positions and legal notes come from the server, as do the line and group totals. The check panel lists what the document's compliance profile still requires; click an entry to jump to the field. Entries about the customer link to the customer; entries about your organization open the organization settings at the right field.
 - **Saving:** changes are saved automatically shortly after you stop typing; the header shows *Unsaved*, *Saving …* and *Saved*. Leaving the page or closing the tab saves first. Logging out saves too, waiting at most three seconds for it; if logging out fails (for example without a connection), you stay signed in, editing and saving go on, and a message says so. If saving fails because of the connection, openbill tries again on its own (or right away with **Try again**); invalid input is marked at its field. If the document was finalized or deleted elsewhere in the meantime (another tab, the API or MCP), the editor stops saving and says so. Two people editing the same draft at the same time overwrite each other's changes – the last save wins. Known limits: if the tab is closed while a save is still on its way, in rare cases the older save can arrive last; very large drafts (several hundred positions) cannot be sent at all while the tab closes; and if your session has expired, the changes since the last save are lost when openbill sends you to the login page.
 - **Actions:** **Finalize** asks for confirmation and names the number the document will get; with missing required details it jumps to the first one instead. Finalized documents are read-only. Depending on the status you can change it (for example *Mark as accepted*, *Mark as paid*), convert a document along the chain, cancel an invoice, duplicate a document, download the PDF (drafts with a watermark) and delete a draft – with **Undo** while the message is visible.
 - **Chain and e-invoice:** above the form, the chain links the quote, order confirmation, invoice and cancellation that belong together. With the e-invoice profile, the tab **E-invoice** shows the XML of a finalized invoice or cancellation (copy or download); for drafts it explains that the XML is created when finalizing.
@@ -125,12 +125,18 @@ Every document opens in the editor: the form on the left, a live preview on the 
 
 **Customers** lists all customers with their default contact and what is open: the sum of their open invoices, overdue ones marked. The search looks through name, number and email.
 
-A customer's page holds the master data, the **tax treatment** (domestic; EU with VAT ID, which means reverse charge; third country), the customer's custom fields, the **contacts** and the customer's documents. Contacts are edited in a side panel; one of them is the default that new documents use. All changes, contacts included, are saved together with **Save**:
+A customer's page holds the master data, the **tax treatment** (domestic; EU with VAT ID, which means reverse charge; third country), the **Customer** kind (business or private person), for customers outside the EU **What you supply**, the customer's custom fields, the **contacts** and the customer's documents. Contacts are edited in a side panel; one of them is the default that new documents use. All changes, contacts included, are saved together with **Save**:
 
 - Mistakes are shown at the field they belong to (or at the contact), and nothing is saved until everything is valid.
 - Leading and trailing spaces are removed; an empty customer number gets the next free number.
 - Leaving the page with unsaved changes asks first.
 - A customer with finalized documents cannot be deleted.
+
+**Customer** says whether the customer is a business (default) or a private person. For customers outside the EU, **What you supply** and **Customer** decide the tax: services to businesses are not taxable in Germany (category `O`), services to private persons keep the regular rate, goods are tax-free exports (`G`). Existing third-country customers were set to goods when the option was introduced, so their drafts keep the previous treatment.
+
+### Templates, custom fields and settings
+
+Templates, custom fields and settings have their own pages: see [Templates](/en/templates#template-editor), [Custom fields](/en/custom-fields) and [Settings](/en/settings).
 
 ### Appearance and language
 

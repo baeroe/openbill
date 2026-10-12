@@ -93,6 +93,7 @@ const MATRIX_ROUTES = [
     'list tokens' => ['GET', '/api/tokens', []],
     'create token' => ['POST', '/api/tokens', []],
     'revoke token' => ['DELETE', '/api/tokens/{customer}', []],
+    'change own password' => ['PUT', '/api/account/password', []],
     'write own template' => ['PUT', '/api/templates/{A}/files', ['api:write', 'templates:write(A)']],
     'duplicate own template' => ['POST', '/api/templates/{A}/duplicate', ['api:write']],
     'delete own template' => ['DELETE', '/api/templates/{A}', ['api:write']],

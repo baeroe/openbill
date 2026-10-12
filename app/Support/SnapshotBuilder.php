@@ -2,6 +2,10 @@
 
 namespace App\Support;
 
+use App\Enums\CustomerKind;
+use App\Enums\DocumentType;
+use App\Enums\SupplyType;
+use App\Enums\TaxTreatment;
 use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Document;
@@ -9,10 +13,12 @@ use App\Models\FieldDefinition;
 use App\Models\Organization;
 use App\Models\TaxRate;
 use App\Models\Unit;
+use Illuminate\Support\Arr;
 
 /**
  * Master data a document depends on, in the shape stored in document_snapshots.data.
- * Drafts are computed from build() (live data), finalized documents from their stored snapshot.
+ * Drafts are computed from build() (live data; a cancellation takes the tax of its invoice's snapshot),
+ * finalized documents from their stored snapshot.
  */
 final class SnapshotBuilder
 {
@@ -26,7 +32,7 @@ final class SnapshotBuilder
         $contact = $document->contact_id === null ? null : Contact::withTrashed()->find($document->contact_id);
         $template = TemplateResolver::for($document);
 
-        return [
+        $sources = [
             'org' => self::orgRow($org),
             'customer' => $customer === null ? null : [
                 ...$customer->only(['id', 'number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'locale']),
@@ -63,6 +69,50 @@ final class SnapshotBuilder
             // frozen in the document's language: later text changes must not alter a finalized document
             'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($document->locale)),
         ];
+
+        return $document->type === DocumentType::Cancellation ? self::withInvoiceTax($document, $sources) : $sources;
+    }
+
+    /**
+     * A cancellation mirrors the tax of the invoice it cancels, never today's master data: small-business status,
+     * the customer's tax treatment, supply type and kind, and the tax rates (percent, category, exemption note) come
+     * from the invoice's snapshot. Which legal note applies follows from that; its text stays in the cancellation's
+     * language. Rates the invoice did not know (added later) stay live.
+     *
+     * @param  array<string, mixed>  $sources
+     * @return array<string, mixed>
+     */
+    public static function withInvoiceTax(Document $document, array $sources): array
+    {
+        $invoice = $document->source_id === null ? null : Document::query()->with('snapshot')->find($document->source_id);
+        $frozen = $invoice?->snapshot?->data;
+        if ($invoice === null || $invoice->type !== DocumentType::Invoice || ! is_array($frozen)) {
+            return $sources;
+        }
+
+        $sources['org']['taxation_mode'] = $frozen['org']['taxation_mode'] ?? $sources['org']['taxation_mode'];
+        $invoiceCustomer = $frozen['customer'] ?? null;
+        if (is_array($sources['customer']) && is_array($invoiceCustomer)) {
+            $sources['customer']['tax_treatment'] = $invoiceCustomer['tax_treatment'] ?? TaxTreatment::Domestic->value;
+            // the defaults are how DomainMapper::taxContext() read older invoice snapshots
+            $sources['customer']['supply_type'] = $invoiceCustomer['supply_type'] ?? SupplyType::Goods->value;
+            $sources['customer']['customer_kind'] = $invoiceCustomer['customer_kind'] ?? CustomerKind::Business->value;
+        }
+
+        $invoiceRates = [];
+        foreach ($frozen['tax_rates'] ?? [] as $rate) {
+            $invoiceRates[$rate['id']] = $rate;
+        }
+        $rates = [];
+        foreach ($sources['tax_rates'] as $rate) {
+            $rates[] = isset($invoiceRates[$rate['id']])
+                ? [...$rate, ...Arr::only($invoiceRates[$rate['id']], ['percent', 'category', 'exemption_note'])]
+                : $rate;
+            unset($invoiceRates[$rate['id']]);
+        }
+        $sources['tax_rates'] = [...$rates, ...array_values($invoiceRates)];
+
+        return $sources;
     }
 
     /**

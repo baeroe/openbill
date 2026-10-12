@@ -111,6 +111,16 @@ class Document extends Model
         return $this->belongsTo(Document::class, 'source_id');
     }
 
+    /**
+     * Finalized and draft cancellations of this invoice (partial cancellations: several).
+     *
+     * @return HasMany<Document, $this>
+     */
+    public function cancellations(): HasMany
+    {
+        return $this->hasMany(Document::class, 'source_id')->where('type', DocumentType::Cancellation->value);
+    }
+
     /** @return BelongsTo<Document, $this> */
     public function cancelledBy(): BelongsTo
     {

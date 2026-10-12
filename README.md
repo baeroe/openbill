@@ -32,12 +32,12 @@ mkdir openbill && cd openbill
 curl -fsSLO https://raw.githubusercontent.com/baeroe/openbill/main/docker-compose.yml
 curl -fsSL -o .env https://raw.githubusercontent.com/baeroe/openbill/main/.env.docker.example
 # edit .env: APP_URL, ADMIN_EMAIL and the passwords ADMIN_PASSWORD, DB_PASSWORD, DB_ROOT_PASSWORD
-# (empty in the template: docker compose refuses to start until they are set)
+# (empty in the template: docker compose refuses to start until the database ones are set)
 docker compose up -d                              # start
 docker compose pull && docker compose up -d       # update
 ```
 
-openbill listens on `127.0.0.1:7739`. Put a reverse proxy with HTTPS in front, set `APP_URL` to its address and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+openbill listens on `127.0.0.1:7739`. Put a reverse proxy with HTTPS in front, set `APP_URL` to its address and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` (then remove `ADMIN_PASSWORD` from `.env`; passwords are changed in the app).
 
 - [Setup](https://openbill.dev/en/setup) and [Reverse proxy](https://openbill.dev/en/reverse-proxy)
 - [Backup](https://openbill.dev/en/backup) and [Upgrading](https://openbill.dev/en/upgrading)

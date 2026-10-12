@@ -11,7 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Figures and lists of the overview page. Phase 8 returns exactly this array from the MCP tool get-overview.
- * Sums come from the stored document totals (drafts keep them current on every save) and stay strings.
+ * Sums come from the stored document totals (drafts keep them current on every save) and stay strings; invoices count
+ * with their balance after partial cancellations (InvoiceBalance).
  */
 final class Overview
 {
@@ -37,11 +38,11 @@ final class Overview
 
         return [
             'figures' => [
-                'open' => self::figure(self::openInvoices()),
-                'overdue' => self::figure(self::overdueInvoices($day)),
+                'open' => self::figure(self::openInvoices(), InvoiceBalance::SQL),
+                'overdue' => self::figure(self::overdueInvoices($day), InvoiceBalance::SQL),
                 'offers' => self::figure(self::openOffers()),
-                'paid_month' => self::figure(self::paidInvoices()->whereBetween('paid_at', [$today->startOfMonth(), $today->endOfMonth()])),
-                'paid_year' => self::figure(self::paidInvoices()->whereBetween('paid_at', [$today->startOfYear(), $today->endOfYear()])),
+                'paid_month' => self::figure(self::paidInvoices()->whereBetween('paid_at', [$today->startOfMonth(), $today->endOfMonth()]), InvoiceBalance::SQL),
+                'paid_year' => self::figure(self::paidInvoices()->whereBetween('paid_at', [$today->startOfYear(), $today->endOfYear()]), InvoiceBalance::SQL),
             ],
             'attention' => $attention,
             'attention_count' => $attentionCount,
@@ -54,14 +55,14 @@ final class Overview
     }
 
     /**
-     * Open invoices per customer (customer list): gross sum, count and how many are overdue.
+     * Open invoices per customer (customer list): sum of their balances, count and how many are overdue.
      *
      * @return array<string, array{gross: string, count: int, overdue: int}>
      */
     public static function openByCustomer(CarbonImmutable $today): array
     {
         $rows = self::openInvoices()->whereNotNull('customer_id')->toBase()
-            ->selectRaw('customer_id, COUNT(*) as aggregate, SUM(gross_total) as gross')
+            ->selectRaw('customer_id, COUNT(*) as aggregate, SUM('.InvoiceBalance::SQL.') as gross')
             ->groupBy('customer_id')
             ->get();
         // overdue through the one rule of DocumentQuery, not a second copy of it in SQL
@@ -117,6 +118,8 @@ final class Overview
             'number' => $document->number,
             'customer_name' => $document->customer?->name,
             'gross_total' => Amount::of((string) $document->gross_total),
+            // invoices: what is left after partial cancellations (null for other documents and drafts)
+            'open_amount' => InvoiceBalance::of($document),
             'is_overdue' => StatusMachine::isOverdue($document->type, $document->status, $document->due_date?->toDateString(), $today),
             'reason' => $reason,
             'reason_date' => $reasonDate,
@@ -127,9 +130,9 @@ final class Overview
      * @param  Builder<Document>  $query
      * @return array{gross: string, count: int}
      */
-    private static function figure(Builder $query): array
+    private static function figure(Builder $query, string $amount = 'documents.gross_total'): array
     {
-        $row = (array) ($query->toBase()->selectRaw('COUNT(*) as aggregate, SUM(gross_total) as gross')->first() ?? []);
+        $row = (array) ($query->toBase()->selectRaw("COUNT(*) as aggregate, SUM({$amount}) as gross")->first() ?? []);
 
         return ['gross' => Amount::of($row['gross'] ?? null), 'count' => (int) ($row['aggregate'] ?? 0)];
     }
@@ -140,7 +143,7 @@ final class Overview
      */
     private static function withCustomer(Builder $query): Builder
     {
-        return $query->with(['customer' => fn ($customer) => $customer->withTrashed()]);
+        return InvoiceBalance::withCancelled($query->with(['customer' => fn ($customer) => $customer->withTrashed()]));
     }
 
     /** @return Builder<Document> */

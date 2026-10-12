@@ -144,9 +144,14 @@ final class DocumentQuery
      */
     public static function summary(array $filters, string $today): array
     {
+        // open/overdue: what is still owed, i.e. invoices after partial cancellations (InvoiceBalance); the filter
+        // leaves out the cancellations themselves, so nothing counts twice
+        $amount = in_array($filters['status'] ?? null, [DocumentStatus::Open->value, self::OVERDUE], true)
+            ? "CASE WHEN documents.type = 'invoice' THEN ".InvoiceBalance::SQL.' ELSE documents.gross_total END'
+            : 'documents.gross_total';
         // the query builder returns stdClass rows; as array they are typed for Larastan
         $row = (array) (self::filtered($filters, $today)->toBase()
-            ->selectRaw('COUNT(*) as aggregate, SUM(gross_total) as gross')
+            ->selectRaw("COUNT(*) as aggregate, SUM({$amount}) as gross")
             ->first() ?? []);
 
         return ['count' => (int) ($row['aggregate'] ?? 0), 'gross_total' => Amount::of($row['gross'] ?? null)];

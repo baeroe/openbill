@@ -21,7 +21,7 @@ Documents with the profile `basic` (and offers and order confirmations) get a re
 
 ## Cancellations are credit notes
 
-A finalized cancellation becomes a credit note (type code 381) with positive amounts that refers to the cancelled invoice (number and date). It carries the payment terms "The amount will be refunded." in the document language.
+A finalized cancellation becomes a credit note (type code 381) with positive amounts that refers to the cancelled invoice (number and date). It carries the payment terms "The amount will be refunded." in the document language. Its tax categories and rates are those of the invoice (see [taxes and totals](/en/documents#taxes-and-totals)), even if the organization, the customer or the rate changed since.
 
 ## Discounts
 

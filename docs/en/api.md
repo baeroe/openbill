@@ -107,9 +107,9 @@ Additional endpoints:
 | `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | next number for a pattern that is not saved yet |
 | `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | undo of the archiving `DELETE` |
 
-Customers have `supply_type` (`goods` or `services`, default `services`) and `customer_kind` (`business` or `consumer`, default `business`); for customers outside the EU they decide between tax category `G`, `O` (services to businesses) and the regular rate (services to consumers) (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) is only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.
+Customers have `supply_type` (`goods` or `services`, default `services`) and `customer_kind` (`business` or `consumer`, default `business`); for customers outside the EU they decide between tax category `G`, `O` (services to businesses) and the regular rate (services to consumers) (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) and changing the own password (`PUT /api/account/password`) are only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.
 
-A document in a list has the short form (number, status, customer, totals, dates). `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes) and – for drafts – `issues`: everything finalizing would still complain about.
+A document in a list has the short form (number, status, customer, totals, dates). Finalized invoices also have `open_amount`: the gross total minus finalized (partial) cancellations, i.e. what is still owed while the invoice is open (`null` for other documents and drafts). A cancellation must credit more than 0 and at most that amount; otherwise finalizing answers `compliance_failed` with the code `cancellation_not_credit` or `cancellation_exceeds_invoice` at the path `positions`. `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes) and – for drafts – `issues`: everything finalizing would still complain about.
 
 The `status` filter of `GET /api/documents` also takes `overdue`: open invoices whose due date has passed. Overdue is not a status of its own, so documents never carry it.
 
@@ -147,7 +147,8 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$INVOICE/finalize" | jq -
 curl -s -H "Authorization: Bearer $OPENBILL_TOKEN" -o invoice.pdf "$OPENBILL_URL/api/documents/$INVOICE/pdf"
 curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$INVOICE/status" -d '{"status": "paid"}' > /dev/null
 
-# cancel it: creates the cancellation draft, finalizing it cancels the invoice
+# cancel it: creates the cancellation draft (all positions negated; reduce them for a partial cancellation),
+# finalizing it cancels the invoice once nothing is left of it
 CANCELLATION=$(curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$INVOICE/cancel" | jq -r .id)
 curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$CANCELLATION/finalize" | jq -r .status
 ```

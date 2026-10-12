@@ -20,18 +20,27 @@ it('leaves an existing user untouched when it runs again on the next start', fun
     $this->artisan('app:ensure-admin')->assertSuccessful();
     User::where('email', 'owner@example.com')->sole()->update(['password' => 'changed-in-the-ui']);
 
-    $this->artisan('app:ensure-admin')->expectsOutputToContain('already exists')->assertSuccessful();
+    $this->artisan('app:ensure-admin')->expectsOutputToContain('already exists')->expectsOutputToContain('remove it from .env')->assertSuccessful();
 
     expect(User::count())->toBe(1)
         ->and(Hash::check('changed-in-the-ui', User::sole()->password))->toBeTrue();
 });
 
-it('skips without failing when the variables are not set', function () {
+it('warns loudly without failing when no account exists and the variables are not set', function () {
     config(['openbill.admin.email' => null, 'openbill.admin.password' => '']);
 
-    $this->artisan('app:ensure-admin')->expectsOutputToContain('not set')->assertSuccessful();
+    $this->artisan('app:ensure-admin')->expectsOutputToContain('nobody can log in')->assertSuccessful();
 
     expect(User::count())->toBe(0);
+});
+
+it('skips quietly once accounts exist and ADMIN_PASSWORD was removed (review I2)', function () {
+    User::factory()->owner()->create();
+    config(['openbill.admin.password' => null]);
+
+    $this->artisan('app:ensure-admin')->expectsOutputToContain('not set')->doesntExpectOutputToContain('nobody can log in')->assertSuccessful();
+
+    expect(User::count())->toBe(1);
 });
 
 it('fails and creates nothing for invalid values', function (string $email, string $password) {

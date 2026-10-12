@@ -8,6 +8,7 @@ use App\Mcp\Schemas;
 use App\Models\Document;
 use App\Support\Actor;
 use App\Support\DocumentQuery;
+use App\Support\InvoiceBalance;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -30,7 +31,7 @@ final class ListDocumentsTool extends OpenbillTool
     {
         [$page, $perPage] = self::paging($request);
         $filters = DocumentQuery::validate($request->all(self::FILTERS));
-        $documents = DocumentQuery::sorted(DocumentQuery::filtered($filters, now()->toDateString()), (string) ($filters['sort'] ?? '-date'))
+        $documents = InvoiceBalance::withCancelled(DocumentQuery::sorted(DocumentQuery::filtered($filters, now()->toDateString()), (string) ($filters['sort'] ?? '-date')))
             ->with(['customer' => fn ($customer) => $customer->withTrashed()])
             ->paginate(perPage: $perPage, page: $page);
 

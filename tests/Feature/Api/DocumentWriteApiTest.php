@@ -85,6 +85,8 @@ it('rejects invalid input with field paths and saves nothing (review focus 4)', 
     'amount as JSON number' => [fn () => ['groups' => [['title' => null, 'positions' => [itemRow('Support', '1', '80', ['unit_price' => 80.5])]]]], 'groups.0.positions.0.unit_price'],
     'optional position in an invoice' => [fn () => ['groups' => [['title' => null, 'positions' => [itemRow('Support', '1', '80', ['kind' => 'optional'])]]]], 'groups.0.positions.0.kind'],
     'contact of another customer' => [fn () => ['contact_id' => Contact::factory()->create()->id], 'contact_id'],
+    'integer beyond DECIMAL(15,4) (review M2)' => [fn () => ['groups' => [['title' => null, 'positions' => [itemRow('Support', '1', '80', ['quantity' => PHP_INT_MAX])]]]], 'groups.0.positions.0.quantity'],
+    'line total beyond DECIMAL(15,2) (review M2)' => [fn () => ['groups' => [['title' => null, 'positions' => [itemRow('Support', '99999999999', '99999999999')]]]], 'groups.0.positions.0.unit_price'],
 ]);
 
 it('refuses to create a cancellation directly', function () {

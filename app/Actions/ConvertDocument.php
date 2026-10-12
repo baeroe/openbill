@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Offer → confirmation/invoice, confirmation → invoice, invoice → cancellation (rules: DocumentConverter).
- * An existing cancellation draft of the invoice counts: it is returned instead of a second one.
+ * An existing cancellation draft of the invoice counts: it is returned instead of a second one. After a partial
+ * cancellation the next draft starts again from all positions of the invoice (to be reduced to what is left).
  */
 final class ConvertDocument
 {
@@ -41,7 +42,9 @@ final class ConvertDocument
             if ($target === DocumentType::Cancellation) {
                 // locking read: sees a cancellation draft committed after this (possibly outer) transaction
                 // took its read view, so a second draft is never created next to it (M-B)
-                $existing = Document::query()->where('source_id', $source->id)->where('type', DocumentType::Cancellation)->lockForUpdate()->first();
+                // only drafts count: after a partial cancellation the invoice can be cancelled again (review M1)
+                $existing = Document::query()->where('source_id', $source->id)->where('type', DocumentType::Cancellation)
+                    ->whereNull('finalized_at')->lockForUpdate()->first();
                 if ($existing !== null) {
                     return new ConversionResult($existing->load('groups.positions'), []);
                 }

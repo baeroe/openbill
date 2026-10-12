@@ -27,4 +27,6 @@ enum ComplianceRule: string
     case DueDateMissing = 'due_date_missing';
     case UnitCodeMissing = 'unit_code_missing';
     case QuantityZero = 'quantity_zero';
+    case CancellationNotCredit = 'cancellation_not_credit';
+    case CancellationExceedsInvoice = 'cancellation_exceeds_invoice';
 }

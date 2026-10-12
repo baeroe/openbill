@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Api\ApiMiddleware;
+use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ApiTokensController;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
@@ -61,6 +62,8 @@ Route::middleware(ApiMiddleware::SESSION)->group(function (): void {
     Route::get('/tokens', [ApiTokensController::class, 'index'])->name('api.tokens');
     Route::post('/tokens', [ApiTokensController::class, 'store'])->name('api.tokens.store');
     Route::delete('/tokens/{id}', [ApiTokensController::class, 'destroy'])->whereUlid('id')->name('api.tokens.destroy');
+    // the own password (settings "Your account"): needs the current one, so it is throttled like the login
+    Route::put('/account/password', [AccountController::class, 'password'])->middleware('throttle:10,1')->name('api.account.password');
 });
 
 // signed links (MCP get-document-pdf-url, 15 minutes): no token, the signature is the permission

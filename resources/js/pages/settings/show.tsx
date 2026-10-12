@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Page, PageHeader, cx } from '@/components/ui';
 import { appLayout } from '@/layouts/app-shell';
 import { path, t } from '@/lib/i18n';
+import { AccountSettings } from '@/settings/account';
 import { ApiSettings } from '@/settings/api-settings';
 import { DocumentTypeSettings } from '@/settings/document-types';
 import { OrganizationSettings } from '@/settings/organization';
@@ -55,6 +56,8 @@ function renderSection(section: SettingsSection, canManageUsers: boolean, urls: 
             return <UserSettings canManage={canManageUsers} />;
         case 'api':
             return <ApiSettings mcpUrl={urls.mcpUrl} apiDocsUrl={urls.apiDocsUrl} />;
+        case 'account':
+            return <AccountSettings />;
     }
 }
 

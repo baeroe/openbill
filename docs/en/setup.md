@@ -26,12 +26,12 @@ curl -fsSL -o .env https://raw.githubusercontent.com/baeroe/openbill/main/.env.d
 
 ## .env
 
-Fill in `.env` before the first start. The passwords are empty in the template on purpose: until they are set, `docker compose up` stops with `ADMIN_PASSWORD missing` (or `DB_PASSWORD`, `DB_ROOT_PASSWORD`).
+Fill in `.env` before the first start. The passwords are empty in the template on purpose: until the database passwords are set, `docker compose up` stops with `DB_PASSWORD missing` (or `DB_ROOT_PASSWORD`), and without `ADMIN_PASSWORD` the first start creates no owner (the log says `nobody can log in`).
 
 | Variable | Required | Meaning |
 |---|---|---|
 | `APP_URL` | yes | Public address including `https://`, e.g. `https://invoices.example.com`. Links, the toolkit download and the allowed `Host` header come from it: requests for any other host get `400`. |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | yes | Owner account (the template leaves the password empty), created on the first start only (password at least 8 characters). Changing them later doesn't touch the existing account. |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | first start | Owner account (the template leaves the password empty), created on the first start only (password at least 8 characters). Changing them later doesn't touch the existing account. Remove `ADMIN_PASSWORD` from `.env` once you have logged in, see [Passwords](#passwords). |
 | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | yes | MariaDB passwords (empty in the template). MariaDB stores them on the first start; changing them in `.env` afterwards breaks the connection. |
 | `OPENBILL_BIND`, `OPENBILL_PORT` | no | Host address and port, default `127.0.0.1` and `7739` (the container listens on `8080`): only a reverse proxy on the same host reaches openbill. For a proxy on another host see [Reverse proxy](/en/reverse-proxy). |
 | `TRUSTED_PROXIES` | no | IP addresses or CIDR networks (no host names) whose `X-Forwarded-*` headers openbill believes, comma-separated. Default: localhost and the private networks. Narrow it to your proxy as soon as `OPENBILL_BIND` isn't `127.0.0.1`. |
@@ -57,6 +57,18 @@ On every start the container:
 4. installs the built-in templates (Klar, Kante, Leise) in the version of the image,
 5. creates the owner account if it doesn't exist yet,
 6. builds its caches.
+
+## Passwords
+
+`ADMIN_PASSWORD` is only needed for the first start. Once you have logged in, delete the line from `.env` and run `docker compose up -d`, so the password no longer sits in the file and in the container environment. Without it the container skips creating the owner; it only warns in the log when no account exists at all.
+
+Everyone changes their own password under **Settings → Your account** (see [Settings](/en/settings#your-account)). A forgotten password is reset on the server; the command asks for the new one twice without showing it:
+
+```bash
+docker compose exec openbill php artisan app:reset-password owner@example.com
+```
+
+Without a terminal it reads the first line of its input instead, e.g. `docker compose exec -T openbill php artisan app:reset-password owner@example.com < new-password.txt`. The password is never an argument, so it doesn't end up in the shell history. Resetting signs the account out everywhere; its API tokens stay valid.
 
 ## What lives where
 

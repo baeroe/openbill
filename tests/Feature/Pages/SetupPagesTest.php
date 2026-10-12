@@ -32,7 +32,7 @@ it('sends /settings to the organization and renders every section', function () 
     $this->actingAs(User::factory()->owner()->create());
 
     $this->get('/de/settings')->assertRedirect('/de/settings/organization');
-    foreach (['organization', 'document-types', 'taxes-units', 'text-blocks', 'users', 'api'] as $section) {
+    foreach (['organization', 'document-types', 'taxes-units', 'text-blocks', 'users', 'api', 'account'] as $section) {
         $this->get("/en/settings/{$section}")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->component('settings/show')->where('section', $section)->where('can_manage_users', true)

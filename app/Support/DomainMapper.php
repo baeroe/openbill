@@ -24,6 +24,7 @@ use App\Enums\TaxTreatment;
 use App\Models\Document;
 use App\Models\Position;
 use App\Models\PositionGroup;
+use Brick\Math\BigDecimal;
 
 /** Models and snapshot arrays → domain input objects (and back for position rows). */
 final class DomainMapper
@@ -127,7 +128,7 @@ final class DomainMapper
     /**
      * @param  array<string, mixed>  $sources
      */
-    public static function complianceInput(Document $document, array $sources, ComplianceProfile $profile): ComplianceInput
+    public static function complianceInput(Document $document, array $sources, ComplianceProfile $profile, ?BigDecimal $gross = null, ?BigDecimal $cancellable = null): ComplianceInput
     {
         return new ComplianceInput(
             type: $document->type,
@@ -144,6 +145,8 @@ final class DomainMapper
             unitCodes: array_column($sources['units'], 'code', 'id'),
             taxRateIds: array_column($sources['tax_rates'], 'id'),
             fieldDefinitions: self::fieldDefinitions($sources['field_definitions']),
+            gross: $gross,
+            cancellable: $cancellable,
         );
     }
 

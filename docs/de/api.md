@@ -107,9 +107,9 @@ Zusätzliche Endpunkte:
 | `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | nächste Nummer für ein noch nicht gespeichertes Muster |
 | `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | macht das archivierende `DELETE` rückgängig |
 
-Kunden haben `supply_type` (`goods` oder `services`, Standard `services`) und `customer_kind` (`business` oder `consumer`, Standard `business`); bei Kunden außerhalb der EU entscheiden sie zwischen Steuerkategorie `G`, `O` (Dienstleistungen an Unternehmen) und dem normalen Satz (Dienstleistungen an Privatpersonen) (siehe [E-Rechnung](/de/e-invoice#steuern)). Die Benutzerverwaltung (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) steht nur der Sitzung der App offen, nie Tokens; deaktivierte Konten bekommen keine API-Tokens, ihre vorhandenen funktionieren nicht mehr.
+Kunden haben `supply_type` (`goods` oder `services`, Standard `services`) und `customer_kind` (`business` oder `consumer`, Standard `business`); bei Kunden außerhalb der EU entscheiden sie zwischen Steuerkategorie `G`, `O` (Dienstleistungen an Unternehmen) und dem normalen Satz (Dienstleistungen an Privatpersonen) (siehe [E-Rechnung](/de/e-invoice#steuern)). Die Benutzerverwaltung (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) und das Ändern des eigenen Passworts (`PUT /api/account/password`) stehen nur der Sitzung der App offen, nie Tokens; deaktivierte Konten bekommen keine API-Tokens, ihre vorhandenen funktionieren nicht mehr.
 
-Ein Dokument in einer Liste hat die Kurzform (Nummer, Status, Kunde, Summen, Datumswerte). `GET /api/documents/{id}` ergänzt Texte, eigene Felder, `groups` mit ihren Positionen, `totals` (netto, Steuer, brutto, Steueraufschlüsselung, Rechtshinweise) und bei Entwürfen `issues`: alles, was das Abschließen noch bemängeln würde.
+Ein Dokument in einer Liste hat die Kurzform (Nummer, Status, Kunde, Summen, Datumswerte). Abgeschlossene Rechnungen haben zusätzlich `open_amount`: die Bruttosumme abzüglich abgeschlossener (Teil-)Stornos, also was noch geschuldet ist, solange die Rechnung offen ist (`null` bei anderen Dokumenten und Entwürfen). Ein Storno muss mehr als 0 und höchstens diesen Betrag gutschreiben; sonst antwortet das Abschließen mit `compliance_failed` und dem Code `cancellation_not_credit` bzw. `cancellation_exceeds_invoice` am Pfad `positions`. `GET /api/documents/{id}` ergänzt Texte, eigene Felder, `groups` mit ihren Positionen, `totals` (netto, Steuer, brutto, Steueraufschlüsselung, Rechtshinweise) und bei Entwürfen `issues`: alles, was das Abschließen noch bemängeln würde.
 
 Der Filter `status` von `GET /api/documents` kennt zusätzlich `overdue`: offene Rechnungen, deren Fälligkeit überschritten ist. Überfällig ist kein eigener Status; Dokumente tragen ihn nie.
 
@@ -147,7 +147,8 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$INVOICE/finalize" | jq -
 curl -s -H "Authorization: Bearer $OPENBILL_TOKEN" -o rechnung.pdf "$OPENBILL_URL/api/documents/$INVOICE/pdf"
 curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$INVOICE/status" -d '{"status": "paid"}' > /dev/null
 
-# stornieren: legt den Storno-Entwurf an, sein Abschluss storniert die Rechnung
+# stornieren: legt den Storno-Entwurf an (alle Positionen negiert; für ein Teilstorno verringern),
+# sein Abschluss storniert die Rechnung, sobald nichts mehr von ihr übrig ist
 CANCELLATION=$(curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$INVOICE/cancel" | jq -r .id)
 curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$CANCELLATION/finalize" | jq -r .status
 ```

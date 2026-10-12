@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { UserCheck } from 'lucide-react';
 import { Button, Notice, TextInput } from '@/components/ui';
-import { LogoMark } from '@/layouts/logo';
+import { AuthCard } from '@/layouts/auth-card';
 import { path, t } from '@/lib/i18n';
 
 type Props = { state: 'open' | 'expired' | 'closed'; email: string | null; role: 'owner' | 'member' | null };
@@ -12,26 +12,22 @@ export default function Invitation({ state, email, role }: Props) {
     const errors = form.errors as Record<string, string | undefined>;
 
     return (
-        <main className="grid min-h-dvh content-center justify-items-start gap-8 px-6 py-12 sm:px-[clamp(1.5rem,8vw,8rem)]">
+        <AuthCard>
             <Head title={t('invitation.title')} />
-            <div className="flex items-center gap-2.5 text-xl font-bold tracking-brand">
-                <LogoMark />
-                <span>openbill</span>
-            </div>
             <div>
-                <h1 className="text-3xl font-bold tracking-brand">{t('invitation.title')}</h1>
-                {state === 'open' && email && role && <p className="mt-2 max-w-[44ch] text-muted">{t('invitation.lead', { email, role: t(`users.role.${role}`) })}</p>}
+                <h1 className="text-2xl font-bold tracking-brand">{t('invitation.title')}</h1>
+                {state === 'open' && email && role && <p className="mt-1.5 text-pretty text-muted">{t('invitation.lead', { email, role: t(`users.role.${role}`) })}</p>}
             </div>
 
             {state !== 'open' ? (
-                <div className="grid max-w-sm gap-4">
+                <div className="grid gap-4">
                     <Notice tone="warn">{state === 'expired' ? t('invitation.expired') : t('invitations.closed')}</Notice>
                     <Link href={path('/login')}>{t('invitation.to_login')}</Link>
                 </div>
             ) : (
                 <form
                     noValidate
-                    className="grid w-full max-w-sm gap-4"
+                    className="grid gap-4"
                     onSubmit={(event) => {
                         event.preventDefault();
                         // the signature is part of the URL: post to exactly this address
@@ -48,6 +44,6 @@ export default function Invitation({ state, email, role }: Props) {
                     </Button>
                 </form>
             )}
-        </main>
+        </AuthCard>
     );
 }

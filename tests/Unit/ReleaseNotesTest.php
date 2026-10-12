@@ -34,3 +34,13 @@ it('has only absolute links, which also work in the GitHub release', function ()
     expect(releaseNotes('0.1.0')->getOutput())->not->toContain('](/')
         ->toContain('](https://github.com/baeroe/openbill/blob/main/docs/en/setup.md)');
 });
+
+it('has notes for the version in config/openbill.php (MCP serverInfo.version)', function () {
+    // Unit suite: no app, so the config file is read as text
+    preg_match("/'version' => '([^']+)'/", (string) file_get_contents(dirname(__DIR__, 2).'/config/openbill.php'), $match);
+    $version = $match[1] ?? '';
+
+    expect($version)->not->toBe('')
+        ->and(releaseNotes($version)->getExitCode())->toBe(0)
+        ->and(file_get_contents(dirname(__DIR__, 2).'/docs/de/upgrading.md'))->toContain("### {$version}");
+});

@@ -7,6 +7,7 @@ use App\Domain\Totals\GroupInput;
 use App\Enums\ComplianceProfile;
 use App\Enums\DocumentType;
 use App\Enums\TaxationMode;
+use Brick\Math\BigDecimal;
 
 final readonly class ComplianceInput
 {
@@ -17,6 +18,8 @@ final readonly class ComplianceInput
      * @param  array<string, string>  $unitCodes  unit id => UN/ECE code ('' if none)
      * @param  list<string>  $taxRateIds
      * @param  list<FieldDefinitionData>  $fieldDefinitions  all definitions; filtered per level here
+     * @param  BigDecimal|null  $gross  cancellations: their gross total (negative for a credit)
+     * @param  BigDecimal|null  $cancellable  cancellations: what is left of the invoice (gross minus finalized cancellations)
      */
     public function __construct(
         public DocumentType $type,
@@ -33,5 +36,7 @@ final readonly class ComplianceInput
         public array $unitCodes,
         public array $taxRateIds,
         public array $fieldDefinitions,
+        public ?BigDecimal $gross = null,
+        public ?BigDecimal $cancellable = null,
     ) {}
 }

@@ -40,12 +40,22 @@ const STATUS_OPTIONS: (DocumentStatus | 'overdue')[] = ['draft', 'open', 'overdu
 /** Number · customer · date · due/valid until · status · amount; on phones two lines (customer/amount, number/status). */
 const GRID = 'grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[8rem_minmax(0,1fr)_6.5rem_7.5rem_7rem] lg:grid-cols-[8.5rem_minmax(0,1fr)_5.5rem_6.5rem_7.5rem_7rem]';
 
+/** A date field's value for the URL: null when empty, undefined while a year is still being typed (before 1900). */
+function completeDate(value: string): string | null | undefined {
+    if (value === '') return null;
+    return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number(value.slice(0, 4)) >= 1900 ? value : undefined;
+}
+
 const EMPTY: Filters = { type: null, status: null, customer_id: null, q: null, date_from: null, date_to: null };
 
 export default function Documents({ filters, counts, summary, customers }: Props) {
     const openNewDocument = useNewDocument();
     const [query, setQuery] = useState(filters.q ?? '');
     const search = useDebounced(query, 300);
+    // the date fields: Chromium reports every valid step while a year is typed (0002, 0020, 0202, 2026), so they go
+    // into the URL debounced like the search, and only with a plausible year
+    const [dates, setDates] = useState({ from: filters.date_from ?? '', to: filters.date_to ?? '' });
+    const typedDates = useDebounced(dates, 400);
     const list = useDocumentList(filters);
     // drafts deleted in the editor disappear at once; the DELETE follows when their undo toast is gone
     const removed = usePendingDeletes();
@@ -72,6 +82,7 @@ export default function Documents({ filters, counts, summary, customers }: Props
     };
     const reset = () => {
         setQuery('');
+        setDates({ from: '', to: '' });
         requested.current = EMPTY;
         visit(EMPTY);
     };
@@ -83,6 +94,20 @@ export default function Documents({ filters, counts, summary, customers }: Props
         const q = search.trim() || null;
         if (q !== requested.current.q) set({ q }, true);
     }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        const from = completeDate(typedDates.from);
+        const to = completeDate(typedDates.to);
+        if (from === undefined || to === undefined) return;
+        if (from !== requested.current.date_from || to !== requested.current.date_to) set({ date_from: from, date_to: to }, true);
+    }, [typedDates]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // back/forward: the date fields follow the URL unless they are being typed in
+    useEffect(() => {
+        if (completeDate(typedDates.from) !== (filters.date_from ?? null) || completeDate(typedDates.to) !== (filters.date_to ?? null)) {
+            setDates({ from: filters.date_from ?? '', to: filters.date_to ?? '' });
+        }
+    }, [filters.date_from, filters.date_to]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // back/forward in the browser changes the URL: the field follows. Compared with the debounced text, so an
     // answer to an older search never overwrites what is being typed right now.
@@ -145,22 +170,22 @@ export default function Documents({ filters, counts, summary, customers }: Props
                             </option>
                         ))}
                     </SelectControl>
-                    {/* document date from/to; typing a date replaces the history entry like the search does */}
+                    {/* document date from/to, debounced; typing a date replaces the history entry like the search does */}
                     <input
                         type="date"
                         className={controlClass(false, 'h-control flex-[1_1_9rem] sm:flex-[0_1_10rem]')}
-                        value={filters.date_from ?? ''}
-                        max={filters.date_to ?? undefined}
-                        onChange={(e) => set({ date_from: e.target.value || null }, true)}
+                        value={dates.from}
+                        max={dates.to || undefined}
+                        onChange={(e) => setDates((current) => ({ ...current, from: e.target.value }))}
                         aria-label={t('documents.filter_date_from')}
                         title={t('documents.filter_date_from')}
                     />
                     <input
                         type="date"
                         className={controlClass(false, 'h-control flex-[1_1_9rem] sm:flex-[0_1_10rem]')}
-                        value={filters.date_to ?? ''}
-                        min={filters.date_from ?? undefined}
-                        onChange={(e) => set({ date_to: e.target.value || null }, true)}
+                        value={dates.to}
+                        min={dates.from || undefined}
+                        onChange={(e) => setDates((current) => ({ ...current, to: e.target.value }))}
                         aria-label={t('documents.filter_date_to')}
                         title={t('documents.filter_date_to')}
                     />

@@ -610,8 +610,6 @@
     "nav.settings": "Settings",
     "nav.setup": "Set up",
     "nav.templates": "Templates",
-    "new_document.cancellation_hint": "Open the invoice and choose “Cancel” there.",
-    "new_document.cancellation_text": "Always created from an invoice.",
     "new_document.confirmation_text": "Confirm an order in writing.",
     "new_document.create": "Create :type",
     "new_document.created": ":type created",

@@ -24,6 +24,12 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.2.1
+
+- The **New document** dialog only offers the types you can create there (offer, order confirmation, invoice). Cancellations still come from an invoice; the greyed-out card is gone, and the remaining cards have room for their names.
+- Template gallery: the buttons of a card wrap on narrow cards instead of running out of the card.
+- No changes to the compose files.
+
 ### 0.2.0
 
 - **Customer numbers are configurable:** new section Settings → Customers with a number range like the document types (placeholders `{YYYY}`, `{YY}`, `{MM}`, `{0000}`, optional yearly reset, next value, live preview). New customers without a number get the next number of this range; numbers typed by hand stay as they are. On update the range continues the numbers handed out so far (for example `K-1004` → `K-{0000}` from 1005, otherwise `C-{0000}` from 1001), so nothing changes until you change the pattern. Details: https://openbill.dev/en/settings#customers

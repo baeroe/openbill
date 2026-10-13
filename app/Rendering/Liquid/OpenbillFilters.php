@@ -87,6 +87,15 @@ final class OpenbillFilters extends FiltersProvider
         return is_scalar($value) ? str_replace(["\r\n", "\r", "\n"], '<br>', (string) $value) : '';
     }
 
+    /** IBAN in groups of four: "DE02 1203 0000 0000 2020 51" (spaces removed first, letters upper case). */
+    public function iban(mixed $value): string
+    {
+        $this->guardLength(is_scalar($value) ? strlen((string) $value) * 2 : 0);
+        $compact = strtoupper((string) preg_replace('/\s+/', '', self::str($value)));
+
+        return trim(chunk_split($compact, 4, ' '));
+    }
+
     /** Template word: manifest "translations" of the document language, then lang template.<key>, else the key. */
     public function t(mixed $key): string
     {

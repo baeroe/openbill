@@ -14,7 +14,8 @@ export function expression(scope: FieldScope, key: string, type?: FieldType): st
     const path = liquidPath(scope, key);
     if (key === 'legal_notes' && !type) return `{% for note in ${path} %}<p>{{ note }}</p>{% endfor %}`;
     if (key === 'tax_breakdown' && !type) return `{% for t in ${path} %}{{ t.percent }} %: {{ t.tax | money }}{% endfor %}`;
-    if (type === 'image' || (!type && scope === 'org' && key === 'logo')) return `{% if ${path} != blank %}<img src="{{ ${path} }}" alt="">{% endif %}`;
+    if (key === 'iban' && !type && scope === 'org') return `{{ ${path} | iban }}`;
+    if (type === 'image' || (!type && ((scope === 'org' && key === 'logo') || (scope === 'document' && key === 'payment_qr')))) return `{% if ${path} != blank %}<img src="{{ ${path} }}" alt="">{% endif %}`;
     if (type === 'boolean') return `{% if ${path} %}{% endif %}`;
     if (type === 'money' || (!type && MONEY.has(key))) return `{{ ${path} | money }}`;
     if (type === 'date' || (!type && DATES.has(key))) return `{{ ${path} | date }}`;

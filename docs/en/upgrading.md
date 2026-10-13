@@ -24,6 +24,13 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.3.0
+
+- **GiroCode on invoices:** templates get `document.payment_qr`, an EPC QR code (SVG data URL) that banking apps scan to fill in the SEPA transfer: your organization name and IBAN/BIC, the total and the invoice number as reference. It is only filled for finalized invoices with a total above zero and an IBAN in the organization settings. The built-in templates do not print it; add it to your own template: https://openbill.dev/en/templates#girocode
+- New Liquid filter `iban` prints an IBAN in groups of four (`org.iban | iban`).
+- `payment_qr` is now a reserved key for document fields: a custom document field with this key is hidden by the GiroCode in templates.
+- No changes to the compose files.
+
 ### 0.2.1
 
 - The **New document** dialog only offers the types you can create there (offer, order confirmation, invoice). Cancellations still come from an invoice; the greyed-out card is gone, and the remaining cards have room for their names.

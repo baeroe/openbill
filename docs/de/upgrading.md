@@ -24,6 +24,13 @@ Alle Versionen und ihre Änderungen: https://github.com/baeroe/openbill/releases
 
 <!-- nur absolute Links: jeder Abschnitt wird zu den Notizen des GitHub-Release (scripts/release-notes.sh) -->
 
+### 0.3.0
+
+- **GiroCode auf Rechnungen:** Templates bekommen `document.payment_qr`, einen EPC-QR-Code (SVG-Data-URL), den Banking-Apps scannen, um die SEPA-Überweisung auszufüllen: Name und IBAN/BIC deiner Organisation, die Summe und die Rechnungsnummer als Verwendungszweck. Befüllt ist er nur bei abgeschlossenen Rechnungen mit einer Summe über null und einer IBAN in den Organisationseinstellungen. Die mitgelieferten Templates drucken ihn nicht; bau ihn in dein eigenes Template ein: https://openbill.dev/de/templates#girocode
+- Neuer Liquid-Filter `iban` gibt eine IBAN in Vierergruppen aus (`org.iban | iban`).
+- `payment_qr` ist jetzt ein reservierter Schlüssel für Dokumentfelder: Ein eigenes Dokumentfeld mit diesem Schlüssel wird in Templates vom GiroCode verdeckt.
+- Keine Änderungen an den Compose-Dateien.
+
 ### 0.2.1
 
 - Der Dialog **Neues Dokument** bietet nur noch die Arten an, die dort entstehen können (Angebot, Auftragsbestätigung, Rechnung). Stornos entstehen weiter aus einer Rechnung; die ausgegraute Karte ist weg, und die übrigen Karten haben Platz für ihre Namen.

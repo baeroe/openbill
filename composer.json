@@ -9,6 +9,7 @@
         "php": "^8.4",
         "api-platform/laravel": "^5.0",
         "brick/math": "^1.0",
+        "chillerlan/php-qrcode": "^5.0",
         "gotenberg/gotenberg-php": "^2.25",
         "horstoeko/zugferd": "^1.0.132",
         "inertiajs/inertia-laravel": "^3.5",

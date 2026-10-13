@@ -71,7 +71,7 @@ export function GalleryCard({ template, documentTypes }: { template: TemplateSum
                         </Tag>
                     ))}
                 </div>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                     <ButtonLink href={href} size="sm" variant={template.built_in ? 'default' : 'soft'} icon={template.built_in ? <Eye /> : <Pencil />}>
                         {template.built_in ? t('templates.view') : t('templates.edit')}
                     </ButtonLink>

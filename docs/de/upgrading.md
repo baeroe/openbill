@@ -24,6 +24,12 @@ Alle Versionen und ihre Änderungen: https://github.com/baeroe/openbill/releases
 
 <!-- nur absolute Links: jeder Abschnitt wird zu den Notizen des GitHub-Release (scripts/release-notes.sh) -->
 
+### 0.2.1
+
+- Der Dialog **Neues Dokument** bietet nur noch die Arten an, die dort entstehen können (Angebot, Auftragsbestätigung, Rechnung). Stornos entstehen weiter aus einer Rechnung; die ausgegraute Karte ist weg, und die übrigen Karten haben Platz für ihre Namen.
+- Template-Galerie: Die Knöpfe einer Karte brechen auf schmalen Karten um, statt aus der Karte zu laufen.
+- Keine Änderungen an den Compose-Dateien.
+
 ### 0.2.0
 
 - **Kundennummern frei gestaltbar:** neuer Bereich Einstellungen → Kunden mit einem Nummernkreis wie bei den Dokumenttypen (Platzhalter `{YYYY}`, `{YY}`, `{MM}`, `{0000}`, optional jedes Jahr neu, nächste Nummer, Live-Vorschau). Neue Kunden ohne Nummer bekommen die nächste Nummer dieses Kreises; von Hand eingetragene Nummern bleiben, wie sie sind. Beim Update setzt der Kreis die bisher vergebenen Nummern fort (zum Beispiel `K-1004` → `K-{0000}` ab 1005, sonst `C-{0000}` ab 1001) – es ändert sich also nichts, bis du das Muster umstellst. Details: https://openbill.dev/de/settings#kunden

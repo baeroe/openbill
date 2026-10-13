@@ -610,8 +610,6 @@
     "nav.settings": "Einstellungen",
     "nav.setup": "Einrichten",
     "nav.templates": "Templates",
-    "new_document.cancellation_hint": "Öffne die Rechnung und wähle dort „Stornieren“.",
-    "new_document.cancellation_text": "Entsteht immer aus einer Rechnung.",
     "new_document.confirmation_text": "Einen Auftrag schriftlich bestätigen.",
     "new_document.create": ":type anlegen",
     "new_document.created": ":type angelegt",

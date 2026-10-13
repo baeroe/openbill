@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { FileCheck2, FilePlus2, FileText, FileX2, type LucideIcon } from 'lucide-react';
+import { FileCheck2, FilePlus2, FileText, type LucideIcon } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { useCustomer, useCustomerOptions } from '@/api/customers';
 import { createDocument } from '@/api/documents';
@@ -16,11 +16,10 @@ const TYPES: { type: DocumentType; icon: LucideIcon }[] = [
     { type: 'offer', icon: FilePlus2 },
     { type: 'confirmation', icon: FileCheck2 },
     { type: 'invoice', icon: FileText },
-    { type: 'cancellation', icon: FileX2 },
 ];
 
-/** Cancellations come from an invoice (CreateDocument refuses them), so the card is only an explanation. */
-const creatable = (type: DocumentType) => type !== 'cancellation';
+/** Cancellations always come from an invoice (CreateDocument refuses them), so they are not offered here. */
+const creatable = (type: DocumentType) => TYPES.some((item) => item.type === type);
 
 /** Mounted fresh for every opening (key in NewDocumentProvider), so the start values come from `options` before the first focus. */
 export function NewDocumentDialog({ open, options, onClose }: { open: boolean; options: NewDocumentOptions; onClose(): void }) {
@@ -39,10 +38,9 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
     const moveType = (event: KeyboardEvent<HTMLDivElement>) => {
         if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(event.key)) return;
         event.preventDefault();
-        const enabled = TYPES.filter((item) => creatable(item.type));
-        const index = enabled.findIndex((item) => item.type === type);
-        const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : enabled.length - 1;
-        const next = enabled[(index + step) % enabled.length];
+        const index = TYPES.findIndex((item) => item.type === type);
+        const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : TYPES.length - 1;
+        const next = TYPES[(index + step) % TYPES.length];
         setType(next.type);
         event.currentTarget.querySelector<HTMLElement>(`[data-type="${next.type}"]`)?.focus();
     };
@@ -96,7 +94,7 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
                 </>
             }
         >
-            <div role="radiogroup" aria-label={t('new_document.type_label')} onKeyDown={moveType} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div role="radiogroup" aria-label={t('new_document.type_label')} onKeyDown={moveType} className="grid gap-2 xs:grid-cols-3">
                 {TYPES.map(({ type: value, icon: Icon }) => (
                     <button
                         key={value}
@@ -104,12 +102,10 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
                         role="radio"
                         data-type={value}
                         aria-checked={type === value}
-                        disabled={!creatable(value)}
-                        title={creatable(value) ? undefined : t('new_document.cancellation_hint')}
                         tabIndex={type === value ? 0 : -1}
                         data-autofocus={type === value ? '' : undefined}
                         onClick={() => setType(value)}
-                        className="group grid content-start justify-items-start gap-1 rounded-lg bg-surface-2 p-4 text-left text-ink transition-[background-color,box-shadow] hover:enabled:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-55 aria-checked:bg-accent-soft aria-checked:shadow-[inset_0_0_0_2px_var(--accent)] aria-checked:hover:bg-accent-soft"
+                        className="group grid content-start justify-items-start gap-1 rounded-lg bg-surface-2 p-4 text-left text-ink transition-[background-color,box-shadow] hover:bg-surface-3 aria-checked:bg-accent-soft aria-checked:shadow-[inset_0_0_0_2px_var(--accent)] aria-checked:hover:bg-accent-soft"
                     >
                         <span className="mb-2 grid size-9 place-items-center rounded-md bg-surface text-muted group-aria-checked:bg-accent group-aria-checked:text-accent-ink [&_svg]:size-[1.1rem]">
                             <Icon aria-hidden />

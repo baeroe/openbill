@@ -79,8 +79,11 @@ export type DocumentTypeInput = {
     default_closing_block_id: string | null;
     payment_term_days: number | null;
     validity_days: number | null;
-    numbering: { pattern: string; reset_yearly: boolean; next_value?: number };
+    numbering: NumberingInput;
 };
+
+/** Pattern, yearly reset and – only when changed – the next running number of a number range. */
+export type NumberingInput = { pattern: string; reset_yearly: boolean; next_value?: number };
 
 export async function saveDocumentType(type: DocumentType, input: DocumentTypeInput): Promise<DocumentTypeSetting> {
     const saved = await api<DocumentTypeSetting>(`/api/document-types/${type}`, { method: 'PATCH', body: input });
@@ -93,6 +96,24 @@ export type NumberPreview = { number: string | null; valid: boolean; message: st
 /** Next number for the pattern being typed, from the server (250 ms after the last keystroke). */
 export function useNumberPreview(type: DocumentType, pattern: string, resetYearly: boolean, nextValue: number | null) {
     const key = useDebounced(keys.numberPreview(type, pattern, resetYearly, nextValue), 250);
+    return useSWR<NumberPreview>(pattern.trim() ? key : null, { keepPreviousData: true, revalidateOnFocus: false });
+}
+
+/** GET /api/customer-numbering (CustomerNumberingResource): number range of new customers without a number. */
+export type CustomerNumbering = { pattern: string; reset_yearly: boolean; next_value: number; next_number: string };
+
+export function useCustomerNumbering() {
+    return useSWR<CustomerNumbering>(keys.customerNumbering());
+}
+
+export async function saveCustomerNumbering(input: NumberingInput): Promise<CustomerNumbering> {
+    const saved = await api<CustomerNumbering>(keys.customerNumbering(), { method: 'PATCH', body: input });
+    await mutate(keys.customerNumbering(), saved, { revalidate: false });
+    return saved;
+}
+
+export function useCustomerNumberPreview(pattern: string, resetYearly: boolean, nextValue: number | null) {
+    const key = useDebounced(keys.customerNumberPreview(pattern, resetYearly, nextValue), 250);
     return useSWR<NumberPreview>(pattern.trim() ? key : null, { keepPreviousData: true, revalidateOnFocus: false });
 }
 

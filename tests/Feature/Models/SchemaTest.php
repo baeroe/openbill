@@ -20,7 +20,7 @@ it('ships the base master data with a fresh database', function () {
         ->and(DocumentTypeSetting::query()->findOrFail('invoice')->profile)->toBe(ComplianceProfile::Basic)
         ->and(DocumentTypeSetting::query()->findOrFail('invoice')->payment_term_days)->toBe(14)
         ->and(NumberSequence::query()->whereNull('year')->orderBy('doc_type')->pluck('pattern')->all())
-        ->toBe(['CN-{YYYY}-{0000}', 'OC-{YYYY}-{0000}', 'INV-{YYYY}-{0000}', 'Q-{YYYY}-{0000}'])
+        ->toBe(['CN-{YYYY}-{0000}', 'OC-{YYYY}-{0000}', 'C-{0000}', 'INV-{YYYY}-{0000}', 'Q-{YYYY}-{0000}'])
         ->and(TaxRate::query()->orderBy('sort')->pluck('percent')->all())->toBe(['19.00', '7.00', '0.00'])
         ->and(Unit::query()->orderBy('sort')->pluck('code')->all())->toBe(['HUR', 'DAY', 'H87', 'LS', 'KMT', 'MON']);
 });

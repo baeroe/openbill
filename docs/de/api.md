@@ -93,6 +93,7 @@ Pfade gibt es in zwei Formen. Die **Validierung** nutzt die Stelle in der Anfrag
 | Textbausteine | `GET/POST /api/text-blocks` (`?kind=`), `GET/PATCH/DELETE /api/text-blocks/{id}` |
 | Dokumenttypen | `GET /api/document-types`, `GET/PATCH /api/document-types/{type}` (Profil, Template, Texte, Fristen, Nummernkreis) |
 | Organisation | `GET/PATCH /api/organization` |
+| Kundennummern | `GET/PATCH /api/customer-numbering` (`pattern`, `reset_yearly`, `next_value`; `next_number` nur lesend) |
 | Templates | `GET /api/templates`, `POST /api/templates` (Paket-ZIP als Multipart-Feld `package`), `GET/DELETE /api/templates/{id}`, `PUT /api/templates/{id}/files`, `GET /api/templates/{id}/package` |
 | Vorschau | `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
 
@@ -105,6 +106,7 @@ Zusätzliche Endpunkte:
 | `POST /api/uploads`, `GET /api/uploads/{name}` | Bild für ein Bildfeld (multipart `file`, höchstens 1 MB); `path` der Antwort ist der Feldwert |
 | `GET`, `POST`, `DELETE /api/organization/logo` | Logo der Organisation (multipart `logo`) |
 | `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | nächste Nummer für ein noch nicht gespeichertes Muster |
+| `GET /api/customer-numbering/preview?pattern=…&reset_yearly=1&next_value=…` | dasselbe für Kundennummern |
 | `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | macht das archivierende `DELETE` rückgängig |
 
 Kunden haben `supply_type` (`goods` oder `services`, Standard `services`) und `customer_kind` (`business` oder `consumer`, Standard `business`); bei Kunden außerhalb der EU entscheiden sie zwischen Steuerkategorie `G`, `O` (Dienstleistungen an Unternehmen) und dem normalen Satz (Dienstleistungen an Privatpersonen) (siehe [E-Rechnung](/de/e-invoice#steuern)). Die Benutzerverwaltung (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) und das Ändern des eigenen Passworts (`PUT /api/account/password`) stehen nur der Sitzung der App offen, nie Tokens; deaktivierte Konten bekommen keine API-Tokens, ihre vorhandenen funktionieren nicht mehr.

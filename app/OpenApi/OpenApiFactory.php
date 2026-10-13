@@ -150,6 +150,17 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     $query('next_value', 'running number to show; default the current next value', 'integer'),
                 ],
             )),
+            '/api/customer-numbering/preview' => new PathItem(get: new Operation(
+                operationId: 'previewCustomerNumber',
+                tags: ['CustomerNumbering'],
+                responses: self::responses(self::json('number (null when invalid), valid, message.')),
+                summary: 'Previews the next customer number for a (not yet saved) pattern.',
+                parameters: [
+                    $query('pattern', 'e.g. C-{0000}'),
+                    $query('reset_yearly', '1 = start at 1 every year', 'boolean'),
+                    $query('next_value', 'running number to show; default the current next value', 'integer'),
+                ],
+            )),
             '/api/render' => new PathItem(post: new Operation(
                 operationId: 'render',
                 tags: ['Render'],

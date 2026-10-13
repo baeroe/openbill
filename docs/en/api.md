@@ -93,6 +93,7 @@ Paths come in two forms. **Validation** uses the position in the request: `group
 | Text blocks | `GET/POST /api/text-blocks` (`?kind=`), `GET/PATCH/DELETE /api/text-blocks/{id}` |
 | Document types | `GET /api/document-types`, `GET/PATCH /api/document-types/{type}` (profile, template, texts, terms, number range) |
 | Organization | `GET/PATCH /api/organization` |
+| Customer numbering | `GET/PATCH /api/customer-numbering` (`pattern`, `reset_yearly`, `next_value`; `next_number` read-only) |
 | Templates | `GET /api/templates`, `POST /api/templates` (package ZIP as multipart field `package`), `GET/DELETE /api/templates/{id}`, `PUT /api/templates/{id}/files`, `GET /api/templates/{id}/package` |
 | Preview | `POST /api/render`, `GET /api/render/sources`, `GET /api/render/schema` |
 
@@ -105,6 +106,7 @@ Additional endpoints:
 | `POST /api/uploads`, `GET /api/uploads/{name}` | image for an image field (multipart `file`, at most 1 MB); the answer's `path` is the field value |
 | `GET`, `POST`, `DELETE /api/organization/logo` | logo of the organization (multipart `logo`) |
 | `GET /api/document-types/{type}/number-preview?pattern=…&reset_yearly=1&next_value=…` | next number for a pattern that is not saved yet |
+| `GET /api/customer-numbering/preview?pattern=…&reset_yearly=1&next_value=…` | the same for customer numbers |
 | `POST /api/tax-rates/{id}/restore`, `POST /api/units/{id}/restore` | undo of the archiving `DELETE` |
 
 Customers have `supply_type` (`goods` or `services`, default `services`) and `customer_kind` (`business` or `consumer`, default `business`); for customers outside the EU they decide between tax category `G`, `O` (services to businesses) and the regular rate (services to consumers) (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) and changing the own password (`PUT /api/account/password`) are only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.

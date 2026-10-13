@@ -60,7 +60,7 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `list-field-definitions`, `save-field-definition` | Custom fields: list, create, change |
 | `list-templates`, `get-template`, `update-template` | Templates with their Liquid and CSS sources; built-in ones are read-only |
 | `render-template-preview` | Liquid errors with line, page count, missing fields and a text excerpt – never HTML |
-| `get-settings`, `update-organization` | Organization and document types; change the organization |
+| `get-settings`, `update-organization` | Organization, document types and customer numbering; change the organization |
 | `list-tax-rates-and-units`, `list-text-blocks` | Ids of tax rates and units for positions, reusable texts |
 
 ## Resources

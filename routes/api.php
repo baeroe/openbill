@@ -3,6 +3,7 @@
 use App\Http\Api\ApiMiddleware;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ApiTokensController;
+use App\Http\Controllers\Api\CustomerNumberPreviewController;
 use App\Http\Controllers\Api\DocumentPdfController;
 use App\Http\Controllers\Api\DocumentXmlController;
 use App\Http\Controllers\Api\FieldOrderController;
@@ -34,6 +35,7 @@ Route::middleware(ApiMiddleware::READ)->group(function (): void {
         ->name('api.uploads.show');
     Route::get('/organization/logo', [OrganizationLogoController::class, 'show'])->name('api.organization.logo');
     Route::get('/document-types/{type}/number-preview', NumberPreviewController::class)->name('api.document-types.number-preview');
+    Route::get('/customer-numbering/preview', CustomerNumberPreviewController::class)->name('api.customer-numbering.preview');
 });
 
 Route::middleware(ApiMiddleware::WRITE)->group(function (): void {

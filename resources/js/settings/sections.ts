@@ -1,12 +1,13 @@
-import { Building2, CircleUserRound, FileStack, KeyRound, Percent, TextQuote, UsersRound, type LucideIcon } from 'lucide-react';
+import { Building2, CircleUserRound, Contact, FileStack, KeyRound, Percent, TextQuote, UsersRound, type LucideIcon } from 'lucide-react';
 
 /** Same list as App\Http\Controllers\SettingsController::SECTIONS. */
-export const SETTINGS_SECTIONS = ['organization', 'document-types', 'taxes-units', 'text-blocks', 'users', 'api', 'account'] as const;
+export const SETTINGS_SECTIONS = ['organization', 'document-types', 'customers', 'taxes-units', 'text-blocks', 'users', 'api', 'account'] as const;
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
 export const SECTION_ICONS: Record<SettingsSection, LucideIcon> = {
     organization: Building2,
     'document-types': FileStack,
+    customers: Contact,
     'taxes-units': Percent,
     'text-blocks': TextQuote,
     users: UsersRound,

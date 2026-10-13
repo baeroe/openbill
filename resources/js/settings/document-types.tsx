@@ -5,16 +5,14 @@ import { useTextBlocks } from '@/api/master-data';
 import { saveDocumentType, useDocumentTypes, useNumberPreview, type DocumentTypeInput, type DocumentTypeSetting } from '@/api/settings';
 import { useTemplates } from '@/api/templates';
 import { DOCUMENT_TYPES, type ComplianceProfile, type DocumentType } from '@/api/types';
-import { Badge, ButtonLink, CardHead, Checkbox, ErrorState, Select, Skeleton, Tabs, TextInput, cx } from '@/components/ui';
+import { Badge, ButtonLink, CardHead, ErrorState, Select, Skeleton, Tabs, TextInput, cx } from '@/components/ui';
 import { SettingsCard } from './settings-card';
 import { ApiError, errorMessage } from '@/lib/api';
 import { useLeaveGuard } from '@/lib/hooks';
 import { path, t } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
+import { NumberingCard } from './numbering-card';
 import { SaveBar } from './save-bar';
-
-const PLACEHOLDERS = ['{YYYY}', '{YY}', '{MM}', '{0000}'] as const;
-const PLACEHOLDER_KEYS: Record<(typeof PLACEHOLDERS)[number], string> = { '{YYYY}': 'year_long', '{YY}': 'year_short', '{MM}': 'month', '{0000}': 'sequence' };
 
 export function DocumentTypeSettings() {
     const [type, setType] = useState<DocumentType>('invoice');
@@ -118,49 +116,15 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                 {profiles.length === 1 && <p className="mt-3 text-xs text-muted">{t('settings.profile_einvoice_only')}</p>}
             </SettingsCard>
 
-            <SettingsCard aria-labelledby="dt-numbering">
-                <CardHead titleId="dt-numbering" title={t('settings.numbering')} description={t('settings.numbering_text')} />
-                <div className="grid items-start gap-5 sm:grid-cols-[minmax(0,1fr)_15rem]">
-                    <div className="grid gap-4">
-                        <TextInput
-                            label={t('settings.pattern')}
-                            value={form.numbering.pattern}
-                            className="font-mono"
-                            error={errors['numbering.pattern']}
-                            onChange={(e) => setNumbering({ pattern: e.target.value })}
-                        />
-                        <div className="flex flex-wrap gap-1.5" aria-label={t('settings.placeholders')}>
-                            {PLACEHOLDERS.map((token) => (
-                                <button
-                                    key={token}
-                                    type="button"
-                                    onClick={() => setNumbering({ pattern: form.numbering.pattern + token })}
-                                    className="inline-flex h-[1.875rem] items-center gap-2 rounded-full bg-surface px-3 text-xs text-muted transition-colors hover:bg-accent-soft hover:text-accent"
-                                >
-                                    <code className="font-mono text-ink">{token}</code>
-                                    <span>{t(`settings.placeholder.${PLACEHOLDER_KEYS[token]}`)}</span>
-                                </button>
-                            ))}
-                        </div>
-                        <Checkbox label={t('settings.reset_yearly')} checked={form.numbering.reset_yearly} onChange={(e) => setNumbering({ reset_yearly: e.target.checked })} />
-                        <TextInput
-                            label={t('settings.next_value')}
-                            type="number"
-                            min={1}
-                            inputMode="numeric"
-                            value={form.numbering.next_value ?? ''}
-                            error={errors['numbering.next_value']}
-                            hint={t('settings.next_value_hint')}
-                            onChange={(e) => setNumbering({ next_value: e.target.value === '' ? undefined : Math.max(1, Math.trunc(Number(e.target.value))) })}
-                        />
-                    </div>
-                    <div aria-live="polite" className="grid gap-1 rounded-lg bg-accent-soft p-5">
-                        <span className="text-sm text-muted">{t('settings.next_number')}</span>
-                        <strong className="num text-2xl font-bold tracking-brand break-all text-accent">{preview.data?.valid ? preview.data.number : '–'}</strong>
-                        {preview.data?.message && <span className={preview.data.valid ? 'text-xs text-muted' : 'text-xs text-bad'}>{preview.data.message}</span>}
-                    </div>
-                </div>
-            </SettingsCard>
+            <NumberingCard
+                id="dt-numbering"
+                title={t('settings.numbering')}
+                description={t('settings.numbering_text')}
+                value={form.numbering}
+                errors={{ pattern: errors['numbering.pattern'], next_value: errors['numbering.next_value'] }}
+                preview={preview.data}
+                onChange={setNumbering}
+            />
 
             <SettingsCard aria-labelledby="dt-defaults">
                 <CardHead titleId="dt-defaults" title={t('settings.defaults')} description={t('settings.defaults_text')} />

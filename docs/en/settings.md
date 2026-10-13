@@ -1,6 +1,6 @@
 # Settings
 
-**Settings** holds your company, the document types and the master data. Everything here is also available through the REST API (except users and tokens).
+**Settings** holds your company, the document types, the customer numbers and the master data. Everything here is also available through the REST API (except users and tokens).
 
 ## Organization
 
@@ -15,6 +15,12 @@ The e-invoice profile needs the VAT ID or the register number; with reverse char
 Per type: the **compliance profile** (basic, or EN 16931 e-invoice for invoices and cancellations), the **number range** and the **defaults** for new documents (template, payment term, validity, intro and closing text).
 
 Number patterns use `{YYYY}`, `{YY}`, `{MM}` and a running number `{0000}` (as many digits as zeros). With “Start at 1 again every year” the pattern must contain the year. The preview next to the pattern comes from the server and shows the next number exactly as finalizing would assign it. “Next running number” continues an existing range; numbers already used are skipped.
+
+## Customers
+
+The **customer numbers**: a new customer whose number field stays empty gets the next number of this range; a number typed by hand is kept as it is. Patterns work like those of the document types (`{YYYY}`, `{YY}`, `{MM}`, `{0000}`, optional yearly reset by the date the customer is created); the number may be at most 32 characters long. Numbers that already exist – also those of deleted customers – are skipped, and the preview shows the number a new customer really gets. The form for a new customer shows it as placeholder.
+
+After an update the range continues the numbers handed out so far: the highest number from 1000 on of the form *prefix + digits* (for example `K-1004` → `K-{0000}` from 1005), otherwise `C-{0000}` from 1001.
 
 ## Taxes & units
 

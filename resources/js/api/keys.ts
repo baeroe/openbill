@@ -46,4 +46,7 @@ export const keys = {
     tokens: () => '/api/tokens',
     numberPreview: (type: DocumentType, pattern: string, resetYearly: boolean, nextValue: number | null) =>
         apiUrl(`/api/document-types/${type}/number-preview`, { pattern, reset_yearly: resetYearly ? 1 : 0, next_value: nextValue }),
+    customerNumbering: () => '/api/customer-numbering',
+    customerNumberPreview: (pattern: string, resetYearly: boolean, nextValue: number | null) =>
+        apiUrl('/api/customer-numbering/preview', { pattern, reset_yearly: resetYearly ? 1 : 0, next_value: nextValue }),
 };

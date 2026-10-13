@@ -24,6 +24,13 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.2.0
+
+- **Customer numbers are configurable:** new section Settings → Customers with a number range like the document types (placeholders `{YYYY}`, `{YY}`, `{MM}`, `{0000}`, optional yearly reset, next value, live preview). New customers without a number get the next number of this range; numbers typed by hand stay as they are. On update the range continues the numbers handed out so far (for example `K-1004` → `K-{0000}` from 1005, otherwise `C-{0000}` from 1001), so nothing changes until you change the pattern. Details: https://openbill.dev/en/settings#customers
+- REST API: `GET/PATCH /api/customer-numbering` and `GET /api/customer-numbering/preview`; the MCP tool `get-settings` also returns `customer_numbering`.
+- The next number shown in the document type settings now skips numbers that already exist, like finalizing does.
+- No changes to the compose files.
+
 ### 0.1.1
 
 - **Compose file changed:** openbill's port `7739` is now published on all addresses of the host (as `7739:8080`), not only on `127.0.0.1`. A reverse proxy in a container, like Nginx Proxy Manager in Dockge, can now forward to `<server>:7739` (before, it got `502 Bad Gateway`). Download `docker-compose.yml` or paste the new `docker-compose.standalone.yml` again. With `OPENBILL_BIND=127.0.0.1` in your `.env`, the port stays local. Hardening options: https://openbill.dev/en/reverse-proxy

@@ -16,7 +16,9 @@ use App\Support\Actor;
 use App\Support\DomainMapper;
 use App\Support\EventLog;
 use App\Support\FieldErrors;
+use App\Support\NumberRange;
 use App\Support\Text;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -115,11 +117,11 @@ final class SaveCustomer
                     $customer->{$key} = $key === 'country' ? strtoupper($value) : $value;
                 }
             }
-            // an empty number means "next number" for a new customer and "keep it" for an existing one
+            // an empty number means "next number of the customer range" for a new customer and "keep it" for an existing one
             if (($data['number'] ?? '') !== '') {
                 $customer->number = $data['number'];
             } elseif (! $customer->exists) {
-                $customer->number = $this->nextNumber();
+                $customer->number = NumberRange::customer()->allocate(CarbonImmutable::now());
             }
             $customer->save();
 
@@ -130,21 +132,6 @@ final class SaveCustomer
             // refresh: columns with database defaults (tax_treatment) are not on a new model otherwise
             return $customer->refresh()->load('contacts');
         }, 3);
-    }
-
-    /** Highest numeric customer number + 1, with its prefix ("K-1004" → "K-1005"); first customer "C-1001". */
-    private function nextNumber(): string
-    {
-        $max = 1000;
-        $prefix = 'C-';
-        foreach (Customer::withTrashed()->pluck('number') as $number) {
-            if (preg_match('/^(\D*)(\d+)$/', (string) $number, $m) === 1 && (int) $m[2] >= $max) {
-                $max = (int) $m[2];
-                $prefix = $m[1];
-            }
-        }
-
-        return $prefix.($max + 1);
     }
 
     /**

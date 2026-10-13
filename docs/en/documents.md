@@ -143,7 +143,7 @@ Every document opens in the editor: the form on the left, a live preview on the 
 A customer's page holds the master data, the **tax treatment** (domestic; EU with VAT ID, which means reverse charge; third country), the **Customer** kind (business or private person), for customers outside the EU **What you supply**, the customer's custom fields, the **contacts** and the customer's documents. Contacts are edited in a side panel; one of them is the default that new documents use. All changes, contacts included, are saved together with **Save**:
 
 - Mistakes are shown at the field they belong to (or at the contact), and nothing is saved until everything is valid.
-- Leading and trailing spaces are removed; an empty customer number gets the next free number.
+- Leading and trailing spaces are removed; an empty customer number gets the next number of the customer number range ([Settings](/en/settings#customers)).
 - Leaving the page with unsaved changes asks first.
 - A customer with finalized documents cannot be deleted.
 

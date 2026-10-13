@@ -3,6 +3,7 @@ import { AlertTriangle, FilePlus, MoreHorizontal, Pencil, Plus, Star, Trash2, Us
 import { useMemo, useState, type FormEvent } from 'react';
 import { deleteCustomer, saveCustomer, useCustomer } from '@/api/customers';
 import { useFieldDefinitions } from '@/api/fields';
+import { useCustomerNumbering } from '@/api/settings';
 import type { CustomerKind, SupplyType, TaxTreatment } from '@/api/types';
 import { ContactDrawer } from '@/components/customers/contact-drawer';
 import { CustomerDocuments } from '@/components/customers/customer-documents';
@@ -60,6 +61,8 @@ const focusFirstInvalid = () => requestAnimationFrame(() => document.querySelect
 
 function CustomerEditor({ id, initial }: { id: string | null; initial: CustomerDraft }) {
     const isNew = id === null;
+    // the number a new customer gets when the field stays empty
+    const nextNumber = useCustomerNumbering().data?.next_number;
     const customerFields = useFieldDefinitions('customer');
     const contactFields = useFieldDefinitions('contact');
     const openNewDocument = useNewDocument();
@@ -220,6 +223,7 @@ function CustomerEditor({ id, initial }: { id: string | null; initial: CustomerD
                                     path="number"
                                     className="num"
                                     value={draft.number}
+                                    placeholder={isNew ? nextNumber : undefined}
                                     hint={isNew ? t('customer.number_hint') : undefined}
                                     error={errors.number}
                                     onChange={(e) => set({ number: e.target.value })}

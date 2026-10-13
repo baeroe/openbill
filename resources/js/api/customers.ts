@@ -25,6 +25,8 @@ export async function saveCustomer(input: CustomerInput, id?: string): Promise<C
     await mutate(keys.customer(saved.id), saved, { revalidate: false });
     // lists, pickers ("New document") and the new customer's first page show the change
     void invalidate('/api/customers', [keys.customer(saved.id)]);
+    // a new customer without a number used the next one of the customer number range
+    if (!id) void mutate(keys.customerNumbering());
     return saved;
 }
 

@@ -5,6 +5,7 @@ import { appLayout } from '@/layouts/app-shell';
 import { path, t } from '@/lib/i18n';
 import { AccountSettings } from '@/settings/account';
 import { ApiSettings } from '@/settings/api-settings';
+import { CustomerSettings } from '@/settings/customers';
 import { DocumentTypeSettings } from '@/settings/document-types';
 import { OrganizationSettings } from '@/settings/organization';
 import { TaxesUnitsSettings } from '@/settings/taxes-units';
@@ -48,6 +49,8 @@ function renderSection(section: SettingsSection, canManageUsers: boolean, urls: 
             return <OrganizationSettings />;
         case 'document-types':
             return <DocumentTypeSettings />;
+        case 'customers':
+            return <CustomerSettings />;
         case 'taxes-units':
             return <TaxesUnitsSettings />;
         case 'text-blocks':

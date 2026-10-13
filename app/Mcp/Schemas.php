@@ -28,7 +28,7 @@ final class Schemas
         $name = $schema->string()->description('Company or person name');
 
         return [
-            'number' => $schema->string()->nullable()->description('Customer number; left out or null: the next free number'),
+            'number' => $schema->string()->nullable()->description('Customer number; left out or null: the next number of the customer number range (settings)'),
             'name' => $create ? $name->required() : $name,
             'street' => $schema->string()->nullable(),
             'zip' => $schema->string()->nullable(),

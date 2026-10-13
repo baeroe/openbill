@@ -13,7 +13,7 @@ use Inertia\Response;
 class SettingsController extends Controller
 {
     /** @var list<string> */
-    public const SECTIONS = ['organization', 'document-types', 'taxes-units', 'text-blocks', 'users', 'api', 'account'];
+    public const SECTIONS = ['organization', 'document-types', 'customers', 'taxes-units', 'text-blocks', 'users', 'api', 'account'];
 
     public function index(): RedirectResponse
     {

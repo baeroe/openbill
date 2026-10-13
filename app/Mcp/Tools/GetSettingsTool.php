@@ -6,6 +6,7 @@ use App\ApiResource\OrganizationResource;
 use App\Enums\DocumentType;
 use App\Mcp\Output;
 use App\Models\Organization;
+use App\State\Provider\CustomerNumberingProvider;
 use App\State\Provider\DocumentTypeProvider;
 use App\Support\Actor;
 use Laravel\Mcp\Request;
@@ -18,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('get-settings')]
 #[Title('Settings')]
-#[Description('The organization (the sender: address, VAT ID, register number, bank, taxation mode, custom fields) and the document types (compliance profile basic or en16931, default template and texts, payment term, validity, numbering with the next number).')]
+#[Description('The organization (the sender: address, VAT ID, register number, bank, taxation mode, custom fields) and the document types (compliance profile basic or en16931, default template and texts, payment term, validity, numbering with the next number) and the customer numbering (pattern and next number of new customers created without a number).')]
 #[IsReadOnly]
 #[IsOpenWorld(false)]
 final class GetSettingsTool extends OpenbillTool
@@ -31,6 +32,7 @@ final class GetSettingsTool extends OpenbillTool
                 fn (DocumentType $type): array => Output::resource(DocumentTypeProvider::resource($type)),
                 DocumentType::cases(),
             ),
+            'customer_numbering' => Output::resource(CustomerNumberingProvider::resource()),
         ]);
     }
 }

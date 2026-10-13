@@ -16,11 +16,12 @@ use App\Models\TextBlock;
 
 beforeEach(fn () => $this->withToken(apiToken(['api:read'])));
 
-it('returns the organization and the document types like the REST API', function () {
+it('returns the organization, the document types and the customer numbering like the REST API', function () {
     $settings = mcpJson(mcpTool(GetSettingsTool::class)->assertOk());
 
     expect($settings['organization'])->toBe($this->getJson('/api/organization')->json())
         ->and($settings['document_types'])->toBe($this->getJson('/api/document-types')->json())
+        ->and($settings['customer_numbering'])->toBe($this->getJson('/api/customer-numbering')->json())
         ->and(collect($settings['document_types'])->pluck('type')->all())->toBe(['offer', 'confirmation', 'invoice', 'cancellation']);
 });
 

@@ -35,6 +35,24 @@ test('document types: the number preview follows the pattern', async ({ page }) 
     await page.getByRole('button', { name: 'Discard' }).click();
 });
 
+test('customers: the customer number range numbers new customers', async ({ page }) => {
+    await page.goto('/en/settings/customers');
+    const before = (await apiGet(page, '/api/customer-numbering')) as { pattern: string; reset_yearly: boolean; next_value: number };
+
+    try {
+        await page.getByLabel('Pattern').fill('KD-{YY}-{000}');
+        await page.getByLabel('Next running number').fill('7');
+        await expect(page.getByText(/^KD-\d{2}-007$/)).toBeVisible();
+        await page.getByRole('button', { name: 'Save', exact: true }).click();
+        await expect(page.getByText('Customer numbers saved')).toBeVisible();
+
+        await page.goto('/en/customers/new');
+        await expect(page.getByLabel('Customer number')).toHaveAttribute('placeholder', /^KD-\d{2}-007$/);
+    } finally {
+        await apiPatch(page, '/api/customer-numbering', before);
+    }
+});
+
 test('taxes: archive with undo', async ({ page }) => {
     await page.goto('/en/settings/taxes-units');
     const first = page.getByRole('button', { name: /^Archive / }).first();

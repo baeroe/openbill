@@ -2,6 +2,7 @@
 
 use App\Actions\DeleteCustomer;
 use App\Actions\SaveCustomer;
+use App\Actions\UpdateCustomerNumbering;
 use App\Enums\DocumentType;
 use App\Enums\EventAction;
 use App\Enums\FieldScope;
@@ -13,6 +14,7 @@ use App\Models\Customer;
 use App\Models\Document;
 use App\Models\DocumentEvent;
 use App\Models\FieldDefinition;
+use App\Models\NumberSequence;
 use Illuminate\Validation\ValidationException;
 
 /** @return array<string, list<string>> */
@@ -44,10 +46,46 @@ it('creates a customer with contacts and exactly one default contact', function 
         ->and($customer->contacts->where('is_default', true)->pluck('first_name')->all())->toBe(['Mira']);
 });
 
-it('continues the highest customer number with its prefix', function () {
-    Customer::factory()->create(['number' => 'K-1004']);
+it('takes the next number of the customer number range and skips numbers typed by hand', function () {
+    NumberSequence::query()->where('doc_type', 'customer')->update(['pattern' => 'KD-{YY}-{000}', 'next_value' => 7]);
+    Customer::factory()->create(['number' => 'KD-26-007']);
+    $this->travelTo('2026-10-13 10:00:00');
 
-    expect(app(SaveCustomer::class)->handle(systemActor(), ['name' => 'Kulturwerk Elbinsel e. V.'])->number)->toBe('K-1005');
+    $save = fn (array $input): string => app(SaveCustomer::class)->handle(systemActor(), ['name' => 'Kulturwerk Elbinsel e. V.', ...$input])->number;
+
+    expect($save([]))->toBe('KD-26-008')
+        ->and($save(['number' => 'X-1']))->toBe('X-1')
+        ->and($save([]))->toBe('KD-26-009')
+        ->and(NumberSequence::query()->where('doc_type', 'customer')->whereNull('year')->value('next_value'))->toBe(10);
+});
+
+it('never hands out the number of a deleted customer again', function () {
+    NumberSequence::query()->where('doc_type', 'customer')->update(['pattern' => 'K-{0000}', 'next_value' => 5]);
+    Customer::factory()->create(['number' => 'K-0005'])->delete();
+
+    expect(app(SaveCustomer::class)->handle(systemActor(), ['name' => 'Fjord Analytics AB'])->number)->toBe('K-0006');
+});
+
+it('starts a new customer range every year with a yearly reset', function () {
+    app(UpdateCustomerNumbering::class)->handle(systemActor(), ['pattern' => '{YYYY}-{00}', 'reset_yearly' => true]);
+    $save = fn (): string => app(SaveCustomer::class)->handle(systemActor(), ['name' => 'Hotel Alpenglück'])->number;
+
+    $this->travelTo('2026-12-31 10:00:00');
+    $first = [$save(), $save()];
+    $this->travelTo('2027-01-02 10:00:00');
+
+    expect([...$first, $save()])->toBe(['2026-01', '2026-02', '2027-01']);
+});
+
+it('updates the customer number range and refuses broken patterns', function () {
+    $update = app(UpdateCustomerNumbering::class);
+    $update->handle(systemActor(), ['pattern' => 'K-{00000}', 'next_value' => 42]);
+
+    expect(app(SaveCustomer::class)->handle(systemActor(), ['name' => 'Hafenkontor Lindqvist GmbH'])->number)->toBe('K-00042')
+        ->and(array_keys(customerErrors(fn () => $update->handle(systemActor(), ['pattern' => 'K-'.'{YYYY}']))))->toBe(['pattern'])
+        ->and(array_keys(customerErrors(fn () => $update->handle(systemActor(), ['pattern' => 'K-{0000}', 'reset_yearly' => true]))))->toBe(['pattern'])
+        ->and(array_keys(customerErrors(fn () => $update->handle(systemActor(), ['pattern' => str_repeat('K', 30).'-{0000}']))))->toBe(['pattern'])
+        ->and(array_keys(customerErrors(fn () => $update->handle(systemActor(), ['next_value' => 0]))))->toBe(['next_value']);
 });
 
 it('makes the first contact the default when none is marked', function () {

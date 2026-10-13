@@ -143,7 +143,7 @@ Jedes Dokument öffnet sich im Editor: links das Formular, rechts eine Live-Vors
 Die Seite eines Kunden enthält die Stammdaten, die **Steuerbehandlung** (Inland; EU mit USt-ID, also Reverse Charge; Drittland), die **Kundenart** (Unternehmen oder Privatperson), bei Kunden außerhalb der EU die **Leistungsart**, die eigenen Felder des Kunden, die **Ansprechpartner** und seine Dokumente. Ansprechpartner bearbeitest du in einem Seitenpanel; einer davon ist der Standard, den neue Dokumente übernehmen. Alle Änderungen, auch die an Ansprechpartnern, speichert **Speichern** zusammen:
 
 - Fehler stehen am betroffenen Feld (oder am Ansprechpartner), und gespeichert wird erst, wenn alles gültig ist.
-- Leerzeichen am Anfang und Ende werden entfernt; eine leere Kundennummer bekommt die nächste freie Nummer.
+- Leerzeichen am Anfang und Ende werden entfernt; eine leere Kundennummer bekommt die nächste Nummer aus dem Kunden-Nummernkreis ([Einstellungen](/de/settings#kunden)).
 - Wer die Seite mit ungespeicherten Änderungen verlässt, wird vorher gefragt.
 - Kunden mit abgeschlossenen Dokumenten lassen sich nicht löschen.
 

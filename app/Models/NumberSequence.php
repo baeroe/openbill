@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\DocumentType;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
-/** year NULL: configuration of a number range; year set: counter of that year (yearly reset). */
+/**
+ * year NULL: configuration of a number range; year set: counter of that year (yearly reset). doc_type is the range key:
+ * a document type or "customer" (App\Support\NumberRange).
+ */
 class NumberSequence extends Model
 {
     use HasUlids;
@@ -19,7 +21,6 @@ class NumberSequence extends Model
     protected function casts(): array
     {
         return [
-            'doc_type' => DocumentType::class,
             'year' => 'integer',
             'next_value' => 'integer',
             'reset_yearly' => 'boolean',

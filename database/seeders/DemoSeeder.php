@@ -214,6 +214,8 @@ class DemoSeeder extends Seeder
                 NumberSequence::query()->create(['doc_type' => $type, 'year' => $year, 'pattern' => $pattern, 'next_value' => $next, 'reset_yearly' => true]);
             }
         }
+        // the demo customers are K-1001 … K-1004
+        NumberSequence::query()->create(['doc_type' => 'customer', 'year' => null, 'pattern' => 'K-{0000}', 'next_value' => 1005, 'reset_yearly' => false]);
     }
 
     /** @return array<string, array{customer: Customer, contact: Contact}> */

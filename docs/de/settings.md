@@ -1,6 +1,6 @@
 # Einstellungen
 
-Unter **Einstellungen** stehen deine Firma, die Dokumenttypen und die Stammdaten. Alles davon geht auch über die REST-API (außer Benutzer und Tokens).
+Unter **Einstellungen** stehen deine Firma, die Dokumenttypen, die Kundennummern und die Stammdaten. Alles davon geht auch über die REST-API (außer Benutzer und Tokens).
 
 ## Organisation
 
@@ -15,6 +15,12 @@ Das E-Rechnungs-Profil braucht die USt-ID oder die Registernummer; bei Reverse C
 Je Typ: das **Prüfprofil** (Basis oder E-Rechnung EN 16931 für Rechnungen und Stornos), der **Nummernkreis** und die **Vorgaben** für neue Dokumente (Template, Zahlungsziel, Gültigkeit, Einleitung und Schlusstext).
 
 Muster nutzen `{YYYY}`, `{YY}`, `{MM}` und eine laufende Nummer `{0000}` (so viele Stellen wie Nullen). Mit „Jedes Jahr wieder bei 1 anfangen“ muss das Muster das Jahr enthalten. Die Vorschau neben dem Muster kommt vom Server und zeigt die nächste Nummer genau so, wie sie beim Abschließen vergeben würde. „Nächste laufende Nummer“ setzt einen bestehenden Nummernkreis fort; schon vergebene Nummern werden übersprungen.
+
+## Kunden
+
+Die **Kundennummern**: Ein neuer Kunde, dessen Nummernfeld leer bleibt, bekommt die nächste Nummer dieses Kreises; eine von Hand eingetragene Nummer bleibt, wie sie ist. Muster funktionieren wie bei den Dokumenttypen (`{YYYY}`, `{YY}`, `{MM}`, `{0000}`, optional jedes Jahr neu nach dem Datum, an dem der Kunde angelegt wird); die Nummer darf höchstens 32 Zeichen lang sein. Vorhandene Nummern – auch die gelöschter Kunden – werden übersprungen, und die Vorschau zeigt die Nummer, die ein neuer Kunde wirklich bekommt. Das Formular für einen neuen Kunden zeigt sie als Platzhalter.
+
+Nach einem Update setzt der Kreis die bisher vergebenen Nummern fort: die höchste Nummer ab 1000 der Form *Präfix + Ziffern* (zum Beispiel `K-1004` → `K-{0000}` ab 1005), sonst `C-{0000}` ab 1001.
 
 ## Steuern & Einheiten
 

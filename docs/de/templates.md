@@ -112,7 +112,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `logo` | Logo als Data-URL, leer ohne Logo: `{% if org.logo != blank %}<img src="{{ org.logo }}">{% endif %}` |
 | `vat_id`, `tax_number` | USt-ID, Steuernummer |
 | `registration_id` | Registernummer, z. B. Handelsregister (`HRB 12345, Amtsgericht Hamburg`) |
-| `iban`, `bic`, `bank_name` | Bankverbindung |
+| `iban`, `bic`, `bank_name` | Bankverbindung wie eingegeben; `{{ org.iban \| iban }}` gibt die IBAN in Vierergruppen aus |
 | `email`, `phone`, `website` | Kontakt |
 | `taxation_mode`, `small_business` | `regular` oder `small_business`; `small_business` ist bei Kleinunternehmern (§ 19 UStG) `true` |
 | `locale` | Standardsprache |
@@ -136,6 +136,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `tax_breakdown` | Liste der Steuerzeilen mit `category`, `percent` (`"19"`), `net`, `tax`, `gross` |
 | `legal_notes` | Liste der gesetzlichen Hinweise (Kleinunternehmer, Reverse Charge, Drittland) |
 | `source_number` | Nummer des Dokuments, aus dem dieses entstanden ist (Angebot → Rechnung, Rechnung → Storno) |
+| `payment_qr` | GiroCode (EPC-QR-Code für SEPA-Überweisungen) als SVG-Data-URL, siehe [GiroCode](#girocode) |
 
 **`groups`** – die Positionsgruppen in Reihenfolge: `title`, `has_title` (`false` für Positionen ohne Gruppe), `total`, `optional_total`, `positions`.
 
@@ -169,6 +170,7 @@ Eigene Felder stehen direkt an ihrem Objekt, unter ihrem Schlüssel: `{{ documen
 | `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026`. Eine ganze Zahl gilt als Unix-Zeitstempel (Sekunden). |
 | `date: Format` | `{{ document.date \| date: "%d.%m.%Y" }}` | strftime-Muster wie beim Standardfilter `date` |
 | `nl2br` | `{{ document.intro \| nl2br }}` | Zeilenumbrüche werden zu `<br>` |
+| `iban` | `{{ org.iban \| iban }}` | `DE02 1203 0000 0000 2020 51` (Vierergruppen) |
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formate folgen der Dokumentsprache. Beträge werden kaufmännisch gerundet. `money` und `number` geben bei Werten, die keine Zahl sind, nichts aus. Ein unbekannter Filter ist ein Fehler.
@@ -210,6 +212,16 @@ In Liquid sind nur `nil` und `false` falsch: Ein leerer Text wie `""` gilt als *
 ```
 
 Werte, die statt eines Texts leer sind (`customer`, `contact`, Datumswerte, `source_number`), und Schalter (`is_text`, `has_title`) funktionieren mit einem einfachen `{% if %}`.
+
+### GiroCode
+
+`document.payment_qr` ist ein GiroCode (EPC-QR-Code nach EPC069-12), den Banking-Apps scannen, um eine SEPA-Überweisung auszufüllen: Empfänger `org.name` (höchstens 70 Zeichen), `org.iban`, `org.bic`, der Betrag `document.gross_total` und die Dokumentnummer als Verwendungszweck. Er ist eine Data-URL eines SVG-Bilds mit Ruhezone und kommt direkt in ein `<img>`:
+
+```liquid
+{% if document.payment_qr != blank %}<img src="{{ document.payment_qr }}" alt="" style="width: 18mm">{% endif %}
+```
+
+Befüllt ist er nur bei abgeschlossenen Rechnungen (keine Entwürfe, damit keine Entwurfsnummer im Code landet) mit einer Summe zwischen 0,01 und 999.999.999,99 und einer gültigen IBAN der Organisation; sonst ist er leer. Nach dem Abschließen entsteht er aus den eingefrorenen Stammdaten des Snapshots. Drucke ihn mit etwa 18 mm oder größer.
 
 ### Beträge vergleichen
 

@@ -112,7 +112,7 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 | `logo` | logo as data URL, empty when there is none: `{% if org.logo != blank %}<img src="{{ org.logo }}">{% endif %}` |
 | `vat_id`, `tax_number` | VAT ID, tax number |
 | `registration_id` | register number, e.g. the commercial register (`HRB 12345, Amtsgericht Hamburg`) |
-| `iban`, `bic`, `bank_name` | bank account |
+| `iban`, `bic`, `bank_name` | bank account as entered; `{{ org.iban \| iban }}` prints the IBAN in groups of four |
 | `email`, `phone`, `website` | contact |
 | `taxation_mode`, `small_business` | `regular` or `small_business`; `small_business` is `true` for small businesses (§ 19 UStG) |
 | `locale` | default language |
@@ -136,6 +136,7 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 | `tax_breakdown` | list of rows with `category`, `percent` (`"19"`), `net`, `tax`, `gross` |
 | `legal_notes` | list of legal notes (small business, reverse charge, third country) |
 | `source_number` | number of the document this one was created from (offer → invoice, invoice → cancellation) |
+| `payment_qr` | GiroCode (EPC QR code for SEPA transfers) as SVG data URL, see [GiroCode](#girocode) |
 
 **`groups`** – the item groups in order: `title`, `has_title` (`false` for items without group), `total`, `optional_total`, `positions`.
 
@@ -169,6 +170,7 @@ Custom fields sit directly on their object, with their key: `{{ document.project
 | `date` | `{{ document.date \| date }}` | `04.10.2026` / `Oct 4, 2026`. A whole number is read as Unix timestamp (seconds). |
 | `date: format` | `{{ document.date \| date: "%Y-%m-%d" }}` | strftime pattern like Liquid's standard `date` |
 | `nl2br` | `{{ document.intro \| nl2br }}` | line breaks become `<br>` |
+| `iban` | `{{ org.iban \| iban }}` | `DE02 1203 0000 0000 2020 51` (groups of four) |
 | `t` | `{{ 'total' \| t }}` | `Gesamt` / `Total` |
 
 Formats follow the document language. Amounts are rounded commercially. `money` and `number` print nothing for values that are not numbers. An unknown filter is an error.
@@ -210,6 +212,16 @@ In Liquid only `nil` and `false` are false: an empty text like `""` counts as **
 ```
 
 Values that are empty instead of texts (`customer`, `contact`, dates, `source_number`) and flags (`is_text`, `has_title`) work with a plain `{% if %}`.
+
+### GiroCode
+
+`document.payment_qr` is a GiroCode (EPC QR code after EPC069-12) that banking apps scan to fill in a SEPA transfer: recipient `org.name` (at most 70 characters), `org.iban`, `org.bic`, the amount `document.gross_total` and the document number as reference. It is a data URL of an SVG image with a quiet zone, so it goes straight into an `<img>`:
+
+```liquid
+{% if document.payment_qr != blank %}<img src="{{ document.payment_qr }}" alt="" style="width: 18mm">{% endif %}
+```
+
+It is filled only for invoices that are finalized (not drafts, so no draft number ends up in the code), have a total between 0.01 and 999,999,999.99 and an organization with a valid IBAN; otherwise it is empty. Once finalized it is built from the frozen master data of the snapshot. Print it at about 18 mm or larger.
 
 ### Comparing amounts
 

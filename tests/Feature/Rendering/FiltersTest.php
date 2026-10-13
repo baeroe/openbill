@@ -151,3 +151,9 @@ it('formats an integer as Unix timestamp like Liquid does (ledger phase 3)', fun
         ->and(liquid('{{ t | date: "%d.%m.%Y" }}', ['t' => 1791115200]))->toBe('04.10.2026')
         ->and(fn () => liquid('[{{ t | date }}]', ['t' => PHP_INT_MAX]))->not->toThrow(Throwable::class);
 });
+
+it('prints an IBAN in groups of four', function () {
+    expect(liquid('{{ s | iban }}', ['s' => 'de02 1203 00000000202051']))->toBe('DE02 1203 0000 0000 2020 51')
+        ->and(liquid('[{{ s | iban }}]', ['s' => '']))->toBe('[]')
+        ->and(liquid('[{{ s | iban }}]', ['s' => null]))->toBe('[]');
+});

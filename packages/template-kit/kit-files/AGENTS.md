@@ -37,8 +37,9 @@ pnpm run pack            # template package ZIP for Templates → Import ZIP (ne
 
 - **Amounts are strings** with a dot and two decimals (`"1130.50"`). Compare them with `>` or `<` only: `{% if document.optional_total > 0 %}`. Never `== 0` / `!= 0`: `"0.00" != 0` is true.
 - **Empty texts are true.** Only `nil` and `false` are false. Test texts that may be empty (logo, VAT ID, descriptions, intro, custom fields) with `!= blank`: `{% if org.logo != blank %}<img src="{{ org.logo }}">{% endif %}`.
+- **GiroCode:** `document.payment_qr` is an SVG data URL of an EPC QR code for finalized invoices, empty otherwise: `{% if document.payment_qr != blank %}<img src="{{ document.payment_qr }}" alt="">{% endif %}`.
 - **Values are already HTML-escaped.** Print them as they are; don't add `escape`.
-- **Filters:** `money` (`{{ document.gross_total | money }}`, `money: 4` for unit prices), `number: 2`, `date` / `date: "%Y-%m-%d"`, `nl2br` (intro, closing, descriptions), `t` for words in the document language (`{{ 'total' | t }}`, own words in `manifest.json` → `translations`). Formats follow the document language. An unknown filter is an error.
+- **Filters:** `money` (`{{ document.gross_total | money }}`, `money: 4` for unit prices), `number: 2`, `date` / `date: "%Y-%m-%d"`, `nl2br` (intro, closing, descriptions), `iban` (IBAN in groups of four), `t` for words in the document language (`{{ 'total' | t }}`, own words in `manifest.json` → `translations`). Formats follow the document language. An unknown filter is an error.
 - **Loops:** positions are read inside `{% for g in groups %}{% for p in g.positions %}` (or `{% for p in positions %}`). Text lines have `p.is_text`, optional items `p.is_optional`.
 - **Not available:** `{% render %}`, `{% include %}`, `{% tablerow %}`.
 - **Header and footer** are separate HTML documents as wide as the page and as high as their margin: `styles.css` does not apply there, put a `<style>` element into `header.liquid` / `footer.liquid` and set font sizes explicitly. Page numbers only there, written exactly `{{ page.number }}` and `{{ page.total }}`.

@@ -22,6 +22,8 @@ describe('expression', () => {
     it('wraps images and yes/no fields', () => {
         expect(expression('document', 'stamp', 'image')).toBe('{% if document.stamp != blank %}<img src="{{ document.stamp }}" alt="">{% endif %}');
         expect(expression('org', 'logo')).toBe('{% if org.logo != blank %}<img src="{{ org.logo }}" alt="">{% endif %}');
+        expect(expression('document', 'payment_qr')).toBe('{% if document.payment_qr != blank %}<img src="{{ document.payment_qr }}" alt="">{% endif %}');
+        expect(expression('org', 'iban')).toBe('{{ org.iban | iban }}');
         expect(expression('document', 'urgent', 'boolean')).toBe('{% if document.urgent %}{% endif %}');
     });
 

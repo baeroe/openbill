@@ -21,7 +21,7 @@ final class FilterPolicy
         // strings that grow by a product or a factor > 1
         'append', 'prepend', 'replace', 'replace_first', 'replace_last', 'join',
         'base64_encode', 'url_encode', 'escape', 'escape_once', 'newline_to_br', 'nl2br',
-        'upcase', 'downcase', 'capitalize', 'date',
+        'upcase', 'downcase', 'capitalize', 'date', 'iban',
         // arrays
         'split', 'concat',
         // numbers whose digits add up per call

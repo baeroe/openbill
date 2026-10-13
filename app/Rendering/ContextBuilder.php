@@ -2,11 +2,15 @@
 
 namespace App\Rendering;
 
+use App\Domain\Payment\EpcPayload;
+use App\Enums\DocumentStatus;
+use App\Enums\DocumentType;
 use App\Enums\PositionKind;
 use App\Enums\TaxationMode;
 use App\Models\Document;
 use App\Support\DocumentInspector;
 use App\Support\Text;
+use Brick\Math\BigDecimal;
 
 /**
  * Liquid context of a document (port of prototypes/clickdummy-v2/src/domain/templateContext.ts):
@@ -115,10 +119,33 @@ final class ContextBuilder
                 'tax_breakdown' => $summary['tax_breakdown'],
                 'legal_notes' => $summary['legal_notes'],
                 'source_number' => $document->source_id === null ? null : Document::query()->whereKey($document->source_id)->value('number'),
+                'payment_qr' => self::paymentQr($document, $org, $summary['gross']),
             ],
             'positions' => array_merge([], ...array_column($groups, 'positions')),
             'groups' => $groups,
         ], $totals);
+    }
+
+    /**
+     * GiroCode for finalized invoices with an amount due and an IBAN, '' otherwise (`!= blank` in templates).
+     * Built from the raw org values of the sources (the snapshot once finalized), so it is reproducible.
+     *
+     * @param  array<string, mixed>  $org
+     */
+    private static function paymentQr(Document $document, array $org, string $gross): string
+    {
+        if ($document->type !== DocumentType::Invoice || $document->status === DocumentStatus::Draft || $document->number === null) {
+            return '';
+        }
+        $payload = EpcPayload::build(
+            (string) ($org['name'] ?? ''),
+            (string) ($org['iban'] ?? ''),
+            (string) ($org['bic'] ?? ''),
+            BigDecimal::of($gross),
+            $document->number,
+        );
+
+        return $payload === null ? '' : PaymentQr::dataUrl($payload);
     }
 
     /**

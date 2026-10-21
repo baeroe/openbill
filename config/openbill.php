@@ -5,7 +5,7 @@ return [
      * The release version: MCP serverInfo.version and the "### X.Y.Z" section of docs/{en,de}/upgrading.md (ReleaseNotesTest).
      * Bump it together with the upgrading section before tagging vX.Y.Z.
      */
-    'version' => '0.3.0',
+    'version' => '0.3.1',
 
     /*
      * Owner account created on start by `php artisan app:ensure-admin`.

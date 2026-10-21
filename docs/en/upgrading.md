@@ -24,6 +24,14 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.3.1
+
+- **Security update:** PHP 8.4.27 fixes two critical remote code execution vulnerabilities in PHP itself (CVE-2026-109618, CVE-2026-109619) that can be exploited without logging in. Update now: https://www.php.net/archive/2026.php#2026-10-21-5
+- The image is now based on `serversideup/php` v5.0.2 (before: v4.5.1, PHP 8.4.23). It also brings nginx 1.30.6 with fixes for five nginx vulnerabilities.
+- `TRUSTED_PROXY=off`: nginx no longer rewrites the client IP itself, only `TRUSTED_PROXIES` decides about forwarded headers, as before. No change for setups with a reverse proxy in front: https://openbill.dev/en/reverse-proxy
+- Upgrade: `docker compose pull && docker compose up -d`
+- No changes to the compose files.
+
 ### 0.3.0
 
 - **GiroCode on invoices:** templates get `document.payment_qr`, an EPC QR code (SVG data URL) that banking apps scan to fill in the SEPA transfer: your organization name and IBAN/BIC, the total and the invoice number as reference. It is only filled for finalized invoices with a total above zero and an IBAN in the organization settings. The built-in templates do not print it; add it to your own template: https://openbill.dev/en/templates#girocode

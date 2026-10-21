@@ -89,7 +89,7 @@ The interface is English and German. Texts live in `lang/en.json` and `lang/de.j
 
 ## Docker image
 
-`Dockerfile` builds the image in two stages: `assets` (Node 24, pnpm from corepack, `pnpm build` for the app and the template kit) and `app` (`serversideup/php` 8.4 with nginx, extensions `intl`, `bcmath`, `gd`, `apcu`). `docker/entrypoint.d/99-openbill.sh` runs on every start: wait for the database, `APP_KEY`, migrations, built-in templates, owner account, caches.
+`Dockerfile` builds the image in two stages: `assets` (Node 24, pnpm from corepack, `pnpm build` for the app and the template kit) and `app` (`serversideup/php` 8.4 v5 with nginx, extensions `intl`, `bcmath`, `gd`, `apcu`; `TRUSTED_PROXY=off`, so only `TRUSTED_PROXIES` decides about forwarded headers). `docker/entrypoint.d/99-openbill.sh` runs on every start: wait for the database, `APP_KEY`, migrations, built-in templates, owner account, caches.
 
 ```bash
 docker build -t openbill:local .

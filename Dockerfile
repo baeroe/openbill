@@ -31,7 +31,7 @@ RUN pnpm build
 # ---------------------------------------------------------------------------------------------------------------------
 # app: PHP-FPM + nginx (serversideup), runs as www-data on port 8080
 # ---------------------------------------------------------------------------------------------------------------------
-FROM serversideup/php:8.4-fpm-nginx-v4.5.1@sha256:8e0864511c48a943b59c59c2845eb8de1dc402b6d549a3b2e0e45018f1b99567 AS app
+FROM serversideup/php:8.4.27-fpm-nginx-v5.0.2@sha256:579494c30b36935ce5f1d125f96499b7f14d6e74668bbe3229b8da188bc10de8 AS app
 
 LABEL org.opencontainers.image.title="openbill" \
       org.opencontainers.image.description="Self-hosted quotes and invoices with custom fields, Liquid templates and EN 16931 e-invoices." \
@@ -40,8 +40,12 @@ LABEL org.opencontainers.image.title="openbill" \
 
 # Template uploads carry up to 30 MB (config openbill.api.max_template_body_bytes): nginx and PHP must let them through
 # to LimitApiBody. Rendering may add 128 MB (openbill.rendering.max_memory_bytes) on top of the request: 512M.
+# TRUSTED_PROXY=off: nginx keeps the TCP peer as REMOTE_ADDR (serversideup v5 defaults to trusting Cloudflare), so
+# Laravel's TRUSTED_PROXIES stays the only place that decides about forwarded headers (docs/en/reverse-proxy.md).
+# OPcache (v5: no timestamp checks) is fine: the code is baked into the image, caches are built before PHP-FPM starts.
 ENV AUTORUN_ENABLED=false \
     SSL_MODE=off \
+    TRUSTED_PROXY=off \
     PHP_OPCACHE_ENABLE=1 \
     PHP_MEMORY_LIMIT=512M \
     PHP_POST_MAX_SIZE=32M \

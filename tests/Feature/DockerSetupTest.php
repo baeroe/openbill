@@ -57,6 +57,13 @@ it('builds assets and the template kit with pnpm from corepack, never npm', func
         ->and(preg_match('/(?<![\w-])npm\b|npx\b/', $dockerfile))->toBe(0);
 });
 
+it('pins the PHP version in the base image tag and leaves forwarded headers to TRUSTED_PROXIES', function () {
+    // serversideup v5 trusts Cloudflare and private networks in nginx by default and would rewrite REMOTE_ADDR
+    // before Laravel's TrustProxies sees the request.
+    expect(dockerRepoFile('Dockerfile'))->toMatch('/^FROM serversideup\/php:8\.4\.\d+-fpm-nginx-v\d+\.\d+\.\d+@/m')
+        ->and(dockerfileEnv('TRUSTED_PROXY'))->toBe('off');
+});
+
 it('installs the PHP extensions the app needs on top of the base image', function () {
     expect(dockerRepoFile('Dockerfile'))->toMatch('/install-php-extensions\s+intl\s+bcmath\s+gd\s+apcu/');
 });

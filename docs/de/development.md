@@ -89,7 +89,7 @@ Die Oberfläche gibt es auf Englisch und Deutsch. Texte stehen in `lang/en.json`
 
 ## Docker-Image
 
-`Dockerfile` baut das Image in zwei Stufen: `assets` (Node 24, pnpm über corepack, `pnpm build` für App und Template-Kit) und `app` (`serversideup/php` 8.4 mit nginx, Extensions `intl`, `bcmath`, `gd`, `apcu`). `docker/entrypoint.d/99-openbill.sh` läuft bei jedem Start: auf die Datenbank warten, `APP_KEY`, Migrationen, mitgelieferte Templates, Owner-Konto, Caches.
+`Dockerfile` baut das Image in zwei Stufen: `assets` (Node 24, pnpm über corepack, `pnpm build` für App und Template-Kit) und `app` (`serversideup/php` 8.4 v5 mit nginx, Extensions `intl`, `bcmath`, `gd`, `apcu`; `TRUSTED_PROXY=off`, damit nur `TRUSTED_PROXIES` über weitergeleitete Header entscheidet). `docker/entrypoint.d/99-openbill.sh` läuft bei jedem Start: auf die Datenbank warten, `APP_KEY`, Migrationen, mitgelieferte Templates, Owner-Konto, Caches.
 
 ```bash
 docker build -t openbill:local .

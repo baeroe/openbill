@@ -10,9 +10,9 @@
         "docs:screenshots": "DOCS_SCREENSHOTS=1 playwright test --project=docs-screenshots-en --project=docs-screenshots-de && ./optimize-screenshots.sh"
     },
     "devDependencies": {
-        "@playwright/test": "^1.64.0",
+        "@playwright/test": "^1.64.1",
         "@types/node": "^24.19.2",
         "typescript": "^7.0.2",
-        "unpdf": "^1.8.1"
+        "unpdf": "^1.9.1"
     }
 }

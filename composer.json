@@ -13,7 +13,7 @@
         "gotenberg/gotenberg-php": "^2.25",
         "horstoeko/zugferd": "^1.0.132",
         "inertiajs/inertia-laravel": "^3.5",
-        "keepsuit/liquid": "^0.12",
+        "keepsuit/liquid": "^0.13",
         "laravel/framework": "^13.17",
         "laravel/mcp": "^1.0",
         "laravel/sanctum": "^4.3",

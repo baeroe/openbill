@@ -3,6 +3,7 @@
 namespace App\EInvoice;
 
 use App\Domain\Totals\Totals;
+use App\Enums\DiscountType;
 use App\Enums\DocumentType;
 use App\Enums\PositionKind;
 use App\Enums\TaxCategory;
@@ -25,6 +26,9 @@ use LogicException;
  */
 final class CiiBuilder
 {
+    /** UNTDID 5189 allowance reason code "Discount" (BT-140). */
+    public const DISCOUNT_REASON_CODE = '95';
+
     /**
      * @param  array<string, mixed>  $sources  snapshot-shaped master data
      *
@@ -114,8 +118,21 @@ final class CiiBuilder
                     ->setDocumentPositionProductDetails($position->title, self::text($position->description))
                     ->setDocumentPositionNetPrice(CiiAmount::of($price, CiiAmount::UNIT))
                     ->setDocumentPositionQuantity($amount($quantity, CiiAmount::UNIT), $position->unit_id === null ? 'C62' : ($unitCodes[$position->unit_id] ?? 'C62'))
-                    ->addDocumentPositionTax($tax->category->value, 'VAT', $tax->category === TaxCategory::O ? null : CiiAmount::of($tax->percent, CiiAmount::AMOUNT))
-                    ->setDocumentPositionLineSummation($amount($total->net));
+                    ->addDocumentPositionTax($tax->category->value, 'VAT', $tax->category === TaxCategory::O ? null : CiiAmount::of($tax->percent, CiiAmount::AMOUNT));
+                if (! $total->discount->isZero()) {
+                    // BG-27 line allowance: BT-136 amount, BT-138 percentage on BT-137 base (percent only), BT-139/140
+                    // reason (BR-42) with code 95 "Discount"; it has the sign of the line, so BT-131 = base − allowance
+                    $percent = $position->discount_type === DiscountType::Percent;
+                    $cii->addDocumentPositionAllowanceCharge(
+                        $amount($total->discount),
+                        false,
+                        $percent ? CiiAmount::of((string) $position->discount_value, CiiAmount::AMOUNT) : null,
+                        $percent ? $amount($total->beforeDiscount) : null,
+                        self::DISCOUNT_REASON_CODE,
+                        Text::t('einvoice.discount', [], $document->locale),
+                    );
+                }
+                $cii->setDocumentPositionLineSummation($amount($total->net));
             }
         }
 

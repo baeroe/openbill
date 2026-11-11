@@ -111,7 +111,7 @@ Zusätzliche Endpunkte:
 
 Kunden haben `supply_type` (`goods` oder `services`, Standard `services`) und `customer_kind` (`business` oder `consumer`, Standard `business`); bei Kunden außerhalb der EU entscheiden sie zwischen Steuerkategorie `G`, `O` (Dienstleistungen an Unternehmen) und dem normalen Satz (Dienstleistungen an Privatpersonen) (siehe [E-Rechnung](/de/e-invoice#steuern)). Die Benutzerverwaltung (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) und das Ändern des eigenen Passworts (`PUT /api/account/password`) stehen nur der Sitzung der App offen, nie Tokens; deaktivierte Konten bekommen keine API-Tokens, ihre vorhandenen funktionieren nicht mehr.
 
-Ein Dokument in einer Liste hat die Kurzform (Nummer, Status, Kunde, Summen, Datumswerte). Abgeschlossene Rechnungen haben zusätzlich `open_amount`: die Bruttosumme abzüglich abgeschlossener (Teil-)Stornos, also was noch geschuldet ist, solange die Rechnung offen ist (`null` bei anderen Dokumenten und Entwürfen). Ein Storno muss mehr als 0 und höchstens diesen Betrag gutschreiben; sonst antwortet das Abschließen mit `compliance_failed` und dem Code `cancellation_not_credit` bzw. `cancellation_exceeds_invoice` am Pfad `positions`. `GET /api/documents/{id}` ergänzt Texte, eigene Felder, `groups` mit ihren Positionen, `totals` (netto, Steuer, brutto, Steueraufschlüsselung, Rechtshinweise) und bei Entwürfen `issues`: alles, was das Abschließen noch bemängeln würde.
+Ein Dokument in einer Liste hat die Kurzform (Nummer, Status, Kunde, Summen, Datumswerte). Abgeschlossene Rechnungen haben zusätzlich `open_amount`: die Bruttosumme abzüglich abgeschlossener (Teil-)Stornos, also was noch geschuldet ist, solange die Rechnung offen ist (`null` bei anderen Dokumenten und Entwürfen). Ein Storno muss mehr als 0 und höchstens diesen Betrag gutschreiben; sonst antwortet das Abschließen mit `compliance_failed` und dem Code `cancellation_not_credit` bzw. `cancellation_exceeds_invoice` am Pfad `positions`. `GET /api/documents/{id}` ergänzt Texte, eigene Felder, `groups` mit ihren Positionen, `totals` (netto, Steuer, brutto, Steueraufschlüsselung, Rechtshinweise, je Position der Zeilenbetrag vor und nach dem Rabatt) und bei Entwürfen `issues`: alles, was das Abschließen noch bemängeln würde.
 
 Der Filter `status` von `GET /api/documents` kennt zusätzlich `overdue`: offene Rechnungen, deren Fälligkeit überschritten ist. Überfällig ist kein eigener Status; Dokumente tragen ihn nie.
 
@@ -164,7 +164,8 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$CANCELLATION/finalize" |
   "groups": [
     {"id": "01J…", "title": "Workshop", "positions": [
       {"id": "01J…", "kind": "item", "title": "Discovery-Workshop", "description": "", "quantity": "8",
-       "unit_price": "120", "unit_id": "01J…", "tax_rate_id": "01J…", "custom": {"ticket": "OPS-12"}}
+       "unit_price": "120", "discount_type": "percent", "discount_value": "10",
+       "unit_id": "01J…", "tax_rate_id": "01J…", "custom": {"ticket": "OPS-12"}}
     ]},
     {"title": null, "positions": [{"kind": "text", "title": "Reisekosten werden gesondert berechnet."}]}
   ]
@@ -172,6 +173,8 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$CANCELLATION/finalize" |
 ```
 
 Eine Gruppe mit `"title": null` enthält lose Positionen (ohne Überschrift und Zwischensumme). `kind` ist `item`, `text` oder `optional` (nur in Angeboten). Ein abgeschlossenes Dokument antwortet mit `409 document_locked`.
+
+Der Rabatt einer Position ist `discount_type` (`percent` oder `amount`; `null` oder weggelassen: keiner) mit `discount_value` als String mit höchstens zwei Nachkommastellen: `"10"` zieht 10 % vom Zeilenbetrag ab, `"100"` macht die Zeile kostenlos, `{"discount_type": "amount", "discount_value": "50.00"}` zieht 50 Euro ab. Ein Prozentsatz über 100, ein negativer Wert oder ein Typ ohne Wert wird mit `422` an `groups.<g>.positions.<p>.discount_value` beantwortet; ein fester Betrag über dem Zeilenbetrag ist ein Issue (`discount_exceeds_line` an `positions.<id>.discount`), das das Abschließen verhindert. Textzeilen behalten nie einen Rabatt. In `totals.lines` hat jede Position `before_discount` (Menge × Einzelpreis), `discount` und `net` (= `before_discount` − `discount`); der Rabatt hat das Vorzeichen der Zeile, im Storno ist er also negativ.
 
 ## Vorschau
 

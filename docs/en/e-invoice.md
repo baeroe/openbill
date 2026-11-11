@@ -29,7 +29,9 @@ A finalized cancellation becomes a credit note (type code 381) with positive amo
 
 ## Discounts
 
-A discount is an item with a negative price. In the XML the price stays positive and the quantity carries the sign (EN 16931 forbids negative net prices); the line amount is the same.
+A discount on a position (percent or fixed amount, see [Documents](/en/documents#drafts)) becomes a line allowance (BG-27) of that line: allowance amount (BT-136), for a percentage also the percentage (BT-138) and the line amount it is taken from (BT-137), reason code `95` "Discount" (BT-140) and the reason "Discount"/"Rabatt" in the document language (BT-139). The net price (BT-146) stays the undiscounted unit price, and the line amount (BT-131) is the discounted line total, exactly as in the PDF. In a credit note (cancellation) the allowance has positive amounts like the rest of the credit note. A discount of 0 adds no allowance.
+
+A discount as a position of its own, with a negative price, still works: in the XML the price stays positive and the quantity carries the sign (EN 16931 forbids negative net prices); the line amount is the same.
 
 ## Taxes
 
@@ -59,7 +61,7 @@ The legal notes are also part of the XML as document notes.
 | service date (period) | delivery date (BT-72), invoicing period (BT-73/74) |
 | IBAN, BIC | SEPA credit transfer (payment means 58) |
 | due date | payment due date (BT-9) |
-| items | name, description, net price (4 decimals), quantity with UN/ECE unit code, tax category and rate, line amount |
+| items | name, description, net price (4 decimals), quantity with UN/ECE unit code, tax category and rate, discount as line allowance, line amount |
 | totals | sum of lines, tax basis, tax total, grand total, amount due |
 
 Text lines are not part of the XML; optional items only exist in offers.

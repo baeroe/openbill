@@ -18,7 +18,7 @@
       {% else %}
         <tr class="{% if p.is_optional %}optional{% endif %}">
           <td>{{ p.title }}{% if p.is_optional %} ({{ 'optional' | t }}){% endif %}{% if p.description != blank %}<span>{{ p.description }}</span>{% endif %}</td>
-          <td class="r q">{{ p.quantity | number: 2 }} {{ p.unit }} × {{ p.unit_price | money }}</td>
+          <td class="r q">{{ p.quantity | number: 2 }} {{ p.unit }} × {{ p.unit_price | money }}{% if p.has_discount %}<span>{{ p.total_before_discount | money }} − {% if p.discount_type == "percent" %}{{ p.discount_value }} %{% else %}{{ p.discount_value | money }}{% endif %} {{ 'discount' | t }}</span>{% endif %}</td>
           <td class="r">{{ p.total | money }}</td>
         </tr>
       {% endif %}

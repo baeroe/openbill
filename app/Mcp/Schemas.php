@@ -88,6 +88,10 @@ final class Schemas
                     'description' => $schema->string()->nullable(),
                     'quantity' => $schema->string()->description('Decimal as string, e.g. "8" or "1.5"'),
                     'unit_price' => $schema->string()->description('Net price as string, e.g. "120" or "49.90"'),
+                    'discount_type' => $schema->string()->enum(['percent', 'amount', null])->nullable()
+                        ->description('Discount of this position: percent (of quantity × unit_price) or amount (fixed, in EUR); null or left out: none'),
+                    'discount_value' => $schema->string()->nullable()
+                        ->description('With discount_type: "10" (percent, 0 to 100, "100" makes the line free) or "50.00" (amount, at most the line amount); at most 2 decimals'),
                     'unit_id' => $schema->string()->nullable()->description('Unit (list-tax-rates-and-units)'),
                     'tax_rate_id' => $schema->string()->nullable()->description('Tax rate (list-tax-rates-and-units)'),
                     'custom' => $schema->object()->description('Custom field values (scope position)'),

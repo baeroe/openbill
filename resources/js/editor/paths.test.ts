@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { ApiPosition } from '@/api/types';
 import { fieldErrors, issuePaths, violationPath } from './paths';
 
-const p = (id: string): ApiPosition => ({ id, kind: 'item', title: '', description: '', quantity: '1', unit_id: null, unit_price: '0', tax_rate_id: null, custom: {} });
+const p = (id: string): ApiPosition => ({ id, kind: 'item', title: '', description: '', quantity: '1', unit_id: null, unit_price: '0', discount_type: null, discount_value: null, tax_rate_id: null, custom: {} });
 const draft = { groups: [{ id: 'g1', title: 'Konzept', positions: [p('a'), p('b')] }, { id: 'g2', title: null, positions: [p('c')] }] };
 
 describe('violationPath', () => {
@@ -10,6 +10,8 @@ describe('violationPath', () => {
         expect(violationPath(draft, 'groups.0.positions.1.quantity')).toBe('positions.b.quantity');
         expect(violationPath(draft, 'groups.1.positions.0.unit_id')).toBe('positions.c.unit');
         expect(violationPath(draft, 'groups.0.positions.0.tax_rate_id')).toBe('positions.a.tax_rate');
+        expect(violationPath(draft, 'groups.0.positions.1.discount_value')).toBe('positions.b.discount_value');
+        expect(violationPath(draft, 'draft.groups.1.positions.0.discount_type')).toBe('positions.c.discount_type');
         expect(violationPath(draft, 'groups.0.positions.0.custom.ticket')).toBe('positions.a.custom.ticket');
         expect(violationPath(draft, 'draft.groups.0.positions.1.unit_price')).toBe('positions.b.unit_price');
     });

@@ -28,13 +28,15 @@ final readonly class Totals
     /**
      * JSON shape for render/autosave responses: every amount as a string.
      *
-     * @return array{lines: array<string, array{net: string, tax_percent: string|null, tax_category: string|null}>, groups: array<string, array{title: string|null, net: string, optional_net: string}>, tax_breakdown: list<array{category: string, percent: string, net: string, tax: string, gross: string}>, net: string, tax: string, gross: string, optional_net: string, legal_notes: list<string>, missing_tax_rate: list<string>}
+     * @return array{lines: array<string, array{net: string, before_discount: string, discount: string, tax_percent: string|null, tax_category: string|null}>, groups: array<string, array{title: string|null, net: string, optional_net: string}>, tax_breakdown: list<array{category: string, percent: string, net: string, tax: string, gross: string}>, net: string, tax: string, gross: string, optional_net: string, legal_notes: list<string>, missing_tax_rate: list<string>}
      */
     public function toArray(): array
     {
         return [
             'lines' => array_map(fn (LineTotal $l): array => [
                 'net' => (string) $l->net,
+                'before_discount' => (string) $l->beforeDiscount,
+                'discount' => (string) $l->discount,
                 'tax_percent' => $l->tax === null ? null : (string) $l->tax->percent->strippedOfTrailingZeros(),
                 'tax_category' => $l->tax?->category->value,
             ], $this->lines),

@@ -70,6 +70,8 @@ final class DocumentConverter
                     taxRateId: $p->taxRateId,
                     custom: self::pick($p->custom, FieldScope::Position, $target, $definitions, $dropped),
                     description: $p->description,
+                    // the discount keeps its value: it takes the sign of the (negated) line, so a cancellation mirrors it
+                    discount: $p->discount,
                 );
             }
             if ($positions !== [] || $group->title === null) {

@@ -50,10 +50,10 @@
           <tr class="note"><td colspan="4">{{ p.title }}</td></tr>
         {% else %}
           <tr class="{% if p.is_optional %}optional{% endif %}">
-            <td><b>{{ p.title }}</b>{% if p.is_optional %} · {{ 'optional' | t }}{% endif %}{% if p.description != blank %}<br><small>{{ p.description }}</small>{% endif %}</td>
+            <td><b>{{ p.title }}</b>{% if p.is_optional %} · {{ 'optional' | t }}{% endif %}{% if p.has_discount %}<span class="tag">−{% if p.discount_type == "percent" %}{{ p.discount_value }} %{% else %}{{ p.discount_value | money }}{% endif %}</span>{% endif %}{% if p.description != blank %}<br><small>{{ p.description }}</small>{% endif %}</td>
             <td class="r">{{ p.quantity | number: 2 }} {{ p.unit }}</td>
             <td class="r">{{ p.unit_price | money }}</td>
-            <td class="r">{{ p.total | money }}</td>
+            <td class="r">{% if p.has_discount %}<s class="was">{{ p.total_before_discount | money }}</s><br>{% endif %}{{ p.total | money }}</td>
           </tr>
         {% endif %}
       {% endfor %}

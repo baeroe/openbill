@@ -1,6 +1,6 @@
 import type { FieldScope, FieldType } from '@/api/types';
 
-const MONEY = new Set(['net_total', 'tax_total', 'gross_total', 'optional_total', 'unit_price', 'total']);
+const MONEY = new Set(['net_total', 'tax_total', 'gross_total', 'optional_total', 'unit_price', 'total', 'total_before_discount', 'discount_amount']);
 const DATES = new Set(['date', 'due_date', 'valid_until', 'service_date', 'service_date_end']);
 const TEXTS = new Set(['intro', 'closing']);
 

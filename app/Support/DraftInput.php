@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Domain\Fields\CustomValueValidator;
 use App\Domain\Fields\FieldRegistry;
+use App\Domain\Money\Decimal;
+use App\Enums\DiscountType;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
 use App\Enums\PositionKind;
@@ -65,6 +67,9 @@ final class DraftInput
             'groups.*.positions.*.description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'groups.*.positions.*.quantity' => ['sometimes', new DecimalString(4)],
             'groups.*.positions.*.unit_price' => ['sometimes', new DecimalString(4)],
+            'groups.*.positions.*.discount_type' => ['sometimes', 'nullable', Rule::enum(DiscountType::class)],
+            // percent or amount, both with at most two decimals (the e-invoice prints percentages with two)
+            'groups.*.positions.*.discount_value' => ['sometimes', 'nullable', new DecimalString(2)],
             'groups.*.positions.*.unit_id' => ['sometimes', 'nullable', 'string', Rule::exists('units', 'id')],
             'groups.*.positions.*.tax_rate_id' => ['sometimes', 'nullable', 'string', Rule::exists('tax_rates', 'id')],
             'groups.*.positions.*.custom' => ['sometimes', 'array'],
@@ -100,6 +105,12 @@ final class DraftInput
                 if ($position['kind'] === PositionKind::Optional->value && $document->type !== DocumentType::Offer) {
                     $messages[$path.'kind'][] = Text::t('errors.optional_only_offers');
                 }
+
+                [$discount, $message] = self::discount($position);
+                $data['groups'][$g]['positions'][$p] = [...$data['groups'][$g]['positions'][$p], ...$discount];
+                if ($message !== null) {
+                    $messages[$path.'discount_value'][] = $message;
+                }
             }
         }
 
@@ -115,5 +126,35 @@ final class DraftInput
         }
 
         return $data;
+    }
+
+    /**
+     * The discount of a position as it is stored: none for text lines or without a type (a lone value is dropped),
+     * otherwise type and value, a percentage 0–100 or an amount ≥ 0. Whether an amount fits the line is a compliance
+     * issue (discount_exceeds_line): quantity and price may still change while the draft is edited.
+     *
+     * @param  array<string, mixed>  $position  validated by rules()
+     * @return array{0: array{discount_type: string|null, discount_value: string|null}, 1: string|null}
+     */
+    private static function discount(array $position): array
+    {
+        $type = $position['discount_type'] ?? null;
+        if ($position['kind'] === PositionKind::Text->value || $type === null) {
+            return [['discount_type' => null, 'discount_value' => null], null];
+        }
+        $value = $position['discount_value'] ?? null;
+        $stored = ['discount_type' => $type, 'discount_value' => $value === null ? null : (string) $value];
+        if ($value === null) {
+            return [$stored, Text::t('errors.discount_value_missing')];
+        }
+        $decimal = Decimal::of($value);
+        if ($decimal->isNegative()) {
+            return [$stored, Text::t('errors.discount_negative')];
+        }
+        if ($type === DiscountType::Percent->value && $decimal->isGreaterThan(100)) {
+            return [$stored, Text::t('errors.discount_percent_range')];
+        }
+
+        return [$stored, null];
     }
 }

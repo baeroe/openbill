@@ -203,9 +203,10 @@ final class DocumentResource
         #[ApiProperty(writable: false, description: 'finalized invoices: gross total minus finalized (partial) cancellations, i.e. what is still owed while the invoice is open; null for other documents and drafts')]
         #[Groups([self::LIST, self::ITEM])]
         public ?string $open_amount,
+        #[ApiProperty(description: 'groups in order: {id, title (null: positions without a heading), positions: [{id, kind (item, optional, text), title, description, quantity, unit_id, unit_price, discount_type (percent, amount or null), discount_value (percent 0–100 or an amount, at most 2 decimals), tax_rate_id, custom}]}; quantities and amounts are decimal strings')]
         #[Groups([self::ITEM])]
         public array $groups,
-        #[ApiProperty(writable: false)]
+        #[ApiProperty(writable: false, description: 'computed by the server: lines by position id {net, before_discount, discount, tax_percent, tax_category} (net = before_discount − discount), groups by id {title, net, optional_net}, tax_breakdown, net, tax, gross, optional_net, legal_notes, missing_tax_rate')]
         #[Groups([self::ITEM])]
         public ?array $totals,
         #[ApiProperty(writable: false)]
@@ -286,6 +287,8 @@ final class DocumentResource
                 'quantity' => (string) $position->quantity,
                 'unit_id' => $position->unit_id,
                 'unit_price' => (string) $position->unit_price,
+                'discount_type' => $position->discount_type?->value,
+                'discount_value' => $position->discount_value === null ? null : (string) $position->discount_value,
                 'tax_rate_id' => $position->tax_rate_id,
                 'custom' => new ArrayObject($position->custom ?? []),
             ])->values()->all(),

@@ -33,9 +33,11 @@ final class TotalsCalculator
                     continue;
                 }
 
-                $net = Decimal::round2($p->quantity->multipliedBy($p->unitPrice));
+                $base = Decimal::round2($p->quantity->multipliedBy($p->unitPrice));
+                $discount = $p->discount?->amountOn($base) ?? Decimal::zero()->toScale(2);
+                $net = $base->minus($discount);
                 $tax = EffectiveTax::resolve($p->taxRateId, $ctx);
-                $lines[$p->id] = new LineTotal($p->id, $net, $tax);
+                $lines[$p->id] = new LineTotal($p->id, $net, $tax, $base, $discount);
 
                 if ($p->kind === PositionKind::Optional) {
                     $optionalNet = $optionalNet->plus($net);

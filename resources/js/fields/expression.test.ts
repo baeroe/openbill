@@ -12,6 +12,8 @@ describe('expression', () => {
         expect(expression('document', 'due_date')).toBe('{{ document.due_date | date }}');
         expect(expression('document', 'intro')).toBe('{{ document.intro | nl2br }}');
         expect(expression('position', 'quantity')).toBe('{{ p.quantity | number: 2 }}');
+        expect(expression('position', 'total_before_discount')).toBe('{{ p.total_before_discount | money }}');
+        expect(expression('position', 'discount_amount')).toBe('{{ p.discount_amount | money }}');
         expect(expression('document', 'project_name', 'text')).toBe('{{ document.project_name }}');
         expect(expression('customer', 'budget', 'money')).toBe('{{ customer.budget | money }}');
         expect(expression('position', 'month', 'date')).toBe('{{ p.month | date }}');

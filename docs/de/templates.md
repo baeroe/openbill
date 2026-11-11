@@ -12,7 +12,7 @@ openbill rendert jedes Dokument auf dem Server aus einem Template aus HTML, CSS 
 | Kante | markant: kräftiger Farbblock, große Summe, starke Linien |
 | Leise | minimal: viel Weißraum, Serifenschrift, Haarlinien |
 
-Die mitgelieferten Templates können Deutsch und Englisch (sie folgen der Sprache des Dokuments) und zeigen Zwischensummen der Gruppen, optionale Positionen, Steuerzeilen, gesetzliche Hinweise und Seitenzahlen. Sie sind schreibgeschützt und werden mit openbill aktualisiert (`php artisan migrate` legt sie an, `php artisan app:sync-templates` bringt sie auf den neuesten Stand). Zum Anpassen duplizierst du es (Templates → Duplizieren) und bearbeitest die Kopie.
+Die mitgelieferten Templates können Deutsch und Englisch (sie folgen der Sprache des Dokuments) und zeigen Zwischensummen der Gruppen, optionale Positionen, Rabatte an ihrer Position (den Betrag vor dem Rabatt und „Rabatt −10 %“ bzw. „−50,00 €“), Steuerzeilen, gesetzliche Hinweise und Seitenzahlen. Sie sind schreibgeschützt und werden mit openbill aktualisiert (`php artisan migrate` legt sie an, `php artisan app:sync-templates` bringt sie auf den neuesten Stand). Zum Anpassen duplizierst du es (Templates → Duplizieren) und bearbeitest die Kopie.
 
 ## Welches Template ein Dokument nutzt
 
@@ -150,8 +150,13 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `quantity` | Menge ohne Nullen am Ende (`"10"`, `"1.5"`) |
 | `unit`, `unit_name`, `unit_code` | Kürzel (`Std.`), Name (`Stunde`), UN/ECE-Code (`HUR`) |
 | `unit_price` | Einzelpreis, mindestens zwei Nachkommastellen (`"95.00"`, `"12.3456"`) |
+| `has_discount` | `true`, wenn die Zeile einen Rabatt hat, der ihren Betrag ändert |
+| `discount_type` | `percent` oder `amount`; leer ohne Rabatt |
+| `discount_value` | der Rabatt wie eingegeben: Prozentsatz ohne Nullen am Ende (`"10"`, `"12.5"`) oder Betrag (`"50.00"`); leer ohne Rabatt |
+| `discount_amount` | was der Rabatt von der Zeile abzieht (`"17.00"`, `"0.00"` ohne Rabatt; im Storno negativ wie die Zeile) |
+| `total_before_discount` | Menge × Einzelpreis, auf Cent gerundet (ohne Rabatt gleich `total`) |
 | `tax_percent` | Steuersatz (`"19"`) |
-| `total` | Nettobetrag der Zeile |
+| `total` | Nettobetrag der Zeile nach Rabatt |
 | `group` | Titel der Gruppe (leer bei Positionen ohne Gruppe) |
 
 **`page`** – nur in `header.liquid` und `footer.liquid`: `{{ page.number }}` und `{{ page.total }}` (siehe Seitenplatzhalter).
@@ -187,7 +192,7 @@ Alle Texte im Kontext sind vor dem Rendern genau einmal HTML-escaped. Deshalb:
 
 ### Wörter in der Dokumentsprache (`t`)
 
-`{{ 'key' | t }}` sucht das Wort zuerst in `translations` deines Manifests (Dokumentsprache), dann im Vokabular von openbill, sonst wird der Schlüssel ausgegeben. Vokabular von openbill: `amount_due`, `credit`, `customer_number`, `date`, `details`, `draft`, `due_date`, `for`, `net`, `number`, `number_short`, `of`, `offer_total`, `optional`, `optional_total`, `page`, `pos`, `price`, `project`, `quantity`, `reference`, `service`, `service_date`, `subtotal`, `sum`, `tax_number`, `total`, `unit_price`, `valid_until`, `vat`, `vat_id`, `vat_long`, `vat_on`.
+`{{ 'key' | t }}` sucht das Wort zuerst in `translations` deines Manifests (Dokumentsprache), dann im Vokabular von openbill, sonst wird der Schlüssel ausgegeben. Vokabular von openbill: `amount_due`, `credit`, `customer_number`, `date`, `details`, `discount`, `draft`, `due_date`, `for`, `net`, `number`, `number_short`, `of`, `offer_total`, `optional`, `optional_total`, `page`, `pos`, `price`, `project`, `quantity`, `reference`, `service`, `service_date`, `subtotal`, `sum`, `tax_number`, `total`, `unit_price`, `valid_until`, `vat`, `vat_id`, `vat_long`, `vat_on`.
 
 ### Seitenplatzhalter
 
@@ -227,6 +232,15 @@ Befüllt ist er nur bei abgeschlossenen Rechnungen (keine Entwürfe, damit keine
 
 Beträge sind Strings. Vergleiche sie mit `>` oder `<`, die Zahlen vergleichen: `{% if document.optional_total > 0 %}`. Nutze `== 0` oder `!= 0` nicht mit Beträgen: `"0.00" != 0` ist in Liquid wahr.
 
+### Rabatte
+
+Eine Position mit Rabatt behält ihren `unit_price`; `total` ist schon der rabattierte Betrag. Prüfe `has_discount` (nicht `discount_amount`, siehe oben) und zeig, was du möchtest, zum Beispiel den Betrag vor dem Rabatt und den Rabatt selbst, wie die mitgelieferten Templates:
+
+```liquid
+<td>{{ p.title }}{% if p.has_discount %}<br>{{ 'discount' | t }} −{% if p.discount_type == "percent" %}{{ p.discount_value }} %{% else %}{{ p.discount_value | money }}{% endif %}{% endif %}</td>
+<td>{% if p.has_discount %}<s>{{ p.total_before_discount | money }}</s><br>{% endif %}{{ p.total | money }}</td>
+```
+
 ## Grenzen und Fehler
 
 Ein Template kann openbill weder kaputt machen noch blockieren:
@@ -246,7 +260,7 @@ Jeder Fehler wird mit **Bereich** (`header`, `body`, `footer`, `css`, `manifest`
 
 ## Beispieldaten
 
-Für Vorschauen ohne echtes Dokument hat openbill fünf Szenarien: `short_invoice`, `long_invoice` (mehrseitig, Gruppen), `small_business`, `reverse_charge` und `offer_with_options`. Sie nutzen deine Organisation (auf einer frischen Installation die fiktive Firma Studio Nordlicht), einen fiktiven Kunden, feste Daten und Beispielwerte für deine eigenen Felder. Als PDF auf der Kommandozeile:
+Für Vorschauen ohne echtes Dokument hat openbill fünf Szenarien: `short_invoice`, `long_invoice` (mehrseitig, Gruppen, zwei rabattierte Zeilen), `small_business`, `reverse_charge` und `offer_with_options`. Sie nutzen deine Organisation (auf einer frischen Installation die fiktive Firma Studio Nordlicht), einen fiktiven Kunden, feste Daten und Beispielwerte für deine eigenen Felder. Als PDF auf der Kommandozeile:
 
 ```bash
 php artisan app:render-sample klar long_invoice --locale=de

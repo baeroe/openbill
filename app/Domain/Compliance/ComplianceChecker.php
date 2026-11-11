@@ -4,6 +4,7 @@ namespace App\Domain\Compliance;
 
 use App\Domain\Fields\FieldDefinitionData;
 use App\Domain\Fields\FieldRegistry;
+use App\Domain\Money\Decimal;
 use App\Domain\Totals\PositionInput;
 use App\Enums\ComplianceProfile;
 use App\Enums\CustomerKind;
@@ -49,6 +50,15 @@ final class ComplianceChecker
             }
             if ($p->unitId === null || ! array_key_exists($p->unitId, $in->unitCodes)) {
                 $issues[] = new ComplianceIssue("positions.{$p->id}.unit", ComplianceRule::UnitMissing, $title);
+            }
+        }
+
+        // optional positions too: their discounted amount is shown in the offer
+        foreach ($in->groups as $group) {
+            foreach ($group->positions as $p) {
+                if ($p->kind !== PositionKind::Text && $p->discount?->exceeds(Decimal::round2($p->quantity->multipliedBy($p->unitPrice))) === true) {
+                    $issues[] = new ComplianceIssue("positions.{$p->id}.discount", ComplianceRule::DiscountExceedsLine, ['title' => self::title($p)]);
+                }
             }
         }
 

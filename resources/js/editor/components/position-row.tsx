@@ -1,12 +1,13 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AlignLeft, CircleDashed, GripVertical, ListPlus, MoreHorizontal, Package, Trash2 } from 'lucide-react';
+import { AlignLeft, CircleDashed, GripVertical, ListPlus, MoreHorizontal, Package, Percent, Trash2, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import type { ApiPosition, DocumentType, FieldDefinition, PositionKind, TaxRate, Unit } from '@/api/types';
+import type { ApiPosition, DiscountType, DocumentType, FieldDefinition, PositionKind, TaxRate, Unit } from '@/api/types';
 import { CustomFieldInput } from '@/components/custom-field-input';
 import { Button, cx, Menu, MenuItem, MenuLabel, MenuRadioGroup, MenuRadioItem, MenuSeparator, SelectControl, Tag } from '@/components/ui';
 import { formatMoney } from '@/lib/format';
 import { t } from '@/lib/i18n';
+import { focusAfterMenu, focusSoon } from '../focus';
 import { DecimalCell } from './decimal-cell';
 import { TitleAutocomplete } from './title-autocomplete';
 
@@ -20,12 +21,15 @@ export type PositionRowProps = {
     fields: FieldDefinition[];
     /** Line net from the server (render answer); undefined while unknown. */
     net: string | undefined;
+    /** Line amount before the discount, from the server like net. */
+    beforeDiscount: string | undefined;
     readOnly: boolean;
     smallBusiness: boolean;
     messages: Record<string, string>;
     autoFocus: boolean;
     onChange(patch: Partial<ApiPosition>): void;
     onKind(kind: PositionKind): void;
+    onDiscount(type: DiscountType | null): void;
     onRemove(): void;
     onEnter(): void;
 };
@@ -62,7 +66,7 @@ export function SortablePositionRow(props: PositionRowProps) {
     );
 }
 
-export function PositionRow({ position: p, docType, taxRates, units, fields, net, readOnly, smallBusiness, messages, autoFocus, onChange, onKind, onRemove, onEnter, handle }: PositionRowProps & { handle: ReactNode }) {
+export function PositionRow({ position: p, docType, taxRates, units, fields, net, beforeDiscount, readOnly, smallBusiness, messages, autoFocus, onChange, onKind, onDiscount, onRemove, onEnter, handle }: PositionRowProps & { handle: ReactNode }) {
     const [showFields, setShowFields] = useState(false);
     const isText = p.kind === 'text';
     const path = (key: string) => `positions.${p.id}.${key}`;
@@ -72,6 +76,8 @@ export function PositionRow({ position: p, docType, taxRates, units, fields, net
     const unitOptions = choices(units, p.unit_id);
     const rateOptions = choices(taxRates, p.tax_rate_id);
     const archived = (label: string, item: { archived_at: string | null } | undefined) => (item?.archived_at ? t('editor.archived', { label }) : label);
+    const discountInput = () => document.querySelector<HTMLInputElement>(`[data-path="${path('discount_value')}"] input`);
+    const priceInput = () => document.querySelector<HTMLInputElement>(`[data-path="${path('unit_price')}"] input`);
 
     return (
         <div
@@ -79,6 +85,7 @@ export function PositionRow({ position: p, docType, taxRates, units, fields, net
             className={cx(
                 'ed-pos rounded-md py-1 pr-2 pl-1 transition-colors hover:bg-[color-mix(in_srgb,var(--surface)_70%,transparent)] focus-within:bg-[color-mix(in_srgb,var(--surface)_70%,transparent)]',
                 isText && 'ed-pos--text',
+                !isText && p.discount_type !== null && 'ed-pos--discount',
                 smallBusiness && 'ed-no-tax',
             )}
         >
@@ -211,12 +218,73 @@ export function PositionRow({ position: p, docType, taxRates, units, fields, net
                             ))}
                         </MenuRadioGroup>
                         <MenuSeparator />
+                        {!isText &&
+                            (p.discount_type === null ? (
+                                <MenuItem
+                                    icon={<Percent />}
+                                    onSelect={() => {
+                                        onDiscount('percent');
+                                        focusAfterMenu(discountInput);
+                                    }}
+                                >
+                                    {t('editor.discount_add')}
+                                </MenuItem>
+                            ) : (
+                                <MenuItem
+                                    icon={<X />}
+                                    onSelect={() => {
+                                        onDiscount(null);
+                                        focusAfterMenu(priceInput);
+                                    }}
+                                >
+                                    {t('editor.discount_remove')}
+                                </MenuItem>
+                            ))}
                         <MenuItem danger icon={<Trash2 />} onSelect={onRemove}>
                             {t('editor.position_remove')}
                         </MenuItem>
                     </Menu>
                 )}
             </div>
+            {!isText && p.discount_type !== null && (
+                <div className="ed-pos__discount flex flex-wrap items-center gap-2 pl-3" data-path={path('discount')}>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted [&_svg]:size-3">
+                        <Percent aria-hidden />
+                        {t('editor.discount')}
+                    </span>
+                    <DecimalCell
+                        className="w-28"
+                        value={p.discount_value ?? '0'}
+                        onCommit={(discount_value) => onChange({ discount_value })}
+                        label={t('editor.discount_value')}
+                        disabled={readOnly}
+                        error={messages[path('discount_value')] ?? messages[path('discount')]}
+                        path={path('discount_value')}
+                        scale={2}
+                        minFraction={p.discount_type === 'amount' ? 2 : 0}
+                        suffix={p.discount_type === 'percent' ? '%' : '€'}
+                    />
+                    <SelectControl className="w-20" value={p.discount_type} disabled={readOnly} aria-label={t('editor.discount_type')} onChange={(e) => onDiscount(e.target.value as DiscountType)}>
+                        <option value="percent">%</option>
+                        <option value="amount">€</option>
+                    </SelectControl>
+                    {beforeDiscount !== undefined && <span className="num text-sm text-muted">{t('editor.discount_of', { amount: formatMoney(beforeDiscount) })}</span>}
+                    {!readOnly && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            iconOnly
+                            icon={<X />}
+                            onClick={() => {
+                                onDiscount(null);
+                                focusSoon(priceInput);
+                            }}
+                        >
+                            {t('editor.discount_remove')}
+                        </Button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

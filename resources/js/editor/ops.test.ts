@@ -11,6 +11,8 @@ const position = (id: string, title = id, extra: Partial<ApiPosition> = {}): Api
     quantity: '1',
     unit_id: 'unit-h',
     unit_price: '100',
+    discount_type: null,
+    discount_value: null,
     tax_rate_id: 'rate-19',
     custom: {},
     ...extra,
@@ -54,7 +56,7 @@ describe('newPosition', () => {
         const item = ops.newPosition('item', defaults);
         const text = ops.newPosition('text', defaults);
 
-        expect(item).toMatchObject({ kind: 'item', quantity: '1', unit_price: '0', unit_id: 'unit-h', tax_rate_id: 'rate-19', custom: { ticket: null } });
+        expect(item).toMatchObject({ kind: 'item', quantity: '1', unit_price: '0', discount_type: null, discount_value: null, unit_id: 'unit-h', tax_rate_id: 'rate-19', custom: { ticket: null } });
         expect(text).toMatchObject({ kind: 'text', quantity: '0', unit_price: '0', unit_id: null, tax_rate_id: null, custom: {} });
         expect(ops.isLocalId(item.id)).toBe(true);
     });
@@ -102,6 +104,41 @@ describe('positions', () => {
 
         const optional = ops.setPositionKind(base, 'b', 'optional', defaults);
         expect(optional.groups[0].positions[1]).toMatchObject({ kind: 'optional', quantity: '1', unit_price: '100' });
+    });
+
+    it('drops the discount when a position becomes a text line', () => {
+        const discounted = ops.setPositionDiscount(base, 'a', 'percent');
+        const text = ops.setPositionKind(discounted, 'a', 'text', defaults);
+
+        expect(text.groups[0].positions[0]).toMatchObject({ kind: 'text', discount_type: null, discount_value: null });
+    });
+
+    it('adds, switches and removes a discount', () => {
+        const added = ops.setPositionDiscount(base, 'a', 'percent');
+        expect(added.groups[0].positions[0]).toMatchObject({ discount_type: 'percent', discount_value: '0' });
+        expect(added.groups[1]).toBe(base.groups[1]);
+
+        const typed = ops.updatePosition(added, 'a', { discount_value: '12.5' });
+        expect(ops.setPositionDiscount(typed, 'a', 'amount').groups[0].positions[0]).toMatchObject({ discount_type: 'amount', discount_value: '12.5' });
+        expect(ops.setPositionDiscount(typed, 'a', 'percent')).toBe(typed);
+
+        const removed = ops.setPositionDiscount(typed, 'a', null);
+        expect(removed.groups[0].positions[0]).toMatchObject({ discount_type: null, discount_value: null });
+        expect(ops.setPositionDiscount(removed, 'a', null)).toBe(removed);
+    });
+
+    it('starts a percentage at 0 when the amount cannot be one', () => {
+        const amount = (value: string) => ops.updatePosition(ops.setPositionDiscount(base, 'a', 'amount'), 'a', { discount_value: value });
+        const percent = (value: string) => ops.setPositionDiscount(amount(value), 'a', 'percent').groups[0].positions[0].discount_value;
+
+        expect(['0', '99.99', '100', '100.00', '007'].map(percent)).toEqual(['0', '99.99', '100', '100.00', '007']);
+        expect(['100.5', '250', '1000', '-1'].map(percent)).toEqual(['0', '0', '0', '0']);
+    });
+
+    it('gives text lines no discount', () => {
+        const withText = ops.addPosition(base, 'g1', position('t', 'Hinweis', { kind: 'text' }));
+        expect(ops.setPositionDiscount(withText, 't', 'percent')).toBe(withText);
+        expect(ops.setPositionDiscount(base, 'missing', 'percent')).toBe(base);
     });
 
     it('moves within a group, across groups and clamps the index', () => {

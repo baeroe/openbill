@@ -297,12 +297,14 @@ export function GroupsEditor({ draft, totals, smallBusiness, readOnly, messages,
                                         units={units}
                                         fields={fields}
                                         net={(totals?.lines[position.id] ?? totals?.lines[keyOf(position.id)])?.net}
+                                        beforeDiscount={(totals?.lines[position.id] ?? totals?.lines[keyOf(position.id)])?.before_discount}
                                         readOnly={readOnly}
                                         smallBusiness={smallBusiness}
                                         messages={rowMessages}
                                         autoFocus={focusId === position.id}
                                         onChange={(patch) => update((d) => ops.updatePosition(d, position.id, patch))}
                                         onKind={(kind) => update((d) => ops.setPositionKind(d, position.id, kind, defaults))}
+                                        onDiscount={(type) => update((d) => ops.setPositionDiscount(d, position.id, type))}
                                         onRemove={() => removePosition(position)}
                                         onEnter={() => {
                                             if (i === group.positions.length - 1) addPosition(group.id, position.id);

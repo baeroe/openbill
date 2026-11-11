@@ -14,7 +14,7 @@ final class FieldRegistry
         'customer' => ['number', 'name', 'street', 'zip', 'city', 'country', 'email', 'vat_id', 'tax_treatment', 'kind', 'locale'],
         'contact' => ['salutation', 'first_name', 'last_name', 'full_name', 'position', 'email', 'phone'],
         'document' => ['number', 'date', 'type_label', 'status', 'due_date', 'valid_until', 'service_date', 'service_date_end', 'intro', 'closing', 'net_total', 'tax_total', 'gross_total', 'optional_total', 'tax_breakdown', 'legal_notes', 'source_number', 'payment_qr', 'locale'],
-        'position' => ['index', 'title', 'description', 'quantity', 'unit', 'unit_code', 'unit_price', 'tax_percent', 'total', 'is_optional', 'is_text', 'group'],
+        'position' => ['index', 'title', 'description', 'quantity', 'unit', 'unit_code', 'unit_price', 'has_discount', 'discount_type', 'discount_value', 'discount_amount', 'total_before_discount', 'tax_percent', 'total', 'is_optional', 'is_text', 'group'],
     ];
 
     /** @var array<string, list<string>> */

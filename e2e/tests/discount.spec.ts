@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { fillRow, newDocument, settle } from './editor-helpers';
-import { apiGet } from './helpers';
+import { apiDelete, apiGet } from './helpers';
 
 type Position = { discount_type: 'percent' | 'amount' | null; discount_value: string | null };
 type Doc = { net_total: string; groups: { positions: Position[] }[]; issues: { code: string }[] };
@@ -60,4 +60,7 @@ test('discount per position: percent, amount, too large, removed', async ({ page
     await expect(value).toBeHidden();
     doc = (await apiGet(page, `/api/documents/${id}`)) as Doc;
     expect(doc.groups[0].positions[0]).toMatchObject({ discount_type: null, discount_value: null });
+
+    // the document list specs count the demo invoices: leave none behind
+    await apiDelete(page, `/api/documents/${id}`);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DiscountType;
 use App\Enums\PositionKind;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +42,8 @@ class Position extends Model
             'kind' => PositionKind::class,
             'quantity' => 'decimal:4',
             'unit_price' => 'decimal:4',
+            'discount_type' => DiscountType::class,
+            'discount_value' => 'decimal:2',
             'custom' => 'array',
             'sort' => 'integer',
         ];

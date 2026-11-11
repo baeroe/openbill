@@ -6,9 +6,11 @@ use App\Domain\Compliance\PartyFacts;
 use App\Domain\Fields\FieldDefinitionData;
 use App\Domain\Money\Decimal;
 use App\Domain\Totals\GroupInput;
+use App\Domain\Totals\LineDiscount;
 use App\Domain\Totals\PositionInput;
 use App\Enums\ComplianceProfile;
 use App\Enums\CustomerKind;
+use App\Enums\DiscountType;
 use App\Enums\DocumentType;
 use App\Enums\FieldScope;
 use App\Enums\FieldType;
@@ -63,6 +65,19 @@ it('requires at least one item', function () {
 it('reports a deleted unit and tax rate', function () {
     expect(compliancePaths([], [complianceItem(['unitId' => 'gone', 'taxRateId' => 'gone'])]))
         ->toBe(['positions.p1.tax_rate', 'positions.p1.unit']);
+});
+
+it('reports a discount larger than its line, also for optional positions and negative lines, in every profile', function () {
+    $discount = fn (DiscountType $type, string $value): LineDiscount => new LineDiscount($type, Decimal::of($value));
+
+    expect(compliancePaths([], [
+        complianceItem(['id' => 'fits', 'quantity' => Decimal::of('2'), 'unitPrice' => Decimal::of('50'), 'discount' => $discount(DiscountType::Amount, '100')]),
+        complianceItem(['id' => 'free', 'discount' => $discount(DiscountType::Percent, '100')]),
+        complianceItem(['id' => 'too_much', 'quantity' => Decimal::of('2'), 'unitPrice' => Decimal::of('50'), 'discount' => $discount(DiscountType::Amount, '100.01')]),
+        complianceItem(['id' => 'negative', 'unitPrice' => Decimal::of('-10'), 'discount' => $discount(DiscountType::Amount, '10')]),
+        complianceItem(['id' => 'optional', 'kind' => PositionKind::Optional, 'discount' => $discount(DiscountType::Amount, '5')]),
+        complianceItem(['id' => 'text', 'kind' => PositionKind::Text, 'discount' => $discount(DiscountType::Amount, '5')]),
+    ]))->toBe(['positions.too_much.discount', 'positions.optional.discount']);
 });
 
 it('does not ask small businesses for a tax rate', function () {

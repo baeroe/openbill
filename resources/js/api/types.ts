@@ -108,10 +108,14 @@ export type FieldDefinition = {
 };
 
 export type PositionKind = 'item' | 'text' | 'optional';
+export type DiscountType = 'percent' | 'amount';
 export type ComplianceProfile = 'basic' | 'en16931';
 export type TextBlockKind = 'intro' | 'closing' | 'payment' | 'note';
 
-/** A position as GET/PATCH /api/documents/{id} carries it; quantity and price are decimal strings. */
+/**
+ * A position as GET/PATCH /api/documents/{id} carries it; quantity, price and discount are decimal strings.
+ * The discount is a percentage (0–100) or an amount, null for none; text lines have none.
+ */
 export type ApiPosition = {
     id: string;
     kind: PositionKind;
@@ -120,6 +124,8 @@ export type ApiPosition = {
     quantity: string;
     unit_id: string | null;
     unit_price: string;
+    discount_type: DiscountType | null;
+    discount_value: string | null;
     tax_rate_id: string | null;
     custom: CustomValues;
 };
@@ -135,7 +141,8 @@ export type Issue = { path: string; message: string; code: string };
  * an empty map may arrive as [] (POST /api/render does not wrap empty maps), reading a key gives undefined either way.
  */
 export type Totals = {
-    lines: Record<string, { net: string; tax_percent: string | null; tax_category: string | null }>;
+    /** net = before_discount − discount (the discount has the sign of the line). */
+    lines: Record<string, { net: string; before_discount: string; discount: string; tax_percent: string | null; tax_category: string | null }>;
     groups: Record<string, { title: string | null; net: string; optional_net: string }>;
     tax_breakdown: { category: string; percent: string; net: string; tax: string; gross: string }[];
     net: string;

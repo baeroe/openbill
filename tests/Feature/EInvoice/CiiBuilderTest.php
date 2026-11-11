@@ -169,6 +169,56 @@ it('moves the sign of a discount line from the price to the quantity (BR-27, rev
         ->toContain('<ram:GrandTotalAmount>1011.50</ram:GrandTotalAmount>');
 });
 
+it('adds a line allowance per discounted position: percent with base, amount without (BG-27)', function () {
+    $xml = ciiOf(draft(DocumentType::Invoice, [
+        itemRow('Workshop', '2', '85', ['discount_type' => 'percent', 'discount_value' => '10']),
+        itemRow('Lizenz', '5', '80', ['discount_type' => 'amount', 'discount_value' => '50']),
+        itemRow('Beratung', '1', '100'),
+    ], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18', 'locale' => 'de']));
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and(substr_count($xml, '<ram:SpecifiedTradeAllowanceCharge>'))->toBe(2)
+        ->and($xml)->toContain('<ram:CalculationPercent>10.00</ram:CalculationPercent>')
+        ->toContain('<ram:BasisAmount>170.00</ram:BasisAmount>')
+        ->toContain('<ram:ActualAmount>17.00</ram:ActualAmount>')
+        ->toContain('<ram:ActualAmount>50.00</ram:ActualAmount>')
+        ->toContain('<ram:Reason>Rabatt</ram:Reason>')
+        // the net price stays the undiscounted price, the line amount is the discounted one
+        ->toContain('<ram:ChargeAmount>85.0000</ram:ChargeAmount>')
+        ->toContain('<ram:LineTotalAmount>153.00</ram:LineTotalAmount>')
+        ->toContain('<ram:LineTotalAmount>350.00</ram:LineTotalAmount>')
+        ->toContain('<ram:LineTotalAmount>603.00</ram:LineTotalAmount>')
+        ->toContain('<ram:GrandTotalAmount>717.57</ram:GrandTotalAmount>');
+    // only one CalculationPercent: the fixed amount carries neither percent nor base
+    expect(substr_count($xml, '<ram:CalculationPercent>'))->toBe(1);
+});
+
+it('mirrors line discounts in the credit note of a cancellation with positive amounts', function () {
+    app()->bind(DocumentArchiver::class, NullDocumentArchiver::class);
+    $invoice = app(FinalizeDocument::class)->handle(systemActor(), draft(DocumentType::Invoice, [
+        itemRow('Workshop', '2', '85', ['discount_type' => 'percent', 'discount_value' => '10']),
+        itemRow('Lizenz', '5', '80', ['discount_type' => 'amount', 'discount_value' => '50']),
+    ], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+    $cancellation = app(CancelInvoice::class)->handle(systemActor(), $invoice)->document;
+
+    $xml = ciiOf($cancellation, 'CN-2026-0004');
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and($xml)->toContain('<ram:BasisAmount>170.00</ram:BasisAmount>')
+        ->toContain('<ram:ActualAmount>17.00</ram:ActualAmount>')
+        ->toContain('<ram:ActualAmount>50.00</ram:ActualAmount>')
+        ->toContain('<ram:LineTotalAmount>153.00</ram:LineTotalAmount>')
+        ->toContain('<ram:GrandTotalAmount>'.$invoice->gross_total.'</ram:GrandTotalAmount>')
+        ->not->toContain('>-');
+});
+
+it('leaves out allowances for discounts of zero', function () {
+    $xml = ciiOf(draft(DocumentType::Invoice, [itemRow('Workshop', '2', '85', ['discount_type' => 'percent', 'discount_value' => '0'])], ['service_date' => '2026-09-30', 'due_date' => '2026-10-18']));
+
+    expect(CiiBuilder::validate($xml))->toBe([])
+        ->and($xml)->not->toContain('SpecifiedTradeAllowanceCharge');
+});
+
 it('falls back to a standard exemption reason when an exempt rate has no note (BR-E-10, review #11)', function () {
     $rate = TaxRate::query()->create(['label' => 'steuerfrei', 'percent' => '0.00', 'category' => 'E', 'exemption_note' => null, 'sort' => 99]);
 

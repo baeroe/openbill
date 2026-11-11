@@ -30,6 +30,8 @@ it('renders the built-in templates exactly like the approved output', function (
 })->with([
     'klar short invoice de' => ['klar', RenderScenario::ShortInvoice, 'de'],
     'klar long invoice en' => ['klar', RenderScenario::LongInvoice, 'en'],
+    'kante long invoice de' => ['kante', RenderScenario::LongInvoice, 'de'],
+    'leise long invoice en' => ['leise', RenderScenario::LongInvoice, 'en'],
     'kante offer with options en' => ['kante', RenderScenario::OfferWithOptions, 'en'],
     'kante small business de' => ['kante', RenderScenario::SmallBusiness, 'de'],
     'leise reverse charge de' => ['leise', RenderScenario::ReverseCharge, 'de'],

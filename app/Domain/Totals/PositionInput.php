@@ -21,5 +21,6 @@ final readonly class PositionInput
         public ?string $taxRateId,
         public array $custom = [],
         public string $description = '',
+        public ?LineDiscount $discount = null,
     ) {}
 }

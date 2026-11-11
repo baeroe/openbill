@@ -117,7 +117,7 @@ landing:
     title: What is in the box
     items:
       - { title: Your own fields, text: 'Text, number, amount, date, selection, yes/no or image – on the organization, customers, contacts, documents and line items.', link: /en/custom-fields }
-      - { title: Line items in groups, text: 'Groups with subtotals, optional services in quotes, suggestions from earlier documents.', link: /en/documents }
+      - { title: Line items in groups, text: 'Groups with subtotals, discounts per line in percent or euros, optional services in quotes, suggestions from earlier documents.', link: /en/documents }
       - { title: Liquid templates with a toolkit, text: 'Three built-in templates to start from, your own in the browser or your editor.', link: /en/template-toolkit }
       - { title: E-invoices built in, text: 'EN 16931, archived as PDF/A-3 with embedded ZUGFeRD/Factur-X XML.', link: /en/e-invoice }
       - { title: REST API and MCP, text: 'Scoped tokens for scripts and integrations, 25 tools for AI agents.', link: /en/api }

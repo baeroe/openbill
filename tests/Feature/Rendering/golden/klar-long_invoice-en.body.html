@@ -19,6 +19,8 @@ h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em
 .items .heading td { font-weight: 600; padding-top: 4mm; border-bottom: none; }
 .items .optional td { color: #6d685f; }
 .desc { color: #6d685f; font-size: 8.5pt; }
+.discount { color: #6d685f; font-size: 8.5pt; }
+.items .was { color: #6d685f; font-size: 8.5pt; }
 .sums { margin: 4mm 0 6mm auto; border-collapse: collapse; min-width: 75mm; font-variant-numeric: tabular-nums; }
 .sums td { padding: 1mm 2mm; } .sums .r { text-align: right; }
 .sums .total td { font-weight: 700; border-top: 0.6pt solid #1b1a17; padding-top: 2mm; }
@@ -73,10 +75,10 @@ h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em
       
         <tr class="">
           <td class="n">2</td>
-          <td>Research 2</td>
+          <td>Research 2<br><span class="discount">Discount −10 %</span></td>
           <td class="r">2.00 h</td>
           <td class="r">€85.00</td>
-          <td class="r">€170.00</td>
+          <td class="r"><s class="was">€170.00</s><br>€153.00</td>
         </tr>
       
     
@@ -180,7 +182,7 @@ h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em
         </tr>
       
     
-    <tr class="subtotal"><td></td><td colspan="3">Subtotal Concept</td><td class="r">€2,875.00</td></tr>
+    <tr class="subtotal"><td></td><td colspan="3">Subtotal Concept</td><td class="r">€2,858.00</td></tr>
   
     <tr class="heading"><td colspan="5">Design</td></tr>
     
@@ -355,10 +357,10 @@ h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em
       
         <tr class="">
           <td class="n">29</td>
-          <td>Testing 5</td>
+          <td>Testing 5<br><span class="discount">Discount −€50.00</span></td>
           <td class="r">5.00 h</td>
           <td class="r">€80.00</td>
-          <td class="r">€400.00</td>
+          <td class="r"><s class="was">€400.00</s><br>€350.00</td>
         </tr>
       
     
@@ -432,7 +434,7 @@ h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em
         </tr>
       
     
-    <tr class="subtotal"><td></td><td colspan="3">Subtotal Development</td><td class="r">€2,875.00</td></tr>
+    <tr class="subtotal"><td></td><td colspan="3">Subtotal Development</td><td class="r">€2,825.00</td></tr>
   
     <tr class="heading"><td colspan="5">Operations</td></tr>
     
@@ -562,11 +564,11 @@ h1 { font-size: 14pt; font-weight: 600; margin: 0 0 5mm; letter-spacing: -0.01em
 </table>
 
 <table class="sums">
-  <tr><td>Net</td><td class="r">€11,500.00</td></tr>
+  <tr><td>Net</td><td class="r">€11,433.00</td></tr>
   
-  <tr><td>VAT 19 % on €11,500.00</td><td class="r">€2,185.00</td></tr>
+  <tr><td>VAT 19 % on €11,433.00</td><td class="r">€2,172.27</td></tr>
   
-  <tr class="total"><td>Total</td><td class="r">€13,685.00</td></tr>
+  <tr class="total"><td>Total</td><td class="r">€13,605.27</td></tr>
   
 </table>
 

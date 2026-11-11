@@ -22,8 +22,8 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * Deterministic sample documents for template previews (template editor, toolkit, golden tests):
  * fixed dates and numbers, a fictional customer and contact, fixed tax rates and units, custom fields
- * filled from their definitions. Nothing is saved. The organization is the real one; an empty one
- * (fresh instance) is replaced by the fictional Studio Nordlicht.
+ * filled from their definitions, two discounted lines in the long invoice. Nothing is saved. The organization
+ * is the real one; an empty one (fresh instance) is replaced by the fictional Studio Nordlicht.
  */
 final class SampleDataFactory
 {
@@ -37,6 +37,9 @@ final class SampleDataFactory
 
     /** @var array<string, array{0: string, 1: int}> unit key => [UN/ECE code, decimals] */
     private const UNITS = ['hour' => ['HUR', 2], 'day' => ['DAY', 1], 'piece' => ['H87', 0], 'flat' => ['LS', 0], 'month' => ['MON', 0]];
+
+    /** @var array<string, array{0: string, 1: string}> "<group>-<line>" of the long invoice => [discount type, value] */
+    private const LONG_INVOICE_DISCOUNTS = ['0-1' => ['percent', '10'], '2-4' => ['amount', '50.00']];
 
     private const TEXT = [
         'de' => [
@@ -160,9 +163,9 @@ final class SampleDataFactory
             RenderScenario::LongInvoice => array_map(fn (int $g): array => [
                 'title' => $text['groups'][$g],
                 'positions' => [
-                    ...array_map(fn (int $i): array => $line(
+                    ...array_map(fn (int $i): array => [...$line(
                         $text['tasks'][($g * 12 + $i) % 6].' '.($i + 1), '', (string) (($i % 5) + 1), 'hour', (string) (80 + 5 * ($i % 4)),
-                    ), range(0, 11)),
+                    ), 'discount' => self::LONG_INVOICE_DISCOUNTS["{$g}-{$i}"] ?? null], range(0, 11)),
                     ...($g === 1 ? [$note] : []),
                 ],
             ], range(0, 3)),
@@ -186,6 +189,8 @@ final class SampleDataFactory
                     'description' => $data['description'],
                     'quantity' => $data['quantity'],
                     'unit_price' => $data['price'],
+                    'discount_type' => $data['discount'][0] ?? null,
+                    'discount_value' => $data['discount'][1] ?? null,
                     'unit_id' => $isText ? null : 'sample-unit-'.$data['unit'],
                     'tax_rate_id' => $isText ? null : 'sample-vat-19',
                     'custom' => $isText ? [] : $custom,

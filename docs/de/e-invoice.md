@@ -29,7 +29,9 @@ Ein abgeschlossenes Storno wird eine Gutschrift (Typcode 381) mit positiven Betr
 
 ## Rabatte
 
-Ein Rabatt ist eine Position mit negativem Preis. In der XML bleibt der Preis positiv und die Menge trägt das Vorzeichen (EN 16931 verbietet negative Nettopreise); der Zeilenbetrag bleibt gleich.
+Ein Rabatt an einer Position (Prozent oder fester Betrag, siehe [Dokumente](/de/documents#entwurfe)) wird ein Nachlass auf Positionsebene (BG-27) dieser Zeile: Betrag des Nachlasses (BT-136), bei Prozent zusätzlich der Prozentsatz (BT-138) und der Zeilenbetrag, von dem er abgeht (BT-137), Grund-Code `95` „Discount“ (BT-140) und der Grund „Rabatt“/„Discount“ in der Dokumentsprache (BT-139). Der Nettopreis (BT-146) bleibt der Einzelpreis ohne Rabatt, der Zeilenbetrag (BT-131) ist die rabattierte Zeilensumme, genau wie im PDF. In einer Gutschrift (Storno) hat der Nachlass wie die ganze Gutschrift positive Beträge. Ein Rabatt von 0 erzeugt keinen Nachlass.
+
+Ein Rabatt als eigene Position mit negativem Preis funktioniert weiter: In der XML bleibt der Preis positiv und die Menge trägt das Vorzeichen (EN 16931 verbietet negative Nettopreise); der Zeilenbetrag bleibt gleich.
 
 ## Steuern
 
@@ -59,7 +61,7 @@ Die gesetzlichen Hinweise stehen außerdem als Dokumentnotizen in der XML.
 | Leistungsdatum (-zeitraum) | Lieferdatum (BT-72), Leistungszeitraum (BT-73/74) |
 | IBAN, BIC | SEPA-Überweisung (Zahlungsart 58) |
 | Fälligkeit | Fälligkeitsdatum (BT-9) |
-| Positionen | Bezeichnung, Beschreibung, Nettopreis (4 Nachkommastellen), Menge mit UN/ECE-Einheitencode, Steuerkategorie und -satz, Zeilenbetrag |
+| Positionen | Bezeichnung, Beschreibung, Nettopreis (4 Nachkommastellen), Menge mit UN/ECE-Einheitencode, Steuerkategorie und -satz, Rabatt als Nachlass auf Positionsebene, Zeilenbetrag |
 | Summen | Summe der Positionen, Steuerbasis, Steuerbetrag, Gesamtbetrag, Zahlbetrag |
 
 Textzeilen stehen nicht in der XML; optionale Positionen gibt es nur in Angeboten.

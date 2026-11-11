@@ -47,7 +47,14 @@ it('covers a long invoice over several groups', function () {
     expect($context['groups'])->toHaveCount(4)
         ->and(count($context['positions']))->toBe(49)
         ->and(array_filter($context['positions'], fn (array $p): bool => $p['is_text']))->toHaveCount(1)
-        ->and($context['groups'][0]['has_title'])->toBeTrue();
+        ->and($context['groups'][0]['has_title'])->toBeTrue()
+        ->and(array_values(array_filter($context['positions'], fn (array $p): bool => $p['has_discount'])))->toHaveCount(2);
+
+    $percent = $context['groups'][0]['positions'][1];
+    $amount = $context['groups'][2]['positions'][4];
+    expect($percent)->toMatchArray(['has_discount' => true, 'discount_type' => 'percent', 'discount_value' => '10', 'discount_amount' => '17.00', 'total_before_discount' => '170.00', 'total' => '153.00'])
+        ->and($amount)->toMatchArray(['has_discount' => true, 'discount_type' => 'amount', 'discount_value' => '50.00', 'discount_amount' => '50.00', 'total_before_discount' => '400.00', 'total' => '350.00'])
+        ->and($context['groups'][0]['positions'][0])->toMatchArray(['has_discount' => false, 'discount_type' => '', 'discount_value' => '', 'discount_amount' => '0.00']);
 });
 
 it('covers small business and reverse charge with their legal notes', function () {

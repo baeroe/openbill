@@ -2,6 +2,7 @@
 
 use App\Enums\ActorType;
 use App\Enums\ComplianceProfile;
+use App\Enums\DiscountType;
 use App\Enums\DocumentFileKind;
 use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
@@ -24,6 +25,7 @@ it('uses the exact values from the spec', function (string $enum, array $values)
     'document types' => [DocumentType::class, ['offer', 'confirmation', 'invoice', 'cancellation']],
     'statuses' => [DocumentStatus::class, ['draft', 'open', 'accepted', 'rejected', 'done', 'paid', 'cancelled', 'closed']],
     'position kinds' => [PositionKind::class, ['item', 'text', 'optional']],
+    'discount types' => [DiscountType::class, ['percent', 'amount']],
     'field scopes' => [FieldScope::class, ['org', 'customer', 'contact', 'document', 'position']],
     'field types' => [FieldType::class, ['text', 'textarea', 'number', 'money', 'date', 'select', 'boolean', 'image']],
     'tax categories' => [TaxCategory::class, ['S', 'Z', 'E', 'AE', 'K', 'G', 'O']],

@@ -44,6 +44,8 @@ final class GroupWriter
                     'quantity' => (string) ($p['quantity'] ?? '0'),
                     'unit_id' => $p['unit_id'] ?? null,
                     'unit_price' => (string) ($p['unit_price'] ?? '0'),
+                    'discount_type' => $p['discount_type'] ?? null,
+                    'discount_value' => isset($p['discount_type']) && isset($p['discount_value']) ? (string) $p['discount_value'] : null,
                     'tax_rate_id' => $p['tax_rate_id'] ?? null,
                     'custom' => $p['custom'] ?? [],
                     'sort' => $positionIndex,

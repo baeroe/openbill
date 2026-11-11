@@ -3,6 +3,7 @@
 namespace App\Rendering;
 
 use App\Domain\Payment\EpcPayload;
+use App\Enums\DiscountType;
 use App\Enums\DocumentStatus;
 use App\Enums\DocumentType;
 use App\Enums\PositionKind;
@@ -44,6 +45,8 @@ final class ContextBuilder
             foreach ($group->positions as $position) {
                 $line = $totals->lines[$position->id] ?? null;
                 $unit = $position->unit_id === null ? null : ($units[$position->unit_id] ?? null);
+                // a discount that changes nothing (0 % or 0.00) is no discount for the template
+                $discounted = $line !== null && $position->discount_type !== null && ! $line->discount->isZero();
                 $positions[] = [
                     ...$this->inlineImages($position->custom ?? [], $images['position']),
                     'index' => $position->kind === PositionKind::Text ? null : ++$index,
@@ -59,6 +62,15 @@ final class ContextBuilder
                     'unit_code' => (string) ($unit['code'] ?? ''),
                     'unit_price' => Amounts::price($position->unit_price),
                     'tax_percent' => $line?->tax === null ? '0' : (string) $line->tax->percent->strippedOfTrailingZeros(),
+                    'has_discount' => $discounted,
+                    'discount_type' => $discounted ? $position->discount_type->value : '',
+                    'discount_value' => match (true) {
+                        ! $discounted => '',
+                        $position->discount_type === DiscountType::Percent => Amounts::plain($position->discount_value),
+                        default => Amounts::price($position->discount_value),
+                    },
+                    'discount_amount' => $line === null ? '0.00' : (string) $line->discount,
+                    'total_before_discount' => $line === null ? '0.00' : (string) $line->beforeDiscount,
                     'total' => $line === null ? '0.00' : (string) $line->net,
                     'group' => $hasTitle ? (string) $group->title : '',
                 ];

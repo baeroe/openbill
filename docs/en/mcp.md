@@ -50,7 +50,7 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `list-customers`, `get-customer` | Customers with contacts; search and pages |
 | `create-customer`, `update-customer` | Create or change a customer; `contacts` is the complete list |
 | `list-documents`, `get-document` | Documents in short form with filters; one document completely, with totals and open issues |
-| `create-document`, `update-document` | Create a draft (offer, confirmation, invoice) or change it; `groups` replaces all groups and positions |
+| `create-document`, `update-document` | Create a draft (offer, confirmation, invoice) or change it; `groups` replaces all groups and positions, a position can carry a discount (`discount_type` `percent` or `amount`, `discount_value`) |
 | `duplicate-document` | Copy a document into a new draft |
 | `finalize-document` | Check, assign the number, archive the PDF (and the e-invoice XML) – cannot be undone |
 | `set-document-status` | Accepted, rejected, done, paid, back to open |

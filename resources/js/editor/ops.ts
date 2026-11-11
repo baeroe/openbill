@@ -1,4 +1,4 @@
-import type { ApiGroup, ApiPosition, CustomValues, DocumentDetail, PositionKind } from '@/api/types';
+import type { ApiGroup, ApiPosition, CustomValues, DiscountType, DocumentDetail, PositionKind } from '@/api/types';
 import type { Draft, DraftPayload, IdMap } from './types';
 
 /**
@@ -29,6 +29,8 @@ export function newPosition(kind: PositionKind, defaults: PositionDefaults): Api
         quantity: priced ? '1' : '0',
         unit_id: priced ? defaults.unitId : null,
         unit_price: '0',
+        discount_type: null,
+        discount_value: null,
         tax_rate_id: priced ? defaults.taxRateId : null,
         custom: priced ? { ...defaults.custom } : {},
     };
@@ -119,13 +121,33 @@ const ZERO = /^-?0*(\.0*)?$/;
 export function setPositionKind(draft: Draft, id: string, kind: PositionKind, defaults: PositionDefaults): Draft {
     const current = draft.groups.flatMap((group) => group.positions).find((p) => p.id === id);
     if (!current || current.kind === kind) return draft;
-    if (kind === 'text') return updatePosition(draft, id, { kind, quantity: '0', unit_price: '0', unit_id: null, tax_rate_id: null });
+    if (kind === 'text') return updatePosition(draft, id, { kind, quantity: '0', unit_price: '0', discount_type: null, discount_value: null, unit_id: null, tax_rate_id: null });
     return updatePosition(draft, id, {
         kind,
         quantity: current.quantity === '' || ZERO.test(current.quantity) ? '1' : current.quantity,
         unit_id: current.unit_id ?? defaults.unitId,
         tax_rate_id: current.tax_rate_id ?? defaults.taxRateId,
     });
+}
+
+/** "0", "99.5" and "100.00" fit a percentage, "100.5", "250" and "-1" do not – a string check, no arithmetic. */
+function fitsPercent(value: string): boolean {
+    const match = /^0*(\d*)(?:\.(\d*))?$/.exec(value);
+    if (!match) return false;
+    const [, integer, fraction = ''] = match;
+    return integer.length < 3 || (integer === '100' && /^0*$/.test(fraction));
+}
+
+/**
+ * Discount of a position: a type adds or switches it, null removes it. A new discount starts at 0; switching keeps the
+ * typed value unless it cannot be a percentage.
+ */
+export function setPositionDiscount(draft: Draft, id: string, type: DiscountType | null): Draft {
+    const current = draft.groups.flatMap((group) => group.positions).find((p) => p.id === id);
+    if (!current || current.kind === 'text' || current.discount_type === type) return draft;
+    if (type === null) return updatePosition(draft, id, { discount_type: null, discount_value: null });
+    const value = current.discount_value ?? '0';
+    return updatePosition(draft, id, { discount_type: type, discount_value: type === 'percent' && !fitsPercent(value) ? '0' : value });
 }
 
 export function removePosition(draft: Draft, id: string): { draft: Draft; position: ApiPosition | null; groupId: string | null; index: number } {

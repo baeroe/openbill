@@ -38,6 +38,8 @@ final class DraftOverlay
                     'description' => $item['description'] ?? '',
                     'quantity' => (string) ($item['quantity'] ?? '0'),
                     'unit_price' => (string) ($item['unit_price'] ?? '0'),
+                    'discount_type' => $item['discount_type'] ?? null,
+                    'discount_value' => isset($item['discount_type']) && isset($item['discount_value']) ? (string) $item['discount_value'] : null,
                     'unit_id' => $item['unit_id'] ?? null,
                     'tax_rate_id' => $item['tax_rate_id'] ?? null,
                     'custom' => $item['custom'] ?? [],

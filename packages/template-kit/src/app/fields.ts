@@ -1,7 +1,7 @@
 import type { FieldScope, FieldType } from '../shared/protocol';
 
 // Copy of resources/js/fields/expression.ts (the kit builds without the app); expression.drift.test.ts keeps both equal.
-const MONEY = new Set(['net_total', 'tax_total', 'gross_total', 'optional_total', 'unit_price', 'total']);
+const MONEY = new Set(['net_total', 'tax_total', 'gross_total', 'optional_total', 'unit_price', 'total', 'total_before_discount', 'discount_amount']);
 const DATES = new Set(['date', 'due_date', 'valid_until', 'service_date', 'service_date_end']);
 const TEXTS = new Set(['intro', 'closing']);
 

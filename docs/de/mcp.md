@@ -50,7 +50,7 @@ Ein `mcp`-Token darf alles, was die Tools anbieten, auch Dokumente abschließen 
 | `list-customers`, `get-customer` | Kunden mit Ansprechpartnern; Suche und Seiten |
 | `create-customer`, `update-customer` | Kunden anlegen oder ändern; `contacts` ist die vollständige Liste |
 | `list-documents`, `get-document` | Dokumente in Kurzform mit Filtern; ein Dokument vollständig mit Summen und offenen Prüfpunkten |
-| `create-document`, `update-document` | Entwurf anlegen (Angebot, Auftragsbestätigung, Rechnung) oder ändern; `groups` ersetzt alle Gruppen und Positionen |
+| `create-document`, `update-document` | Entwurf anlegen (Angebot, Auftragsbestätigung, Rechnung) oder ändern; `groups` ersetzt alle Gruppen und Positionen, eine Position kann einen Rabatt haben (`discount_type` `percent` oder `amount`, `discount_value`) |
 | `duplicate-document` | Dokument in einen neuen Entwurf kopieren |
 | `finalize-document` | Prüfen, Nummer vergeben, PDF (und E-Rechnungs-XML) archivieren – nicht umkehrbar |
 | `set-document-status` | Angenommen, abgelehnt, erledigt, bezahlt, zurück auf offen |

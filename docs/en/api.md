@@ -111,7 +111,7 @@ Additional endpoints:
 
 Customers have `supply_type` (`goods` or `services`, default `services`) and `customer_kind` (`business` or `consumer`, default `business`); for customers outside the EU they decide between tax category `G`, `O` (services to businesses) and the regular rate (services to consumers) (see [e-invoices](/en/e-invoice#taxes)). User management (`/api/users`, `/api/users/{id}/disable|enable`, `/api/invitations`) and changing the own password (`PUT /api/account/password`) are only open to the session of the app, never to tokens; disabled accounts get no API tokens and their existing ones stop working.
 
-A document in a list has the short form (number, status, customer, totals, dates). Finalized invoices also have `open_amount`: the gross total minus finalized (partial) cancellations, i.e. what is still owed while the invoice is open (`null` for other documents and drafts). A cancellation must credit more than 0 and at most that amount; otherwise finalizing answers `compliance_failed` with the code `cancellation_not_credit` or `cancellation_exceeds_invoice` at the path `positions`. `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes) and – for drafts – `issues`: everything finalizing would still complain about.
+A document in a list has the short form (number, status, customer, totals, dates). Finalized invoices also have `open_amount`: the gross total minus finalized (partial) cancellations, i.e. what is still owed while the invoice is open (`null` for other documents and drafts). A cancellation must credit more than 0 and at most that amount; otherwise finalizing answers `compliance_failed` with the code `cancellation_not_credit` or `cancellation_exceeds_invoice` at the path `positions`. `GET /api/documents/{id}` adds texts, custom fields, `groups` with their positions, `totals` (net, tax, gross, tax breakdown, legal notes, per position the line amount before and after the discount) and – for drafts – `issues`: everything finalizing would still complain about.
 
 The `status` filter of `GET /api/documents` also takes `overdue`: open invoices whose due date has passed. Overdue is not a status of its own, so documents never carry it.
 
@@ -164,7 +164,8 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$CANCELLATION/finalize" |
   "groups": [
     {"id": "01J…", "title": "Workshop", "positions": [
       {"id": "01J…", "kind": "item", "title": "Discovery workshop", "description": "", "quantity": "8",
-       "unit_price": "120", "unit_id": "01J…", "tax_rate_id": "01J…", "custom": {"ticket": "OPS-12"}}
+       "unit_price": "120", "discount_type": "percent", "discount_value": "10",
+       "unit_id": "01J…", "tax_rate_id": "01J…", "custom": {"ticket": "OPS-12"}}
     ]},
     {"title": null, "positions": [{"kind": "text", "title": "Travel costs are billed separately."}]}
   ]
@@ -172,6 +173,8 @@ curl -s "${H[@]}" -X POST "$OPENBILL_URL/api/documents/$CANCELLATION/finalize" |
 ```
 
 A group with `"title": null` holds loose positions (no heading, no subtotal). `kind` is `item`, `text` or `optional` (offers only). A finalized document answers `409 document_locked`.
+
+A position's discount is `discount_type` (`percent` or `amount`; `null` or left out: none) with `discount_value` as a string with at most two decimals: `"10"` takes 10 % off the line amount, `"100"` makes the line free, `{"discount_type": "amount", "discount_value": "50.00"}` takes 50 euros off. A percentage above 100, a negative value or a type without a value is answered with `422` at `groups.<g>.positions.<p>.discount_value`; a fixed amount larger than the line amount is an issue (`discount_exceeds_line` at `positions.<id>.discount`) that blocks finalizing. Text lines never keep a discount. In `totals.lines` every position has `before_discount` (quantity × unit price), `discount` and `net` (= `before_discount` − `discount`); the discount has the sign of the line, so it is negative in a cancellation.
 
 ## Previews
 

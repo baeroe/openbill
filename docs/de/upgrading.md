@@ -24,6 +24,17 @@ Alle Versionen und ihre Änderungen: https://github.com/baeroe/openbill/releases
 
 <!-- nur absolute Links: jeder Abschnitt wird zu den Notizen des GitHub-Release (scripts/release-notes.sh) -->
 
+### 0.4.0
+
+- **Rabatt je Position:** Leistungen und optionale Leistungen können einen Rabatt haben, als Prozentsatz (0 bis 100 %, 100 % macht die Zeile kostenlos) oder als festen Betrag in Euro. Im Editor: **Rabatt hinzufügen** im Menü einer Position. Die Zeilensumme ist Menge × Einzelpreis minus Rabatt; Umwandeln, Duplizieren und Stornieren übernehmen ihn, ein Storno schreibt also genau das gut, was die Rechnung berechnet hat. Ein fester Betrag über dem Zeilenbetrag verhindert das Abschließen. Rabatte als eigene Position mit negativem Preis funktionieren wie bisher. https://openbill.dev/de/documents#entwurfe
+- **E-Rechnung:** Der Rabatt wird ein Nachlass auf Positionsebene (BG-27) mit Betrag, Prozentsatz und Basis, Grund-Code 95; der Zeilenbetrag ist der rabattierte. https://openbill.dev/de/e-invoice#rabatte
+- **REST-API und MCP:** Positionen nehmen und liefern `discount_type` (`percent`, `amount` oder `null`) und `discount_value` (`"10"`, `"50.00"`); `totals.lines` hat neben `net` auch `before_discount` und `discount`. Clients, die `groups` ohne diese Schlüssel schicken, entfernen einen Rabatt, wie bei jedem weggelassenen Positionsfeld. https://openbill.dev/de/api#entwurfe-speichern
+- **Templates:** Positionen haben `has_discount`, `discount_type`, `discount_value`, `discount_amount` und `total_before_discount`; `total` ist der rabattierte Betrag. Die mitgelieferten Templates Klar, Kante und Leise (jetzt 1.1.0) zeigen den Rabatt an seiner Position, das Wort `discount` steht im Vokabular von `t`. Eigene Templates funktionieren weiter, zeigen aber nur das rabattierte `total`, bis du den Rabatt ergänzt: https://openbill.dev/de/templates#rabatte
+- Diese Schlüssel sind jetzt für Positionsfelder reserviert: `has_discount`, `discount_type`, `discount_value`, `discount_amount`, `total_before_discount`. Ein eigenes Positionsfeld mit einem dieser Schlüssel wird in Templates vom Rabatt verdeckt.
+- Die Beispielrechnung `long_invoice` hat zwei rabattierte Zeilen.
+- Eine Datenbank-Migration ergänzt die Spalten `discount_type` und `discount_value` in `positions`; sie läuft beim Start. Bestehende Positionen haben keinen Rabatt, abgeschlossene Dokumente behalten ihre Summen.
+- Keine Änderungen an den Compose-Dateien.
+
 ### 0.3.1
 
 - **Sicherheitsupdate:** PHP 8.4.27 behebt zwei kritische Lücken in PHP selbst, über die sich ohne Anmeldung Code ausführen lässt (CVE-2026-109618, CVE-2026-109619). Jetzt aktualisieren: https://www.php.net/archive/2026.php#2026-10-21-5

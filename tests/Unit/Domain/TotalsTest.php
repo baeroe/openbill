@@ -6,10 +6,12 @@ use App\Domain\Tax\LegalNotes;
 use App\Domain\Tax\TaxContext;
 use App\Domain\Tax\TaxRateData;
 use App\Domain\Totals\GroupInput;
+use App\Domain\Totals\LineDiscount;
 use App\Domain\Totals\PositionInput;
 use App\Domain\Totals\TotalsCalculator;
 use App\Domain\Totals\TotalsLimits;
 use App\Enums\CustomerKind;
+use App\Enums\DiscountType;
 use App\Enums\PositionKind;
 use App\Enums\SupplyType;
 use App\Enums\TaxationMode;
@@ -31,6 +33,11 @@ function totalsCtx(TaxationMode $mode = TaxationMode::Regular, TaxTreatment $tre
 function totalsPos(string $id, string $quantity = '1', string $price = '0', PositionKind $kind = PositionKind::Item, ?string $taxRateId = 'r19'): PositionInput
 {
     return new PositionInput($id, $kind, 'X', Decimal::of($quantity), Decimal::of($price), 'u', $taxRateId);
+}
+
+function discountPos(string $id, string $quantity, string $price, DiscountType $type, string $value, PositionKind $kind = PositionKind::Item, ?string $taxRateId = 'r19'): PositionInput
+{
+    return new PositionInput($id, $kind, 'X', Decimal::of($quantity), Decimal::of($price), 'u', $taxRateId, discount: new LineDiscount($type, Decimal::of($value)));
 }
 
 /** @return list<GroupInput> */
@@ -135,6 +142,127 @@ describe('TotalsCalculator', function () {
         expect((string) $t->lines['a']->net)->toBe('0.30')
             ->and((string) $t->lines['b']->net)->toBe('0.01')
             ->and((string) $t->lines['c']->net)->toBe('-0.01');
+    });
+});
+
+describe('line discounts', function () {
+    it('takes a percentage off the line amount', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(discountPos('a', '10', '95', DiscountType::Percent, '10')), totalsCtx());
+
+        expect($t->toArray()['lines']['a'])->toBe(['net' => '855.00', 'before_discount' => '950.00', 'discount' => '95.00', 'tax_percent' => '19', 'tax_category' => 'S'])
+            ->and((string) $t->net)->toBe('855.00')
+            ->and((string) $t->tax)->toBe('162.45')
+            ->and((string) $t->gross)->toBe('1017.45');
+    });
+
+    it('takes a fixed amount off the line amount', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(discountPos('a', '3', '760', DiscountType::Amount, '280')), totalsCtx());
+
+        expect((string) $t->lines['a']->beforeDiscount)->toBe('2280.00')
+            ->and((string) $t->lines['a']->discount)->toBe('280.00')
+            ->and((string) $t->lines['a']->net)->toBe('2000.00')
+            ->and((string) $t->gross)->toBe('2380.00');
+    });
+
+    it('makes a line free with 100 % or the full amount', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(
+            discountPos('a', '2', '49.95', DiscountType::Percent, '100'),
+            discountPos('b', '1', '120', DiscountType::Amount, '120'),
+            totalsPos('c', '1', '10'),
+        ), totalsCtx());
+
+        expect((string) $t->lines['a']->net)->toBe('0.00')
+            ->and((string) $t->lines['a']->discount)->toBe('99.90')
+            ->and((string) $t->lines['b']->net)->toBe('0.00')
+            ->and((string) $t->net)->toBe('10.00')
+            ->and((string) $t->gross)->toBe('11.90');
+    });
+
+    it('rounds the percentage of the rounded line amount half away from zero', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(
+            discountPos('a', '1', '0.10', DiscountType::Percent, '5'),
+            discountPos('b', '3', '0.333', DiscountType::Percent, '33.33'),
+            discountPos('c', '-1', '0.10', DiscountType::Percent, '5'),
+        ), totalsCtx());
+
+        // 0.10 × 5 % = 0.005 → 0.01; 3 × 0.333 = 0.999 → 1.00, × 33.33 % = 0.3333 → 0.33
+        expect((string) $t->lines['a']->discount)->toBe('0.01')
+            ->and((string) $t->lines['a']->net)->toBe('0.09')
+            ->and((string) $t->lines['b']->beforeDiscount)->toBe('1.00')
+            ->and((string) $t->lines['b']->discount)->toBe('0.33')
+            ->and((string) $t->lines['b']->net)->toBe('0.67')
+            ->and((string) $t->lines['c']->discount)->toBe('-0.01')
+            ->and((string) $t->lines['c']->net)->toBe('-0.09');
+    });
+
+    it('moves negative lines towards zero (cancellations mirror their invoice)', function () {
+        $invoice = TotalsCalculator::calculate(totalsLoose(
+            discountPos('a', '2', '85', DiscountType::Percent, '10'),
+            discountPos('b', '5', '80', DiscountType::Amount, '50'),
+        ), totalsCtx());
+        $cancellation = TotalsCalculator::calculate(totalsLoose(
+            discountPos('a', '-2', '85', DiscountType::Percent, '10'),
+            discountPos('b', '-5', '80', DiscountType::Amount, '50'),
+        ), totalsCtx());
+
+        expect((string) $cancellation->lines['a']->net)->toBe('-153.00')
+            ->and((string) $cancellation->lines['b']->discount)->toBe('-50.00')
+            ->and((string) $cancellation->lines['b']->net)->toBe('-350.00')
+            ->and((string) $cancellation->gross)->toBe((string) $invoice->gross->negated())
+            ->and((string) $invoice->gross)->toBe('598.57');
+    });
+
+    it('mixes discounted lines with discount positions of a negative price', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(
+            discountPos('a', '1', '1000', DiscountType::Percent, '15'),
+            totalsPos('rebate', '1', '-100'),
+            discountPos('b', '1', '-200', DiscountType::Amount, '20'),
+        ), totalsCtx());
+
+        expect((string) $t->lines['a']->net)->toBe('850.00')
+            ->and((string) $t->lines['rebate']->net)->toBe('-100.00')
+            ->and((string) $t->lines['rebate']->discount)->toBe('0.00')
+            ->and((string) $t->lines['b']->net)->toBe('-180.00')
+            ->and((string) $t->net)->toBe('570.00');
+    });
+
+    it('computes the tax per rate from the discounted lines', function () {
+        $t = TotalsCalculator::calculate([
+            new GroupInput('g1', 'Konzept', [discountPos('a', '1', '890', DiscountType::Percent, '10'), discountPos('b', '2', '50', DiscountType::Amount, '10', taxRateId: 'r7')]),
+            new GroupInput('g2', 'Extras', [discountPos('o', '1', '300', DiscountType::Percent, '50', PositionKind::Optional)]),
+        ], totalsCtx());
+
+        expect($t->toArray()['tax_breakdown'])->toBe([
+            ['category' => 'S', 'percent' => '19', 'net' => '801.00', 'tax' => '152.19', 'gross' => '953.19'],
+            ['category' => 'S', 'percent' => '7', 'net' => '90.00', 'tax' => '6.30', 'gross' => '96.30'],
+        ])
+            ->and($t->toArray()['groups']['g1']['net'])->toBe('891.00')
+            ->and($t->toArray()['groups']['g2']['optional_net'])->toBe('150.00')
+            ->and((string) $t->optionalNet)->toBe('150.00');
+    });
+
+    it('discounts small-business invoices without VAT', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(discountPos('a', '4', '60', DiscountType::Percent, '25')), totalsCtx(TaxationMode::SmallBusiness));
+
+        expect((string) $t->net)->toBe('180.00')
+            ->and((string) $t->tax)->toBe('0.00')
+            ->and((string) $t->gross)->toBe('180.00')
+            ->and($t->legalNotes)->toBe(['small business note']);
+    });
+
+    it('reports discounts that exceed the line', function () {
+        expect((new LineDiscount(DiscountType::Percent, Decimal::of('100')))->exceeds(Decimal::of('10.00')))->toBeFalse()
+            ->and((new LineDiscount(DiscountType::Percent, Decimal::of('100.01')))->exceeds(Decimal::of('10.00')))->toBeTrue()
+            ->and((new LineDiscount(DiscountType::Amount, Decimal::of('10.00')))->exceeds(Decimal::of('10.00')))->toBeFalse()
+            ->and((new LineDiscount(DiscountType::Amount, Decimal::of('10.01')))->exceeds(Decimal::of('10.00')))->toBeTrue()
+            ->and((new LineDiscount(DiscountType::Amount, Decimal::of('10.00')))->exceeds(Decimal::of('-10.00')))->toBeFalse()
+            ->and((new LineDiscount(DiscountType::Amount, Decimal::of('0.01')))->exceeds(Decimal::of('0.00')))->toBeTrue();
+    });
+
+    it('leaves lines without a discount unchanged', function () {
+        $t = TotalsCalculator::calculate(totalsLoose(totalsPos('a', '10', '95')), totalsCtx());
+
+        expect($t->toArray()['lines']['a'])->toBe(['net' => '950.00', 'before_discount' => '950.00', 'discount' => '0.00', 'tax_percent' => '19', 'tax_category' => 'S']);
     });
 });
 

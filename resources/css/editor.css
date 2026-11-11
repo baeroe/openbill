@@ -106,6 +106,10 @@
     .ed-pos--text .ed-pos__main {
         grid-column: 2 / -2;
     }
+    /* the discount of a position: its own line below the row, from the title to the total */
+    .ed-pos__discount {
+        grid-column: 2 / -2;
+    }
     @container positions (max-width: 51rem) {
         .ed-pos-head {
             display: none;
@@ -148,6 +152,15 @@
         .ed-pos__menu {
             grid-area: menu;
         }
+        .ed-pos.ed-pos--discount {
+            grid-template-areas: 'handle main main main main total menu' '. qty unit price tax . .' '. discount discount discount discount discount .';
+        }
+        .ed-pos.ed-no-tax.ed-pos--discount {
+            grid-template-areas: 'handle main main main main total menu' '. qty unit price . . .' '. discount discount discount discount discount .';
+        }
+        .ed-pos__discount {
+            grid-area: discount;
+        }
     }
     @container positions (max-width: 30rem) {
         .ed-pos,
@@ -157,6 +170,12 @@
         }
         .ed-pos.ed-no-tax {
             grid-template-areas: 'handle main main menu' '. qty unit .' '. price price .' '. total total .';
+        }
+        .ed-pos.ed-pos--discount {
+            grid-template-areas: 'handle main main menu' '. qty unit .' '. price tax .' '. discount discount .' '. total total .';
+        }
+        .ed-pos.ed-no-tax.ed-pos--discount {
+            grid-template-areas: 'handle main main menu' '. qty unit .' '. price price .' '. discount discount .' '. total total .';
         }
         .ed-pos--text,
         .ed-pos--text.ed-no-tax {

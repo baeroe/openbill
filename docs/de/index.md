@@ -117,7 +117,7 @@ landing:
     title: Was drin ist
     items:
       - { title: Eigene Felder, text: 'Text, Zahl, Betrag, Datum, Auswahl, Ja/Nein oder Bild – für Organisation, Kunden, Ansprechpartner, Dokumente und Positionen.', link: /de/custom-fields }
-      - { title: Positionen in Gruppen, text: 'Gruppen mit Zwischensummen, optionale Leistungen in Angeboten, Vorschläge aus früheren Dokumenten.', link: /de/documents }
+      - { title: Positionen in Gruppen, text: 'Gruppen mit Zwischensummen, Rabatte je Position in Prozent oder Euro, optionale Leistungen in Angeboten, Vorschläge aus früheren Dokumenten.', link: /de/documents }
       - { title: Liquid-Templates mit Toolkit, text: 'Drei mitgelieferte Templates als Start, eigene im Browser oder in deinem Editor.', link: /de/template-toolkit }
       - { title: E-Rechnung eingebaut, text: 'EN 16931, archiviert als PDF/A-3 mit eingebetteter ZUGFeRD/Factur-X-XML.', link: /de/e-invoice }
       - { title: REST-API und MCP, text: 'Eingeschränkte Tokens für Skripte und Integrationen, 25 Tools für KI-Agenten.', link: /de/api }

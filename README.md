@@ -13,7 +13,7 @@ Open, self-hosted quotes, order confirmations, invoices and cancellations. Your 
 
 - Quotes, order confirmations, invoices and cancellations, converted along the chain with one click; numbers are assigned when you finalize
 - Custom fields on the organization, customers, contacts, documents and line items
-- Line items in groups with subtotals, optional items in quotes, suggestions from earlier documents
+- Line items in groups with subtotals, discounts per line (percent or amount), optional items in quotes, suggestions from earlier documents
 - Templates in HTML, CSS and Liquid, rendered to PDF by Gotenberg: three built in, a toolkit with live preview for your own
 - E-invoices after EN 16931 as PDF/A-3 with embedded XML; VAT for regular taxation, small businesses (§ 19 UStG), EU reverse charge and third countries
 - REST API (OpenAPI) and an MCP server with scoped tokens

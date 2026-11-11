@@ -11,6 +11,7 @@ use App\Domain\Tax\LegalNotes;
 use App\Domain\Tax\TaxContext;
 use App\Domain\Tax\TaxRateData;
 use App\Domain\Totals\GroupInput;
+use App\Domain\Totals\LineDiscount;
 use App\Domain\Totals\PositionInput;
 use App\Enums\ComplianceProfile;
 use App\Enums\CustomerKind;
@@ -51,6 +52,9 @@ final class DomainMapper
             taxRateId: $position->tax_rate_id,
             custom: $position->custom ?? [],
             description: $position->description ?? '',
+            discount: $position->discount_type === null || $position->discount_value === null
+                ? null
+                : new LineDiscount($position->discount_type, Decimal::of($position->discount_value)),
         );
     }
 
@@ -179,6 +183,8 @@ final class DomainMapper
                 'description' => $p->description,
                 'quantity' => (string) $p->quantity,
                 'unit_price' => (string) $p->unitPrice,
+                'discount_type' => $p->discount?->type->value,
+                'discount_value' => $p->discount === null ? null : (string) $p->discount->value,
                 'unit_id' => $p->unitId,
                 'tax_rate_id' => $p->taxRateId,
                 'custom' => $p->custom,

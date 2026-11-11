@@ -17,7 +17,7 @@ it('ships Klar, Kante and Leise as built-in templates and uses Klar as default f
 
     expect(Template::query()->where('built_in', true)->orderBy('slug')->pluck('name', 'slug')->all())->toBe(['kante' => 'Kante', 'klar' => 'Klar', 'leise' => 'Leise'])
         ->and(DocumentTypeSetting::query()->pluck('template_id')->unique()->values()->all())->toBe([$klar->id])
-        ->and($klar->version)->toBe('1.0.0')
+        ->and($klar->version)->toBe('1.1.0')
         ->and($klar->manifest['paper'])->toBe(['format' => 'A4', 'marginX' => '20mm', 'headerHeight' => '30mm', 'footerHeight' => '28mm']);
 });
 
@@ -52,6 +52,22 @@ it('renders every built-in template with every scenario in both languages withou
             ->and($result->body)->toContain((string) $sample->sources['customer']['vat_id']);
     }
 })->with(SyncBuiltInTemplates::SLUGS)->with(RenderScenario::cases());
+
+it('shows the discount of a position with the amount before it', function (string $slug, string $locale, array $expected) {
+    $sample = app(SampleDataFactory::class)->make(RenderScenario::LongInvoice, $locale);
+    $context = app(ContextBuilder::class)->build($sample->document, $sample->sources);
+    $body = app(LiquidRenderer::class)->render(TemplateSource::fromModel(Template::query()->where('slug', $slug)->firstOrFail()), $context->data, new RenderOptions($locale))->body;
+
+    foreach ($expected as $text) {
+        expect($body)->toContain($text);
+    }
+    // only the two discounted sample lines show a discount
+    expect(preg_match_all('/−\s?10 %/u', $body))->toBe(1);
+})->with([
+    'klar de' => ['klar', 'de', ['Rabatt −10 %', '<s class="was">170,00 €</s><br>153,00 €', 'Rabatt −50,00 €', '<s class="was">400,00 €</s><br>350,00 €']],
+    'kante en' => ['kante', 'en', ['<span class="tag">−10 %</span>', '<s class="was">€170.00</s><br>€153.00', '<span class="tag">−€50.00</span>']],
+    'leise de' => ['leise', 'de', ['<span>170,00 € − 10 % Rabatt</span>', '<span>400,00 € − 50,00 € Rabatt</span>', '153,00 €']],
+]);
 
 it('uses only words of the template vocabulary', function () {
     $lang = ['en' => json_decode((string) file_get_contents(lang_path('en.json')), true), 'de' => json_decode((string) file_get_contents(lang_path('de.json')), true)];

@@ -24,6 +24,17 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.4.0
+
+- **Discount per position:** items and optional items can have a discount, as a percentage (0 to 100 %, 100 % makes the line free) or as a fixed amount in euros. In the editor: **Add discount** in the menu of a position. The line total is quantity × unit price minus the discount; converting, duplicating and cancelling keep it, so a cancellation credits exactly what the invoice charged. A fixed amount larger than the line blocks finalizing. Discounts as positions of their own with a negative price work as before. https://openbill.dev/en/documents#drafts
+- **E-invoices:** the discount becomes a line allowance (BG-27) with amount, percentage and base, reason code 95; the line amount is the discounted one. https://openbill.dev/en/e-invoice#discounts
+- **REST API and MCP:** positions take and return `discount_type` (`percent`, `amount` or `null`) and `discount_value` (`"10"`, `"50.00"`); `totals.lines` has `before_discount` and `discount` next to `net`. Clients that send `groups` without these keys remove a discount, as with any position field left out. https://openbill.dev/en/api#saving-drafts
+- **Templates:** positions have `has_discount`, `discount_type`, `discount_value`, `discount_amount` and `total_before_discount`; `total` is the discounted amount. The built-in templates Klar, Kante and Leise (now 1.1.0) show the discount at its position, the word `discount` is in the vocabulary of `t`. Your own templates keep working, but show only the discounted `total` until you add the discount: https://openbill.dev/en/templates#discounts
+- These keys are now reserved for position fields: `has_discount`, `discount_type`, `discount_value`, `discount_amount`, `total_before_discount`. A custom position field with one of these keys is hidden by the discount in templates.
+- The sample invoice `long_invoice` has two discounted lines.
+- A database migration adds the columns `discount_type` and `discount_value` to `positions`; it runs on start. Existing positions have no discount, finalized documents keep their totals.
+- No changes to the compose files.
+
 ### 0.3.1
 
 - **Security update:** PHP 8.4.27 fixes two critical remote code execution vulnerabilities in PHP itself (CVE-2026-109618, CVE-2026-109619) that can be exploited without logging in. Update now: https://www.php.net/archive/2026.php#2026-10-21-5

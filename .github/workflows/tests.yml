@@ -39,7 +39,7 @@ jobs:
       GOTENBERG_URL: http://127.0.0.1:3000
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # not a service container: services can't take a command, and Gotenberg must run hardened
       # (no JavaScript, no URLs but its own files and data:) – same image and flags as docker-compose.yml and
@@ -60,9 +60,9 @@ jobs:
           coverage: none
 
       # version comes from "packageManager" in package.json
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -71,7 +71,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
@@ -117,7 +117,7 @@ jobs:
           # EInvoiceSamplesTest writes the archived e-invoice XMLs there for the einvoice job
           EINVOICE_SAMPLES_DIR: ${{ github.workspace }}/einvoice-samples
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: einvoice-samples
           path: einvoice-samples/*.xml
@@ -146,16 +146,16 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: einvoice-samples
           path: einvoice-samples
 
       # Schematron, Saxon-HE, xmlresolver, KoSIT validator and configuration: downloaded once per version of the script
       # (it pins URLs and SHA-256), so a flaky download source only hurts the first run after a version bump
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: storage/framework/testing/einvoice-validator
           key: einvoice-validator-${{ hashFiles('scripts/validate-einvoice.sh') }}
@@ -172,12 +172,12 @@ jobs:
       OPENBILL_URL: http://localhost:7739
       E2E_ARTISAN: e2e/compose.sh exec -T openbill php artisan
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - name: Image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           load: true
@@ -189,9 +189,9 @@ jobs:
         run: e2e/compose.sh up -d --wait --wait-timeout 300
 
       # version comes from "packageManager" in package.json (same as e2e/package.json)
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -210,7 +210,7 @@ jobs:
         if: failure()
         run: e2e/compose.sh logs --no-color --timestamps > compose.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: e2e-results

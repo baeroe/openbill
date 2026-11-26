@@ -73,7 +73,8 @@ it('keeps text documents out of the money figures', function () {
     app(FinalizeDocument::class)->handle(systemActor(), textDraft());
     $today = CarbonImmutable::now();
 
-    expect(DocumentQuery::summary([], $today->toDateString()))->toBe(['count' => 0, 'gross_total' => '0.00'])
+    expect(DocumentQuery::summary([], $today->toDateString()))->toBe(['count' => 1, 'gross_total' => '0.00'])
+        ->and(DocumentQuery::summary(['type' => 'text'], $today->toDateString()))->toBe(['count' => 1, 'gross_total' => '0.00'])
         ->and(DocumentQuery::counts([], $today->toDateString())['text'])->toBe(1)
         ->and(Overview::build($today)['figures']['open'])->toBe(['gross' => '0.00', 'count' => 0])
         ->and(Overview::build($today)['attention_count'])->toBe(0);

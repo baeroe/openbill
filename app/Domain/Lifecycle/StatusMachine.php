@@ -14,6 +14,7 @@ final class StatusMachine
         'confirmation' => ['draft' => ['open'], 'open' => ['done']],
         'invoice' => ['draft' => ['open'], 'open' => ['paid']],
         'cancellation' => ['draft' => ['closed']],
+        'text' => ['draft' => ['closed']],
     ];
 
     /** @return list<DocumentStatus> */
@@ -38,7 +39,7 @@ final class StatusMachine
 
     public static function finalizedStatus(DocumentType $type): DocumentStatus
     {
-        return $type === DocumentType::Cancellation ? DocumentStatus::Closed : DocumentStatus::Open;
+        return in_array($type, [DocumentType::Cancellation, DocumentType::Text], true) ? DocumentStatus::Closed : DocumentStatus::Open;
     }
 
     public static function isLocked(DocumentStatus $status): bool

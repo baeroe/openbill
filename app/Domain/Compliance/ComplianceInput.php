@@ -20,6 +20,7 @@ final readonly class ComplianceInput
      * @param  list<FieldDefinitionData>  $fieldDefinitions  all definitions; filtered per level here
      * @param  BigDecimal|null  $gross  cancellations: their gross total (negative for a credit)
      * @param  BigDecimal|null  $cancellable  cancellations: what is left of the invoice (gross minus finalized cancellations)
+     * @param  string|null  $title  text documents: title and Markdown body
      */
     public function __construct(
         public DocumentType $type,
@@ -38,5 +39,8 @@ final readonly class ComplianceInput
         public array $fieldDefinitions,
         public ?BigDecimal $gross = null,
         public ?BigDecimal $cancellable = null,
+        public ?string $title = null,
+        public ?string $body = null,
+        public bool $isPublic = false,
     ) {}
 }

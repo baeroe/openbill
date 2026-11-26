@@ -22,7 +22,7 @@ it('renders the list with normalized filters, counts per type and the sum', func
         ->assertInertia(fn (Assert $page) => $page
             ->component('documents/index')
             ->where('filters', ['type' => 'invoice', 'status' => null, 'customer_id' => $fjord->id, 'q' => null, 'date_from' => null, 'date_to' => null])
-            ->where('counts', ['all' => 3, 'offer' => 1, 'confirmation' => 0, 'invoice' => 2, 'cancellation' => 0])
+            ->where('counts', ['all' => 3, 'offer' => 1, 'confirmation' => 0, 'invoice' => 2, 'cancellation' => 0, 'text' => 0])
             ->where('summary', ['count' => 2, 'gross_total' => '129.00'])
             ->where('customers', [['id' => $fjord->id, 'name' => 'Fjord Analytics AB']]));
 });

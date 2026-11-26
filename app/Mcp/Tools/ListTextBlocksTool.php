@@ -19,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('list-text-blocks')]
 #[Title('Text blocks')]
-#[Description('Reusable texts (intro, closing, payment, note) with Liquid placeholders. Put their body into intro or closing of a draft with update-document.')]
+#[Description('Reusable texts (intro, closing, payment, note, clause) with Liquid placeholders. Put their body into intro or closing of a draft with update-document.')]
 #[IsReadOnly]
 #[IsOpenWorld(false)]
 final class ListTextBlocksTool extends OpenbillTool
@@ -40,6 +40,6 @@ final class ListTextBlocksTool extends OpenbillTool
      */
     public function schema(JsonSchema $schema): array
     {
-        return ['kind' => $schema->string()->enum(['intro', 'closing', 'payment', 'note'])];
+        return ['kind' => $schema->string()->enum(['intro', 'closing', 'payment', 'note', 'clause'])];
     }
 }

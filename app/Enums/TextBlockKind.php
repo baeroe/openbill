@@ -8,4 +8,5 @@ enum TextBlockKind: string
     case Closing = 'closing';
     case Payment = 'payment';
     case Note = 'note';
+    case Clause = 'clause';
 }

@@ -8,4 +8,5 @@ enum DocumentType: string
     case Confirmation = 'confirmation';
     case Invoice = 'invoice';
     case Cancellation = 'cancellation';
+    case Text = 'text';
 }

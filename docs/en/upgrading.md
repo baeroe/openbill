@@ -24,6 +24,13 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.5.0
+
+- **Text documents:** a new document type `text` for terms and conditions, service descriptions and small contracts: title and Markdown text, optionally a customer, a short name and the flag public. They are numbered `T-{YYYY}-{0000}`, finalized to the status closed and never count in sums or figures. This first step covers the REST API and MCP (`type: text`, `title`, `body`, `slug`, `is_public`); rendering, the editor and the public link follow. https://openbill.dev/en/documents#text-documents
+- **Text blocks:** a new kind `clause` for reusable clauses.
+- A database migration adds the columns `title`, `body`, `slug` and `is_public` to `documents` (the lock trigger is re-created with them) and creates the document type and number range `text`; it runs on start. Existing documents are not touched.
+- No changes to the compose files.
+
 ### 0.4.0
 
 - **Discount per position:** items and optional items can have a discount, as a percentage (0 to 100 %, 100 % makes the line free) or as a fixed amount in euros. In the editor: **Add discount** in the menu of a position. The line total is quantity × unit price minus the discount; converting, duplicating and cancelling keep it, so a cancellation credits exactly what the invoice charged. A fixed amount larger than the line blocks finalizing. Discounts as positions of their own with a negative price work as before. https://openbill.dev/en/documents#drafts

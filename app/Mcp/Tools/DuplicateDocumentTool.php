@@ -20,7 +20,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('duplicate-document')]
 #[Title('Duplicate document')]
-#[Description('Copy a document (draft or finalized, not a cancellation) into a new draft of the same type with today\'s date. The source stays unchanged. Answers with the new draft.')]
+#[Description('Copy a document (draft or finalized, not a cancellation; for a text document this starts a new version) into a new draft of the same type with today\'s date. The source stays unchanged. Answers with the new draft.')]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
 final class DuplicateDocumentTool extends OpenbillTool

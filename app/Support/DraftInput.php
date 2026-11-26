@@ -22,7 +22,10 @@ use Illuminate\Validation\ValidationException;
  */
 final class DraftInput
 {
-    public const FIELDS = ['date', 'customer_id', 'contact_id', 'service_date', 'service_date_end', 'due_date', 'valid_until', 'intro', 'closing', 'template_id', 'locale', 'custom'];
+    public const FIELDS = ['date', 'customer_id', 'contact_id', 'service_date', 'service_date_end', 'due_date', 'valid_until', 'intro', 'closing', 'template_id', 'locale', 'custom', 'title', 'body', 'slug', 'is_public'];
+
+    /** Fields that only text documents have. */
+    private const TEXT_ONLY = ['title', 'body', 'slug', 'is_public'];
 
     /**
      * @param  array<string, mixed>  $input
@@ -55,6 +58,10 @@ final class DraftInput
             'template_id' => ['sometimes', 'nullable', 'string', Rule::exists('templates', 'id')],
             'locale' => ['sometimes', 'required', Rule::in(['en', 'de'])],
             'custom' => ['sometimes', 'array'],
+            'title' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'body' => ['sometimes', 'nullable', 'string', 'max:100000'],
+            'slug' => ['sometimes', 'nullable', 'string', 'max:64', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/'],
+            'is_public' => ['sometimes', 'boolean'],
             'groups' => ['sometimes', 'array', 'list', 'max:200'],
             'groups.*' => ['array'],
             'groups.*.id' => ['sometimes', 'nullable', 'string'],
@@ -111,6 +118,27 @@ final class DraftInput
                 if ($message !== null) {
                     $messages[$path.'discount_value'][] = $message;
                 }
+            }
+        }
+
+        if ($document->type === DocumentType::Text) {
+            foreach ($data['groups'] ?? [] as $g => $group) {
+                if (($group['positions'] ?? []) !== [] || trim((string) ($group['title'] ?? '')) !== '') {
+                    $messages["groups.{$g}"][] = Text::t('errors.text_no_positions');
+                }
+            }
+            $slug = array_key_exists('slug', $data) ? $data['slug'] : $document->slug;
+            $public = array_key_exists('is_public', $data) ? $data['is_public'] : $document->is_public;
+            if ($public && ($slug === null || $slug === '')) {
+                $messages['is_public'][] = Text::t('errors.public_needs_slug');
+            }
+        } else {
+            foreach (self::TEXT_ONLY as $field) {
+                if (($data[$field] ?? null) !== null && $data[$field] !== false && $data[$field] !== '') {
+                    $messages[$field][] = Text::t('errors.text_only');
+                }
+                // a harmless empty value of a field this type does not have is dropped, never stored
+                unset($data[$field]);
             }
         }
 

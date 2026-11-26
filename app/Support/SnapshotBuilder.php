@@ -70,6 +70,11 @@ final class SnapshotBuilder
             'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($document->locale)),
         ];
 
+        if ($document->type === DocumentType::Text) {
+            // rendered from the snapshot when archiving; frozen with the document
+            $sources += ['title' => $document->title, 'body' => $document->body, 'slug' => $document->slug, 'is_public' => (bool) $document->is_public];
+        }
+
         return $document->type === DocumentType::Cancellation ? self::withInvoiceTax($document, $sources) : $sources;
     }
 

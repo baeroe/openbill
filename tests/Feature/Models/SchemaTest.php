@@ -16,11 +16,11 @@ use Illuminate\Support\Facades\Schema;
 it('ships the base master data with a fresh database', function () {
     expect(Organization::query()->count())->toBe(1)
         ->and(Organization::current()->locale)->toBe('en')
-        ->and(DocumentTypeSetting::query()->orderBy('type')->pluck('type')->all())->toBe(['cancellation', 'confirmation', 'invoice', 'offer'])
+        ->and(DocumentTypeSetting::query()->orderBy('type')->pluck('type')->all())->toBe(['cancellation', 'confirmation', 'invoice', 'offer', 'text'])
         ->and(DocumentTypeSetting::query()->findOrFail('invoice')->profile)->toBe(ComplianceProfile::Basic)
         ->and(DocumentTypeSetting::query()->findOrFail('invoice')->payment_term_days)->toBe(14)
         ->and(NumberSequence::query()->whereNull('year')->orderBy('doc_type')->pluck('pattern')->all())
-        ->toBe(['CN-{YYYY}-{0000}', 'OC-{YYYY}-{0000}', 'C-{0000}', 'INV-{YYYY}-{0000}', 'Q-{YYYY}-{0000}'])
+        ->toBe(['CN-{YYYY}-{0000}', 'OC-{YYYY}-{0000}', 'C-{0000}', 'INV-{YYYY}-{0000}', 'Q-{YYYY}-{0000}', 'T-{YYYY}-{0000}'])
         ->and(TaxRate::query()->orderBy('sort')->pluck('percent')->all())->toBe(['19.00', '7.00', '0.00'])
         ->and(Unit::query()->orderBy('sort')->pluck('code')->all())->toBe(['HUR', 'DAY', 'H87', 'LS', 'KMT', 'MON']);
 });

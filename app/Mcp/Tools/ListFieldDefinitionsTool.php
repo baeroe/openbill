@@ -37,7 +37,7 @@ final class ListFieldDefinitionsTool extends OpenbillTool
     {
         return [
             'scope' => $schema->string()->enum(['org', 'customer', 'contact', 'document', 'position']),
-            'doc_type' => $schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation'])
+            'doc_type' => $schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation', 'text'])
                 ->description('Only fields that apply to this document type (org, customer and contact fields always do)'),
         ];
     }

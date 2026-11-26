@@ -1,6 +1,6 @@
 /** Shapes of the REST API (phase 4, docs/superpowers/plans/2026-10-11-phase-04-api.md "Interfaces"). Amounts are strings. */
 
-export type DocumentType = 'offer' | 'confirmation' | 'invoice' | 'cancellation';
+export type DocumentType = 'offer' | 'confirmation' | 'invoice' | 'cancellation' | 'text';
 export type DocumentStatus = 'draft' | 'open' | 'accepted' | 'rejected' | 'done' | 'paid' | 'cancelled' | 'closed';
 export type TaxTreatment = 'domestic' | 'eu_reverse_charge' | 'third_country';
 export type FieldScope = 'org' | 'customer' | 'contact' | 'document' | 'position';
@@ -10,7 +10,7 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'money' | 'date' | 'sel
 export type CustomValue = string | number | boolean | null;
 export type CustomValues = Record<string, CustomValue>;
 
-export const DOCUMENT_TYPES: DocumentType[] = ['offer', 'confirmation', 'invoice', 'cancellation'];
+export const DOCUMENT_TYPES: DocumentType[] = ['offer', 'confirmation', 'invoice', 'cancellation', 'text'];
 export const DOCUMENT_STATUSES: DocumentStatus[] = ['draft', 'open', 'accepted', 'rejected', 'done', 'paid', 'cancelled', 'closed'];
 
 export type Contact = {
@@ -65,6 +65,10 @@ export type DocumentSummary = {
     customer_id: string | null;
     customer_name: string | null;
     contact_id: string | null;
+    /** Text documents only (editor and UI follow in a later step, so optional for now). */
+    title?: string | null;
+    slug?: string | null;
+    is_public?: boolean;
     due_date: string | null;
     valid_until: string | null;
     locale: string;
@@ -110,7 +114,7 @@ export type FieldDefinition = {
 export type PositionKind = 'item' | 'text' | 'optional';
 export type DiscountType = 'percent' | 'amount';
 export type ComplianceProfile = 'basic' | 'en16931';
-export type TextBlockKind = 'intro' | 'closing' | 'payment' | 'note';
+export type TextBlockKind = 'intro' | 'closing' | 'payment' | 'note' | 'clause';
 
 /**
  * A position as GET/PATCH /api/documents/{id} carries it; quantity, price and discount are decimal strings.

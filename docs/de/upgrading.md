@@ -24,6 +24,13 @@ Alle Versionen und ihre Änderungen: https://github.com/baeroe/openbill/releases
 
 <!-- nur absolute Links: jeder Abschnitt wird zu den Notizen des GitHub-Release (scripts/release-notes.sh) -->
 
+### 0.5.0
+
+- **Textdokumente:** ein neuer Dokumenttyp `text` für AGB, Leistungsbeschreibungen und kleine Verträge: Titel und Markdown-Text, optional ein Kunde, ein Kurzname und das Kennzeichen öffentlich. Sie werden mit `T-{YYYY}-{0000}` nummeriert, beim Abschließen auf den Status abgeschlossen gesetzt und zählen nie in Summen oder Kennzahlen. Dieser erste Schritt umfasst die REST-API und MCP (`type: text`, `title`, `body`, `slug`, `is_public`); Darstellung, Editor und der öffentliche Link folgen. https://openbill.dev/de/documents#textdokumente
+- **Textbausteine:** eine neue Art `clause` für wiederverwendbare Klauseln.
+- Eine Datenbank-Migration ergänzt die Spalten `title`, `body`, `slug` und `is_public` in `documents` (der Sperr-Trigger wird mit ihnen neu angelegt) und legt Dokumenttyp und Nummernkreis `text` an; sie läuft beim Start. Bestehende Dokumente bleiben unberührt.
+- Keine Änderungen an den Compose-Dateien.
+
 ### 0.4.0
 
 - **Rabatt je Position:** Leistungen und optionale Leistungen können einen Rabatt haben, als Prozentsatz (0 bis 100 %, 100 % macht die Zeile kostenlos) oder als festen Betrag in Euro. Im Editor: **Rabatt hinzufügen** im Menü einer Position. Die Zeilensumme ist Menge × Einzelpreis minus Rabatt; Umwandeln, Duplizieren und Stornieren übernehmen ihn, ein Storno schreibt also genau das gut, was die Rechnung berechnet hat. Ein fester Betrag über dem Zeilenbetrag verhindert das Abschließen. Rabatte als eigene Position mit negativem Preis funktionieren wie bisher. https://openbill.dev/de/documents#entwurfe

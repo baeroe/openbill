@@ -50,7 +50,7 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `list-customers`, `get-customer` | Customers with contacts; search and pages |
 | `create-customer`, `update-customer` | Create or change a customer; `contacts` is the complete list |
 | `list-documents`, `get-document` | Documents in short form with filters; one document completely, with totals and open issues |
-| `create-document`, `update-document` | Create a draft (offer, confirmation, invoice) or change it; `groups` replaces all groups and positions, a position can carry a discount (`discount_type` `percent` or `amount`, `discount_value`) |
+| `create-document`, `update-document` | Create a draft (offer, confirmation, invoice, text) or change it; text documents take `title`, `body` (Markdown), `slug` and `is_public` instead of groups; `groups` replaces all groups and positions, a position can carry a discount (`discount_type` `percent` or `amount`, `discount_value`) |
 | `duplicate-document` | Copy a document into a new draft |
 | `finalize-document` | Check, assign the number, archive the PDF (and the e-invoice XML) – cannot be undone |
 | `set-document-status` | Accepted, rejected, done, paid, back to open |
@@ -61,7 +61,7 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `list-templates`, `get-template`, `update-template` | Templates with their Liquid and CSS sources; built-in ones are read-only |
 | `render-template-preview` | Liquid errors with line, page count, missing fields and a text excerpt – never HTML |
 | `get-settings`, `update-organization` | Organization, document types and customer numbering; change the organization |
-| `list-tax-rates-and-units`, `list-text-blocks` | Ids of tax rates and units for positions, reusable texts |
+| `list-tax-rates-and-units`, `list-text-blocks` | Ids of tax rates and units for positions, reusable texts (intro, closing, payment, note, clause) |
 
 ## Resources
 

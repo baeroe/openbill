@@ -26,7 +26,7 @@ it('validates custom fields of the organization with their path', function () {
 });
 
 it('lists the document types with their numbering and the next number', function () {
-    $this->getJson('/api/document-types')->assertOk()->assertJsonCount(4);
+    $this->getJson('/api/document-types')->assertOk()->assertJsonCount(5);
 
     $this->getJson('/api/document-types/invoice')
         ->assertOk()

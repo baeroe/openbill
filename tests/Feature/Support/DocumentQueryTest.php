@@ -25,7 +25,7 @@ it('filters overdue invoices like StatusMachine::isOverdue', function () {
 
 it('counts per type with the other filters applied', function () {
     expect(DocumentQuery::counts(['customer_id' => $this->fjord->id], $this->today))
-        ->toBe(['all' => 2, 'offer' => 1, 'confirmation' => 0, 'invoice' => 1, 'cancellation' => 0]);
+        ->toBe(['all' => 2, 'offer' => 1, 'confirmation' => 0, 'invoice' => 1, 'cancellation' => 0, 'text' => 0]);
 });
 
 it('sums the gross totals as an exact string', function () {

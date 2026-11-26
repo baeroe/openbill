@@ -7,6 +7,7 @@ use App\Enums\FieldType;
 use App\Exceptions\ActionNotAllowedException;
 use App\Mcp\Tools\CreateDocumentTool;
 use App\Mcp\Tools\DuplicateDocumentTool;
+use App\Mcp\Tools\FinalizeDocumentTool;
 use App\Mcp\Tools\UpdateDocumentTool;
 use App\Models\Contact;
 use App\Models\Customer;
@@ -103,4 +104,12 @@ it('duplicates a document as a new draft and leaves the source alone', function 
         ->and($copy)->toMatchArray(['type' => 'invoice', 'status' => 'draft', 'number' => null])
         ->and($copy['groups'][0]['positions'][0]['title'])->toBe('Workshop')
         ->and($source->fresh()->status->value)->toBe('open');
+});
+
+it('creates, checks and finalizes a text document through MCP', function () {
+    $created = mcpJson(mcpTool(CreateDocumentTool::class, ['type' => 'text', 'title' => 'Terms', 'body' => 'Hello', 'slug' => 'terms']));
+    expect($created)->toMatchArray(['type' => 'text', 'title' => 'Terms', 'slug' => 'terms', 'is_public' => false, 'issues' => []]);
+
+    $done = mcpJson(mcpTool(FinalizeDocumentTool::class, ['id' => $created['id']]));
+    expect($done['number'])->toStartWith('T-')->and($done['status'])->toBe('closed');
 });

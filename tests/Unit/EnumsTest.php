@@ -22,7 +22,7 @@ use App\Enums\TokenAbility;
 it('uses the exact values from the spec', function (string $enum, array $values) {
     expect(array_map(fn (BackedEnum $case): string|int => $case->value, $enum::cases()))->toBe($values);
 })->with([
-    'document types' => [DocumentType::class, ['offer', 'confirmation', 'invoice', 'cancellation']],
+    'document types' => [DocumentType::class, ['offer', 'confirmation', 'invoice', 'cancellation', 'text']],
     'statuses' => [DocumentStatus::class, ['draft', 'open', 'accepted', 'rejected', 'done', 'paid', 'cancelled', 'closed']],
     'position kinds' => [PositionKind::class, ['item', 'text', 'optional']],
     'discount types' => [DiscountType::class, ['percent', 'amount']],
@@ -34,7 +34,7 @@ it('uses the exact values from the spec', function (string $enum, array $values)
     'tax treatments' => [TaxTreatment::class, ['domestic', 'eu_reverse_charge', 'third_country']],
     'profiles' => [ComplianceProfile::class, ['basic', 'en16931']],
     'token abilities' => [TokenAbility::class, ['api:read', 'api:write', 'mcp', 'templates:render', 'templates:write']],
-    'text block kinds' => [TextBlockKind::class, ['intro', 'closing', 'payment', 'note']],
+    'text block kinds' => [TextBlockKind::class, ['intro', 'closing', 'payment', 'note', 'clause']],
     'actor types' => [ActorType::class, ['user', 'token', 'system']],
     'event actions' => [EventAction::class, ['created', 'updated', 'finalized', 'status_changed', 'converted', 'converted_from', 'cancelled', 'duplicated', 'deleted']],
     'file kinds' => [DocumentFileKind::class, ['pdf', 'xml']],

@@ -27,7 +27,7 @@ use ArrayObject;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 /**
- * Offer, order confirmation, invoice or cancellation. Groups and positions are embedded; they are
+ * Offer, order confirmation, invoice, cancellation or text document. Groups and positions are embedded; they are
  * writable only while the document is a draft. Lists show the short form (no texts, groups, totals, issues).
  */
 #[ApiResource(
@@ -40,7 +40,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             provider: DocumentProvider::class,
             normalizationContext: [...Normalization::CONTEXT, 'groups' => [self::LIST]],
             parameters: [
-                'type' => new QueryParameter(description: 'offer, confirmation, invoice or cancellation'),
+                'type' => new QueryParameter(description: 'offer, confirmation, invoice, cancellation or text'),
                 'status' => new QueryParameter(description: 'draft, open, accepted, rejected, done, paid, cancelled, closed, or overdue (open invoices past their due date)'),
                 'customer_id' => new QueryParameter(description: 'customer ULID'),
                 'q' => new QueryParameter(description: 'number or customer name contains'),
@@ -56,7 +56,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             read: false,
             deserialize: false,
             processor: DocumentProcessor::class,
-            description: 'Creates a draft: type (offer, confirmation, invoice), customer_id, date and any field PATCH takes.',
+            description: 'Creates a draft: type (offer, confirmation, invoice, text), customer_id (optional for text), date and any field PATCH takes.',
         ),
         new Patch(
             uriTemplate: '/documents/{id}',
@@ -167,6 +167,18 @@ final class DocumentResource
         public string $intro,
         #[Groups([self::ITEM])]
         public string $closing,
+        #[ApiProperty(description: 'text documents only: title')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $title,
+        #[ApiProperty(description: 'text documents only: Markdown text (at most 100000 characters)')]
+        #[Groups([self::ITEM])]
+        public ?string $body,
+        #[ApiProperty(description: 'text documents only: short name (a-z, 0-9, hyphens), shared by all versions of a text')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $slug,
+        #[ApiProperty(description: 'text documents only: publicly readable after finalizing (needs slug, no customer)')]
+        #[Groups([self::LIST, self::ITEM])]
+        public bool $is_public,
         #[Groups([self::ITEM])]
         public ?string $template_id,
         #[Groups([self::LIST, self::ITEM])]
@@ -246,6 +258,10 @@ final class DocumentResource
             valid_until: $document->valid_until?->toDateString(),
             intro: (string) $document->intro,
             closing: (string) $document->closing,
+            title: $document->title,
+            body: $document->body,
+            slug: $document->slug,
+            is_public: (bool) $document->is_public,
             template_id: $document->template_id,
             locale: $document->locale,
             custom: new ArrayObject($document->custom ?? []),

@@ -1,6 +1,6 @@
 # Documents
 
-openbill knows four document types. Each one moves through a small set of statuses; finalizing gives it a number and locks it.
+openbill knows five document types. Each one moves through a small set of statuses; finalizing gives it a number and locks it.
 
 | Type | Statuses |
 |---|---|
@@ -8,6 +8,7 @@ openbill knows four document types. Each one moves through a small set of status
 | Order confirmation | draft → open → done |
 | Invoice | draft → open → paid; cancelled (set by a cancellation that covers the rest) |
 | Cancellation | draft → closed |
+| Text document | draft → closed |
 
 "Overdue" is not a status: an open invoice whose due date has passed is shown as overdue.
 
@@ -24,6 +25,14 @@ Position kinds:
 Items and optional items can have a **discount**: a percentage of the line amount (0 to 100 %; 100 % makes the line free) or a fixed amount in euros (at most the line amount). The line total is quantity × unit price, rounded to cents, minus the discount; a percentage discount is rounded to cents too. A fixed amount larger than the line is reported by the check and blocks finalizing (the quantity or price may still change while you edit). Converting and duplicating keep the discount, and a cancellation mirrors it, so it credits exactly what the invoice line charged. A discount as a position of its own with a negative price still works as before.
 
 Amounts and quantities are exact decimals. Through the API they are sent as strings with a dot (`"12.50"`); numbers like `12.5` or `"12,5"` are rejected with a message for that field. Quantities and unit prices have at most 11 digits before the dot (and 4 after it); line, group and document totals may be at most 9,999,999,999,999.99. Larger values are rejected with a message at the position (or the positions) instead of being saved.
+
+## Text documents
+
+A **text document** (type `text`) is for terms and conditions, service descriptions and small contracts: a title and a text in Markdown (at most 100,000 characters), the usual date and custom fields of the document level, and optionally a customer. It has no positions, no taxes and no totals, so it never counts in the overview, the sums of the document list, "open" or "overdue", and it cannot be converted or cancelled.
+
+- **Short name and public:** a text document can carry a short name (`slug`: lowercase letters, digits and hyphens, e.g. `terms`) that all versions of a text share, and the flag **public**. A public text needs a short name and no customer; a public text with a customer is reported by the check (`public_with_customer`) and blocks finalizing.
+- **Check:** date, title and text must not be empty and required custom fields of the document level must be filled. There are no customer, tax or organization rules.
+- **Finalizing:** like a cancellation: number `T-{YYYY}-{0000}`, status `closed`, snapshot with title, text, short name and public flag, PDF in the archive. Afterwards all of this is locked. A new version is a copy: duplicate, change, finalize.
 
 ## Taxes and totals
 

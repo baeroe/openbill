@@ -76,6 +76,10 @@ final class Schemas
             'closing' => $schema->string()->nullable()->description('Text below the positions'),
             'template_id' => $schema->string()->nullable()->description('Template (list-templates); null: the default of the document type'),
             'locale' => $schema->string()->enum(['en', 'de'])->description('Document language'),
+            'title' => $schema->string()->nullable()->description('Text documents only: title'),
+            'body' => $schema->string()->nullable()->description('Text documents only: Markdown text, at most 100000 characters'),
+            'slug' => $schema->string()->nullable()->description('Text documents only: short name (a-z, 0-9, hyphens) shared by all versions of a text'),
+            'is_public' => $schema->boolean()->description('Text documents only: publicly readable once finalized (needs slug; not with a customer)'),
             'custom' => $schema->object()->description('Custom field values by key (list-field-definitions, scope document)'),
             'groups' => $schema->array()->items($schema->object([
                 'id' => $schema->string()->description('Keeps an existing group'),
@@ -139,7 +143,7 @@ final class Schemas
             'default_value' => $schema->union(['string', 'number', 'boolean', 'null'])->description('Value new documents or customers start with'),
             'help' => $schema->string()->nullable(),
             'options' => $schema->array()->items($schema->string())->description('Choices of a select field'),
-            'doc_types' => $schema->array()->items($schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation']))
+            'doc_types' => $schema->array()->items($schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation', 'text']))
                 ->description('Document types a document or position field applies to (at least one)'),
             'sort' => $schema->integer(),
         ];

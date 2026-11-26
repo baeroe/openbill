@@ -115,7 +115,7 @@ final class DocumentQuery
      * Documents per type under the other filters (the type pills of the documents page).
      *
      * @param  array<string, mixed>  $filters
-     * @return array{all: int, offer: int, confirmation: int, invoice: int, cancellation: int}
+     * @return array{all: int, offer: int, confirmation: int, invoice: int, cancellation: int, text: int}
      */
     public static function counts(array $filters, string $today): array
     {
@@ -128,13 +128,15 @@ final class DocumentQuery
         $confirmation = $count(DocumentType::Confirmation);
         $invoice = $count(DocumentType::Invoice);
         $cancellation = $count(DocumentType::Cancellation);
+        $text = $count(DocumentType::Text);
 
         return [
-            'all' => $offer + $confirmation + $invoice + $cancellation,
+            'all' => $offer + $confirmation + $invoice + $cancellation + $text,
             'offer' => $offer,
             'confirmation' => $confirmation,
             'invoice' => $invoice,
             'cancellation' => $cancellation,
+            'text' => $text,
         ];
     }
 
@@ -151,6 +153,7 @@ final class DocumentQuery
             : 'documents.gross_total';
         // the query builder returns stdClass rows; as array they are typed for Larastan
         $row = (array) (self::filtered($filters, $today)->toBase()
+            ->where('documents.type', '!=', DocumentType::Text->value)
             ->selectRaw("COUNT(*) as aggregate, SUM({$amount}) as gross")
             ->first() ?? []);
 

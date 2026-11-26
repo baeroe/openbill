@@ -54,6 +54,8 @@ final class SampleDataFactory
             'optional' => ['Wartung & Updates', 'Monatlich, inklusive Monitoring'],
             'units' => ['hour' => ['Stunde', 'Std.'], 'day' => ['Tag', 'Tage'], 'piece' => ['Stück', 'Stk.'], 'flat' => ['Pauschal', 'Psch.'], 'month' => ['Monat', 'Mon.']],
             'contact' => ['Frau', 'Leitung E-Commerce'],
+            'text_title' => 'Allgemeine Geschäftsbedingungen',
+            'text_body' => "## § 1 Geltung\n\nDiese Bedingungen gelten für alle Verträge zwischen **Studio Nordlicht** und ihren Auftraggebern. Abweichende Bedingungen des Auftraggebers gelten nur, wenn wir ihnen schriftlich zustimmen.\n\n## § 2 Leistungen\n\nArt und Umfang der Leistungen ergeben sich aus dem Angebot. Dazu gehören insbesondere:\n\n- Konzeption und Beratung\n- Gestaltung und Entwicklung\n- Betrieb und Wartung\n\n## § 3 Vergütung\n\n1. Rechnungen sind innerhalb von 14 Tagen ohne Abzug zu zahlen.\n2. Bei Zahlungsverzug berechnen wir Verzugszinsen in gesetzlicher Höhe.\n3. Alle Preise verstehen sich netto zuzüglich Umsatzsteuer.\n\n> Änderungswünsche nach der Abnahme werden gesondert berechnet.\n\n## § 4 Schlussbestimmungen\n\nEs gilt deutsches Recht. Die aktuelle Fassung steht unter [nordlicht.example/legal/agb](https://nordlicht.example/legal/agb).",
         ],
         'en' => [
             'invoice_intro' => "Hello {{ contact.first_name }},\nthank you for working with us. We invoice the following services:",
@@ -67,6 +69,8 @@ final class SampleDataFactory
             'optional' => ['Maintenance & updates', 'Monthly, including monitoring'],
             'units' => ['hour' => ['Hour', 'h'], 'day' => ['Day', 'd'], 'piece' => ['Piece', 'pc'], 'flat' => ['Flat rate', 'flat'], 'month' => ['Month', 'mo']],
             'contact' => ['Ms', 'Head of e-commerce'],
+            'text_title' => 'General terms and conditions',
+            'text_body' => "## § 1 Scope\n\nThese terms apply to all contracts between **Studio Nordlicht** and its clients. Terms of the client only apply if we agree to them in writing.\n\n## § 2 Services\n\nThe quote defines the kind and scope of the services. They include in particular:\n\n- Concept and consulting\n- Design and development\n- Operations and maintenance\n\n## § 3 Fees\n\n1. Invoices are payable within 14 days without deduction.\n2. In case of late payment we charge statutory default interest.\n3. All prices are net, plus VAT.\n\n> Change requests after acceptance are charged separately.\n\n## § 4 Final provisions\n\nGerman law applies. The current version is available at [nordlicht.example/legal/terms](https://nordlicht.example/legal/terms).",
         ],
     ];
 
@@ -76,12 +80,13 @@ final class SampleDataFactory
         $text = self::TEXT[$locale];
         $type = $scenario->documentType();
         $offer = $type === DocumentType::Offer;
+        $isText = $type === DocumentType::Text;
         $definitions = SnapshotBuilder::fieldDefinitionRows();
 
         $sources = [
             'org' => $this->org($scenario, $definitions),
-            'customer' => $this->customer($scenario, $locale, $definitions),
-            'contact' => [
+            'customer' => $isText ? null : $this->customer($scenario, $locale, $definitions),
+            'contact' => $isText ? null : [
                 'id' => 'sample-contact', 'salutation' => $text['contact'][0], 'first_name' => 'Mira', 'last_name' => 'Albers',
                 'position' => $text['contact'][1], 'email' => 'mira.albers@hafenkontor.example', 'phone' => '+49 40 555 0101',
                 'custom' => self::custom($definitions, FieldScope::Contact, null),
@@ -97,24 +102,31 @@ final class SampleDataFactory
             'template' => null,
             'field_definitions' => $definitions,
             'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($locale)),
+            ...($isText ? ['title' => $text['text_title'], 'body' => $text['text_body'], 'slug' => 'agb', 'is_public' => true] : []),
         ];
 
         $document = new Document;
         $document->forceFill([
             'type' => $type,
             'status' => DocumentStatus::Open,
-            'number' => $offer ? 'Q-2026-0042' : 'INV-2026-0042',
+            'number' => match (true) {
+                $offer => 'Q-2026-0042',
+                $isText => 'T-2026-0003',
+                default => 'INV-2026-0042',
+            },
             'date' => self::DATE,
-            'service_date' => $offer ? null : '2026-09-30',
-            'due_date' => $offer ? null : '2026-10-15',
+            'service_date' => $offer || $isText ? null : '2026-09-30',
+            'due_date' => $offer || $isText ? null : '2026-10-15',
             'valid_until' => $offer ? '2026-10-31' : null,
-            'intro' => $text[$offer ? 'offer_intro' : 'invoice_intro'],
-            'closing' => $text[$offer ? 'offer_closing' : 'invoice_closing'],
+            'intro' => $isText ? '' : $text[$offer ? 'offer_intro' : 'invoice_intro'],
+            'closing' => $isText ? '' : $text[$offer ? 'offer_closing' : 'invoice_closing'],
+            'title' => $isText ? $text['text_title'] : null,
+            'body' => $isText ? $text['text_body'] : null,
             'locale' => $locale,
             'custom' => self::custom($definitions, FieldScope::Document, $type),
         ]);
         $document->id = 'sample-'.$scenario->value;
-        $document->setRelation('groups', new Collection($this->groups($scenario, $text, self::custom($definitions, FieldScope::Position, $type))));
+        $document->setRelation('groups', new Collection($isText ? [] : $this->groups($scenario, $text, self::custom($definitions, FieldScope::Position, $type))));
 
         return new SampleData($document, $sources);
     }

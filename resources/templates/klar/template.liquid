@@ -22,6 +22,10 @@
   {% endif %}
 </section>
 
+{% if document.type == "text" %}
+<h1>{{ document.title }}</h1>
+<div class="doc-body">{{ document.body }}</div>
+{% else %}
 <h1>{{ document.type_label }} {{ document.number }}{% if document.project_name != blank %} · {{ document.project_name }}{% endif %}</h1>
 
 {% if document.intro != blank %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
@@ -60,3 +64,4 @@
 
 {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
 {% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
+{% endif %}

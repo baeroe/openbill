@@ -10,9 +10,14 @@ enum RenderScenario: string
     case SmallBusiness = 'small_business';
     case ReverseCharge = 'reverse_charge';
     case OfferWithOptions = 'offer_with_options';
+    case TextDocument = 'text_document';
 
     public function documentType(): DocumentType
     {
-        return $this === self::OfferWithOptions ? DocumentType::Offer : DocumentType::Invoice;
+        return match ($this) {
+            self::OfferWithOptions => DocumentType::Offer,
+            self::TextDocument => DocumentType::Text,
+            default => DocumentType::Invoice,
+        };
     }
 }

@@ -3,21 +3,21 @@
     {% if org.logo != blank %}<img class="logo" src="{{ org.logo }}" alt="">{% else %}<span class="org">{{ org.name }}</span>{% endif %}
   </div>
   <div class="band-main">
-    <h1>{{ document.type_label }}</h1>
-    <div class="amount">
+    <h1>{% if document.type == "text" %}{{ document.title }}{% else %}{{ document.type_label }}{% endif %}</h1>
+    {% if document.type != "text" %}<div class="amount">
       <span>{% if document.type == "offer" %}{{ 'offer_total' | t }}{% elsif document.type == "cancellation" %}{{ 'credit' | t }}{% else %}{{ 'amount_due' | t }}{% endif %}</span>
       <strong>{{ document.gross_total | money }}</strong>
-    </div>
+    </div>{% endif %}
   </div>
 </header>
 
 <section class="parties">
-  <div>
+  {% if customer %}<div>
     <p class="label">{{ 'for' | t }}</p>
     {% if customer %}
       <p><b>{{ customer.name }}</b>{% if contact %}<br>{{ contact.full_name }}{% endif %}<br>{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% if customer.vat_id != blank %}<br>{{ 'vat_id' | t }} {{ customer.vat_id }}{% endif %}</p>
     {% endif %}
-  </div>
+  </div>{% endif %}
   <div>
     <p class="label">{{ 'details' | t }}</p>
     <p>
@@ -38,6 +38,9 @@
 </section>
 
 <main class="content">
+  {% if document.type == "text" %}
+  <div class="doc-body">{{ document.body }}</div>
+  {% else %}
   {% if document.intro != blank %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
 
   <table class="items">
@@ -69,4 +72,5 @@
 
   {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
   {% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
+  {% endif %}
 </main>

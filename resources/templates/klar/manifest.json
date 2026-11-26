@@ -1,10 +1,10 @@
 {
   "name": "Klar",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "openbill",
   "license": "MIT",
   "description": "Calm, classic layout with a clear table. Fits every document type.",
-  "documentTypes": ["offer", "confirmation", "invoice", "cancellation"],
+  "documentTypes": ["offer", "confirmation", "invoice", "cancellation", "text"],
   "expectedFields": [
     { "scope": "document", "key": "project_name", "type": "text", "fallback": "" }
   ],

@@ -66,6 +66,11 @@ final class LiquidRenderer
         $context['document'] = $document;
         /** @var array<string, mixed> $escaped */
         $escaped = self::escape($context);
+        // text documents: the Markdown becomes HTML only now, so it is not escaped a second time (Markdown escapes
+        // raw HTML itself)
+        if (($context['document']['type'] ?? null) === 'text' && is_string($context['document']['body'] ?? null)) {
+            $escaped['document']['body'] = Markdown::toHtml($context['document']['body']);
+        }
 
         $css = $this->css($template->css, $errors);
         $body = $this->part(RenderPart::Body, $template->body, $escaped, $env, $errors) ?? self::errorBox(end($errors));

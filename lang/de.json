@@ -693,6 +693,7 @@
     "scenario.reverse_charge": "Rechnung mit Reverse Charge",
     "scenario.short_invoice": "Kurze Rechnung",
     "scenario.small_business": "Rechnung als Kleinunternehmer",
+    "scenario.text_document": "Textdokument (AGB)",
     "settings.archive_named": ":label archivieren",
     "settings.archived": "„:label“ archiviert",
     "settings.archived_count.one": ":count archiviert",

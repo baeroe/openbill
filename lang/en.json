@@ -693,6 +693,7 @@
     "scenario.reverse_charge": "Invoice with reverse charge",
     "scenario.short_invoice": "Short invoice",
     "scenario.small_business": "Invoice of a small business",
+    "scenario.text_document": "Text document (terms and conditions)",
     "settings.archive_named": "Archive :label",
     "settings.archived": "“:label” archived",
     "settings.archived_count.one": ":count archived",

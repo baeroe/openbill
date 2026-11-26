@@ -88,11 +88,11 @@ it('decodes back to the EPC payload, umlauts included', function () {
     expect(decodedPayload($payload))->toBe($payload);
 });
 
-it('gives every invoice sample scenario a GiroCode, the offer none', function (RenderScenario $scenario) {
+it('gives every invoice sample scenario a GiroCode, offer and text none', function (RenderScenario $scenario) {
     $sample = app(SampleDataFactory::class)->make($scenario, 'de');
     $qr = app(ContextBuilder::class)->build($sample->document, $sample->sources)->data['document']['payment_qr'];
 
-    expect($qr !== '')->toBe($scenario !== RenderScenario::OfferWithOptions);
+    expect($qr !== '')->toBe(! in_array($scenario, [RenderScenario::OfferWithOptions, RenderScenario::TextDocument], true));
 })->with(RenderScenario::cases());
 
 it('survives HTML escaping unchanged and prints into an img', function () {

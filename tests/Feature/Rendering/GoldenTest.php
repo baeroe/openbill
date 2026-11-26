@@ -35,4 +35,8 @@ it('renders the built-in templates exactly like the approved output', function (
     'kante offer with options en' => ['kante', RenderScenario::OfferWithOptions, 'en'],
     'kante small business de' => ['kante', RenderScenario::SmallBusiness, 'de'],
     'leise reverse charge de' => ['leise', RenderScenario::ReverseCharge, 'de'],
+    'klar text document de' => ['klar', RenderScenario::TextDocument, 'de'],
+    'kante text document en' => ['kante', RenderScenario::TextDocument, 'en'],
+    'leise text document de' => ['leise', RenderScenario::TextDocument, 'de'],
+    'leise text document en' => ['leise', RenderScenario::TextDocument, 'en'],
 ]);

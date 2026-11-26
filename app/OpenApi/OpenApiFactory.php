@@ -28,7 +28,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         'template' => ['type' => 'object', 'description' => 'unsaved parts: header, body, footer, css, manifest'],
         'document_id' => ['type' => 'string', 'description' => 'required without scenario'],
         'draft' => ['type' => 'object', 'description' => 'unsaved draft changes (PATCH /api/documents/{id} body)'],
-        'scenario' => ['type' => 'string', 'enum' => ['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options']],
+        'scenario' => ['type' => 'string', 'enum' => ['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options', 'text_document']],
         'locale' => ['type' => 'string', 'enum' => ['en', 'de']],
     ]];
 

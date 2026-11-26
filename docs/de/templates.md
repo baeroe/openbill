@@ -79,7 +79,7 @@ openbill bettet sie beim Rendern als Data-URL ein. Bilder und Schriften kommen n
 | `name` | ja | Anzeigename (höchstens 100 Zeichen) |
 | `version` | ja | Version wie `1.0.0` |
 | `author`, `license`, `description` | nein | Texte |
-| `documentTypes` | nein | Dokumenttypen, für die das Template gedacht ist: `offer`, `confirmation`, `invoice`, `cancellation` |
+| `documentTypes` | nein | Dokumenttypen, für die das Template gedacht ist: `offer`, `confirmation`, `invoice`, `cancellation`, `text` |
 | `expectedFields` | nein | eigene Felder, die das Template nutzt (`scope`, `key`, `type`, `fallback`), als Hinweis, wenn ein Feld fehlt |
 | `paper` | nein | `format` (`A4` oder `Letter`), `marginX` (links und rechts), `headerHeight`, `footerHeight`; Längen in `mm`, `cm`, `in`, `pt` oder `px`. Standard: A4, 20mm, 30mm, 20mm |
 | `translations` | nein | eigene Wörter für den Filter `t`, je Sprache (`en`, `de`) |
@@ -130,6 +130,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `number` | Nummer; Entwürfe zeigen „Entwurf“/„Draft“ |
 | `date`, `due_date`, `valid_until`, `service_date`, `service_date_end` | Datumswerte (können leer sein) |
 | `locale` | Dokumentsprache (`en`, `de`) |
+| `title`, `body` | nur bei Textdokumenten (`type` ist `text`): der Titel und der Text als HTML, schon aus dem Markdown gemacht (Überschriften, Listen, Hervorhebungen, Links; rohes HTML erscheint als Text, Links mit unsicherem Ziel und Bilder werden auf ihren Text reduziert). Gib `body` unverändert aus, ohne Filter |
 | `intro`, `closing` | Texte vor und nach den Positionen (dürfen selbst Liquid enthalten, siehe unten) |
 | `net_total`, `tax_total`, `gross_total` | Summen |
 | `optional_total` | Summe der optionalen Positionen (Angebote), nicht in den Summen enthalten |
@@ -241,6 +242,23 @@ Eine Position mit Rabatt behält ihren `unit_price`; `total` ist schon der rabat
 <td>{% if p.has_discount %}<s>{{ p.total_before_discount | money }}</s><br>{% endif %}{{ p.total | money }}</td>
 ```
 
+### Textdokumente
+
+Bei `type == "text"` gibt es keine Gruppen, Positionen oder Summen: Das Template zeigt `document.title` und `document.body` (die mitgelieferten Templates ab 1.2.0 tun das, ohne Tabelle, Summen, Zahlungsinfo und Rechtshinweise). Eigene Templates ohne `documentTypes` gelten für jeden Typ und zeigen bei einem Textdokument ihre (leere) Tabelle, fang den Typ deshalb ab:
+
+::: v-pre
+```liquid
+{% if document.type == "text" %}
+  <h1>{{ document.title }}</h1>
+  <div class="doc-body">{{ document.body }}</div>
+{% else %}
+  … deine Tabelle und Summen …
+{% endif %}
+```
+:::
+
+Gestalte die Elemente in `.doc-body` selbst (`h1`–`h4`, `p`, `ul`, `ol`, `blockquote`, `code`, `hr`, `a`). Soll ein Template nur für Textdokumente angeboten werden, setze `"documentTypes": ["text"]`.
+
 ## Grenzen und Fehler
 
 Ein Template kann openbill weder kaputt machen noch blockieren:
@@ -260,7 +278,7 @@ Jeder Fehler wird mit **Bereich** (`header`, `body`, `footer`, `css`, `manifest`
 
 ## Beispieldaten
 
-Für Vorschauen ohne echtes Dokument hat openbill fünf Szenarien: `short_invoice`, `long_invoice` (mehrseitig, Gruppen, zwei rabattierte Zeilen), `small_business`, `reverse_charge` und `offer_with_options`. Sie nutzen deine Organisation (auf einer frischen Installation die fiktive Firma Studio Nordlicht), einen fiktiven Kunden, feste Daten und Beispielwerte für deine eigenen Felder. Als PDF auf der Kommandozeile:
+Für Vorschauen ohne echtes Dokument hat openbill sechs Szenarien: `short_invoice`, `long_invoice` (mehrseitig, Gruppen, zwei rabattierte Zeilen), `small_business`, `reverse_charge`, `offer_with_options` und `text_document` (fiktive AGB). Sie nutzen deine Organisation (auf einer frischen Installation die fiktive Firma Studio Nordlicht), einen fiktiven Kunden, feste Daten und Beispielwerte für deine eigenen Felder. Als PDF auf der Kommandozeile:
 
 ```bash
 php artisan app:render-sample klar long_invoice --locale=de

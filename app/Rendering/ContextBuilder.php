@@ -122,6 +122,7 @@ final class ContextBuilder
                 'service_date' => $document->service_date?->toDateString(),
                 'service_date_end' => $document->service_date_end?->toDateString(),
                 'locale' => $locale,
+                ...$this->textFields($document, $sources),
                 'intro' => $document->intro ?? '',
                 'closing' => $document->closing ?? '',
                 'net_total' => $summary['net'],
@@ -136,6 +137,26 @@ final class ContextBuilder
             'positions' => array_merge([], ...array_column($groups, 'positions')),
             'groups' => $groups,
         ], $totals);
+    }
+
+    /**
+     * Text documents only: title and Markdown body, finalized ones from the snapshot (drafts: the sources are built
+     * from the document, DraftOverlay included). The body stays raw Markdown here; LiquidRenderer turns it into HTML
+     * after escaping the context (like org.logo, the HTML must not be escaped again).
+     *
+     * @param  array<string, mixed>  $sources
+     * @return array<string, string>
+     */
+    private function textFields(Document $document, array $sources): array
+    {
+        if ($document->type !== DocumentType::Text) {
+            return [];
+        }
+
+        return [
+            'title' => (string) ($sources['title'] ?? $document->title),
+            'body' => (string) ($sources['body'] ?? $document->body),
+        ];
     }
 
     /**

@@ -33,6 +33,15 @@ it('sums the gross totals as an exact string', function () {
         ->and(DocumentQuery::summary(['type' => 'cancellation'], $this->today))->toBe(['count' => 0, 'gross_total' => '0.00']);
 });
 
+it('counts text documents but keeps them out of the sum', function () {
+    // a gross total on the text row proves the CASE branch, not just a zero sum
+    Document::factory()->type(DocumentType::Text)->create(['gross_total' => '7.00']);
+
+    expect(DocumentQuery::summary(['type' => 'text'], $this->today))->toBe(['count' => 1, 'gross_total' => '0.00'])
+        ->and(DocumentQuery::summary(['type' => 'invoice'], $this->today))->toBe(['count' => 2, 'gross_total' => '119.10'])
+        ->and(DocumentQuery::summary([], $this->today))->toBe(['count' => 4, 'gross_total' => '169.10']);
+});
+
 it('searches number and customer name', function () {
     $ids = DocumentQuery::filtered(['q' => 'fjord'], $this->today)->pluck('id')->sort()->values()->all();
 

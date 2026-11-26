@@ -251,7 +251,8 @@ export default function Documents({ filters, counts, summary, customers }: Props
                         )}
                         <div className="flex justify-between gap-4 px-5 pt-4 pb-3 text-sm text-muted">
                             <span>{tn('documents.count', summary.count)}</span>
-                            <span className="num">{t('documents.sum', { amount: formatMoney(summary.gross_total) })}</span>
+                            {/* text documents carry no amount, so a sum under their own tab would only read as 0,00 */}
+                            {filters.type !== 'text' && <span className="num">{t('documents.sum', { amount: formatMoney(summary.gross_total) })}</span>}
                         </div>
                     </div>
                 )}

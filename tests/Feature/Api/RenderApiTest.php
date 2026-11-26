@@ -62,7 +62,7 @@ it('lists sample scenarios and matching documents as preview sources', function 
 
     $json = $this->getJson('/api/render/sources?q=elbinsel')->assertOk()->json();
 
-    expect(collect($json['scenarios'])->pluck('key')->all())->toBe(['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options'])
+    expect(collect($json['scenarios'])->pluck('key')->all())->toBe(['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options', 'text_document'])
         ->and($json['scenarios'][4]['document_type'])->toBe('offer')
         ->and($json['documents'])->toHaveCount(1)
         ->and($json['documents'][0])->toMatchArray(['id' => $document->id, 'type' => 'invoice', 'status' => 'draft', 'customer_name' => 'Kulturwerk Elbinsel e. V.']);

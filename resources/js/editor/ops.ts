@@ -57,6 +57,12 @@ export function fromDocument(document: DocumentDetail): Draft {
         locale: document.locale,
         custom: { ...document.custom },
         groups: copyGroups(document.groups),
+        title: document.title ?? null,
+        body: document.body ?? null,
+        slug: document.slug ?? null,
+        is_public: document.is_public ?? false,
+        // finalized documents carry the frozen versions instead of short names; only drafts are edited
+        attachments: document.is_locked ? [] : ((document.attachments ?? []) as string[]),
     };
 }
 
@@ -75,7 +81,35 @@ export function toPayload(draft: Draft): DraftPayload {
         locale: draft.locale,
         custom: draft.custom,
         groups: draft.groups,
+        // the server refuses these fields on other types
+        ...(draft.type === 'offer' || draft.type === 'confirmation' ? { attachments: draft.attachments ?? [] } : {}),
+        ...(draft.type === 'text' ? { title: draft.title, body: draft.body, slug: draft.slug, is_public: draft.is_public } : {}),
     };
+}
+
+/** Puts `snippet` into `value` at the selection (start..end), as its own paragraph; returns the new text and the caret behind the snippet. */
+export function insertAtSelection(value: string, snippet: string, start: number, end: number): { value: string; caret: number } {
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    const lead = before === '' || before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n';
+    const tail = after === '' || after.startsWith('\n\n') ? '' : after.startsWith('\n') ? '\n' : '\n\n';
+    return { value: `${before}${lead}${snippet}${tail}${after}`, caret: before.length + lead.length + snippet.length };
+}
+
+/**
+ * A short name as the server takes it (a–z, 0–9, single hyphens): "AGB 2026" gives "agb-2026". While typing
+ * (`final` false) a trailing hyphen stays, so "agb-" can become "agb-2026"; empty gives null.
+ */
+export function toSlug(input: string, final = false): string | null {
+    let slug = input
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+/, '')
+        .slice(0, 64);
+    if (final) slug = slug.replace(/-+$/, '');
+    return slug === '' ? null : slug;
 }
 
 /** JSON with sorted object keys: the server may order custom values differently than the browser. */
@@ -281,4 +315,13 @@ export function reconcileIds(draft: Draft, map: IdMap): Draft {
             positions: group.positions.map((position) => (map[position.id] ? { ...position, id: map[position.id] } : position)),
         })),
     };
+}
+
+/** Adds a short name to the attachments (once); the server allows ten. */
+export function addAttachment(slugs: string[], slug: string): string[] {
+    return slugs.includes(slug) || slugs.length >= 10 ? slugs : [...slugs, slug];
+}
+
+export function removeAttachment(slugs: string[], slug: string): string[] {
+    return slugs.filter((item) => item !== slug);
 }

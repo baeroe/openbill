@@ -1,0 +1,57 @@
+# Textdokumente
+
+Ein **Textdokument** besteht nur aus Worten: AGB, eine Leistungsbeschreibung, ein kleiner Vertrag. Es hat einen Titel und einen Text in Markdown, ein Datum, optional eigene Felder und optional einen Kunden. Positionen, Steuern und Summen gibt es nicht. Wie jedes Dokument bekommt es beim Abschließen eine Nummer (`T-{YYYY}-{0000}`), wird mit einem Template gerendert und als PDF archiviert; danach ist es gesperrt.
+
+![Der Editor eines Textdokuments: Titel, Markdown-Text und die Live-Vorschau](/screenshots/de/text-editor.png)
+
+## Anlegen und schreiben
+
+**Neues Dokument** (oder die Taste **N**) → **Textdokument**. Der Kunde ist optional: AGB haben keinen, ein Rahmenvertrag für einen Auftraggeber schon. Der Editor zeigt:
+
+- **Titel** und **Text**. Der Text ist Markdown: `## Überschrift`, Listen mit `-` oder `1.`, `**fett**`, `*kursiv*`, `> Zitat`, Links `[Text](https://…)`. Rohes HTML erscheint als einfacher Text, Bilder werden nicht angezeigt (das PDF lädt nichts von außen).
+- Die üblichen Kopffelder: Datum, Kunde, Ansprechpartner, Sprache, Template und deine eigenen Felder für Textdokumente.
+- **Veröffentlichen:** ein **Kurzname** (Buchstaben `a–z`, Ziffern und Bindestriche, zum Beispiel `agb`; alle Versionen eines Textes teilen ihn) und der Schalter **öffentlich**. Ein öffentlicher Text braucht einen Kurznamen und keinen Kunden. Ein abgeschlossener öffentlicher Text ist ohne Anmeldung erreichbar (siehe [Öffentlicher Link](#offentlicher-link)).
+- Rechts die Live-Vorschau, genau so wie das PDF aussehen wird. Die Prüfung unter dem Formular nennt, was noch fehlt (Datum, Titel, Text, Pflicht-Eigenfelder, „öffentlich“ zusammen mit einem Kunden).
+
+Änderungen werden wie in jedem Entwurf automatisch gespeichert.
+
+## Klauseln
+
+Wiederkehrende Absätze sind **Textbausteine** der Art **Klausel** (Einstellungen → Textbausteine). Im Editor setzt **Klausel einfügen** den Text einer Klausel an die Cursorposition, als eigenen Absatz. Klauseln sind einfaches Markdown; sie werden als Text eingefügt, du kannst sie im Dokument also ändern, ohne den Textbaustein anzufassen.
+
+## Abschließen und neue Versionen
+
+Beim Abschließen prüft openbill den Entwurf, vergibt die Nummer (`T-2026-0001`), friert den Text ein, rendert das PDF mit dem Template des Dokumenttyps und legt es im Archiv ab. Der Status wird **abgeschlossen**; weitere Status gibt es bei einem Textdokument nicht. Danach lässt es sich nicht mehr ändern, in ein anderes Dokument umwandeln oder stornieren.
+
+Eine **neue Version** ist eine Kopie: **Weitere Aktionen → Duplizieren** legt einen Entwurf mit demselben Titel, Text, Kurznamen und Öffentlich-Kennzeichen an, datiert auf heute. Ändere ihn und schließe ihn ab; die alte Version bleibt, wie sie war.
+
+## Öffentlicher Link
+
+Ein **abgeschlossenes**, **öffentliches** Textdokument **ohne Kunde** ist für alle ohne Anmeldung als PDF lesbar:
+
+- `https://<deine Instanz>/legal/<Kurzname>` – die **neueste** Version des Kurznamens (zum Beispiel `/legal/agb`). Schließt du eine neue Version ab, zeigt der Link sie.
+- `https://<deine Instanz>/legal/<Kurzname>/<Nummer>` – genau **diese Version** (zum Beispiel `/legal/agb/T-2026-0002`). Die Adresse ändert ihren Inhalt nie; ein altes Angebot behält so einen funktionierenden Link zu den AGB, auf denen es beruhte.
+
+Das abgeschlossene Dokument zeigt beide Links in der Karte **Veröffentlichen** zum Kopieren. Die Adresse wird aus `APP_URL` gebildet, ist also die öffentliche `https://`-Adresse deiner Instanz; die Route muss in deinem [Reverse Proxy](/de/reverse-proxy#checkliste) ohne Anmeldung erreichbar sein.
+
+**Einen Text zurückziehen:** Schließe eine neue Version ab, die **nicht** öffentlich ist. Die neueste Version entscheidet: `/legal/<Kurzname>` antwortet dann mit 404, ältere öffentliche Versionen bleiben unter ihrer Nummer erreichbar.
+
+Alles, was nicht infrage kommt, bekommt dasselbe **404**, damit niemand herausfinden kann, welche Kurznamen es gibt: Entwürfe, nicht öffentliche Texte, Texte mit Kunde (nie öffentlich), andere Dokumenttypen, unbekannte Kurznamen und Nummern. Das PDF ist die archivierte Datei (gegen ihre SHA-256 geprüft, nie neu gerendert), `inline` ausgeliefert, 60 Anfragen pro Minute und Adresse. Der Link zur neuesten Version wird nicht gecacht, ein Versions-Link ein Jahr lang (`immutable`).
+
+## Anlagen an Angeboten
+
+Ein Angebot oder eine Auftragsbestätigung kann Textdokumente als **Anlagen** nennen, typischerweise die AGB: AGB gelten nur, wenn sie beim Vertragsschluss einbezogen werden, und das passiert über das Angebot.
+
+![Ein Angebotsentwurf mit der Anlage „agb“: Chips, die Liste zum Hinzufügen und die Zeile in der Vorschau](/screenshots/de/attachments.png)
+
+- **Auswählen:** Im Editor eines Angebots oder einer Auftragsbestätigung listet der Abschnitt **Anlagen** Kurznamen als Chips. **Anlage hinzufügen** bietet die neueste abgeschlossene Version jedes Kurznamens an; angeboten werden nur Texte **ohne Kunde**, ein Vertrag eines Kunden landet so nie im Angebot eines anderen. Ein Chip, zu dem es (nicht mehr) einen solchen Text gibt, ist markiert, und die Prüfung meldet ihn (`attachment_missing`, verhindert das Abschließen).
+- **Vorgabe je Dokumenttyp:** In **Einstellungen → Dokumenttypen** haben die Karten *Angebot* und *Auftragsbestätigung* einen Abschnitt **Anlagen**. Neue Entwürfe starten damit (wie beim Template), bestehende Entwürfe behalten ihre. Eine Auftragsbestätigung aus einem Angebot übernimmt dessen Anlagen; Duplizieren kopiert sie.
+- **Abschließen friert die Version ein:** Die neueste abgeschlossene Version jedes Kurznamens in diesem Moment (Nummer, Titel, Prüfsumme ihres archivierten PDFs) kommt in den Snapshot. Das PDF des Angebots nennt sie über dem Schlusstext: *Anlagen: Allgemeine Geschäftsbedingungen (T-2026-0002)*, bei einer öffentlichen Version mit dem vollen Link. Ein später abgeschlossener Text ändert am abgeschlossenen Angebot nichts, weder am Snapshot noch am archivierten PDF.
+- **Eigene PDFs:** Die Anlagen werden **nicht** ins PDF des Angebots eingefügt. Ein abgeschlossenes Angebot listet die eingefrorenen Versionen mit **PDF herunterladen**; jede ist das archivierte PDF ihres Textdokuments (`GET /api/documents/<id>/pdf` mit der ID des Textdokuments), eine spätere E-Mail kann also genau diese Dateien anhängen. Das MCP-Tool `get-document-pdf-url` gibt signierte Links dafür aus.
+- Rechnungen und Stornos haben keine Anlagen.
+
+## Templates und Einstellungen
+
+Die mitgelieferten Templates Klar, Kante und Leise (ab Version 1.2.0) setzen ein Textdokument als Titel und Text. Für eigene Templates siehe [Textdokumente in Templates](/de/templates#textdokumente). In **Einstellungen → Dokumenttypen** hat die Karte *Textdokument* den Nummernkreis und das Template; ein Prüfprofil oder Zahlungsziel gibt es nicht.
+
+Textdokumente erscheinen in der [Dokumentliste](/de/documents#in-der-app) mit dem Filter **Texte**; ohne Kunde zeigt die Liste den Titel, die Betragsspalte bleibt leer. Sie zählen nie in Summen, Kennzahlen der Übersicht, offenen oder überfälligen Beträgen. Dasselbe geht über die [REST-API](/de/api#entwurfe-speichern) und [MCP](/de/mcp) (`type: text`, `title`, `body`, `slug`, `is_public`).

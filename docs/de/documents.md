@@ -1,6 +1,6 @@
 # Dokumente
 
-openbill kennt vier Dokumenttypen. Jeder durchläuft wenige Status; beim Abschließen bekommt er eine Nummer und wird gesperrt.
+openbill kennt fünf Dokumenttypen. Jeder durchläuft wenige Status; beim Abschließen bekommt er eine Nummer und wird gesperrt.
 
 | Typ | Status |
 |---|---|
@@ -8,6 +8,7 @@ openbill kennt vier Dokumenttypen. Jeder durchläuft wenige Status; beim Abschli
 | Auftragsbestätigung | Entwurf → Offen → Erledigt |
 | Rechnung | Entwurf → Offen → Bezahlt; Storniert (durch ein Storno, das den Rest abdeckt) |
 | Storno | Entwurf → Abgeschlossen |
+| Textdokument | Entwurf → Abgeschlossen |
 
 „Überfällig“ ist kein Status: Eine offene Rechnung, deren Fälligkeit vorbei ist, wird als überfällig angezeigt.
 
@@ -24,6 +25,14 @@ Positionsarten:
 Leistungen und optionale Leistungen können einen **Rabatt** haben: einen Prozentsatz vom Zeilenbetrag (0 bis 100 %; 100 % macht die Zeile kostenlos) oder einen festen Betrag in Euro (höchstens der Zeilenbetrag). Die Zeilensumme ist Menge × Einzelpreis, auf Cent gerundet, minus Rabatt; ein Rabatt in Prozent wird ebenfalls auf Cent gerundet. Ein fester Betrag, der größer als die Zeile ist, steht in der Prüfung und verhindert das Abschließen (Menge oder Preis können sich beim Bearbeiten ja noch ändern). Umwandeln und Duplizieren übernehmen den Rabatt, ein Storno spiegelt ihn und schreibt so genau das gut, was die Rechnungszeile berechnet hat. Ein Rabatt als eigene Position mit negativem Preis funktioniert weiter wie bisher.
 
 Beträge und Mengen sind exakte Dezimalzahlen. Über die API werden sie als Text mit Punkt geschickt (`"12.50"`); Zahlen wie `12.5` oder `"12,5"` werden mit einer Meldung zum Feld abgelehnt. Mengen und Einzelpreise haben höchstens 11 Stellen vor dem Punkt (und 4 danach); Zeilen-, Gruppen- und Dokumentsummen dürfen höchstens 9.999.999.999.999,99 betragen. Größere Werte werden mit einer Meldung an der Position (bzw. den Positionen) abgelehnt statt gespeichert.
+
+## Textdokumente
+
+Ein **Textdokument** (Typ `text`) ist für AGB, Leistungsbeschreibungen und kleine Verträge: ein Titel und ein Text in Markdown (höchstens 100.000 Zeichen), das übliche Datum und die eigenen Felder der Dokumentebene, optional ein Kunde. Es hat keine Positionen, keine Steuer und keine Summen und zählt deshalb nie in der Übersicht, den Summen der Dokumentliste, „offen“ oder „überfällig“; umwandeln oder stornieren lässt es sich nicht.
+
+- **Kurzname und öffentlich:** Ein Textdokument kann einen Kurznamen (`slug`: Kleinbuchstaben, Ziffern und Bindestriche, z. B. `agb`) tragen, den alle Versionen eines Textes teilen, und das Kennzeichen **öffentlich**. Ein öffentlicher Text braucht einen Kurznamen und keinen Kunden; ein öffentlicher Text mit Kunde wird von der Prüfung gemeldet (`public_with_customer`) und verhindert das Abschließen.
+- **Prüfung:** Datum, Titel und Text dürfen nicht leer sein, Pflicht-Eigenfelder der Dokumentebene müssen gefüllt sein. Regeln zu Kunde, Steuer oder Organisation gibt es nicht.
+- **Abschließen:** wie beim Storno: Nummer `T-{YYYY}-{0000}`, Status `abgeschlossen`, Snapshot mit Titel, Text, Kurzname und Öffentlich-Kennzeichen, PDF im Archiv. Danach ist alles gesperrt. Eine neue Version ist eine Kopie: duplizieren, ändern, abschließen.
 
 ## Steuern und Summen
 
@@ -116,11 +125,11 @@ Nach dem Anmelden landest du auf der Übersicht. Vier Kennzahlen fassen das Geld
 
 ![Die Dokumentliste mit Filtern nach Art, Status, Kunde und Datum](/screenshots/de/documents.png)
 
-**Dokumente** zeigt alle Dokumente, die neuesten zuerst und nach Monaten gruppiert. Filtern lässt sich nach Art (jede Pille zeigt, wie viele Dokumente dieser Art unter den übrigen Filtern dazukommen), nach Status, Kunde und Dokumentdatum (von/bis), dazu eine Suche über Nummer und Kundennamen. Der Statusfilter kennt zusätzlich **Überfällig**: offene Rechnungen, deren Fälligkeit überschritten ist. Jeder Filter steht in der Adresse, zum Beispiel `/de/documents?type=invoice&status=overdue` oder `/de/documents?date_from=2026-01-01&date_to=2026-03-31`; eine gefilterte Liste lässt sich also als Lesezeichen speichern, weitergeben und mit dem Zurück-Knopf des Browsers wieder aufrufen. Die Liste lädt 50 Dokumente auf einmal (**Mehr laden**); die Zeile darunter zählt alle passenden Dokumente und summiert ihre Bruttobeträge.
+**Dokumente** zeigt alle Dokumente, die neuesten zuerst und nach Monaten gruppiert. Filtern lässt sich nach Art (jede Pille zeigt, wie viele Dokumente dieser Art unter den übrigen Filtern dazukommen), nach Status, Kunde und Dokumentdatum (von/bis), dazu eine Suche über Nummer und Kundennamen. Der Statusfilter kennt zusätzlich **Überfällig**: offene Rechnungen, deren Fälligkeit überschritten ist. Jeder Filter steht in der Adresse, zum Beispiel `/de/documents?type=invoice&status=overdue` oder `/de/documents?date_from=2026-01-01&date_to=2026-03-31`; eine gefilterte Liste lässt sich also als Lesezeichen speichern, weitergeben und mit dem Zurück-Knopf des Browsers wieder aufrufen. Die Liste lädt 50 Dokumente auf einmal (**Mehr laden**); die Zeile darunter zählt alle passenden Dokumente und summiert ihre Bruttobeträge. [Textdokumente](/de/text-documents) (Filter **Texte**) zeigen ohne Kunde ihren Titel und keinen Betrag und zählen nicht in der Summe.
 
 ### Neues Dokument
 
-**Neues Dokument** in der Seitenleiste – oder die Taste **N** überall, solange du nicht in einem Feld tippst – öffnet einen Dialog: Art und Kunde wählen (den Kunden auch später), und openbill legt einen Entwurf mit den Vorgaben des Dokumenttyps an. Stornos entstehen hier nicht, sondern immer aus einer Rechnung. Der neue Entwurf öffnet sich im Dokument-Editor.
+**Neues Dokument** in der Seitenleiste – oder die Taste **N** überall, solange du nicht in einem Feld tippst – öffnet einen Dialog: Art und Kunde wählen (den Kunden auch später), und openbill legt einen Entwurf mit den Vorgaben des Dokumenttyps an. Stornos entstehen hier nicht, sondern immer aus einer Rechnung. Ein [Textdokument](/de/text-documents) braucht keinen Kunden. Der neue Entwurf öffnet sich im Dokument-Editor.
 
 ### Dokument-Editor
 

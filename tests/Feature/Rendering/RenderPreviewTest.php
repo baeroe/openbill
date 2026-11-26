@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\CreateDocument;
 use App\Actions\FinalizeDocument;
 use App\Actions\RenderPreview;
 use App\Enums\DocumentType;
@@ -87,4 +88,27 @@ it('renders a sample PDF from the console', function () {
 
     expect((string) file_get_contents($out))->toStartWith('%PDF-');
     unlink($out);
+});
+
+it('previews a text document with title and Markdown as HTML and no table', function () {
+    $document = app(CreateDocument::class)->handle(systemActor(), ['type' => 'text', 'title' => 'Terms', 'body' => "## One\n\n- a & b\n- <script>alert(1)</script>"]);
+
+    $result = app(RenderPreview::class)->handle(systemActor(), ['document_id' => $document->id])->toArray();
+
+    expect($result['errors'])->toBe([])
+        ->and($result['body'])->toContain('<h1>Terms</h1>')->and($result['body'])->toContain('<h2>One</h2>')
+        ->and($result['body'])->toContain('<li>a &amp; b</li>')
+        // markdown escapes the raw tag itself, it is not escaped twice
+        ->and($result['body'])->toContain('&lt;script&gt;alert(1)&lt;/script&gt;')->not->toContain('&amp;lt;')->not->toContain('<script')
+        ->and($result['body'])->not->toContain('<table');
+
+    $preview = app(RenderPreview::class)->handle(systemActor(), ['document_id' => $document->id, 'draft' => ['title' => 'New title', 'body' => 'Changed *text*']])->toArray();
+    expect($preview['body'])->toContain('New title')->and($preview['body'])->toContain('Changed <em>text</em>');
+});
+
+it('renders a finalized text document from its snapshot', function () {
+    $document = app(CreateDocument::class)->handle(systemActor(), ['type' => 'text', 'title' => 'Terms', 'body' => 'Frozen text']);
+    $done = app(FinalizeDocument::class)->handle(systemActor(), $document);
+
+    expect(app(RenderPreview::class)->handle(systemActor(), ['document_id' => $done->id])->toArray()['body'])->toContain('Frozen text')->toContain($done->number);
 });

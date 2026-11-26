@@ -38,7 +38,7 @@ final class RenderTemplatePreviewTool extends OpenbillTool
             'template_id' => $schema->string()->description('Template to render (list-templates); default: the document\'s template, for scenarios Klar'),
             'template' => $schema->object(Schemas::templateParts($schema))->description('Unsaved parts that replace those of the template'),
             'document_id' => $schema->string()->description('Render this document (drafts with live master data, finalized ones from their snapshot)'),
-            'scenario' => $schema->string()->enum(['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options'])
+            'scenario' => $schema->string()->enum(['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options', 'text_document'])
                 ->description('Sample data instead of a document'),
             'locale' => $schema->string()->enum(['en', 'de'])->description('Language of the sample data'),
         ];

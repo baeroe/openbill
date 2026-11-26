@@ -20,7 +20,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('create-document')]
 #[Title('Create draft')]
-#[Description('Create a draft: type offer, confirmation or invoice (a cancellation comes from cancel-invoice), customer_id, and any field update-document takes, e.g. groups with positions. Dates, payment term, validity, texts and template come from the document type settings unless sent. Answers like get-document, with totals and issues.')]
+#[Description('Create a draft: type offer, confirmation, invoice or text (a cancellation comes from cancel-invoice; a text document has title and Markdown body instead of positions, the customer is optional), customer_id, and any field update-document takes, e.g. groups with positions. Dates, payment term, validity, texts and template come from the document type settings unless sent. Answers like get-document, with totals and issues.')]
 #[IsDestructive(false)]
 #[IsOpenWorld(false)]
 final class CreateDocumentTool extends OpenbillTool
@@ -43,7 +43,7 @@ final class CreateDocumentTool extends OpenbillTool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'type' => $schema->string()->enum(['offer', 'confirmation', 'invoice'])->required(),
+            'type' => $schema->string()->enum(['offer', 'confirmation', 'invoice', 'text'])->required(),
             ...Schemas::draft($schema),
         ];
     }

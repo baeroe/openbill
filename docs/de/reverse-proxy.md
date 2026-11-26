@@ -87,3 +87,4 @@ server {
 - Der Quelltext von `/de/login` zeigt Asset-Links mit `https://`. Stehen dort `http://`-Links, steht die Adresse des Proxys nicht in `TRUSTED_PROXIES`.
 - Template-Pakete und Toolkit-Pushes sind bis zu 30 MB groß: mindestens `client_max_body_size 32m` erlauben (nginx); Caddy und Traefik begrenzen die Body-Größe standardmäßig nicht.
 - Das [Template-Toolkit](/de/template-toolkit) der Template-Autoren spricht von deren Rechner aus mit `APP_URL`: Die Adresse muss dort mit gültigem Zertifikat erreichbar sein.
+- `/legal/…` ist **ohne Anmeldung** erreichbar: Dort liegen die öffentlichen [Textdokumente](/de/text-documents#offentlicher-link) (AGB). Dein Proxy muss diese Pfade durchreichen; schützt du den ganzen Host mit einer Anmeldung (zum Beispiel Basic Auth vor openbill), nimm `/legal/` davon aus.

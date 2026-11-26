@@ -30,6 +30,9 @@ export const keys = {
     taxRates: () => apiUrl('/api/tax-rates', { include_archived: true }),
     units: () => apiUrl('/api/units', { include_archived: true }),
     textBlocks: () => '/api/text-blocks',
+    textDocumentSlugs: () => '/api/text-documents/slugs',
+    /** The archived PDF of a document, as download (attachments are documents of their own). */
+    documentPdfDownload: (id: string) => `/api/documents/${id}/pdf`,
     /** Customer select of the editor: the first 100 by name. */
     customerChoices: () => apiUrl('/api/customers', { itemsPerPage: 100 }),
     /** Suggestions for a typed title; null (nothing to fetch) while the title is empty. */

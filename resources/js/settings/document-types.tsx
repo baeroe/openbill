@@ -7,6 +7,7 @@ import { useTemplates } from '@/api/templates';
 import { DOCUMENT_TYPES, type ComplianceProfile, type DocumentType } from '@/api/types';
 import { Badge, ButtonLink, CardHead, ErrorState, Select, Skeleton, Tabs, TextInput, cx } from '@/components/ui';
 import { SettingsCard } from './settings-card';
+import { AttachmentPicker } from '@/components/attachment-picker';
 import { ApiError, errorMessage } from '@/lib/api';
 import { useLeaveGuard } from '@/lib/hooks';
 import { path, t } from '@/lib/i18n';
@@ -40,6 +41,7 @@ const inputOf = (setting: DocumentTypeSetting): DocumentTypeInput => ({
     default_closing_block_id: setting.default_closing_block_id,
     payment_term_days: setting.payment_term_days,
     validity_days: setting.validity_days,
+    attachments: setting.attachments ?? null,
     numbering: { pattern: setting.numbering.pattern, reset_yearly: setting.numbering.reset_yearly, next_value: setting.numbering.next_value },
 });
 
@@ -60,7 +62,8 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
     const profiles: ComplianceProfile[] = type === 'invoice' || type === 'cancellation' ? ['basic', 'en16931'] : ['basic'];
     const templateOptions = (templates.data ?? []).filter((template) => template.document_types.includes(type) || template.id === form.template_id);
     const blockOptions = (kinds: string[]) => (blocks.data ?? []).filter((block) => kinds.includes(block.kind));
-    const fieldsForType = [...(documentFields.data ?? []), ...(positionFields.data ?? [])].filter((field) => field.doc_types.includes(type));
+    const isText = type === 'text';
+    const fieldsForType = [...(documentFields.data ?? []), ...(isText ? [] : (positionFields.data ?? []))].filter((field) => field.doc_types.includes(type));
 
     const submit = async () => {
         setPending(true);
@@ -102,6 +105,7 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                 void submit();
             }}
         >
+            {!isText && (
             <SettingsCard aria-labelledby="dt-profile">
                 <CardHead titleId="dt-profile" title={t('settings.profile')} description={t('settings.profile_text')} />
                 <div role="radiogroup" aria-labelledby="dt-profile" className="grid gap-3 sm:grid-cols-2">
@@ -115,6 +119,7 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                 </div>
                 {profiles.length === 1 && <p className="mt-3 text-xs text-muted">{t('settings.profile_einvoice_only')}</p>}
             </SettingsCard>
+            )}
 
             <NumberingCard
                 id="dt-numbering"
@@ -139,6 +144,8 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                     </Select>
                     {type === 'invoice' && days('payment_term_days', t('settings.payment_term'))}
                     {type === 'offer' && days('validity_days', t('settings.validity'))}
+                    {!isText && (
+                    <>
                     <Select label={t('settings.intro_block')} value={form.default_intro_block_id ?? ''} onChange={(e) => set({ default_intro_block_id: e.target.value || null })}>
                         <option value="">{t('settings.none')}</option>
                         {blockOptions(['intro', 'note']).map((block) => (
@@ -155,8 +162,18 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                             </option>
                         ))}
                     </Select>
+                    </>
+                    )}
                 </div>
             </SettingsCard>
+
+            {(type === 'offer' || type === 'confirmation') && (
+                <SettingsCard aria-labelledby="dt-attachments">
+                    <CardHead titleId="dt-attachments" title={t('attachments.title')} description={t('attachments.settings_text')} />
+                    <AttachmentPicker value={form.attachments ?? []} onChange={(attachments) => set({ attachments: attachments.length === 0 ? null : attachments })} />
+                    {errors.attachments && <p className="mt-2 text-xs text-bad">{errors.attachments}</p>}
+                </SettingsCard>
+            )}
 
             <div className="flex flex-wrap items-center gap-4 rounded-lg bg-surface-2 px-5 py-4">
                 <ListPlus aria-hidden className="size-5 shrink-0 text-muted" />

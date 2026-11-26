@@ -1,6 +1,6 @@
 /** Shapes of the REST API (phase 4, docs/superpowers/plans/2026-10-11-phase-04-api.md "Interfaces"). Amounts are strings. */
 
-export type DocumentType = 'offer' | 'confirmation' | 'invoice' | 'cancellation';
+export type DocumentType = 'offer' | 'confirmation' | 'invoice' | 'cancellation' | 'text';
 export type DocumentStatus = 'draft' | 'open' | 'accepted' | 'rejected' | 'done' | 'paid' | 'cancelled' | 'closed';
 export type TaxTreatment = 'domestic' | 'eu_reverse_charge' | 'third_country';
 export type FieldScope = 'org' | 'customer' | 'contact' | 'document' | 'position';
@@ -10,7 +10,7 @@ export type FieldType = 'text' | 'textarea' | 'number' | 'money' | 'date' | 'sel
 export type CustomValue = string | number | boolean | null;
 export type CustomValues = Record<string, CustomValue>;
 
-export const DOCUMENT_TYPES: DocumentType[] = ['offer', 'confirmation', 'invoice', 'cancellation'];
+export const DOCUMENT_TYPES: DocumentType[] = ['offer', 'confirmation', 'invoice', 'cancellation', 'text'];
 export const DOCUMENT_STATUSES: DocumentStatus[] = ['draft', 'open', 'accepted', 'rejected', 'done', 'paid', 'cancelled', 'closed'];
 
 export type Contact = {
@@ -65,6 +65,15 @@ export type DocumentSummary = {
     customer_id: string | null;
     customer_name: string | null;
     contact_id: string | null;
+    /** Text documents only (editor and UI follow in a later step, so optional for now). */
+    title?: string | null;
+    slug?: string | null;
+    is_public?: boolean;
+    /** Finalized public texts only: the link of this version and of the newest version of the short name. */
+    public_url?: string | null;
+    public_latest_url?: string | null;
+    /** Quotes and confirmations: short names while a draft, the frozen versions once finalized. */
+    attachments?: string[] | FrozenAttachment[];
     due_date: string | null;
     valid_until: string | null;
     locale: string;
@@ -110,7 +119,7 @@ export type FieldDefinition = {
 export type PositionKind = 'item' | 'text' | 'optional';
 export type DiscountType = 'percent' | 'amount';
 export type ComplianceProfile = 'basic' | 'en16931';
-export type TextBlockKind = 'intro' | 'closing' | 'payment' | 'note';
+export type TextBlockKind = 'intro' | 'closing' | 'payment' | 'note' | 'clause';
 
 /**
  * A position as GET/PATCH /api/documents/{id} carries it; quantity, price and discount are decimal strings.
@@ -156,6 +165,8 @@ export type Totals = {
 
 /** Item form of a document (GET /api/documents/{id}, answers of PATCH and the document actions). */
 export type DocumentDetail = DocumentSummary & {
+    /** Text documents only: Markdown. */
+    body?: string | null;
     service_date: string | null;
     service_date_end: string | null;
     intro: string;
@@ -176,6 +187,10 @@ export type RenderResponse = { header: string; body: string; footer: string; pap
 
 export type TaxRate = { id: string; label: string; percent: string; category: string; exemption_note: string | null; sort: number; archived_at: string | null };
 export type Unit = { id: string; name: string; symbol: string; decimals: number; code: string; sort: number; archived_at: string | null };
+/** What an attachment can name: the newest finalized version of a short name (GET /api/text-documents/slugs). */
+export type TextDocumentSlug = { slug: string; title: string; number: string; is_public: boolean; public_url: string | null };
+/** An attachment of a finalized quote or confirmation: the version that was current when it was finalized. */
+export type FrozenAttachment = { slug: string; document_id: string; number: string; title: string; is_public: boolean; sha256: string };
 export type TextBlock = { id: string; name: string; kind: TextBlockKind; body: string; updated_at: string | null };
 
 /** GET /api/position-suggestions: earlier positions by title, values of their latest use. */

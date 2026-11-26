@@ -17,7 +17,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('get-document-pdf-url')]
 #[Title('PDF and XML links')]
-#[Description('Signed download links, valid for 15 minutes without a token: "pdf" always (a draft is rendered live with a watermark, a finalized document comes from the archive) and "xml" for a finalized e-invoice. A draft link stops working once the draft changes. Give the link to the user instead of downloading the file.')]
+#[Description('Signed download links, valid for 15 minutes without a token: "pdf" always (a draft is rendered live with a watermark, a finalized document comes from the archive) and "xml" for a finalized e-invoice. A finalized quote or confirmation also lists its frozen "attachments" (title, number, link of the text document version that was current when it was finalized). A draft link stops working once the draft changes. Give the link to the user instead of downloading the file.')]
 #[IsReadOnly]
 #[IsOpenWorld(false)]
 final class GetDocumentPdfUrlTool extends OpenbillTool

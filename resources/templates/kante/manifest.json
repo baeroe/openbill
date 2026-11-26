@@ -1,10 +1,10 @@
 {
   "name": "Kante",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "author": "openbill",
   "license": "MIT",
   "description": "Bold: a strong colour band, a large total, heavy rules.",
-  "documentTypes": ["offer", "confirmation", "invoice", "cancellation"],
+  "documentTypes": ["offer", "confirmation", "invoice", "cancellation", "text"],
   "expectedFields": [
     { "scope": "document", "key": "project_name", "type": "text", "fallback": "" }
   ],

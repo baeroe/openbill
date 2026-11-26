@@ -24,6 +24,17 @@ All versions and their changes: https://github.com/baeroe/openbill/releases
 
 <!-- absolute links only: each section becomes the notes of the GitHub release (scripts/release-notes.sh) -->
 
+### 0.5.0
+
+- **Text documents:** a new document type `text` for terms and conditions, service descriptions and small contracts: title and Markdown text, optionally a customer, a short name and the flag public. They are numbered `T-{YYYY}-{0000}`, finalized to the status closed and never count in sums or figures. This first step covers the REST API and MCP (`type: text`, `title`, `body`, `slug`, `is_public`); rendering, the editor and the public link follow. https://openbill.dev/en/documents#text-documents
+- **Text blocks:** a new kind `clause` for reusable clauses.
+- **Templates:** the built-in templates Klar, Kante and Leise (now 1.2.0) set a text document as title and text, without table, sums, payment info and legal notes; Liquid has `document.title` and `document.body` (HTML made from the Markdown, only for `text`), the sample scenario `text_document` shows it. **Your own templates** without `documentTypes` also apply to text documents and show their empty table: add `{% if document.type == "text" %}…{% endif %}` or limit them with `documentTypes`. https://openbill.dev/en/templates#text-documents
+- The keys `title` and `body` are now reserved for document fields. An existing custom document field with one of these keys is hidden by the core value in templates for text documents (only there; other types don't have these values).
+- **Public link:** a finalized text document that is public and has no customer is readable without login at `/legal/<short name>` (newest version) and `/legal/<short name>/<number>` (one version). Check that your reverse proxy lets `/legal/` through without login. `DocumentResource` has `public_url` and `public_latest_url`. https://openbill.dev/en/text-documents#public-link
+- **Attachments:** quotes and order confirmations can name text documents as attachments (by short name). Finalizing freezes the newest version of each, the PDF names it with number and link, and every attachment stays a PDF of its own. Default per document type under Settings → Document types. The built-in templates are now 1.3.0 (a line *Attachments* above the closing text). **Custom templates:** `document.attachments` is a new core key for quotes and confirmations; a custom document field with the key `attachments` is overridden by it there. https://openbill.dev/en/text-documents#attachments-to-quotes
+- A database migration adds the columns `title`, `body`, `slug` and `is_public` to `documents` (the lock trigger is re-created with them) and creates the document type and number range `text`; it runs on start. Existing documents are not touched.
+- No changes to the compose files.
+
 ### 0.4.0
 
 - **Discount per position:** items and optional items can have a discount, as a percentage (0 to 100 %, 100 % makes the line free) or as a fixed amount in euros. In the editor: **Add discount** in the menu of a position. The line total is quantity × unit price minus the discount; converting, duplicating and cancelling keep it, so a cancellation credits exactly what the invoice charged. A fixed amount larger than the line blocks finalizing. Discounts as positions of their own with a negative price work as before. https://openbill.dev/en/documents#drafts

@@ -151,6 +151,11 @@ final class DomainMapper
             fieldDefinitions: self::fieldDefinitions($sources['field_definitions']),
             gross: $gross,
             cancellable: $cancellable,
+            title: $document->title,
+            body: $document->body,
+            isPublic: (bool) $document->is_public,
+            attachments: array_values($document->attachments ?? []),
+            resolvedAttachments: array_column($sources['attachments'] ?? [], 'slug'),
         );
     }
 

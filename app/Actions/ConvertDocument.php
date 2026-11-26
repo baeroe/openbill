@@ -77,6 +77,8 @@ final class ConvertDocument
                 'template_id' => $setting->template_id ?? $source->template_id,
                 'locale' => $source->locale,
                 'custom' => $plan->custom,
+                // a confirmation keeps the attachments of its quote (an invoice has none)
+                'attachments' => $target === DocumentType::Confirmation ? $source->attachments : null,
                 'source_id' => $source->id,
                 'created_by' => $actor->userId,
             ])->save();

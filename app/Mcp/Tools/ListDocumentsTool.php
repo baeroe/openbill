@@ -47,7 +47,7 @@ final class ListDocumentsTool extends OpenbillTool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'type' => $schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation']),
+            'type' => $schema->string()->enum(['offer', 'confirmation', 'invoice', 'cancellation', 'text']),
             'status' => $schema->string()->enum(['draft', 'open', 'accepted', 'rejected', 'done', 'paid', 'cancelled', 'closed', 'overdue']),
             'customer_id' => $schema->string()->description('Customer ID (ULID)'),
             'q' => $schema->string()->description('Number or customer name contains'),

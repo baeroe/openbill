@@ -28,6 +28,7 @@ class DocumentTypeSetting extends Model
             'profile' => ComplianceProfile::class,
             'payment_term_days' => 'integer',
             'validity_days' => 'integer',
+            'attachments' => 'array',
         ];
     }
 

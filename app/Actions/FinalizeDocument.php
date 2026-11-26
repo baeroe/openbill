@@ -98,7 +98,10 @@ final class FinalizeDocument
             }
 
             $this->archiver->archive($draft, $snapshot);
-            EventLog::record($draft, $actor, EventAction::Finalized, ['number' => $draft->number]);
+            EventLog::record($draft, $actor, EventAction::Finalized, [
+                'number' => $draft->number,
+                ...(isset($sources['attachments']) && $sources['attachments'] !== [] ? ['attachments' => array_column($sources['attachments'], 'document_id')] : []),
+            ]);
 
             return $draft->load(['groups.positions', 'snapshot']);
         });

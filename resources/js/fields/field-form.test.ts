@@ -29,7 +29,7 @@ describe('moveId', () => {
 
 describe('emptyDefinition', () => {
     it('applies document and position fields to every type, other levels to none', () => {
-        expect(emptyDefinition('document').doc_types).toEqual(['offer', 'confirmation', 'invoice', 'cancellation']);
+        expect(emptyDefinition('document').doc_types).toEqual(['offer', 'confirmation', 'invoice', 'cancellation', 'text']);
         expect(emptyDefinition('customer').doc_types).toEqual([]);
         expect([hasDocTypes('position'), hasDocTypes('org')]).toEqual([true, false]);
     });

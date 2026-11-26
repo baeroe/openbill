@@ -37,7 +37,7 @@ final class SuggestPositions
         $rows = Position::query()
             ->join('documents', 'documents.id', '=', 'positions.document_id')
             ->whereIn('positions.kind', [PositionKind::Item->value, PositionKind::Optional->value])
-            ->where('documents.type', '!=', DocumentType::Cancellation->value)
+            ->whereNotIn('documents.type', [DocumentType::Cancellation->value, DocumentType::Text->value])
             ->where('positions.title', '!=', '')
             ->when($q !== '', fn ($query) => $query->where('positions.title', 'like', Like::contains($q)))
             ->orderByDesc('documents.date')

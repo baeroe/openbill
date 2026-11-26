@@ -80,6 +80,6 @@ it('lists every template with the document types of its manifest', function () {
     $templates = pageContext(draft())['templates'];
 
     expect(array_column($templates, 'name'))->toBe(['Kante', 'Klar', 'Leise'])
-        ->and($templates[1])->toMatchArray(['name' => 'Klar', 'document_types' => ['offer', 'confirmation', 'invoice', 'cancellation']])
+        ->and($templates[1])->toMatchArray(['name' => 'Klar', 'document_types' => ['offer', 'confirmation', 'invoice', 'cancellation', 'text']])
         ->and($templates[1]['id'])->toBeString();
 });

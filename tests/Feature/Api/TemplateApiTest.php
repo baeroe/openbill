@@ -117,7 +117,7 @@ it('downloads the template package as ZIP', function () {
 it('lists the document types of every template', function () {
     $list = collect($this->getJson('/api/templates')->assertOk()->json())->keyBy('slug');
 
-    expect($list['klar']['document_types'])->toBe(['offer', 'confirmation', 'invoice', 'cancellation']);
+    expect($list['klar']['document_types'])->toBe(['offer', 'confirmation', 'invoice', 'cancellation', 'text']);
 });
 
 it('duplicates a template over the API in the language of the request', function () {

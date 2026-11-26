@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { FileCheck2, FilePlus2, FileText, type LucideIcon } from 'lucide-react';
+import { FileCheck2, FilePlus2, FileText, ScrollText, type LucideIcon } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
 import { useCustomer, useCustomerOptions } from '@/api/customers';
 import { createDocument } from '@/api/documents';
@@ -16,6 +16,7 @@ const TYPES: { type: DocumentType; icon: LucideIcon }[] = [
     { type: 'offer', icon: FilePlus2 },
     { type: 'confirmation', icon: FileCheck2 },
     { type: 'invoice', icon: FileText },
+    { type: 'text', icon: ScrollText },
 ];
 
 /** Cancellations always come from an invoice (CreateDocument refuses them), so they are not offered here. */
@@ -94,7 +95,7 @@ export function NewDocumentDialog({ open, options, onClose }: { open: boolean; o
                 </>
             }
         >
-            <div role="radiogroup" aria-label={t('new_document.type_label')} onKeyDown={moveType} className="grid gap-2 xs:grid-cols-3">
+            <div role="radiogroup" aria-label={t('new_document.type_label')} onKeyDown={moveType} className="grid gap-2 xs:grid-cols-2 md:grid-cols-4">
                 {TYPES.map(({ type: value, icon: Icon }) => (
                     <button
                         key={value}

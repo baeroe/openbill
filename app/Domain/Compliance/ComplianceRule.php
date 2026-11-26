@@ -30,4 +30,8 @@ enum ComplianceRule: string
     case DiscountExceedsLine = 'discount_exceeds_line';
     case CancellationNotCredit = 'cancellation_not_credit';
     case CancellationExceedsInvoice = 'cancellation_exceeds_invoice';
+    case TitleMissing = 'title_missing';
+    case BodyMissing = 'body_missing';
+    case PublicWithCustomer = 'public_with_customer';
+    case AttachmentMissing = 'attachment_missing';
 }

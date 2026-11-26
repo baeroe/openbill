@@ -22,6 +22,7 @@ final class DocumentConverter
         'confirmation' => ['invoice'],
         'invoice' => ['cancellation'],
         'cancellation' => [],
+        'text' => [],
     ];
 
     public static function canConvert(DocumentType $source, DocumentStatus $status, bool $alreadyCancelled, DocumentType $target): bool

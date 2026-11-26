@@ -14,6 +14,8 @@ use App\Rendering\TemplateSource;
  * then look at the diff (git diff tests/Feature/Rendering/golden) and at the PDF (php artisan app:render-sample).
  */
 it('renders the built-in templates exactly like the approved output', function (string $slug, RenderScenario $scenario, string $locale) {
+    // links (attachments) are built on APP_URL: pin it, the golden files must not depend on the machine
+    config(['app.url' => 'https://openbill.example']);
     $sample = app(SampleDataFactory::class)->make($scenario, $locale);
     $context = app(ContextBuilder::class)->build($sample->document, $sample->sources);
     $result = app(LiquidRenderer::class)->render(TemplateSource::fromModel(Template::query()->where('slug', $slug)->firstOrFail()), $context->data, new RenderOptions($locale));
@@ -35,4 +37,8 @@ it('renders the built-in templates exactly like the approved output', function (
     'kante offer with options en' => ['kante', RenderScenario::OfferWithOptions, 'en'],
     'kante small business de' => ['kante', RenderScenario::SmallBusiness, 'de'],
     'leise reverse charge de' => ['leise', RenderScenario::ReverseCharge, 'de'],
+    'klar text document de' => ['klar', RenderScenario::TextDocument, 'de'],
+    'kante text document en' => ['kante', RenderScenario::TextDocument, 'en'],
+    'leise text document de' => ['leise', RenderScenario::TextDocument, 'de'],
+    'leise text document en' => ['leise', RenderScenario::TextDocument, 'en'],
 ]);

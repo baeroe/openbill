@@ -79,7 +79,7 @@ openbill embeds them as data URLs while rendering. Images and fonts can only com
 | `name` | yes | display name (at most 100 characters) |
 | `version` | yes | version like `1.0.0` |
 | `author`, `license`, `description` | no | texts |
-| `documentTypes` | no | document types the template is meant for: `offer`, `confirmation`, `invoice`, `cancellation` |
+| `documentTypes` | no | document types the template is meant for: `offer`, `confirmation`, `invoice`, `cancellation`, `text` |
 | `expectedFields` | no | custom fields the template uses (`scope`, `key`, `type`, `fallback`), shown as hints when a field is missing |
 | `paper` | no | `format` (`A4` or `Letter`), `marginX` (left and right), `headerHeight`, `footerHeight`; lengths in `mm`, `cm`, `in`, `pt` or `px`. Default: A4, 20mm, 30mm, 20mm |
 | `translations` | no | your own words for the `t` filter, per language (`en`, `de`) |
@@ -130,6 +130,8 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 | `number` | number; drafts show "Draft"/"Entwurf" |
 | `date`, `due_date`, `valid_until`, `service_date`, `service_date_end` | dates (may be empty) |
 | `locale` | document language (`en`, `de`) |
+| `attachments` | quotes and order confirmations only: list of the attachments `{title, number, slug, url}` (see below); `url` is the link of that version if it is public, otherwise empty |
+| `title`, `body` | text documents only (`type` is `text`): the title and the text as HTML, already made from the Markdown (headings, lists, emphasis, links; raw HTML is shown as text, links with unsafe targets and images are reduced to their text). Output `body` as it is, without a filter |
 | `intro`, `closing` | texts before and after the items (may contain Liquid themselves, see below) |
 | `net_total`, `tax_total`, `gross_total` | totals |
 | `optional_total` | sum of optional items (offers), not part of the totals |
@@ -241,6 +243,40 @@ A position with a discount keeps its `unit_price`; `total` is already the discou
 <td>{% if p.has_discount %}<s>{{ p.total_before_discount | money }}</s><br>{% endif %}{{ p.total | money }}</td>
 ```
 
+### Text documents
+
+For `type == "text"` there are no groups, positions or totals: the template shows `document.title` and `document.body` (the built-in templates since 1.2.0 do, without table, sums, payment info and legal notes). Own templates without `documentTypes` apply to every type and show their (empty) table for a text document, so catch the type:
+
+::: v-pre
+```liquid
+{% if document.type == "text" %}
+  <h1>{{ document.title }}</h1>
+  <div class="doc-body">{{ document.body }}</div>
+{% else %}
+  … your table and sums …
+{% endif %}
+```
+:::
+
+Style the elements of `.doc-body` yourself (`h1`–`h4`, `p`, `ul`, `ol`, `blockquote`, `code`, `hr`, `a`). To offer a template for text documents only, set `"documentTypes": ["text"]`.
+
+### Attachments
+
+`document.attachments` lists the [attachments](/en/text-documents#attachments-to-quotes) of a quote or confirmation: in a draft the newest versions as they are now, in a finalized document the versions frozen when it was finalized. The built-in templates (1.3.0) print them above the closing text; your own template can do the same:
+
+::: v-pre
+```liquid
+{% if document.attachments.size > 0 %}
+  <p><b>{{ 'attachments' | t }}</b></p>
+  {% for a in document.attachments %}
+    <p>{{ a.title }} ({{ a.number }}){% if a.url != blank %} – <a href="{{ a.url }}">{{ a.url }}</a>{% endif %}</p>
+  {% endfor %}
+{% endif %}
+```
+:::
+
+The key is not set for other document types, so `size` is empty there. The word `attachments` is in the vocabulary of `t`.
+
 ## Limits and errors
 
 A template can never break openbill or block it:
@@ -260,7 +296,7 @@ Every problem is reported with the **part** (`header`, `body`, `footer`, `css`, 
 
 ## Sample data
 
-For previews without a real document openbill has five sample scenarios: `short_invoice`, `long_invoice` (several pages, groups, two discounted lines), `small_business`, `reverse_charge` and `offer_with_options`. They use your organization (or the fictional Studio Nordlicht on a fresh installation), a fictional customer, fixed dates and sample values for your custom fields. To get one as PDF on the command line:
+For previews without a real document openbill has six sample scenarios: `short_invoice`, `long_invoice` (several pages, groups, two discounted lines), `small_business`, `reverse_charge`, `offer_with_options` and `text_document` (fictional terms and conditions). They use your organization (or the fictional Studio Nordlicht on a fresh installation), a fictional customer, fixed dates and sample values for your custom fields. To get one as PDF on the command line:
 
 ```bash
 php artisan app:render-sample klar long_invoice --locale=en

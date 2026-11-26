@@ -21,6 +21,10 @@ final class ComplianceChecker
     /** @return list<ComplianceIssue> */
     public static function check(ComplianceInput $in): array
     {
+        if ($in->type === DocumentType::Text) {
+            return self::checkText($in);
+        }
+
         $items = [];
         foreach ($in->groups as $group) {
             foreach ($group->positions as $position) {
@@ -63,6 +67,11 @@ final class ComplianceChecker
         }
 
         array_push($issues, ...self::cancellationAmount($in));
+        foreach ($in->attachments as $i => $slug) {
+            if (! in_array($slug, $in->resolvedAttachments, true)) {
+                $issues[] = new ComplianceIssue("document.attachments.{$i}", ComplianceRule::AttachmentMissing, ['slug' => $slug]);
+            }
+        }
 
         $defs = $in->fieldDefinitions;
         array_push($issues, ...self::requiredCustom(FieldRegistry::forScope($defs, FieldScope::Org), $in->org->custom, 'org.', ComplianceRule::OrgFieldMissing));
@@ -136,6 +145,32 @@ final class ComplianceChecker
                 $issues[] = new ComplianceIssue("positions.{$p->id}.quantity", ComplianceRule::QuantityZero, $title);
             }
         }
+
+        return $issues;
+    }
+
+    /**
+     * Text documents (all profiles): date, title, text and required custom fields. No customer, positions, tax or
+     * organization rules. Public with a customer is a combination that arises while typing, so an issue, not a 422.
+     *
+     * @return list<ComplianceIssue>
+     */
+    private static function checkText(ComplianceInput $in): array
+    {
+        $issues = [];
+        if ($in->date === null || $in->date === '') {
+            $issues[] = new ComplianceIssue('document.date', ComplianceRule::DateMissing);
+        }
+        if (trim((string) $in->title) === '') {
+            $issues[] = new ComplianceIssue('document.title', ComplianceRule::TitleMissing);
+        }
+        if (trim((string) $in->body) === '') {
+            $issues[] = new ComplianceIssue('document.body', ComplianceRule::BodyMissing);
+        }
+        if ($in->isPublic && $in->customer !== null) {
+            $issues[] = new ComplianceIssue('document.is_public', ComplianceRule::PublicWithCustomer);
+        }
+        array_push($issues, ...self::requiredCustom(FieldRegistry::forScope($in->fieldDefinitions, FieldScope::Document, $in->type), $in->custom, 'document.custom.', ComplianceRule::DocumentFieldMissing));
 
         return $issues;
     }

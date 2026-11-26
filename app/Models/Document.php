@@ -79,6 +79,8 @@ class Document extends Model
             'due_date' => 'immutable_date:Y-m-d',
             'valid_until' => 'immutable_date:Y-m-d',
             'custom' => 'array',
+            'is_public' => 'boolean',
+            'attachments' => 'array',
             'finalized_at' => 'immutable_datetime',
             'paid_at' => 'immutable_datetime',
             'net_total' => 'decimal:2',

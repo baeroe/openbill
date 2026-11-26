@@ -14,6 +14,7 @@ export type DocumentTypeSetting = {
     default_closing_block_id: string | null;
     payment_term_days: number | null;
     validity_days: number | null;
+    attachments: string[] | null;
     numbering: { pattern: string; reset_yearly: boolean; next_value: number; next_number: string };
 };
 
@@ -79,6 +80,7 @@ export type DocumentTypeInput = {
     default_closing_block_id: string | null;
     payment_term_days: number | null;
     validity_days: number | null;
+    attachments: string[] | null;
     numbering: NumberingInput;
 };
 

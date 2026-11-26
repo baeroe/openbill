@@ -17,7 +17,7 @@ it('ships Klar, Kante and Leise as built-in templates and uses Klar as default f
 
     expect(Template::query()->where('built_in', true)->orderBy('slug')->pluck('name', 'slug')->all())->toBe(['kante' => 'Kante', 'klar' => 'Klar', 'leise' => 'Leise'])
         ->and(DocumentTypeSetting::query()->pluck('template_id')->unique()->values()->all())->toBe([$klar->id])
-        ->and($klar->version)->toBe('1.1.0')
+        ->and($klar->version)->toBe('1.3.0')
         ->and($klar->manifest['paper'])->toBe(['format' => 'A4', 'marginX' => '20mm', 'headerHeight' => '30mm', 'footerHeight' => '28mm']);
 });
 
@@ -49,7 +49,7 @@ it('renders every built-in template with every scenario in both languages withou
             // empty strings are truthy in Liquid: templates must test text with "!= blank" (no logo → no broken image)
             ->and($result->header.$result->body.$result->footer)->not->toContain('src=""')
             ->and($result->body)->not->toMatch('#<(span|small) class="desc"></(span|small)>|<small></small>#')
-            ->and($result->body)->toContain((string) $sample->sources['customer']['vat_id']);
+            ->and($result->body)->toContain($scenario === RenderScenario::TextDocument ? (string) $sample->sources['title'] : (string) $sample->sources['customer']['vat_id']);
     }
 })->with(SyncBuiltInTemplates::SLUGS)->with(RenderScenario::cases());
 
@@ -92,4 +92,21 @@ it('never compares amounts with == or != (string amounts, see docs)', function (
 
 it('syncs from the console', function () {
     $this->artisan('app:sync-templates')->expectsOutputToContain('klar, kante, leise')->assertSuccessful();
+});
+
+it('sets a text document as title and text without table, sums, payment info or legal notes', function (string $slug) {
+    $sample = app(SampleDataFactory::class)->make(RenderScenario::TextDocument, 'de');
+    $context = app(ContextBuilder::class)->build($sample->document, $sample->sources);
+    $body = app(LiquidRenderer::class)->render(TemplateSource::fromModel(Template::query()->where('slug', $slug)->firstOrFail()), $context->data, new RenderOptions('de'))->body;
+
+    expect($body)->toContain('Allgemeine Geschäftsbedingungen')
+        ->and($body)->toContain('<h2>§ 1 Geltung</h2>')
+        ->and($body)->toContain('<li>Konzeption und Beratung</li>')
+        ->and($body)->not->toContain('<table')
+        ->and($body)->not->toContain('class="legal"')
+        ->and($body)->not->toContain('data:image/svg+xml');
+})->with(SyncBuiltInTemplates::SLUGS);
+
+it('lets manifests name the text document type', function () {
+    expect(ManifestValidator::validate([...TemplatePackage::fromDirectory(resource_path('templates/klar'))->manifest, 'documentTypes' => ['text']]))->toBe([]);
 });

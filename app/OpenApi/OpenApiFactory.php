@@ -28,7 +28,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         'template' => ['type' => 'object', 'description' => 'unsaved parts: header, body, footer, css, manifest'],
         'document_id' => ['type' => 'string', 'description' => 'required without scenario'],
         'draft' => ['type' => 'object', 'description' => 'unsaved draft changes (PATCH /api/documents/{id} body)'],
-        'scenario' => ['type' => 'string', 'enum' => ['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options']],
+        'scenario' => ['type' => 'string', 'enum' => ['short_invoice', 'long_invoice', 'small_business', 'reverse_charge', 'offer_with_options', 'text_document']],
         'locale' => ['type' => 'string', 'enum' => ['en', 'de']],
     ]];
 
@@ -181,6 +181,12 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                 responses: self::responses(self::json('Core and custom fields per level (org, customer, contact, document, position).')),
                 summary: 'Describes the fields templates can use.',
                 parameters: [$query('document_type', 'offer, confirmation, invoice or cancellation')],
+            )),
+            '/api/text-documents/slugs' => new PathItem(get: new Operation(
+                operationId: 'getTextDocumentSlugs',
+                tags: ['Document'],
+                responses: self::responses(self::json('The newest finalized version of every short name (texts without customer only).', ['type' => 'array', 'items' => ['type' => 'object']])),
+                summary: 'Lists the short names an attachment can use.',
             )),
             '/api/position-suggestions' => new PathItem(get: new Operation(
                 operationId: 'getPositionSuggestions',

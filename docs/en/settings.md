@@ -12,7 +12,7 @@ The e-invoice profile needs the VAT ID or the register number; with reverse char
 
 ## Document types
 
-Per type: the **compliance profile** (basic, or EN 16931 e-invoice for invoices and cancellations), the **number range** and the **defaults** for new documents (template, payment term, validity, intro and closing text).
+The cards *Quote* and *Order confirmation* also have the default **attachments** of new drafts (see [attachments](/en/text-documents#attachments-to-quotes)). Text documents have their own card with the number range and the template only (see [text documents](/en/text-documents)). Per type: the **compliance profile** (basic, or EN 16931 e-invoice for invoices and cancellations), the **number range** and the **defaults** for new documents (template, payment term, validity, intro and closing text).
 
 Number patterns use `{YYYY}`, `{YY}`, `{MM}` and a running number `{0000}` (as many digits as zeros). With “Start at 1 again every year” the pattern must contain the year. The preview next to the pattern comes from the server and shows the next number exactly as finalizing would assign it. “Next running number” continues an existing range; numbers already used are skipped.
 
@@ -31,7 +31,7 @@ Deleting a rate or unit **archives** it: it disappears from the pickers, existin
 ## Text blocks
 
 ::: v-pre
-Reusable intro, closing, payment and note texts. They may contain Liquid placeholders like `{{ customer.name }}` or `{{ document.due_date | date }}`, filled in when the document is rendered. A text block can be the default for a document type.
+Reusable intro, closing, payment and note texts, and **clauses** that you insert into [text documents](/en/text-documents#clauses) at the cursor. They may contain Liquid placeholders like `{{ customer.name }}` or `{{ document.due_date | date }}`, filled in when the document is rendered. A text block can be the default for a document type.
 :::
 
 ## Users

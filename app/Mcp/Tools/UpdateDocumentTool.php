@@ -23,7 +23,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsOpenWorld;
 
 #[Name('update-document')]
 #[Title('Update draft')]
-#[Description('Change a draft. Only the keys you send change; "groups", when sent, replaces all groups and positions (send their ids to keep them). Amounts and quantities are strings. Finalized documents cannot be changed (reason document_locked). Answers like get-document: check "issues" before finalize-document.')]
+#[Description('Change a draft. Only the keys you send change; "groups", when sent, replaces all groups and positions (send their ids to keep them). Text documents take title, body, slug and is_public instead of groups. Amounts and quantities are strings. Finalized documents cannot be changed (reason document_locked). Answers like get-document: check "issues" before finalize-document.')]
 #[IsDestructive]
 #[IsIdempotent]
 #[IsOpenWorld(false)]

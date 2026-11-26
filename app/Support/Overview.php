@@ -92,7 +92,8 @@ final class Overview
         $day = $today->toDateString();
         $overdue = self::overdueInvoices($day);
         $offers = self::openOffers()->whereNotNull('valid_until')->where('valid_until', '<=', $today->addDays(self::EXPIRY_DAYS)->toDateString());
-        $drafts = Document::query()->where('status', DocumentStatus::Draft->value);
+        // text documents are no sales documents: no reminder to finish them
+        $drafts = Document::query()->where('status', DocumentStatus::Draft->value)->where('type', '!=', DocumentType::Text->value);
 
         $rows = [
             ...self::withCustomer(clone $overdue)->orderBy('due_date')->orderBy('id')->limit(self::ATTENTION_LIMIT)->get()

@@ -15,7 +15,7 @@ use App\Models\TextBlock;
 use App\State\Processor\TextBlockProcessor;
 use App\State\Provider\TextBlockProvider;
 
-/** Reusable intro/closing/payment/note text; may contain Liquid placeholders. */
+/** Reusable intro/closing/payment/note/clause text; may contain Liquid placeholders. */
 #[ApiResource(
     shortName: 'TextBlock',
     normalizationContext: Normalization::CONTEXT,
@@ -25,7 +25,7 @@ use App\State\Provider\TextBlockProvider;
             paginationEnabled: false,
             middleware: ApiMiddleware::READ,
             provider: TextBlockProvider::class,
-            parameters: ['kind' => new QueryParameter(description: 'intro, closing, payment or note')],
+            parameters: ['kind' => new QueryParameter(description: 'intro, closing, payment, note or clause')],
         ),
         new Get(uriTemplate: '/text-blocks/{id}', middleware: ApiMiddleware::READ, provider: TextBlockProvider::class),
         new Post(uriTemplate: '/text-blocks', middleware: ApiMiddleware::WRITE, read: false, deserialize: false, processor: TextBlockProcessor::class),

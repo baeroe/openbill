@@ -19,7 +19,7 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Name('get-document')]
 #[Title('Get document')]
-#[Description('One document completely: fields, custom values, groups with positions (the shape update-document takes), totals and – for drafts – the "issues" that block finalize-document (an empty list means ready).')]
+#[Description('One document completely: fields, custom values, groups with positions (the shape update-document takes), totals and – for drafts – the "issues" that block finalize-document (an empty list means ready); a finalized public text document also has "public_url", its link without login.')]
 #[IsReadOnly]
 #[IsOpenWorld(false)]
 final class GetDocumentTool extends OpenbillTool

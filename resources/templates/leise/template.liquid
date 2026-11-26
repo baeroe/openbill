@@ -2,11 +2,14 @@
   {% if customer %}{{ customer.name }}<br>{% if contact %}{{ contact.full_name }}<br>{% endif %}{{ customer.street }}<br>{{ customer.zip }} {{ customer.city }}{% if customer.vat_id != blank %}<br>{{ 'vat_id' | t }} {{ customer.vat_id }}{% endif %}{% endif %}
 </section>
 
-<h1>{{ document.type_label }}</h1>
+<h1>{% if document.type == "text" %}{{ document.title }}{% else %}{{ document.type_label }}{% endif %}</h1>
 <p class="meta">
   {{ 'number_short' | t }} {{ document.number }}, {{ document.date | date }}{% if document.service_date %}, {{ 'service_date' | t }} {{ document.service_date | date }}{% endif %}{% if document.valid_until %}, {{ 'valid_until' | t | downcase }} {{ document.valid_until | date }}{% endif %}{% if document.source_number %}, {{ 'reference' | t }} {{ document.source_number }}{% endif %}
 </p>
 
+{% if document.type == "text" %}
+<div class="doc-body">{{ document.body }}</div>
+{% else %}
 {% if document.intro != blank %}<p class="text">{{ document.intro | nl2br }}</p>{% endif %}
 
 <table class="items">
@@ -33,4 +36,6 @@
 </table>
 
 {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
+{% if document.attachments.size > 0 %}<div class="attachments"><b>{{ 'attachments' | t }}</b>{% for a in document.attachments %}<div>{{ a.title }} ({{ a.number }}){% if a.url != blank %} – <a href="{{ a.url }}">{{ a.url }}</a>{% endif %}</div>{% endfor %}</div>{% endif %}
 {% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
+{% endif %}

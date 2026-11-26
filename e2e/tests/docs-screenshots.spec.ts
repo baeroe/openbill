@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { apiDelete, apiGet } from './helpers';
+import { apiDelete, apiGet, apiPost } from './helpers';
 
 /**
  * Screenshots of the documentation, committed under docs/public/screenshots/{en,de}/<name>.png: the demo data of
@@ -37,6 +37,26 @@ const SHOTS: Shot[] = [
     { name: 'documents', open: (page, locale) => go(page, locale, '/documents') },
     { name: 'editor', dark: true, open: openEditor },
     {
+        // a text document without customer: terms and conditions, written in the page's language
+        name: 'text-editor',
+        dark: true,
+        open: async (page, locale) => {
+            await go(page, locale, '/documents');
+            const de = locale === 'de';
+            const created = (await apiPost(page, '/api/documents', {
+                type: 'text',
+                title: de ? 'Allgemeine Geschäftsbedingungen' : 'General terms and conditions',
+                slug: de ? 'agb' : 'terms',
+                locale,
+                body: de
+                    ? '## § 1 Geltung\n\nDiese Bedingungen gelten für alle Verträge zwischen **Studio Nordlicht** und ihren Auftraggebern.\n\n## § 2 Vergütung\n\n1. Rechnungen sind innerhalb von 14 Tagen zu zahlen.\n2. Alle Preise verstehen sich netto zuzüglich Umsatzsteuer.'
+                    : '## § 1 Scope\n\nThese terms apply to all contracts between **Studio Nordlicht** and its clients.\n\n## § 2 Fees\n\n1. Invoices are payable within 14 days.\n2. All prices are net, plus VAT.',
+            })) as { id: string };
+            await go(page, locale, `/documents/${created.id}`);
+            await page.locator('.pp-page').first().waitFor();
+        },
+    },
+    {
         name: 'customer',
         open: async (page, locale) => {
             await go(page, locale, '/customers');
@@ -58,6 +78,31 @@ const SHOTS: Shot[] = [
     { name: 'fields', open: (page, locale) => go(page, locale, '/fields?scope=document') },
     { name: 'settings-organization', open: (page, locale) => go(page, locale, '/settings/organization') },
     { name: 'settings-api', open: (page, locale) => go(page, locale, '/settings/api') },
+    {
+        // a quote with the attachment "terms" (en) / "agb" (de): finalized terms and conditions without customer
+        name: 'attachments',
+        open: async (page, locale) => {
+            await go(page, locale, '/documents');
+            const de = locale === 'de';
+            const slug = de ? 'agb' : 'terms';
+            const text = (await apiPost(page, '/api/documents', {
+                type: 'text',
+                title: de ? 'Allgemeine Geschäftsbedingungen' : 'General terms and conditions',
+                slug,
+                is_public: true,
+                locale,
+                body: de ? '## § 1 Geltung\n\nDiese Bedingungen gelten für alle Verträge.' : '## § 1 Scope\n\nThese terms apply to all contracts.',
+            })) as { id: string };
+            await apiPost(page, `/api/documents/${text.id}/finalize`);
+            const customers = (await apiGet(page, '/api/customers')) as { id: string; name: string }[];
+            const customer = customers.find((item) => item.name === 'Hafenkontor Lindqvist GmbH')!;
+            const quote = (await apiPost(page, '/api/documents', { type: 'offer', customer_id: customer.id, attachments: [slug] })) as { id: string };
+            await go(page, locale, `/documents/${quote.id}`);
+            await page.locator('.pp-page').first().waitFor();
+            await page.locator('#attachments-heading').scrollIntoViewIfNeeded();
+            await page.getByText(de ? 'Allgemeine Geschäftsbedingungen ·' : 'General terms and conditions ·').first().waitFor();
+        },
+    },
     {
         // a finalized EN 16931 invoice (Fjord Analytics, reverse charge) with its archived XML
         name: 'einvoice',

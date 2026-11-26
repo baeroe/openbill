@@ -55,6 +55,9 @@ class AppServiceProvider extends ServiceProvider
         // only a valid token gets its own bucket; anything else (no token, made-up tokens) shares the IP's
         RateLimiter::for('api', fn (Request $request): Limit => self::perToken($request, (int) config('openbill.api.requests_per_minute')));
         // agents get their own bucket (the limiter name is part of the key), so they never slow down the UI
+        // public texts: 60 a minute per address, a bucket of their own (an unnamed throttle:N,1 shares one counter with
+        // every other unnamed throttle of the address, so /legal traffic would lock the same address out of login)
+        RateLimiter::for('legal', fn (Request $request): Limit => Limit::perMinute(60)->by($request->ip()));
         RateLimiter::for('mcp', fn (Request $request): Limit => self::perToken($request, (int) config('openbill.mcp.requests_per_minute')));
     }
 

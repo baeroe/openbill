@@ -23,11 +23,12 @@ use App\State\Provider\DocumentProvider;
 use App\Support\DocumentInspector;
 use App\Support\InvoiceBalance;
 use App\Support\IssueList;
+use App\Support\LegalLinks;
 use ArrayObject;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 /**
- * Offer, order confirmation, invoice or cancellation. Groups and positions are embedded; they are
+ * Offer, order confirmation, invoice, cancellation or text document. Groups and positions are embedded; they are
  * writable only while the document is a draft. Lists show the short form (no texts, groups, totals, issues).
  */
 #[ApiResource(
@@ -40,7 +41,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             provider: DocumentProvider::class,
             normalizationContext: [...Normalization::CONTEXT, 'groups' => [self::LIST]],
             parameters: [
-                'type' => new QueryParameter(description: 'offer, confirmation, invoice or cancellation'),
+                'type' => new QueryParameter(description: 'offer, confirmation, invoice, cancellation or text'),
                 'status' => new QueryParameter(description: 'draft, open, accepted, rejected, done, paid, cancelled, closed, or overdue (open invoices past their due date)'),
                 'customer_id' => new QueryParameter(description: 'customer ULID'),
                 'q' => new QueryParameter(description: 'number or customer name contains'),
@@ -56,7 +57,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             read: false,
             deserialize: false,
             processor: DocumentProcessor::class,
-            description: 'Creates a draft: type (offer, confirmation, invoice), customer_id, date and any field PATCH takes.',
+            description: 'Creates a draft: type (offer, confirmation, invoice, text), customer_id (optional for text), date and any field PATCH takes.',
         ),
         new Patch(
             uriTemplate: '/documents/{id}',
@@ -133,6 +134,7 @@ final class DocumentResource
      * @param  array<string, mixed>|null  $totals
      * @param  list<array{path: string, message: string, code: string}>  $issues
      * @param  list<string>  $dropped_fields
+     * @param  list<string>|list<array<string, mixed>>  $attachments
      */
     public function __construct(
         #[ApiProperty(identifier: true, writable: false)]
@@ -167,6 +169,27 @@ final class DocumentResource
         public string $intro,
         #[Groups([self::ITEM])]
         public string $closing,
+        #[ApiProperty(description: 'text documents only: title')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $title,
+        #[ApiProperty(description: 'text documents only: Markdown text (at most 100000 characters)')]
+        #[Groups([self::ITEM])]
+        public ?string $body,
+        #[ApiProperty(description: 'text documents only: short name (a-z, 0-9, hyphens), shared by all versions of a text')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $slug,
+        #[ApiProperty(description: 'text documents only: publicly readable after finalizing (needs slug, no customer)')]
+        #[Groups([self::LIST, self::ITEM])]
+        public bool $is_public,
+        #[ApiProperty(writable: false, description: 'finalized public text documents (without customer) only: the permanent link of this version, /legal/<slug>/<number>')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $public_url,
+        #[ApiProperty(writable: false, description: 'finalized public text documents only: the link of the newest version of this short name, /legal/<slug> (shows another version once a newer one is finalized)')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $public_latest_url,
+        #[ApiProperty(description: 'quotes and confirmations only: short names of text documents, at most 10, each once. Finalized: the frozen versions [{slug, document_id, number, title, is_public, sha256}] – each is a document of its own, its PDF is GET /api/documents/{document_id}/pdf')]
+        #[Groups([self::ITEM])]
+        public array $attachments,
         #[Groups([self::ITEM])]
         public ?string $template_id,
         #[Groups([self::LIST, self::ITEM])]
@@ -246,6 +269,13 @@ final class DocumentResource
             valid_until: $document->valid_until?->toDateString(),
             intro: (string) $document->intro,
             closing: (string) $document->closing,
+            title: $document->title,
+            body: $document->body,
+            slug: $document->slug,
+            is_public: (bool) $document->is_public,
+            public_url: LegalLinks::versionOf($document),
+            public_latest_url: LegalLinks::latestOf($document),
+            attachments: $document->isFinalized() ? ($inspector === null ? [] : ($document->snapshot?->data['attachments'] ?? [])) : array_values($document->attachments ?? []),
             template_id: $document->template_id,
             locale: $document->locale,
             custom: new ArrayObject($document->custom ?? []),

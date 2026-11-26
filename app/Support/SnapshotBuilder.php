@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Enums\CustomerKind;
+use App\Enums\DocumentFileKind;
 use App\Enums\DocumentType;
 use App\Enums\SupplyType;
 use App\Enums\TaxTreatment;
@@ -70,7 +71,38 @@ final class SnapshotBuilder
             'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($document->locale)),
         ];
 
+        if ($document->type === DocumentType::Text) {
+            // rendered from the snapshot when archiving; frozen with the document
+            $sources += ['title' => $document->title, 'body' => $document->body, 'slug' => $document->slug, 'is_public' => (bool) $document->is_public];
+        }
+
+        if (in_array($document->type, [DocumentType::Offer, DocumentType::Confirmation], true)) {
+            $sources['attachments'] = self::attachments($document);
+        }
+
         return $document->type === DocumentType::Cancellation ? self::withInvoiceTax($document, $sources) : $sources;
+    }
+
+    /**
+     * The attachments of a quote or confirmation as they are right now: every short name resolved to the newest
+     * finalized text document without customer (TextDocuments::latest), with the SHA-256 of its archived PDF. A short
+     * name without such a document is left out (a compliance issue blocks finalizing). Finalizing freezes this list in
+     * the snapshot, so a later version never changes a finalized document.
+     *
+     * @return list<array{slug: string, document_id: string, number: string, title: string, is_public: bool, sha256: string}>
+     */
+    public static function attachments(Document $document): array
+    {
+        $resolved = [];
+        foreach ($document->attachments ?? [] as $slug) {
+            $text = TextDocuments::latest((string) $slug);
+            $sha = $text?->files()->where('kind', DocumentFileKind::Pdf)->value('sha256');
+            if ($text !== null && is_string($sha)) {
+                $resolved[] = ['slug' => (string) $slug, 'document_id' => $text->id, 'number' => (string) $text->number, 'title' => (string) $text->title, 'is_public' => (bool) $text->is_public, 'sha256' => $sha];
+            }
+        }
+
+        return $resolved;
     }
 
     /**

@@ -14,7 +14,7 @@ class RenderSample extends Command
 {
     protected $signature = 'app:render-sample
         {template=klar : template slug}
-        {scenario=short_invoice : short_invoice, long_invoice, small_business, reverse_charge or offer_with_options}
+        {scenario=short_invoice : short_invoice, long_invoice, small_business, reverse_charge, offer_with_options or text_document}
         {--locale=de : en or de}
         {--out= : PDF path (default storage/app/private/samples/<template>-<scenario>-<locale>.pdf)}';
 

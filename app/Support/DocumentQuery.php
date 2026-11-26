@@ -153,8 +153,8 @@ final class DocumentQuery
             : 'documents.gross_total';
         // the query builder returns stdClass rows; as array they are typed for Larastan
         $row = (array) (self::filtered($filters, $today)->toBase()
-            ->where('documents.type', '!=', DocumentType::Text->value)
-            ->selectRaw("COUNT(*) as aggregate, SUM({$amount}) as gross")
+            // the count covers every row of the list; only the sum leaves text documents out
+            ->selectRaw("COUNT(*) as aggregate, SUM(CASE WHEN documents.type = ? THEN 0 ELSE {$amount} END) as gross", [DocumentType::Text->value])
             ->first() ?? []);
 
         return ['count' => (int) ($row['aggregate'] ?? 0), 'gross_total' => Amount::of($row['gross'] ?? null)];

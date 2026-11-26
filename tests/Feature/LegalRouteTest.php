@@ -126,3 +126,12 @@ it('puts public_url into the document of the API and MCP, only for finalized pub
     $this->getJson("/api/documents/{$private->id}")->assertOk()->assertJsonPath('public_url', null);
     expect(mcpJson(mcpTool(GetDocumentTool::class, ['id' => $done->id]))['public_url'])->toBe(url("/legal/agb/{$done->number}"));
 });
+
+it('does not use up the login and invitation limits of the same address', function () {
+    foreach (range(1, 25) as $i) {
+        $this->get('/legal/unknown')->assertNotFound();
+    }
+
+    // POST /en/invitations/... and /en/login are throttled 10 and 20 a minute: the legal requests must not count there
+    $this->post('/en/login', ['email' => 'nobody@example.com', 'password' => 'x'])->assertStatus(302)->assertSessionHasErrors();
+});

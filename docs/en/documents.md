@@ -125,11 +125,11 @@ After logging in you land on the overview. Four figures sum up the money side: o
 
 ![The document list, filtered by type, status, customer and date](/screenshots/en/documents.png)
 
-**Documents** shows all documents, newest first and grouped by month. Filter by type (each pill shows how many documents that type has under the other filters), by status, by customer and by document date (from/to), and search number and customer name. The status filter also offers **Overdue**: open invoices past their due date. Every filter is part of the address, for example `/en/documents?type=invoice&status=overdue` or `/en/documents?date_from=2026-01-01&date_to=2026-03-31`, so a filtered list can be bookmarked, shared and reached again with the browser's back button. The list loads 50 documents at a time (**Load more**); the line below it counts all matching documents and sums their gross amounts.
+**Documents** shows all documents, newest first and grouped by month. Filter by type (each pill shows how many documents that type has under the other filters), by status, by customer and by document date (from/to), and search number and customer name. The status filter also offers **Overdue**: open invoices past their due date. Every filter is part of the address, for example `/en/documents?type=invoice&status=overdue` or `/en/documents?date_from=2026-01-01&date_to=2026-03-31`, so a filtered list can be bookmarked, shared and reached again with the browser's back button. The list loads 50 documents at a time (**Load more**); the line below it counts all matching documents and sums their gross amounts. [Text documents](/en/text-documents) (filter **Texts**) show their title when they have no customer and no amount, and they are not part of the sum.
 
 ### New document
 
-**New document** in the sidebar – or the key **N** anywhere, as long as you are not typing in a field – opens a dialog: choose the type and the customer (or choose the customer later), and openbill creates a draft with the defaults of the document type. Cancellations are not created here; they always come from an invoice. The new draft opens in the document editor.
+**New document** in the sidebar – or the key **N** anywhere, as long as you are not typing in a field – opens a dialog: choose the type and the customer (or choose the customer later), and openbill creates a draft with the defaults of the document type. Cancellations are not created here; they always come from an invoice. A [text document](/en/text-documents) needs no customer. The new draft opens in the document editor.
 
 ### Document editor
 

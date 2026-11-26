@@ -160,6 +160,8 @@ export type Totals = {
 
 /** Item form of a document (GET /api/documents/{id}, answers of PATCH and the document actions). */
 export type DocumentDetail = DocumentSummary & {
+    /** Text documents only: Markdown. */
+    body?: string | null;
     service_date: string | null;
     service_date_end: string | null;
     intro: string;

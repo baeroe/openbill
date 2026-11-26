@@ -34,6 +34,7 @@ const TYPE_PILLS: { value: DocumentType | null; key: 'all' | DocumentType }[] = 
     { value: 'confirmation', key: 'confirmation' },
     { value: 'invoice', key: 'invoice' },
     { value: 'cancellation', key: 'cancellation' },
+    { value: 'text', key: 'text' },
 ];
 
 const STATUS_OPTIONS: (DocumentStatus | 'overdue')[] = ['draft', 'open', 'overdue', 'accepted', 'rejected', 'done', 'paid', 'cancelled', 'closed'];
@@ -273,14 +274,14 @@ function DocumentRow({ document }: { document: DocumentSummary }) {
                 <span className={cx('whitespace-nowrap', document.number ? 'num font-semibold' : 'font-semibold text-muted italic')}>{document.number ?? t('documents.draft')}</span>
                 <span className="truncate text-sm text-muted">{t(`document_type.${document.type}`)}</span>
             </span>
-            <span className="col-start-1 row-start-1 min-w-0 truncate font-strong sm:col-auto sm:row-auto">{document.customer_name ?? t('documents.no_customer')}</span>
+            <span className="col-start-1 row-start-1 min-w-0 truncate font-strong sm:col-auto sm:row-auto">{document.customer_name ?? (document.type === 'text' && document.title ? document.title : t('documents.no_customer'))}</span>
             <span className="num hidden text-sm text-muted lg:block">{formatDate(document.date)}</span>
             <span className={cx('num hidden text-sm sm:block', document.is_overdue ? 'font-semibold text-bad' : 'text-muted')}>{deadline ? formatDate(deadline) : '–'}</span>
             <span className="col-start-2 row-start-2 justify-self-end sm:col-auto sm:row-auto sm:justify-self-start">
                 <StatusBadge status={document.status} overdue={document.is_overdue} />
             </span>
             <span className="num col-start-2 row-start-1 text-right font-semibold sm:col-auto sm:row-auto">
-                <DocumentAmount gross={document.gross_total} open={document.open_amount} />
+                {document.type === 'text' ? '—' : <DocumentAmount gross={document.gross_total} open={document.open_amount} />}
             </span>
         </Link>
     );

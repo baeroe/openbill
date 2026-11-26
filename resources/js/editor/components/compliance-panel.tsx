@@ -8,7 +8,7 @@ const ITEM = 'flex w-full items-center gap-2 rounded-sm bg-[color-mix(in_srgb,va
 const WHERE = 'ml-auto inline-flex items-center gap-1 text-xs whitespace-nowrap text-muted [&_svg]:size-3';
 
 /** Result of the compliance profile from the last render answer, every issue jumps to its field or links to its place. */
-export function CompliancePanel({ issues, profile, customerId, onJump }: { issues: Issue[]; profile: ComplianceProfile; customerId: string | null; onJump(path: string): void }) {
+export function CompliancePanel({ issues, profile, customerId, onJump }: { issues: Issue[]; profile: ComplianceProfile | null; customerId: string | null; onJump(path: string): void }) {
     const ok = issues.length === 0;
     return (
         <section id="check-panel" aria-live="polite" className={cx('grid scroll-mt-16 gap-3 rounded-lg px-5 py-4', ok ? 'bg-ok-soft text-ok' : 'bg-warn-soft text-warn')}>
@@ -16,7 +16,7 @@ export function CompliancePanel({ issues, profile, customerId, onJump }: { issue
                 {ok ? <CheckCircle2 aria-hidden className="size-5 shrink-0" /> : <AlertCircle aria-hidden className="size-5 shrink-0" />}
                 <div className="grid">
                     <b className="font-strong">{ok ? t('editor.check.ready') : tn('editor.check.missing', issues.length)}</b>
-                    <span className="text-xs opacity-80">{t('editor.check.profile', { profile: profile === 'en16931' ? t('editor.profile.en16931') : t('editor.profile.basic') })}</span>
+                    {profile && <span className="text-xs opacity-80">{t('editor.check.profile', { profile: profile === 'en16931' ? t('editor.profile.en16931') : t('editor.profile.basic') })}</span>}
                 </div>
             </div>
             {!ok && (

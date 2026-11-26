@@ -60,7 +60,8 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
     const profiles: ComplianceProfile[] = type === 'invoice' || type === 'cancellation' ? ['basic', 'en16931'] : ['basic'];
     const templateOptions = (templates.data ?? []).filter((template) => template.document_types.includes(type) || template.id === form.template_id);
     const blockOptions = (kinds: string[]) => (blocks.data ?? []).filter((block) => kinds.includes(block.kind));
-    const fieldsForType = [...(documentFields.data ?? []), ...(positionFields.data ?? [])].filter((field) => field.doc_types.includes(type));
+    const isText = type === 'text';
+    const fieldsForType = [...(documentFields.data ?? []), ...(isText ? [] : (positionFields.data ?? []))].filter((field) => field.doc_types.includes(type));
 
     const submit = async () => {
         setPending(true);
@@ -102,6 +103,7 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                 void submit();
             }}
         >
+            {!isText && (
             <SettingsCard aria-labelledby="dt-profile">
                 <CardHead titleId="dt-profile" title={t('settings.profile')} description={t('settings.profile_text')} />
                 <div role="radiogroup" aria-labelledby="dt-profile" className="grid gap-3 sm:grid-cols-2">
@@ -115,6 +117,7 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                 </div>
                 {profiles.length === 1 && <p className="mt-3 text-xs text-muted">{t('settings.profile_einvoice_only')}</p>}
             </SettingsCard>
+            )}
 
             <NumberingCard
                 id="dt-numbering"
@@ -139,6 +142,8 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                     </Select>
                     {type === 'invoice' && days('payment_term_days', t('settings.payment_term'))}
                     {type === 'offer' && days('validity_days', t('settings.validity'))}
+                    {!isText && (
+                    <>
                     <Select label={t('settings.intro_block')} value={form.default_intro_block_id ?? ''} onChange={(e) => set({ default_intro_block_id: e.target.value || null })}>
                         <option value="">{t('settings.none')}</option>
                         {blockOptions(['intro', 'note']).map((block) => (
@@ -155,6 +160,8 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                             </option>
                         ))}
                     </Select>
+                    </>
+                    )}
                 </div>
             </SettingsCard>
 

@@ -22,6 +22,7 @@ import { HeaderFields } from './header-fields';
 import { PreviewPane } from './preview-pane';
 import { ReadOnlyNotice } from './read-only-notice';
 import { TextsSection } from './texts-section';
+import { PublishCard, TextBody } from './text-document';
 import { TotalsPanel } from './totals-panel';
 
 function keepFocus(event: MouseEvent<HTMLDivElement>): void {
@@ -39,6 +40,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
     // first render (before the store has loaded this document): show the server state
     const fallback = useMemo(() => fromDocument(document), [document]);
     const draft = stored?.id === document.id ? stored : fallback;
+    const isText = draft.type === 'text';
     const readOnly = draft.status !== 'draft' || saveState === 'locked' || saveState === 'gone';
     const [previewOpen, setPreviewOpen] = useStoredFlag('openbill:editor-preview', true);
     const preview = useRenderPreview(document.id, readOnly ? null : draft);
@@ -71,19 +73,28 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                 <section className="grid min-w-0 gap-4">
                     <HeaderFields draft={draft} context={context} readOnly={readOnly} messages={messages} customerName={document.customer_name} update={update} />
                 </section>
-                <TextsSection which="intro" value={draft.intro} readOnly={readOnly} error={messages['document.intro']} onChange={(intro) => update((d) => ({ ...d, intro }))} />
-                <section className="grid min-w-0 gap-4" aria-labelledby="positions-heading">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <h2 id="positions-heading" className="text-lg font-heading">
-                            {t('editor.positions')}
-                        </h2>
-                        {context.small_business && <Tag neutral>{t('editor.small_business')}</Tag>}
-                    </div>
-                    <GroupsEditor draft={draft} totals={totals} smallBusiness={context.small_business} readOnly={readOnly} messages={messages} update={update} />
-                    <TotalsPanel totals={totals} stale={!!preview.error && !isAbort(preview.error)} />
-                </section>
-                <TextsSection which="closing" value={draft.closing} readOnly={readOnly} error={messages['document.closing']} onChange={(closing) => update((d) => ({ ...d, closing }))} />
-                {!readOnly && <CompliancePanel issues={issues} profile={context.profile} customerId={draft.customer_id} onJump={jump} />}
+                {isText ? (
+                    <>
+                        <TextBody draft={draft} readOnly={readOnly} messages={messages} update={update} />
+                        <PublishCard draft={draft} readOnly={readOnly} messages={messages} update={update} />
+                    </>
+                ) : (
+                    <>
+                        <TextsSection which="intro" value={draft.intro} readOnly={readOnly} error={messages['document.intro']} onChange={(intro) => update((d) => ({ ...d, intro }))} />
+                        <section className="grid min-w-0 gap-4" aria-labelledby="positions-heading">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <h2 id="positions-heading" className="text-lg font-heading">
+                                    {t('editor.positions')}
+                                </h2>
+                                {context.small_business && <Tag neutral>{t('editor.small_business')}</Tag>}
+                            </div>
+                            <GroupsEditor draft={draft} totals={totals} smallBusiness={context.small_business} readOnly={readOnly} messages={messages} update={update} />
+                            <TotalsPanel totals={totals} stale={!!preview.error && !isAbort(preview.error)} />
+                        </section>
+                        <TextsSection which="closing" value={draft.closing} readOnly={readOnly} error={messages['document.closing']} onChange={(closing) => update((d) => ({ ...d, closing }))} />
+                    </>
+                )}
+                {!readOnly && <CompliancePanel issues={issues} profile={isText ? null : context.profile} customerId={draft.customer_id} onJump={jump} />}
             </div>
             {previewOpen && (
                 <div className="ed-preview">

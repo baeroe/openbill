@@ -290,3 +290,29 @@ describe('server state', () => {
         expect(ops.reconcileIds(current, {})).toBe(current);
     });
 });
+
+describe('text documents', () => {
+    it('inserts a clause at the cursor as its own paragraph', async () => {
+        const { insertAtSelection } = await import('./ops');
+        expect(insertAtSelection('', 'A', 0, 0)).toEqual({ value: 'A', caret: 1 });
+        expect(insertAtSelection('Intro', 'Clause', 5, 5)).toEqual({ value: 'Intro\n\nClause', caret: 13 });
+        expect(insertAtSelection('One\n\nTwo', 'X', 5, 5)).toEqual({ value: 'One\n\nX\n\nTwo', caret: 6 });
+        expect(insertAtSelection('abc', 'X', 1, 2)).toEqual({ value: 'a\n\nX\n\nc', caret: 4 });
+    });
+
+    it('makes short names the server accepts', async () => {
+        const { toSlug } = await import('./ops');
+        expect(toSlug('AGB 2026')).toBe('agb-2026');
+        expect(toSlug('Bäcker-Preise')).toBe('backer-preise');
+        expect(toSlug('agb-')).toBe('agb-');
+        expect(toSlug('agb-', true)).toBe('agb');
+        expect(toSlug('  ')).toBeNull();
+    });
+
+    it('sends the text fields only for text documents', async () => {
+        const { fromDocument, toPayload } = await import('./ops');
+        const base = { ...fromDocument({ id: 'x', type: 'invoice', status: 'draft', groups: [], custom: {} } as never), title: null };
+        expect('title' in toPayload(base)).toBe(false);
+        expect(toPayload({ ...base, type: 'text', title: 'T', body: 'B', slug: 's', is_public: true })).toMatchObject({ title: 'T', body: 'B', slug: 's', is_public: true });
+    });
+});

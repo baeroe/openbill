@@ -1,7 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { apiDelete, apiGet } from './helpers';
+import { apiDelete, apiGet, apiPost } from './helpers';
 
 /**
  * Screenshots of the documentation, committed under docs/public/screenshots/{en,de}/<name>.png: the demo data of
@@ -36,6 +36,26 @@ const SHOTS: Shot[] = [
     { name: 'overview', open: (page, locale) => go(page, locale, '/') },
     { name: 'documents', open: (page, locale) => go(page, locale, '/documents') },
     { name: 'editor', dark: true, open: openEditor },
+    {
+        // a text document without customer: terms and conditions, written in the page's language
+        name: 'text-editor',
+        dark: true,
+        open: async (page, locale) => {
+            await go(page, locale, '/documents');
+            const de = locale === 'de';
+            const created = (await apiPost(page, '/api/documents', {
+                type: 'text',
+                title: de ? 'Allgemeine Geschäftsbedingungen' : 'General terms and conditions',
+                slug: de ? 'agb' : 'terms',
+                locale,
+                body: de
+                    ? '## § 1 Geltung\n\nDiese Bedingungen gelten für alle Verträge zwischen **Studio Nordlicht** und ihren Auftraggebern.\n\n## § 2 Vergütung\n\n1. Rechnungen sind innerhalb von 14 Tagen zu zahlen.\n2. Alle Preise verstehen sich netto zuzüglich Umsatzsteuer.'
+                    : '## § 1 Scope\n\nThese terms apply to all contracts between **Studio Nordlicht** and its clients.\n\n## § 2 Fees\n\n1. Invoices are payable within 14 days.\n2. All prices are net, plus VAT.',
+            })) as { id: string };
+            await go(page, locale, `/documents/${created.id}`);
+            await page.locator('.pp-page').first().waitFor();
+        },
+    },
     {
         name: 'customer',
         open: async (page, locale) => {

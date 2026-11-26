@@ -11,7 +11,7 @@ const description = 'Open, self-hosted quotes and invoices with custom fields, L
 
 // every page exists in docs/en and docs/de under the same file name (tests/Unit/DocsTest.php)
 const hosting = ['setup', 'reverse-proxy', 'backup', 'upgrading'];
-const pages = ['documents', 'custom-fields', 'templates', 'template-toolkit', 'e-invoice', 'settings', 'api', 'mcp', 'development'];
+const pages = ['documents', 'text-documents', 'custom-fields', 'templates', 'template-toolkit', 'e-invoice', 'settings', 'api', 'mcp', 'development'];
 
 const sidebar = (prefix: string, t: Record<string, string>): DefaultTheme.SidebarItem[] => [
     { text: t.hosting, items: hosting.map((p) => ({ text: t[p], link: `${prefix}/${p}` })) },
@@ -31,6 +31,7 @@ const en: Record<string, string> = {
     backup: 'Backup',
     upgrading: 'Upgrading',
     documents: 'Documents',
+    'text-documents': 'Text documents',
     'custom-fields': 'Custom fields',
     settings: 'Settings',
     templates: 'Templates',
@@ -52,6 +53,7 @@ const de: Record<string, string> = {
     backup: 'Datensicherung',
     upgrading: 'Aktualisieren',
     documents: 'Dokumente',
+    'text-documents': 'Textdokumente',
     'custom-fields': 'Eigene Felder',
     settings: 'Einstellungen',
     templates: 'Templates',

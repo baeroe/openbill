@@ -10,7 +10,7 @@ import { t } from '@/lib/i18n';
 import { scheduleDelete, usePendingDeletes } from '@/lib/pending-delete';
 import { toast } from '@/lib/toast';
 
-const KINDS: TextBlockKind[] = ['intro', 'closing', 'payment', 'note'];
+const KINDS: TextBlockKind[] = ['intro', 'closing', 'payment', 'note', 'clause'];
 const PLACEHOLDERS = ['{{ contact.first_name }}', '{{ customer.name }}', '{{ document.number }}', '{{ document.due_date | date }}', '{{ document.gross_total | money }}'];
 
 export function TextBlockSettings() {

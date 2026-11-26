@@ -86,11 +86,11 @@ export function Select({ label, hint, error, aside, wrapClassName, path, childre
     );
 }
 
-export function Textarea({ label, hint, error, aside, wrapClassName, path, className, ...rest }: FieldExtras & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'>) {
+export function Textarea({ label, hint, error, aside, wrapClassName, path, className, ref, ...rest }: FieldExtras & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> & { ref?: Ref<HTMLTextAreaElement> }) {
     return (
         <Field label={label} hint={hint} error={error} aside={aside} className={wrapClassName} path={path}>
             {(id, describedBy) => (
-                <textarea id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy} className={controlClass(!!error, cx('min-h-22 resize-y py-2 leading-normal', className))} {...rest} />
+                <textarea ref={ref} id={id} aria-invalid={error ? true : undefined} aria-describedby={describedBy} className={controlClass(!!error, cx('min-h-22 resize-y py-2 leading-normal', className))} {...rest} />
             )}
         </Field>
     );

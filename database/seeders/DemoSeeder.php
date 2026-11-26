@@ -206,6 +206,7 @@ class DemoSeeder extends Seeder
             'confirmation' => ['AB-{YYYY}-{0000}', 2, ['profile' => 'basic', 'template_id' => $templates['leise'], 'validity_days' => null, 'payment_term_days' => null]],
             'invoice' => ['RE-{YYYY}-{0000}', 42, ['profile' => 'en16931', 'template_id' => $templates['klar'], 'validity_days' => null, 'payment_term_days' => 14, 'default_intro_block_id' => $blocks['invoice_intro']->id, 'default_closing_block_id' => $blocks['payment']->id]],
             'cancellation' => ['ST-{YYYY}-{0000}', null, ['profile' => 'en16931', 'template_id' => $templates['klar'], 'validity_days' => null, 'payment_term_days' => null]],
+            'text' => ['T-{YYYY}-{0000}', null, ['profile' => 'basic', 'template_id' => $templates['klar'], 'validity_days' => null, 'payment_term_days' => null]],
         ];
         foreach ($types as $type => [$pattern, $next, $setting]) {
             DocumentTypeSetting::query()->whereKey($type)->update($setting);

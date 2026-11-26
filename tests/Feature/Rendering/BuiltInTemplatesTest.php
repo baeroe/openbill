@@ -17,7 +17,7 @@ it('ships Klar, Kante and Leise as built-in templates and uses Klar as default f
 
     expect(Template::query()->where('built_in', true)->orderBy('slug')->pluck('name', 'slug')->all())->toBe(['kante' => 'Kante', 'klar' => 'Klar', 'leise' => 'Leise'])
         ->and(DocumentTypeSetting::query()->pluck('template_id')->unique()->values()->all())->toBe([$klar->id])
-        ->and($klar->version)->toBe('1.2.0')
+        ->and($klar->version)->toBe('1.3.0')
         ->and($klar->manifest['paper'])->toBe(['format' => 'A4', 'marginX' => '20mm', 'headerHeight' => '30mm', 'footerHeight' => '28mm']);
 });
 

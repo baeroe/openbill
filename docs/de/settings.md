@@ -12,7 +12,7 @@ Das E-Rechnungs-Profil braucht die USt-ID oder die Registernummer; bei Reverse C
 
 ## Dokumenttypen
 
-Textdokumente haben eine eigene Karte nur mit Nummernkreis und Template (siehe [Textdokumente](/de/text-documents)). Je Typ: das **Prüfprofil** (Basis oder E-Rechnung EN 16931 für Rechnungen und Stornos), der **Nummernkreis** und die **Vorgaben** für neue Dokumente (Template, Zahlungsziel, Gültigkeit, Einleitung und Schlusstext).
+Die Karten *Angebot* und *Auftragsbestätigung* haben außerdem die Vorgabe **Anlagen** für neue Entwürfe (siehe [Anlagen](/de/text-documents#anlagen-an-angeboten)). Textdokumente haben eine eigene Karte nur mit Nummernkreis und Template (siehe [Textdokumente](/de/text-documents)). Je Typ: das **Prüfprofil** (Basis oder E-Rechnung EN 16931 für Rechnungen und Stornos), der **Nummernkreis** und die **Vorgaben** für neue Dokumente (Template, Zahlungsziel, Gültigkeit, Einleitung und Schlusstext).
 
 Muster nutzen `{YYYY}`, `{YY}`, `{MM}` und eine laufende Nummer `{0000}` (so viele Stellen wie Nullen). Mit „Jedes Jahr wieder bei 1 anfangen“ muss das Muster das Jahr enthalten. Die Vorschau neben dem Muster kommt vom Server und zeigt die nächste Nummer genau so, wie sie beim Abschließen vergeben würde. „Nächste laufende Nummer“ setzt einen bestehenden Nummernkreis fort; schon vergebene Nummern werden übersprungen.
 

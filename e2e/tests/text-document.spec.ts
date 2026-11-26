@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { finalize, heading, settle } from './editor-helpers';
-import { apiPost } from './helpers';
+import { fillRow, finalize, heading, newDocument, settle } from './editor-helpers';
+import { apiGet, apiPost, pdfText } from './helpers';
 
 test('writes a text document with a clause, previews it, finalizes it and duplicates it', async ({ page }) => {
     // a clause as text block
@@ -104,4 +104,43 @@ test('a public text is readable without login under its link', async ({ page, br
     } finally {
         await visitor.close();
     }
+});
+
+test('a quote names its attachment with number and link, frozen when finalized; the attachment is a PDF of its own', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/en/documents');
+    const slug = `agb-e2e-${Date.now().toString(36)}`;
+    const text = (await apiPost(page, '/api/documents', { type: 'text', title: 'Terms E2E', body: 'First version', slug, is_public: true })) as { id: string };
+    const first = (await apiPost(page, `/api/documents/${text.id}/finalize`)) as { number: string };
+
+    // the quote: one position, the attachment from the list
+    await newDocument(page, 'Quote', /Hotel Alpenglück/);
+    const quoteId = page.url().split('/').pop()!;
+    await page.getByRole('button', { name: 'Add position' }).first().click();
+    await fillRow(page.locator('.ed-main'), 0, 'Consulting', '1', '100');
+    await page.getByLabel('Add attachment').selectOption({ value: slug });
+    await expect(page.getByRole('button', { name: `Remove attachment ${slug}` })).toBeVisible();
+    await settle(page);
+    await finalize(page, 'Quote');
+
+    // frozen: the quote lists the version of that moment, its PDF text names number and link
+    await expect(page.getByText(`${slug} · ${first.number}`)).toBeVisible();
+    const pdf = await pdfText(page, `/api/documents/${quoteId}/pdf`);
+    expect(pdf).toContain('Anlagen'); // the customer's language
+    expect(pdf).toContain(`Terms E2E (${first.number})`);
+    expect(pdf).toContain(`/legal/${slug}/${first.number}`);
+
+    // a newer version of the text changes nothing about the quote
+    const copy = (await apiPost(page, `/api/documents/${text.id}/duplicate`)) as { id: string };
+    await apiPost(page, `/api/documents/${copy.id}/finalize`);
+    await page.reload();
+    await expect(page.getByText(`${slug} · ${first.number}`)).toBeVisible();
+    const frozen = (await apiGet(page, `/api/documents/${quoteId}`)) as { attachments: { document_id: string; number: string }[] };
+    expect(frozen.attachments.map((item) => item.number)).toEqual([first.number]);
+
+    // the attachment downloads as a PDF of its own
+    const download = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'Download PDF' }).click();
+    expect((await download).suggestedFilename()).toBe(`${first.number}.pdf`);
+    expect(await pdfText(page, `/api/documents/${frozen.attachments[0].document_id}/pdf`)).toContain('First version');
 });

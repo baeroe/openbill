@@ -12,7 +12,7 @@ The e-invoice profile needs the VAT ID or the register number; with reverse char
 
 ## Document types
 
-Text documents have their own card with the number range and the template only (see [text documents](/en/text-documents)). Per type: the **compliance profile** (basic, or EN 16931 e-invoice for invoices and cancellations), the **number range** and the **defaults** for new documents (template, payment term, validity, intro and closing text).
+The cards *Quote* and *Order confirmation* also have the default **attachments** of new drafts (see [attachments](/en/text-documents#attachments-to-quotes)). Text documents have their own card with the number range and the template only (see [text documents](/en/text-documents)). Per type: the **compliance profile** (basic, or EN 16931 e-invoice for invoices and cancellations), the **number range** and the **defaults** for new documents (template, payment term, validity, intro and closing text).
 
 Number patterns use `{YYYY}`, `{YY}`, `{MM}` and a running number `{0000}` (as many digits as zeros). With “Start at 1 again every year” the pattern must contain the year. The preview next to the pattern comes from the server and shows the next number exactly as finalizing would assign it. “Next running number” continues an existing range; numbers already used are skipped.
 

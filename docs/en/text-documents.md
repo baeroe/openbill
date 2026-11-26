@@ -38,6 +38,18 @@ The finalized document shows both links in the card **Publish**, ready to copy. 
 
 Everything that does not qualify answers the same **404**, so nobody can find out which short names exist: drafts, texts that are not public, texts with a customer (never public), other document types, unknown short names and numbers. The PDF is the archived file (checked against its SHA-256, never rendered again), served `inline`, 60 requests a minute per address. The link of the newest version is not cached; a version link is cached for a year (`immutable`).
 
+## Attachments to quotes
+
+A quote or order confirmation can name text documents as **attachments**, typically the terms and conditions: terms only apply if they are included when the contract is made, and that happens through the quote.
+
+![A quote draft with the attachment "terms": chips, the list to add more, and the line in the preview](/screenshots/en/attachments.png)
+
+- **Choose:** in the editor of a quote or confirmation the section **Attachments** lists short names as chips. **Add attachment** offers the newest finalized version of every short name; only texts **without a customer** are offered, a contract of one customer never ends up in another customer's quote. A chip whose short name has no such text (any more) is marked, and the check reports it (`attachment_missing`, blocks finalizing).
+- **Default per document type:** in **Settings → Document types** the cards *Quote* and *Order confirmation* have a section **Attachments**. New drafts start with them (like the template), existing drafts keep theirs. A confirmation made from a quote takes over the attachments of the quote; duplicating copies them.
+- **Finalizing freezes the version:** the newest finalized version of every short name at that moment (number, title, checksum of its archived PDF) goes into the snapshot. The PDF of the quote names it above the closing text: *Attachments: General terms and conditions (T-2026-0002)*, with the full link when that version is public. A text finalized later changes nothing about the finalized quote, neither the snapshot nor the archived PDF.
+- **Their own PDFs:** the attachments are **not merged** into the PDF of the quote. A finalized quote lists the frozen versions with **Download PDF**; each is the archived PDF of its text document (`GET /api/documents/<id>/pdf` with the id of the text document), so a later mail can attach exactly these files. The MCP tool `get-document-pdf-url` hands out signed links for them.
+- Invoices and cancellations have no attachments.
+
 ## Templates and settings
 
 The built-in templates Klar, Kante and Leise (version 1.2.0 and later) set a text document as title and text. For your own templates see [Text documents in templates](/en/templates#text-documents). In **Settings → Document types** the card *Text document* holds the number range and the template; there is no compliance profile and no payment term.

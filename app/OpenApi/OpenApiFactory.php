@@ -182,6 +182,12 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                 summary: 'Describes the fields templates can use.',
                 parameters: [$query('document_type', 'offer, confirmation, invoice or cancellation')],
             )),
+            '/api/text-documents/slugs' => new PathItem(get: new Operation(
+                operationId: 'getTextDocumentSlugs',
+                tags: ['Document'],
+                responses: self::responses(self::json('The newest finalized version of every short name (texts without customer only).', ['type' => 'array', 'items' => ['type' => 'object']])),
+                summary: 'Lists the short names an attachment can use.',
+            )),
             '/api/position-suggestions' => new PathItem(get: new Operation(
                 operationId: 'getPositionSuggestions',
                 tags: ['Document'],

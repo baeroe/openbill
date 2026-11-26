@@ -134,6 +134,7 @@ final class DocumentResource
      * @param  array<string, mixed>|null  $totals
      * @param  list<array{path: string, message: string, code: string}>  $issues
      * @param  list<string>  $dropped_fields
+     * @param  list<string>|list<array<string, mixed>>  $attachments
      */
     public function __construct(
         #[ApiProperty(identifier: true, writable: false)]
@@ -186,6 +187,9 @@ final class DocumentResource
         #[ApiProperty(writable: false, description: 'finalized public text documents only: the link of the newest version of this short name, /legal/<slug> (shows another version once a newer one is finalized)')]
         #[Groups([self::LIST, self::ITEM])]
         public ?string $public_latest_url,
+        #[ApiProperty(description: 'quotes and confirmations only: short names of text documents, at most 10, each once. Finalized: the frozen versions [{slug, document_id, number, title, is_public, sha256}] – each is a document of its own, its PDF is GET /api/documents/{document_id}/pdf')]
+        #[Groups([self::ITEM])]
+        public array $attachments,
         #[Groups([self::ITEM])]
         public ?string $template_id,
         #[Groups([self::LIST, self::ITEM])]
@@ -271,6 +275,7 @@ final class DocumentResource
             is_public: (bool) $document->is_public,
             public_url: LegalLinks::versionOf($document),
             public_latest_url: LegalLinks::latestOf($document),
+            attachments: $document->isFinalized() ? ($inspector === null ? [] : ($document->snapshot?->data['attachments'] ?? [])) : array_values($document->attachments ?? []),
             template_id: $document->template_id,
             locale: $document->locale,
             custom: new ArrayObject($document->custom ?? []),

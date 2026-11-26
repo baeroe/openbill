@@ -38,6 +38,18 @@ Das abgeschlossene Dokument zeigt beide Links in der Karte **Veröffentlichen** 
 
 Alles, was nicht infrage kommt, bekommt dasselbe **404**, damit niemand herausfinden kann, welche Kurznamen es gibt: Entwürfe, nicht öffentliche Texte, Texte mit Kunde (nie öffentlich), andere Dokumenttypen, unbekannte Kurznamen und Nummern. Das PDF ist die archivierte Datei (gegen ihre SHA-256 geprüft, nie neu gerendert), `inline` ausgeliefert, 60 Anfragen pro Minute und Adresse. Der Link zur neuesten Version wird nicht gecacht, ein Versions-Link ein Jahr lang (`immutable`).
 
+## Anlagen an Angeboten
+
+Ein Angebot oder eine Auftragsbestätigung kann Textdokumente als **Anlagen** nennen, typischerweise die AGB: AGB gelten nur, wenn sie beim Vertragsschluss einbezogen werden, und das passiert über das Angebot.
+
+![Ein Angebotsentwurf mit der Anlage „agb“: Chips, die Liste zum Hinzufügen und die Zeile in der Vorschau](/screenshots/de/attachments.png)
+
+- **Auswählen:** Im Editor eines Angebots oder einer Auftragsbestätigung listet der Abschnitt **Anlagen** Kurznamen als Chips. **Anlage hinzufügen** bietet die neueste abgeschlossene Version jedes Kurznamens an; angeboten werden nur Texte **ohne Kunde**, ein Vertrag eines Kunden landet so nie im Angebot eines anderen. Ein Chip, zu dem es (nicht mehr) einen solchen Text gibt, ist markiert, und die Prüfung meldet ihn (`attachment_missing`, verhindert das Abschließen).
+- **Vorgabe je Dokumenttyp:** In **Einstellungen → Dokumenttypen** haben die Karten *Angebot* und *Auftragsbestätigung* einen Abschnitt **Anlagen**. Neue Entwürfe starten damit (wie beim Template), bestehende Entwürfe behalten ihre. Eine Auftragsbestätigung aus einem Angebot übernimmt dessen Anlagen; Duplizieren kopiert sie.
+- **Abschließen friert die Version ein:** Die neueste abgeschlossene Version jedes Kurznamens in diesem Moment (Nummer, Titel, Prüfsumme ihres archivierten PDFs) kommt in den Snapshot. Das PDF des Angebots nennt sie über dem Schlusstext: *Anlagen: Allgemeine Geschäftsbedingungen (T-2026-0002)*, bei einer öffentlichen Version mit dem vollen Link. Ein später abgeschlossener Text ändert am abgeschlossenen Angebot nichts, weder am Snapshot noch am archivierten PDF.
+- **Eigene PDFs:** Die Anlagen werden **nicht** ins PDF des Angebots eingefügt. Ein abgeschlossenes Angebot listet die eingefrorenen Versionen mit **PDF herunterladen**; jede ist das archivierte PDF ihres Textdokuments (`GET /api/documents/<id>/pdf` mit der ID des Textdokuments), eine spätere E-Mail kann also genau diese Dateien anhängen. Das MCP-Tool `get-document-pdf-url` gibt signierte Links dafür aus.
+- Rechnungen und Stornos haben keine Anlagen.
+
 ## Templates und Einstellungen
 
 Die mitgelieferten Templates Klar, Kante und Leise (ab Version 1.2.0) setzen ein Textdokument als Titel und Text. Für eigene Templates siehe [Textdokumente in Templates](/de/templates#textdokumente). In **Einstellungen → Dokumenttypen** hat die Karte *Textdokument* den Nummernkreis und das Template; ein Prüfprofil oder Zahlungsziel gibt es nicht.

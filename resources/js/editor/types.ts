@@ -4,7 +4,10 @@ import type { DocumentDetail } from '@/api/types';
 export type Draft = Pick<
     DocumentDetail,
     'id' | 'type' | 'status' | 'date' | 'customer_id' | 'contact_id' | 'service_date' | 'service_date_end' | 'due_date' | 'valid_until' | 'intro' | 'closing' | 'template_id' | 'locale' | 'custom' | 'groups' | 'title' | 'body' | 'slug' | 'is_public'
->;
+> & {
+    /** Quotes and confirmations: short names of the text documents to attach. */
+    attachments?: string[];
+};
 
 /** Body of PATCH /api/documents/{id} and the "draft" of POST /api/render: every draft field, groups replace all groups. */
 export type DraftPayload = Omit<Draft, 'id' | 'type' | 'status'>; // title, body, slug and is_public are sent for text documents only

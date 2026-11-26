@@ -72,6 +72,8 @@ export type DocumentSummary = {
     /** Finalized public texts only: the link of this version and of the newest version of the short name. */
     public_url?: string | null;
     public_latest_url?: string | null;
+    /** Quotes and confirmations: short names while a draft, the frozen versions once finalized. */
+    attachments?: string[] | FrozenAttachment[];
     due_date: string | null;
     valid_until: string | null;
     locale: string;
@@ -185,6 +187,10 @@ export type RenderResponse = { header: string; body: string; footer: string; pap
 
 export type TaxRate = { id: string; label: string; percent: string; category: string; exemption_note: string | null; sort: number; archived_at: string | null };
 export type Unit = { id: string; name: string; symbol: string; decimals: number; code: string; sort: number; archived_at: string | null };
+/** What an attachment can name: the newest finalized version of a short name (GET /api/text-documents/slugs). */
+export type TextDocumentSlug = { slug: string; title: string; number: string; is_public: boolean; public_url: string | null };
+/** An attachment of a finalized quote or confirmation: the version that was current when it was finalized. */
+export type FrozenAttachment = { slug: string; document_id: string; number: string; title: string; is_public: boolean; sha256: string };
 export type TextBlock = { id: string; name: string; kind: TextBlockKind; body: string; updated_at: string | null };
 
 /** GET /api/position-suggestions: earlier positions by title, values of their latest use. */

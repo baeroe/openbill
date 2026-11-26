@@ -16,7 +16,7 @@ it('documents every resource, document action and file endpoint in OpenAPI', fun
             '/api/templates', '/api/templates/{id}', '/api/templates/{id}/duplicate', '/api/templates/{id}/files', '/api/templates/{id}/package',
             '/api/document-types', '/api/document-types/{type}', '/api/document-types/{type}/number-preview', '/api/organization', '/api/organization/logo',
             '/api/uploads', '/api/uploads/{name}', '/api/field-definitions/reorder',
-            '/api/render', '/api/render/sources', '/api/render/schema', '/api/position-suggestions',
+            '/api/render', '/api/render/sources', '/api/render/schema', '/api/position-suggestions', '/api/text-documents/slugs',
         )
         ->and($doc['components']['securitySchemes'] ?? [])->not->toBeEmpty()
         ->and(array_keys($doc['paths']))->not->toContain('/api/downloads/documents/{id}/{kind}');

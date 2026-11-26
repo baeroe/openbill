@@ -7,6 +7,7 @@ import { useTemplates } from '@/api/templates';
 import { DOCUMENT_TYPES, type ComplianceProfile, type DocumentType } from '@/api/types';
 import { Badge, ButtonLink, CardHead, ErrorState, Select, Skeleton, Tabs, TextInput, cx } from '@/components/ui';
 import { SettingsCard } from './settings-card';
+import { AttachmentPicker } from '@/components/attachment-picker';
 import { ApiError, errorMessage } from '@/lib/api';
 import { useLeaveGuard } from '@/lib/hooks';
 import { path, t } from '@/lib/i18n';
@@ -40,6 +41,7 @@ const inputOf = (setting: DocumentTypeSetting): DocumentTypeInput => ({
     default_closing_block_id: setting.default_closing_block_id,
     payment_term_days: setting.payment_term_days,
     validity_days: setting.validity_days,
+    attachments: setting.attachments ?? null,
     numbering: { pattern: setting.numbering.pattern, reset_yearly: setting.numbering.reset_yearly, next_value: setting.numbering.next_value },
 });
 
@@ -164,6 +166,14 @@ function DocumentTypeForm({ saved }: { saved: DocumentTypeSetting }) {
                     )}
                 </div>
             </SettingsCard>
+
+            {(type === 'offer' || type === 'confirmation') && (
+                <SettingsCard aria-labelledby="dt-attachments">
+                    <CardHead titleId="dt-attachments" title={t('attachments.title')} description={t('attachments.settings_text')} />
+                    <AttachmentPicker value={form.attachments ?? []} onChange={(attachments) => set({ attachments: attachments.length === 0 ? null : attachments })} />
+                    {errors.attachments && <p className="mt-2 text-xs text-bad">{errors.attachments}</p>}
+                </SettingsCard>
+            )}
 
             <div className="flex flex-wrap items-center gap-4 rounded-lg bg-surface-2 px-5 py-4">
                 <ListPlus aria-hidden className="size-5 shrink-0 text-muted" />

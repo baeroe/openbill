@@ -6,7 +6,9 @@ use App\Enums\ComplianceProfile;
 use App\Enums\DocumentType;
 use App\Models\DocumentTypeSetting;
 use App\Support\Actor;
+use App\Support\DraftInput;
 use App\Support\NumberRange;
+use App\Support\Text;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -33,9 +35,14 @@ final class UpdateDocumentType
             'default_closing_block_id' => ['sometimes', 'nullable', 'string', Rule::exists('text_blocks', 'id')],
             'payment_term_days' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:365'],
             'validity_days' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:365'],
+            ...DraftInput::attachmentRules(),
             'numbering' => ['sometimes', 'array'],
             ...NumberRange::rules('numbering.'),
         ])->validate();
+
+        if (($data['attachments'] ?? []) !== [] && ! in_array($type, [DocumentType::Offer, DocumentType::Confirmation], true)) {
+            throw ValidationException::withMessages(['attachments' => [Text::t('errors.attachments_only_quotes')]]);
+        }
 
         return DB::transaction(function () use ($type, $data): DocumentTypeSetting {
             $setting = DocumentTypeSetting::query()->findOrFail($type->value);

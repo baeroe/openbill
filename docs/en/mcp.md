@@ -50,13 +50,13 @@ An `mcp` token can do everything the tools offer, including finalizing documents
 | `list-customers`, `get-customer` | Customers with contacts; search and pages |
 | `create-customer`, `update-customer` | Create or change a customer; `contacts` is the complete list |
 | `list-documents`, `get-document` | Documents in short form with filters; one document completely, with totals and open issues (finalized public texts also with `public_url`) |
-| `create-document`, `update-document` | Create a draft (offer, confirmation, invoice, text) or change it; text documents take `title`, `body` (Markdown), `slug` and `is_public` instead of groups; `groups` replaces all groups and positions, a position can carry a discount (`discount_type` `percent` or `amount`, `discount_value`) |
+| `create-document`, `update-document` | Create a draft (offer, confirmation, invoice, text) or change it; text documents take `title`, `body` (Markdown), `slug` and `is_public` instead of groups, quotes and confirmations `attachments` (short names of finalized text documents); `groups` replaces all groups and positions, a position can carry a discount (`discount_type` `percent` or `amount`, `discount_value`) |
 | `duplicate-document` | Copy a document into a new draft |
 | `finalize-document` | Check, assign the number, archive the PDF (and the e-invoice XML) – cannot be undone |
 | `set-document-status` | Accepted, rejected, done, paid, back to open |
 | `convert-document` | Accepted offer into a confirmation or invoice, confirmation into an invoice |
 | `cancel-invoice` | Cancellation draft of an open or paid invoice (reduce its positions for a partial cancellation) |
-| `get-document-pdf-url` | Signed links to the PDF (and the XML of an e-invoice), 15 minutes, no token needed |
+| `get-document-pdf-url` | Signed links to the PDF (and the XML of an e-invoice), 15 minutes, no token needed; a finalized quote also lists the links of its frozen attachments |
 | `list-field-definitions`, `save-field-definition` | Custom fields: list, create, change |
 | `list-templates`, `get-template`, `update-template` | Templates with their Liquid and CSS sources; built-in ones are read-only |
 | `render-template-preview` | Liquid errors with line, page count, missing fields and a text excerpt – never HTML |

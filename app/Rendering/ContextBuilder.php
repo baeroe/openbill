@@ -10,6 +10,7 @@ use App\Enums\PositionKind;
 use App\Enums\TaxationMode;
 use App\Models\Document;
 use App\Support\DocumentInspector;
+use App\Support\LegalLinks;
 use App\Support\Text;
 use Brick\Math\BigDecimal;
 
@@ -123,6 +124,7 @@ final class ContextBuilder
                 'service_date_end' => $document->service_date_end?->toDateString(),
                 'locale' => $locale,
                 ...$this->textFields($document, $sources),
+                ...self::attachmentFields($document, $sources),
                 'intro' => $document->intro ?? '',
                 'closing' => $document->closing ?? '',
                 'net_total' => $summary['net'],
@@ -157,6 +159,28 @@ final class ContextBuilder
             'title' => (string) ($sources['title'] ?? $document->title),
             'body' => (string) ($sources['body'] ?? $document->body),
         ];
+    }
+
+    /**
+     * Quotes and confirmations only: the attachments as {title, number, slug, url}. The sources hold them resolved
+     * (SnapshotBuilder::attachments: live for a draft, frozen in the snapshot once finalized). url is the link of that
+     * version when it is public, else ''.
+     *
+     * @param  array<string, mixed>  $sources
+     * @return array<string, list<array{title: string, number: string, slug: string, url: string}>>
+     */
+    private static function attachmentFields(Document $document, array $sources): array
+    {
+        if (! in_array($document->type, [DocumentType::Offer, DocumentType::Confirmation], true)) {
+            return [];
+        }
+
+        return ['attachments' => array_map(fn (array $row): array => [
+            'title' => (string) $row['title'],
+            'number' => (string) $row['number'],
+            'slug' => (string) $row['slug'],
+            'url' => ($row['is_public'] ?? false) ? LegalLinks::version((string) $row['slug'], (string) $row['number']) : '',
+        ], $sources['attachments'] ?? [])];
     }
 
     /**

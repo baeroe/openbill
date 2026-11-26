@@ -130,6 +130,7 @@ All amounts are strings with a dot and two decimals (`"1130.50"`), dates are `YY
 | `number` | number; drafts show "Draft"/"Entwurf" |
 | `date`, `due_date`, `valid_until`, `service_date`, `service_date_end` | dates (may be empty) |
 | `locale` | document language (`en`, `de`) |
+| `attachments` | quotes and order confirmations only: list of the attachments `{title, number, slug, url}` (see below); `url` is the link of that version if it is public, otherwise empty |
 | `title`, `body` | text documents only (`type` is `text`): the title and the text as HTML, already made from the Markdown (headings, lists, emphasis, links; raw HTML is shown as text, links with unsafe targets and images are reduced to their text). Output `body` as it is, without a filter |
 | `intro`, `closing` | texts before and after the items (may contain Liquid themselves, see below) |
 | `net_total`, `tax_total`, `gross_total` | totals |
@@ -258,6 +259,23 @@ For `type == "text"` there are no groups, positions or totals: the template show
 :::
 
 Style the elements of `.doc-body` yourself (`h1`–`h4`, `p`, `ul`, `ol`, `blockquote`, `code`, `hr`, `a`). To offer a template for text documents only, set `"documentTypes": ["text"]`.
+
+### Attachments
+
+`document.attachments` lists the [attachments](/en/text-documents#attachments-to-quotes) of a quote or confirmation: in a draft the newest versions as they are now, in a finalized document the versions frozen when it was finalized. The built-in templates (1.3.0) print them above the closing text; your own template can do the same:
+
+::: v-pre
+```liquid
+{% if document.attachments.size > 0 %}
+  <p><b>{{ 'attachments' | t }}</b></p>
+  {% for a in document.attachments %}
+    <p>{{ a.title }} ({{ a.number }}){% if a.url != blank %} – <a href="{{ a.url }}">{{ a.url }}</a>{% endif %}</p>
+  {% endfor %}
+{% endif %}
+```
+:::
+
+The key is not set for other document types, so `size` is empty there. The word `attachments` is in the vocabulary of `t`.
 
 ## Limits and errors
 

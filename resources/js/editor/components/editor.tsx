@@ -22,6 +22,7 @@ import { HeaderFields } from './header-fields';
 import { PreviewPane } from './preview-pane';
 import { ReadOnlyNotice } from './read-only-notice';
 import { TextsSection } from './texts-section';
+import { AttachmentsSection } from './attachments-section';
 import { PublishCard, TextBody } from './text-document';
 import { TotalsPanel } from './totals-panel';
 
@@ -92,6 +93,9 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                             <TotalsPanel totals={totals} stale={!!preview.error && !isAbort(preview.error)} />
                         </section>
                         <TextsSection which="closing" value={draft.closing} readOnly={readOnly} error={messages['document.closing']} onChange={(closing) => update((d) => ({ ...d, closing }))} />
+                        {(draft.type === 'offer' || draft.type === 'confirmation') && (
+                            <AttachmentsSection draft={draft} document={document} readOnly={readOnly} messages={messages} update={update} />
+                        )}
                     </>
                 )}
                 {!readOnly && <CompliancePanel issues={issues} profile={isText ? null : context.profile} customerId={draft.customer_id} onJump={jump} />}

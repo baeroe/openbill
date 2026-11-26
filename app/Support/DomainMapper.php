@@ -154,6 +154,8 @@ final class DomainMapper
             title: $document->title,
             body: $document->body,
             isPublic: (bool) $document->is_public,
+            attachments: array_values($document->attachments ?? []),
+            resolvedAttachments: array_column($sources['attachments'] ?? [], 'slug'),
         );
     }
 

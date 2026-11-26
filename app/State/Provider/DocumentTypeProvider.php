@@ -41,6 +41,7 @@ final class DocumentTypeProvider implements ProviderInterface
             default_closing_block_id: $setting->default_closing_block_id,
             payment_term_days: $setting->payment_term_days,
             validity_days: $setting->validity_days,
+            attachments: $setting->attachments,
             numbering: NumberRange::document($type)->describe(CarbonImmutable::now()),
         );
     }

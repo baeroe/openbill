@@ -50,13 +50,13 @@ Ein `mcp`-Token darf alles, was die Tools anbieten, auch Dokumente abschließen 
 | `list-customers`, `get-customer` | Kunden mit Ansprechpartnern; Suche und Seiten |
 | `create-customer`, `update-customer` | Kunden anlegen oder ändern; `contacts` ist die vollständige Liste |
 | `list-documents`, `get-document` | Dokumente in Kurzform mit Filtern; ein Dokument vollständig mit Summen und offenen Prüfpunkten (abgeschlossene öffentliche Texte auch mit `public_url`) |
-| `create-document`, `update-document` | Entwurf anlegen (Angebot, Auftragsbestätigung, Rechnung, Text) oder ändern; Textdokumente nehmen `title`, `body` (Markdown), `slug` und `is_public` statt Gruppen; `groups` ersetzt alle Gruppen und Positionen, eine Position kann einen Rabatt haben (`discount_type` `percent` oder `amount`, `discount_value`) |
+| `create-document`, `update-document` | Entwurf anlegen (Angebot, Auftragsbestätigung, Rechnung, Text) oder ändern; Textdokumente nehmen `title`, `body` (Markdown), `slug` und `is_public` statt Gruppen, Angebote und Auftragsbestätigungen `attachments` (Kurznamen abgeschlossener Textdokumente); `groups` ersetzt alle Gruppen und Positionen, eine Position kann einen Rabatt haben (`discount_type` `percent` oder `amount`, `discount_value`) |
 | `duplicate-document` | Dokument in einen neuen Entwurf kopieren |
 | `finalize-document` | Prüfen, Nummer vergeben, PDF (und E-Rechnungs-XML) archivieren – nicht umkehrbar |
 | `set-document-status` | Angenommen, abgelehnt, erledigt, bezahlt, zurück auf offen |
 | `convert-document` | Angenommenes Angebot in Auftragsbestätigung oder Rechnung, Auftragsbestätigung in Rechnung |
 | `cancel-invoice` | Storno-Entwurf einer offenen oder bezahlten Rechnung (für ein Teilstorno Positionen verringern) |
-| `get-document-pdf-url` | Signierte Links zum PDF (und zum XML einer E-Rechnung), 15 Minuten, ohne Token |
+| `get-document-pdf-url` | Signierte Links zum PDF (und zum XML einer E-Rechnung), 15 Minuten, ohne Token; ein abgeschlossenes Angebot nennt auch die Links seiner eingefrorenen Anlagen |
 | `list-field-definitions`, `save-field-definition` | Eigene Felder auflisten, anlegen, ändern |
 | `list-templates`, `get-template`, `update-template` | Templates mit Liquid- und CSS-Quellen; mitgelieferte sind schreibgeschützt |
 | `render-template-preview` | Liquid-Fehler mit Zeile, Seitenzahl, fehlende Felder und ein Text-Auszug – nie HTML |

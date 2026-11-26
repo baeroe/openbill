@@ -67,6 +67,11 @@ final class ComplianceChecker
         }
 
         array_push($issues, ...self::cancellationAmount($in));
+        foreach ($in->attachments as $i => $slug) {
+            if (! in_array($slug, $in->resolvedAttachments, true)) {
+                $issues[] = new ComplianceIssue("document.attachments.{$i}", ComplianceRule::AttachmentMissing, ['slug' => $slug]);
+            }
+        }
 
         $defs = $in->fieldDefinitions;
         array_push($issues, ...self::requiredCustom(FieldRegistry::forScope($defs, FieldScope::Org), $in->org->custom, 'org.', ComplianceRule::OrgFieldMissing));

@@ -130,6 +130,7 @@ Alle Beträge sind Strings mit Punkt und zwei Nachkommastellen (`"1130.50"`), Da
 | `number` | Nummer; Entwürfe zeigen „Entwurf“/„Draft“ |
 | `date`, `due_date`, `valid_until`, `service_date`, `service_date_end` | Datumswerte (können leer sein) |
 | `locale` | Dokumentsprache (`en`, `de`) |
+| `attachments` | nur Angebote und Auftragsbestätigungen: Liste der Anlagen `{title, number, slug, url}` (siehe unten); `url` ist der Link dieser Version, wenn sie öffentlich ist, sonst leer |
 | `title`, `body` | nur bei Textdokumenten (`type` ist `text`): der Titel und der Text als HTML, schon aus dem Markdown gemacht (Überschriften, Listen, Hervorhebungen, Links; rohes HTML erscheint als Text, Links mit unsicherem Ziel und Bilder werden auf ihren Text reduziert). Gib `body` unverändert aus, ohne Filter |
 | `intro`, `closing` | Texte vor und nach den Positionen (dürfen selbst Liquid enthalten, siehe unten) |
 | `net_total`, `tax_total`, `gross_total` | Summen |
@@ -258,6 +259,23 @@ Bei `type == "text"` gibt es keine Gruppen, Positionen oder Summen: Das Template
 :::
 
 Gestalte die Elemente in `.doc-body` selbst (`h1`–`h4`, `p`, `ul`, `ol`, `blockquote`, `code`, `hr`, `a`). Soll ein Template nur für Textdokumente angeboten werden, setze `"documentTypes": ["text"]`.
+
+### Anlagen
+
+`document.attachments` listet die [Anlagen](/de/text-documents#anlagen-an-angeboten) eines Angebots oder einer Auftragsbestätigung: im Entwurf die neuesten Versionen, wie sie gerade sind, im abgeschlossenen Dokument die beim Abschließen eingefrorenen Versionen. Die mitgelieferten Templates (1.3.0) drucken sie über dem Schlusstext; ein eigenes Template kann dasselbe:
+
+::: v-pre
+```liquid
+{% if document.attachments.size > 0 %}
+  <p><b>{{ 'attachments' | t }}</b></p>
+  {% for a in document.attachments %}
+    <p>{{ a.title }} ({{ a.number }}){% if a.url != blank %} – <a href="{{ a.url }}">{{ a.url }}</a>{% endif %}</p>
+  {% endfor %}
+{% endif %}
+```
+:::
+
+Bei anderen Dokumenttypen ist der Schlüssel nicht gesetzt, `size` ist dort leer. Das Wort `attachments` steht im Vokabular von `t`.
 
 ## Grenzen und Fehler
 

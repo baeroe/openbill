@@ -61,6 +61,8 @@ export function fromDocument(document: DocumentDetail): Draft {
         body: document.body ?? null,
         slug: document.slug ?? null,
         is_public: document.is_public ?? false,
+        // finalized documents carry the frozen versions instead of short names; only drafts are edited
+        attachments: document.is_locked ? [] : ((document.attachments ?? []) as string[]),
     };
 }
 
@@ -80,6 +82,7 @@ export function toPayload(draft: Draft): DraftPayload {
         custom: draft.custom,
         groups: draft.groups,
         // the server refuses these fields on other types
+        ...(draft.type === 'offer' || draft.type === 'confirmation' ? { attachments: draft.attachments ?? [] } : {}),
         ...(draft.type === 'text' ? { title: draft.title, body: draft.body, slug: draft.slug, is_public: draft.is_public } : {}),
     };
 }
@@ -312,4 +315,13 @@ export function reconcileIds(draft: Draft, map: IdMap): Draft {
             positions: group.positions.map((position) => (map[position.id] ? { ...position, id: map[position.id] } : position)),
         })),
     };
+}
+
+/** Adds a short name to the attachments (once); the server allows ten. */
+export function addAttachment(slugs: string[], slug: string): string[] {
+    return slugs.includes(slug) || slugs.length >= 10 ? slugs : [...slugs, slug];
+}
+
+export function removeAttachment(slugs: string[], slug: string): string[] {
+    return slugs.filter((item) => item !== slug);
 }

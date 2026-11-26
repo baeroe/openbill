@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import { apiPage, type Page } from '@/lib/api';
 import { keys } from './keys';
-import type { Customer, PositionSuggestion, TaxRate, TextBlock, Unit } from './types';
+import type { Customer, PositionSuggestion, TaxRate, TextBlock, TextDocumentSlug, Unit } from './types';
 
 const STATIC = { revalidateOnFocus: false };
 
@@ -24,4 +24,9 @@ export function useCustomerChoices() {
 /** Up to six earlier positions whose title contains the (debounced) input. */
 export function usePositionSuggestions(q: string) {
     return useSWR<PositionSuggestion[]>(keys.suggestions(q), { revalidateOnFocus: false, keepPreviousData: false });
+}
+
+/** Short names an attachment can use: the newest finalized version of each text document without customer. */
+export function useTextDocumentSlugs() {
+    return useSWR<TextDocumentSlug[]>(keys.textDocumentSlugs(), STATIC);
 }

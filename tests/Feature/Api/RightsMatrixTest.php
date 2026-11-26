@@ -43,6 +43,7 @@ const MATRIX_ROUTES = [
     'pdf' => ['GET', '/api/documents/{draft}/pdf', MATRIX_READ],
     'xml' => ['GET', '/api/documents/{draft}/xml', MATRIX_READ],
     'position suggestions' => ['GET', '/api/position-suggestions', MATRIX_READ],
+    'text document slugs' => ['GET', '/api/text-documents/slugs', MATRIX_READ],
     'field definitions' => ['GET', '/api/field-definitions', MATRIX_READ],
     'create field' => ['POST', '/api/field-definitions', ['api:write']],
     'show field' => ['GET', '/api/field-definitions/{field}', MATRIX_READ],

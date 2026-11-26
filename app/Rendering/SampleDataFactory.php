@@ -102,6 +102,7 @@ final class SampleDataFactory
             'template' => null,
             'field_definitions' => $definitions,
             'legal_notes' => LegalNoteTexts::toArray(LegalNoteTexts::for($locale)),
+            ...($scenario === RenderScenario::OfferWithOptions ? ['attachments' => [['slug' => 'agb', 'document_id' => 'sample-attachment', 'number' => 'T-2026-0003', 'title' => $text['text_title'], 'is_public' => true, 'sha256' => str_repeat('0', 64)]]] : []),
             ...($isText ? ['title' => $text['text_title'], 'body' => $text['text_body'], 'slug' => 'agb', 'is_public' => true] : []),
         ];
 

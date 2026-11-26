@@ -71,6 +71,8 @@ final class CreateDocument
                 'intro' => $setting->introBlock->body ?? '',
                 'closing' => $setting->closingBlock->body ?? '',
                 'template_id' => $setting->template_id,
+                // quotes and confirmations start with the attachments of their document type (like the template)
+                'attachments' => in_array($type, [DocumentType::Offer, DocumentType::Confirmation], true) ? $setting->attachments : null,
                 'locale' => $customer->locale ?? Organization::current()->locale,
                 'custom' => FieldRegistry::defaults($fields),
                 'net_total' => '0.00',

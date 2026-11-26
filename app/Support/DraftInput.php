@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
  */
 final class DraftInput
 {
-    public const FIELDS = ['date', 'customer_id', 'contact_id', 'service_date', 'service_date_end', 'due_date', 'valid_until', 'intro', 'closing', 'template_id', 'locale', 'custom', 'title', 'body', 'slug', 'is_public'];
+    public const FIELDS = ['date', 'customer_id', 'contact_id', 'service_date', 'service_date_end', 'due_date', 'valid_until', 'intro', 'closing', 'template_id', 'locale', 'custom', 'title', 'body', 'slug', 'is_public', 'attachments'];
 
     /** Fields that only text documents have. */
     private const TEXT_ONLY = ['title', 'body', 'slug', 'is_public'];
@@ -62,6 +62,7 @@ final class DraftInput
             'body' => ['sometimes', 'nullable', 'string', 'max:100000'],
             'slug' => ['sometimes', 'nullable', 'string', 'max:64', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/'],
             'is_public' => ['sometimes', 'boolean'],
+            ...self::attachmentRules(),
             'groups' => ['sometimes', 'array', 'list', 'max:200'],
             'groups.*' => ['array'],
             'groups.*.id' => ['sometimes', 'nullable', 'string'],
@@ -80,6 +81,19 @@ final class DraftInput
             'groups.*.positions.*.unit_id' => ['sometimes', 'nullable', 'string', Rule::exists('units', 'id')],
             'groups.*.positions.*.tax_rate_id' => ['sometimes', 'nullable', 'string', Rule::exists('tax_rates', 'id')],
             'groups.*.positions.*.custom' => ['sometimes', 'array'],
+        ];
+    }
+
+    /**
+     * A list of short names of text documents (at most 10, each once): documents and the document type defaults.
+     *
+     * @return array<string, mixed>
+     */
+    public static function attachmentRules(): array
+    {
+        return [
+            'attachments' => ['sometimes', 'nullable', 'array', 'list', 'max:10'],
+            'attachments.*' => ['string', 'max:64', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/', 'distinct'],
         ];
     }
 
@@ -140,6 +154,13 @@ final class DraftInput
                 // a harmless empty value of a field this type does not have is dropped, never stored
                 unset($data[$field]);
             }
+        }
+
+        if (! in_array($document->type, [DocumentType::Offer, DocumentType::Confirmation], true)) {
+            if (($data['attachments'] ?? []) !== []) {
+                $messages['attachments'][] = Text::t('errors.attachments_only_quotes');
+            }
+            unset($data['attachments']);
         }
 
         $customerId = array_key_exists('customer_id', $data) ? $data['customer_id'] : $document->customer_id;

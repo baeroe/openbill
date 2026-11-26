@@ -257,7 +257,7 @@ describe('server state', () => {
         const payload = ops.toPayload(ops.fromDocument(detail));
 
         expect(Object.keys(payload).sort()).toEqual(
-            ['closing', 'contact_id', 'custom', 'customer_id', 'date', 'due_date', 'groups', 'intro', 'locale', 'service_date', 'service_date_end', 'template_id', 'valid_until'].sort(),
+            ['attachments', 'closing', 'contact_id', 'custom', 'customer_id', 'date', 'due_date', 'groups', 'intro', 'locale', 'service_date', 'service_date_end', 'template_id', 'valid_until'].sort(),
         );
     });
 
@@ -314,5 +314,25 @@ describe('text documents', () => {
         const base = { ...fromDocument({ id: 'x', type: 'invoice', status: 'draft', groups: [], custom: {} } as never), title: null };
         expect('title' in toPayload(base)).toBe(false);
         expect(toPayload({ ...base, type: 'text', title: 'T', body: 'B', slug: 's', is_public: true })).toMatchObject({ title: 'T', body: 'B', slug: 's', is_public: true });
+    });
+});
+
+describe('attachments', () => {
+    it('adds a short name once, up to ten, and removes it again', async () => {
+        const { addAttachment, removeAttachment } = await import('./ops');
+        expect(addAttachment(['agb'], 'dsgvo')).toEqual(['agb', 'dsgvo']);
+        const same = ['agb'];
+        expect(addAttachment(same, 'agb')).toBe(same);
+        const full = Array.from({ length: 10 }, (_, i) => `t${i}`);
+        expect(addAttachment(full, 'more')).toBe(full);
+        expect(removeAttachment(['agb', 'dsgvo'], 'agb')).toEqual(['dsgvo']);
+    });
+
+    it('sends attachments for quotes and confirmations only', async () => {
+        const { fromDocument, toPayload } = await import('./ops');
+        const base = fromDocument({ id: 'x', type: 'offer', status: 'draft', groups: [], custom: {}, is_locked: false, attachments: ['agb'] } as never);
+        expect(toPayload(base).attachments).toEqual(['agb']);
+        expect('attachments' in toPayload({ ...base, type: 'invoice' })).toBe(false);
+        expect(fromDocument({ id: 'x', type: 'offer', status: 'open', groups: [], custom: {}, is_locked: true, attachments: [{ slug: 'agb' }] } as never).attachments).toEqual([]);
     });
 });

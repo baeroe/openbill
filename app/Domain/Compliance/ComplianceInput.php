@@ -21,6 +21,8 @@ final readonly class ComplianceInput
      * @param  BigDecimal|null  $gross  cancellations: their gross total (negative for a credit)
      * @param  BigDecimal|null  $cancellable  cancellations: what is left of the invoice (gross minus finalized cancellations)
      * @param  string|null  $title  text documents: title and Markdown body
+     * @param  list<string>  $attachments  quotes and confirmations: short names of the attachments
+     * @param  list<string>  $resolvedAttachments  those short names that a finalized text document without customer has
      */
     public function __construct(
         public DocumentType $type,
@@ -42,5 +44,7 @@ final readonly class ComplianceInput
         public ?string $title = null,
         public ?string $body = null,
         public bool $isPublic = false,
+        public array $attachments = [],
+        public array $resolvedAttachments = [],
     ) {}
 }

@@ -79,6 +79,31 @@ const SHOTS: Shot[] = [
     { name: 'settings-organization', open: (page, locale) => go(page, locale, '/settings/organization') },
     { name: 'settings-api', open: (page, locale) => go(page, locale, '/settings/api') },
     {
+        // a quote with the attachment "terms" (en) / "agb" (de): finalized terms and conditions without customer
+        name: 'attachments',
+        open: async (page, locale) => {
+            await go(page, locale, '/documents');
+            const de = locale === 'de';
+            const slug = de ? 'agb' : 'terms';
+            const text = (await apiPost(page, '/api/documents', {
+                type: 'text',
+                title: de ? 'Allgemeine Geschäftsbedingungen' : 'General terms and conditions',
+                slug,
+                is_public: true,
+                locale,
+                body: de ? '## § 1 Geltung\n\nDiese Bedingungen gelten für alle Verträge.' : '## § 1 Scope\n\nThese terms apply to all contracts.',
+            })) as { id: string };
+            await apiPost(page, `/api/documents/${text.id}/finalize`);
+            const customers = (await apiGet(page, '/api/customers')) as { id: string; name: string }[];
+            const customer = customers.find((item) => item.name === 'Hafenkontor Lindqvist GmbH')!;
+            const quote = (await apiPost(page, '/api/documents', { type: 'offer', customer_id: customer.id, attachments: [slug] })) as { id: string };
+            await go(page, locale, `/documents/${quote.id}`);
+            await page.locator('.pp-page').first().waitFor();
+            await page.locator('#attachments-heading').scrollIntoViewIfNeeded();
+            await page.getByText(de ? 'Allgemeine Geschäftsbedingungen ·' : 'General terms and conditions ·').first().waitFor();
+        },
+    },
+    {
         // a finalized EN 16931 invoice (Fjord Analytics, reverse charge) with its archived XML
         name: 'einvoice',
         open: async (page, locale) => {

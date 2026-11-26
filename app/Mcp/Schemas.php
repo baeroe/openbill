@@ -79,6 +79,7 @@ final class Schemas
             'title' => $schema->string()->nullable()->description('Text documents only: title'),
             'body' => $schema->string()->nullable()->description('Text documents only: Markdown text, at most 100000 characters'),
             'slug' => $schema->string()->nullable()->description('Text documents only: short name (a-z, 0-9, hyphens) shared by all versions of a text'),
+            'attachments' => $schema->array()->items($schema->string())->nullable()->description('Quotes and order confirmations only: short names of finalized text documents without customer (at most 10); finalizing freezes the newest version of each (list text documents with list-documents type text)'),
             'is_public' => $schema->boolean()->description('Text documents only: publicly readable once finalized (needs slug; not with a customer)'),
             'custom' => $schema->object()->description('Custom field values by key (list-field-definitions, scope document)'),
             'groups' => $schema->array()->items($schema->object([

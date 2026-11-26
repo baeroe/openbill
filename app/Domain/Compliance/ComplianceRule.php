@@ -33,4 +33,5 @@ enum ComplianceRule: string
     case TitleMissing = 'title_missing';
     case BodyMissing = 'body_missing';
     case PublicWithCustomer = 'public_with_customer';
+    case AttachmentMissing = 'attachment_missing';
 }

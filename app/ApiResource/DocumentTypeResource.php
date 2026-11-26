@@ -24,7 +24,7 @@ use App\State\Provider\DocumentTypeProvider;
             read: false,
             deserialize: false,
             processor: DocumentTypeProcessor::class,
-            description: 'profile (en16931 only for invoice/cancellation), template_id, default_intro_block_id, default_closing_block_id, payment_term_days, validity_days, numbering{pattern, reset_yearly, next_value}.',
+            description: 'profile (en16931 only for invoice/cancellation), template_id, default_intro_block_id, default_closing_block_id, payment_term_days, validity_days, attachments (short names, quotes and confirmations only, at most 10), numbering{pattern, reset_yearly, next_value}.',
         ),
     ],
 )]
@@ -32,6 +32,7 @@ final class DocumentTypeResource
 {
     /**
      * @param  array{pattern: string, reset_yearly: bool, next_value: int, next_number: string}  $numbering
+     * @param  list<string>|null  $attachments  short names of text documents new quotes/confirmations start with
      */
     public function __construct(
         #[ApiProperty(identifier: true, writable: false)]
@@ -42,6 +43,7 @@ final class DocumentTypeResource
         public ?string $default_closing_block_id,
         public ?int $payment_term_days,
         public ?int $validity_days,
+        public ?array $attachments,
         public array $numbering,
     ) {}
 }

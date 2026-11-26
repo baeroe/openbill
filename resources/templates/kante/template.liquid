@@ -71,6 +71,7 @@
   </div>
 
   {% for note in document.legal_notes %}<p class="legal">{{ note }}</p>{% endfor %}
+    {% if document.attachments.size > 0 %}<div class="attachments"><b>{{ 'attachments' | t }}</b>{% for a in document.attachments %}<div>{{ a.title }} ({{ a.number }}){% if a.url != blank %} – <a href="{{ a.url }}">{{ a.url }}</a>{% endif %}</div>{% endfor %}</div>{% endif %}
   {% if document.closing != blank %}<p class="text">{{ document.closing | nl2br }}</p>{% endif %}
   {% endif %}
 </main>

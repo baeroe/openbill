@@ -1,8 +1,11 @@
-import { TextQuote } from 'lucide-react';
+import { Copy, TextQuote } from 'lucide-react';
 import { useRef } from 'react';
+import { copyText } from '@/api/users';
 import { useTextBlocks } from '@/api/master-data';
+import type { DocumentDetail } from '@/api/types';
 import { Button, Card, CardHead, Menu, MenuItem, Switch, Textarea, TextInput } from '@/components/ui';
 import { t } from '@/lib/i18n';
+import { toast } from '@/lib/toast';
 import { focusAfterMenu } from '../focus';
 import { insertAtSelection, toSlug } from '../ops';
 import type { Draft } from '../types';
@@ -82,8 +85,27 @@ export function TextBody({ draft, readOnly, messages, update }: Props) {
     );
 }
 
-/** Short name and the public flag. The public link comes with the finalized document (a later step). */
-export function PublishCard({ draft, readOnly, messages, update }: Props) {
+function LinkRow({ label, hint, url }: { label: string; hint: string; url: string }) {
+    const copy = async () => {
+        if (await copyText(url)) toast.success(t('editor.link_copied'));
+        else toast.error(t('editor.link_copy_failed'));
+    };
+    return (
+        <div className="grid gap-1.5">
+            <span className="text-sm font-medium text-muted">{label}</span>
+            <div className="flex items-center gap-2">
+                <TextInput aria-label={label} value={url} readOnly className="font-mono" wrapClassName="min-w-0 flex-1" onFocus={(e) => e.currentTarget.select()} />
+                <Button iconOnly icon={<Copy />} onClick={() => void copy()}>
+                    {t('editor.link_copy')}
+                </Button>
+            </div>
+            <span className="text-xs text-muted">{hint}</span>
+        </div>
+    );
+}
+
+/** Short name and the public flag; once finalized and public, the links to copy. */
+export function PublishCard({ draft, document, readOnly, messages, update }: Props & { document: DocumentDetail }) {
     return (
         <Card tinted className="grid gap-4" aria-labelledby="publish-heading" data-path="document.is_public">
             <CardHead titleId="publish-heading" title={t('editor.publish')} description={t('editor.publish_text')} />
@@ -114,6 +136,8 @@ export function PublishCard({ draft, readOnly, messages, update }: Props) {
                     {messages['document.is_public'] && <span className="text-xs text-bad">{messages['document.is_public']}</span>}
                 </div>
             </div>
+            {document.public_url && <LinkRow label={t('editor.link_version')} hint={t('editor.link_version_hint')} url={document.public_url} />}
+            {document.public_latest_url && <LinkRow label={t('editor.link_latest')} hint={t('editor.link_latest_hint')} url={document.public_latest_url} />}
         </Card>
     );
 }

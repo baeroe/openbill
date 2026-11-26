@@ -49,7 +49,7 @@ Ein `mcp`-Token darf alles, was die Tools anbieten, auch Dokumente abschließen 
 | `get-overview` | Kennzahlen (offen, überfällig, Angebote, bezahlt; Rechnungen zählen mit dem, was nach Teilstornos übrig ist), Dokumente, die Aufmerksamkeit brauchen, zuletzt bearbeitete |
 | `list-customers`, `get-customer` | Kunden mit Ansprechpartnern; Suche und Seiten |
 | `create-customer`, `update-customer` | Kunden anlegen oder ändern; `contacts` ist die vollständige Liste |
-| `list-documents`, `get-document` | Dokumente in Kurzform mit Filtern; ein Dokument vollständig mit Summen und offenen Prüfpunkten |
+| `list-documents`, `get-document` | Dokumente in Kurzform mit Filtern; ein Dokument vollständig mit Summen und offenen Prüfpunkten (abgeschlossene öffentliche Texte auch mit `public_url`) |
 | `create-document`, `update-document` | Entwurf anlegen (Angebot, Auftragsbestätigung, Rechnung, Text) oder ändern; Textdokumente nehmen `title`, `body` (Markdown), `slug` und `is_public` statt Gruppen; `groups` ersetzt alle Gruppen und Positionen, eine Position kann einen Rabatt haben (`discount_type` `percent` oder `amount`, `discount_value`) |
 | `duplicate-document` | Dokument in einen neuen Entwurf kopieren |
 | `finalize-document` | Prüfen, Nummer vergeben, PDF (und E-Rechnungs-XML) archivieren – nicht umkehrbar |

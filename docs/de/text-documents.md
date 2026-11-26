@@ -10,7 +10,7 @@ Ein **Textdokument** besteht nur aus Worten: AGB, eine Leistungsbeschreibung, ei
 
 - **Titel** und **Text**. Der Text ist Markdown: `## Überschrift`, Listen mit `-` oder `1.`, `**fett**`, `*kursiv*`, `> Zitat`, Links `[Text](https://…)`. Rohes HTML erscheint als einfacher Text, Bilder werden nicht angezeigt (das PDF lädt nichts von außen).
 - Die üblichen Kopffelder: Datum, Kunde, Ansprechpartner, Sprache, Template und deine eigenen Felder für Textdokumente.
-- **Veröffentlichen:** ein **Kurzname** (Buchstaben `a–z`, Ziffern und Bindestriche, zum Beispiel `agb`; alle Versionen eines Textes teilen ihn) und der Schalter **öffentlich**. Ein öffentlicher Text braucht einen Kurznamen und keinen Kunden. Öffentliche Texte werden in einem späteren Schritt dieser Funktion ohne Anmeldung erreichbar; bis dahin wird das Kennzeichen nur gespeichert.
+- **Veröffentlichen:** ein **Kurzname** (Buchstaben `a–z`, Ziffern und Bindestriche, zum Beispiel `agb`; alle Versionen eines Textes teilen ihn) und der Schalter **öffentlich**. Ein öffentlicher Text braucht einen Kurznamen und keinen Kunden. Ein abgeschlossener öffentlicher Text ist ohne Anmeldung erreichbar (siehe [Öffentlicher Link](#offentlicher-link)).
 - Rechts die Live-Vorschau, genau so wie das PDF aussehen wird. Die Prüfung unter dem Formular nennt, was noch fehlt (Datum, Titel, Text, Pflicht-Eigenfelder, „öffentlich“ zusammen mit einem Kunden).
 
 Änderungen werden wie in jedem Entwurf automatisch gespeichert.
@@ -24,6 +24,19 @@ Wiederkehrende Absätze sind **Textbausteine** der Art **Klausel** (Einstellunge
 Beim Abschließen prüft openbill den Entwurf, vergibt die Nummer (`T-2026-0001`), friert den Text ein, rendert das PDF mit dem Template des Dokumenttyps und legt es im Archiv ab. Der Status wird **abgeschlossen**; weitere Status gibt es bei einem Textdokument nicht. Danach lässt es sich nicht mehr ändern, in ein anderes Dokument umwandeln oder stornieren.
 
 Eine **neue Version** ist eine Kopie: **Weitere Aktionen → Duplizieren** legt einen Entwurf mit demselben Titel, Text, Kurznamen und Öffentlich-Kennzeichen an, datiert auf heute. Ändere ihn und schließe ihn ab; die alte Version bleibt, wie sie war.
+
+## Öffentlicher Link
+
+Ein **abgeschlossenes**, **öffentliches** Textdokument **ohne Kunde** ist für alle ohne Anmeldung als PDF lesbar:
+
+- `https://<deine Instanz>/legal/<Kurzname>` – die **neueste** Version des Kurznamens (zum Beispiel `/legal/agb`). Schließt du eine neue Version ab, zeigt der Link sie.
+- `https://<deine Instanz>/legal/<Kurzname>/<Nummer>` – genau **diese Version** (zum Beispiel `/legal/agb/T-2026-0002`). Die Adresse ändert ihren Inhalt nie; ein altes Angebot behält so einen funktionierenden Link zu den AGB, auf denen es beruhte.
+
+Das abgeschlossene Dokument zeigt beide Links in der Karte **Veröffentlichen** zum Kopieren. Die Adresse wird aus `APP_URL` gebildet, ist also die öffentliche `https://`-Adresse deiner Instanz; die Route muss in deinem [Reverse Proxy](/de/reverse-proxy#checkliste) ohne Anmeldung erreichbar sein.
+
+**Einen Text zurückziehen:** Schließe eine neue Version ab, die **nicht** öffentlich ist. Die neueste Version entscheidet: `/legal/<Kurzname>` antwortet dann mit 404, ältere öffentliche Versionen bleiben unter ihrer Nummer erreichbar.
+
+Alles, was nicht infrage kommt, bekommt dasselbe **404**, damit niemand herausfinden kann, welche Kurznamen es gibt: Entwürfe, nicht öffentliche Texte, Texte mit Kunde (nie öffentlich), andere Dokumenttypen, unbekannte Kurznamen und Nummern. Das PDF ist die archivierte Datei (gegen ihre SHA-256 geprüft, nie neu gerendert), `inline` ausgeliefert, 60 Anfragen pro Minute und Adresse. Der Link zur neuesten Version wird nicht gecacht, ein Versions-Link ein Jahr lang (`immutable`).
 
 ## Templates und Einstellungen
 

@@ -69,6 +69,9 @@ export type DocumentSummary = {
     title?: string | null;
     slug?: string | null;
     is_public?: boolean;
+    /** Finalized public texts only: the link of this version and of the newest version of the short name. */
+    public_url?: string | null;
+    public_latest_url?: string | null;
     due_date: string | null;
     valid_until: string | null;
     locale: string;

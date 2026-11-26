@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { finalize, heading, settle } from './editor-helpers';
+import { apiPost } from './helpers';
 
 test('writes a text document with a clause, previews it, finalizes it and duplicates it', async ({ page }) => {
     // a clause as text block
@@ -66,4 +67,41 @@ test('writes a text document with a clause, previews it, finalizes it and duplic
     await expect(page.getByLabel('Title', { exact: true })).toHaveValue('General terms and conditions');
     await expect(page.getByRole('textbox', { name: /^Text/ })).toHaveValue(/## Liability/);
     await expect(page.getByLabel('Short name')).toHaveValue('terms-e2e');
+});
+
+test('a public text is readable without login under its link', async ({ page, browser, baseURL }) => {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto('/en/documents');
+    const slug = `public-e2e-${Date.now().toString(36)}`;
+    const created = (await apiPost(page, '/api/documents', { type: 'text', title: 'Public terms', body: '## Public\n\nReadable by anyone.', slug, is_public: true })) as { id: string };
+    await apiPost(page, `/api/documents/${created.id}/finalize`);
+
+    await page.goto(`/en/documents/${created.id}`);
+    await expect(heading(page)).toHaveAccessibleName(/^Text document T-\d{4}-\d{4}$/);
+    const latest = page.getByLabel('Link to the newest version');
+    await expect(latest).toHaveValue(new RegExp(`/legal/${slug}$`));
+    await expect(page.getByLabel('Link to this version')).toHaveValue(new RegExp(`/legal/${slug}/T-\\d{4}-\\d{4}$`));
+
+    // copy puts the link on the clipboard
+    await page.getByRole('button', { name: 'Copy link' }).first().click();
+    await expect(page.getByText('Link copied')).toBeVisible();
+    const link = await page.evaluate(() => navigator.clipboard.readText());
+    expect(link).toBe(await page.getByLabel('Link to this version').inputValue());
+
+    // signed out: a context without the session still gets the PDF, at both links
+    const visitor = await browser.newContext({ baseURL, ignoreHTTPSErrors: true, storageState: { cookies: [], origins: [] } });
+    try {
+        for (const url of [`/legal/${slug}`, new URL(link).pathname]) {
+            const response = await visitor.request.get(url);
+            expect(response.status(), url).toBe(200);
+            expect(response.headers()['content-type']).toBe('application/pdf');
+            expect(response.headers()['content-disposition']).toContain('inline');
+            const { extractText, getDocumentProxy } = await import('unpdf');
+            const { text } = await extractText(await getDocumentProxy(new Uint8Array(await response.body())), { mergePages: true });
+            expect(text).toContain('Readable by anyone.');
+        }
+        expect((await visitor.request.get('/legal/does-not-exist')).status()).toBe(404);
+    } finally {
+        await visitor.close();
+    }
 });

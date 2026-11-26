@@ -10,7 +10,7 @@ A **text document** is a document made of words only: terms and conditions, a se
 
 - **Title** and **Text**. The text is Markdown: `## Heading`, lists with `-` or `1.`, `**bold**`, `*italic*`, `> quote`, links `[text](https://…)`. Raw HTML is shown as plain text, and images are not shown (the PDF loads nothing from outside).
 - The usual header fields: date, customer, contact, language, template and your custom fields for text documents.
-- **Publish:** a **short name** (letters `a–z`, digits and hyphens, for example `terms`; all versions of one text share it) and the switch **public**. A public text needs a short name and no customer. Public texts become reachable without login in a later step of this feature; until then the flag is only stored.
+- **Publish:** a **short name** (letters `a–z`, digits and hyphens, for example `terms`; all versions of one text share it) and the switch **public**. A public text needs a short name and no customer. A finalized public text is reachable without login (see [Public link](#public-link)).
 - The live preview on the right, exactly as the PDF will look. The check below the form lists what is still missing (date, title, text, required custom fields, `public` together with a customer).
 
 Changes are saved automatically, like in every draft.
@@ -24,6 +24,19 @@ Recurring paragraphs are **text blocks** of the kind **Clause** (Settings → Te
 Finalizing checks the draft, assigns the number (`T-2026-0001`), freezes the text, renders the PDF with the template of the document type and stores it in the archive. The status becomes **closed**; a text document has no other statuses. It cannot be changed afterwards, converted into another document or cancelled.
 
 A **new version** is a copy: **More actions → Duplicate** creates a draft with the same title, text, short name and public flag, dated today. Change it and finalize it; the old version stays as it was.
+
+## Public link
+
+A **finalized**, **public** text document **without a customer** is readable by anyone, without login, as a PDF:
+
+- `https://<your instance>/legal/<short name>` – the **newest** version of the short name (for example `/legal/terms`). When you finalize a new version, the link shows it.
+- `https://<your instance>/legal/<short name>/<number>` – exactly **this version** (for example `/legal/terms/T-2026-0002`). The address never changes its content, so an old quote keeps a working link to the terms it was based on.
+
+The finalized document shows both links in the card **Publish**, ready to copy. The address is built from `APP_URL`, so it is the public `https://` address of your instance; the route has to be reachable without login in your [reverse proxy](/en/reverse-proxy#checklist).
+
+**Withdrawing a text:** finalize a new version that is **not** public. The newest version decides: `/legal/<short name>` then answers 404, older public versions stay reachable by their number.
+
+Everything that does not qualify answers the same **404**, so nobody can find out which short names exist: drafts, texts that are not public, texts with a customer (never public), other document types, unknown short names and numbers. The PDF is the archived file (checked against its SHA-256, never rendered again), served `inline`, 60 requests a minute per address. The link of the newest version is not cached; a version link is cached for a year (`immutable`).
 
 ## Templates and settings
 

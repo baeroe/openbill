@@ -87,3 +87,4 @@ server {
 - The page source of `/en/login` shows asset links starting with `https://`. If they start with `http://`, the proxy's address is not in `TRUSTED_PROXIES`.
 - Template packages and toolkit pushes carry up to 30 MB: allow at least `client_max_body_size 32m` (nginx); Caddy and Traefik don't limit the body size by default.
 - The [template toolkit](/en/template-toolkit) of template authors talks to `APP_URL` from their machine: it must be reachable from there with a valid certificate.
+- `/legal/…` is reachable **without login**: public [text documents](/en/text-documents#public-link) (terms and conditions) are served there. Your proxy must pass these paths on; if you protect the whole host with a login (for example basic auth in front of openbill), leave `/legal/` out of it.

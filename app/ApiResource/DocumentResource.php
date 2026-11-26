@@ -23,6 +23,7 @@ use App\State\Provider\DocumentProvider;
 use App\Support\DocumentInspector;
 use App\Support\InvoiceBalance;
 use App\Support\IssueList;
+use App\Support\LegalLinks;
 use ArrayObject;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -179,6 +180,12 @@ final class DocumentResource
         #[ApiProperty(description: 'text documents only: publicly readable after finalizing (needs slug, no customer)')]
         #[Groups([self::LIST, self::ITEM])]
         public bool $is_public,
+        #[ApiProperty(writable: false, description: 'finalized public text documents (without customer) only: the permanent link of this version, /legal/<slug>/<number>')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $public_url,
+        #[ApiProperty(writable: false, description: 'finalized public text documents only: the link of the newest version of this short name, /legal/<slug> (shows another version once a newer one is finalized)')]
+        #[Groups([self::LIST, self::ITEM])]
+        public ?string $public_latest_url,
         #[Groups([self::ITEM])]
         public ?string $template_id,
         #[Groups([self::LIST, self::ITEM])]
@@ -262,6 +269,8 @@ final class DocumentResource
             body: $document->body,
             slug: $document->slug,
             is_public: (bool) $document->is_public,
+            public_url: LegalLinks::versionOf($document),
+            public_latest_url: LegalLinks::latestOf($document),
             template_id: $document->template_id,
             locale: $document->locale,
             custom: new ArrayObject($document->custom ?? []),

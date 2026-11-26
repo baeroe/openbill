@@ -28,6 +28,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Middleware\ThrottleRequestsWithRedis;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -36,6 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function (): void {
+            // public texts: no web group (no session, no cookies), so the PDFs can be cached
+            Route::group([], base_path('routes/legal.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [SetLocale::class, HandleInertiaRequests::class]);

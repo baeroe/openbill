@@ -76,7 +76,7 @@ export function Editor({ document, context }: { document: DocumentDetail; contex
                 {isText ? (
                     <>
                         <TextBody draft={draft} readOnly={readOnly} messages={messages} update={update} />
-                        <PublishCard draft={draft} readOnly={readOnly} messages={messages} update={update} />
+                        <PublishCard draft={draft} document={document} readOnly={readOnly} messages={messages} update={update} />
                     </>
                 ) : (
                     <>
